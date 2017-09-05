@@ -4,11 +4,14 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "removeComments": false,
-    "target": "es5",
-    "lib": ["dom","es2015"],
+    "target": "es2015",
+    "lib": [
+      "dom",
+      "es2015"
+    ],
     "inlineSourceMap": true
   },
   "exclude": [
-      "node_modules"
+    "node_modules"
   ]
 }
