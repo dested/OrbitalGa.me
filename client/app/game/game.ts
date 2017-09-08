@@ -13,7 +13,10 @@ export class Game {
         this.noise.seed(1234);
         this.gameLayer = CanvasInformation.create(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.gameLayer.canvas);
-
+        window.addEventListener("resize", () => {
+            this.gameLayer.canvas.width = window.innerWidth;
+            this.gameLayer.canvas.height = window.innerHeight;
+        });
         this.player = {x: 0, y: 0};
 
         this.gameLayer.canvas.onmousedown = (ev) => {
@@ -38,19 +41,14 @@ export class Game {
         window.requestAnimationFrame(callback);
 
 
+        // this.player.y -= 20;
     }
 
     private tick() {
-        let speed = .3;
-        this.player.y -= speed;
 
         if (this.touchDown) {
-            if (this.touchPosition.x < this.gameLayer.canvas.width / 2) {
-                this.player.x -= speed;
-            } else if (this.touchPosition.x > this.gameLayer.canvas.width / 2) {
-                this.player.x += speed;
-            }
-
+            this.player.x += (this.touchPosition.x - this.gameLayer.canvas.width / 2) / 1000;
+            this.player.y += (this.touchPosition.y - this.gameLayer.canvas.height / 2) / 1000;
         }
     }
 
@@ -61,44 +59,41 @@ export class Game {
         let scaleY = (this.gameLayer.canvas.height / 64);
 
         let context = this.gameLayer.context;
-        context.save();
-        context.fillStyle = 'rgba(0,0,0,.5)';
+        context.fillStyle = 'rgba(0,0,0,1)';
         context.fillRect(0, 0, this.gameLayer.canvas.width, this.gameLayer.canvas.height);
+
+        context.save();
 
 
         context.translate(this.gameLayer.canvas.width / 2, this.gameLayer.canvas.height / 2);
         context.fillStyle = 'red';
         context.fillRect(0 - scaleX, 0 - scaleY, scaleX * 2, scaleY * 2);
-        context.translate(-this.player.x * scaleX, -this.player.y * scaleY);
-  /*             context.strokeStyle = 'grey';
- for (let x = -100; x < 100; x++) {
-            context.strokeRect(x*64,0,2,100*64)
-            context.strokeRect(0,x*64,100*64,2)
-        }*/
-
+        context.translate(-Math.round(this.player.x * scaleX), -Math.round(this.player.y * scaleY));
 
         context.fillStyle = 'white';
 
         for (let element of this.getElements()) {
+            context.fillStyle = `rgba(255,255,255,${element.n})`;
             context.fillRect(
                 element.x * scaleX - scaleX / 2,
                 element.y * scaleY - scaleY / 2,
-                scaleX,
-                scaleY
+                scaleX * element.n,
+                scaleY * element.n
             );
+
         }
         context.restore();
 
     }
 
     * getElements(): Iterable<Element> {
-
         let px = Math.round(this.player.x);
         let py = Math.round(this.player.y);
         for (let x = px - 32; x < px + 32; x++) {
             for (let y = py - 32; y < py + 32; y++) {
-                if (this.noise.simplex2(x, y) > .95) {
-                    yield {x: x, y: y};
+                let n = this.noise.simplex2(x, y);
+                if (n > .85) {
+                    yield {x, y, n};
                 }
             }
         }
@@ -108,4 +103,5 @@ export class Game {
 export class Element {
     x: number;
     y: number;
+    n: number;
 }
