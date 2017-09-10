@@ -1,13 +1,14 @@
 import {ServerPlayer} from "./serverPlayer";
 import {Board} from "@common/board";
 import {Config} from "@common/config";
-import {Message, MessageType, SyncMessage, TickMessage} from "@common/messages";
+import {Message, MessageType, MessageUtils, SyncMessage, TickMessage} from "@common/messages";
 import {Player} from "@common/player";
 
 export class ServerBoard extends Board {
     players: ServerPlayer[];
 
     startPlayer(player: ServerPlayer, playerName: string) {
+        player.playerId = (Math.random() * 10000000).toFixed();
         player.playerName = playerName;
         player.x = (Math.random() * this.width) | 0;
         player.health = 100;
@@ -16,6 +17,12 @@ export class ServerBoard extends Board {
             tick: this.currentTick,
             data: this.buildSyncMessage(player)
         });
+        this.broadcast({
+            type: MessageType.SyncPlayer,
+            tick: this.currentTick,
+            data: this.buildSyncMessage(null)
+        }, player);
+
     }
 
     syncPlayer(player: ServerPlayer) {
@@ -27,18 +34,24 @@ export class ServerBoard extends Board {
     }
 
     processMessage(player: ServerPlayer, message: Message) {
-        let tick = (<TickMessage>message).tick;
-        if (tick) {
-            if (this.currentTick - tick > Config.ticksPerSecond) {
+        if (MessageUtils.isTickMessage(message)) {
+            if (this.currentTick - message.tick > Config.ticksPerSecond) {
                 this.syncPlayer(player);
+                return;
             }
-            else if (tick - this.currentTick > 2) {
+            else if (message.tick - this.currentTick > 2) {
                 this.syncPlayer(player);
+                return;
             } else {
-                this.scheduleMessage({tick, message, player})
+                this.executeMessage(player, message);
             }
         } else {
             this.executeMessage(player, message);
+        }
+        switch (message.type) {
+            case MessageType.Move:
+                this.broadcast(message, player);
+                break;
         }
     }
 
@@ -58,15 +71,16 @@ export class ServerBoard extends Board {
             players: this.players.map(p => ({
                 me: me === p,
                 x: p.x,
-                holdingLeft: p.holdingLeft,
-                holdingRight: p.holdingRight,
+                playerId: p.playerId,
+                moving: p.moving,
                 playerName: p.playerName
             }))
         }
     }
 
-    private broadcast(message: Message) {
+    private broadcast(message: Message, exceptPlayer: Player | null = null) {
         for (let player of this.players) {
+            if (exceptPlayer === player) continue;
             player.sendMessage(message);
         }
     }

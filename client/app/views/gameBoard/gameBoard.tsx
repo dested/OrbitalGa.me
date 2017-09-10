@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {MouseEventHandler} from "react";
-import {ClientBoard} from "../../game/clientBoard";
 import {GameManager} from "../../game/gameManager";
+import {Config} from "@common/config";
+import {MessageType} from "@common/messages";
 
-export class GameBoard extends React.Component<{}, {}> {
+export default class GameBoard extends React.Component<{}, {}> {
     canvas: HTMLCanvasElement;
     touchPosition: { x: number, y: number; } | null;
     private gameManager: GameManager;
@@ -27,31 +27,80 @@ export class GameBoard extends React.Component<{}, {}> {
 
         const ctx = this.canvas.getContext('2d')!;
         this.gameManager.board!.loadContext(this.canvas, ctx);
+
+        setInterval(() => {
+            this.gameManager.board!.tick();
+        }, 1000 / Config.ticksPerSecond);
     }
 
 
     private onMouseDown(ev: React.MouseEvent<HTMLCanvasElement>) {
         this.touchPosition = {x: ev.clientX, y: ev.clientY};
+        let board = this.gameManager.board!;
         if (this.touchPosition.x - this.canvas.width / 2 < 0) {
-            this.gameManager.board!.playerHoldingLeft(this.gameManager.board!.me, true);
+            if (board.me.moving !== "left") {
+                this.gameManager.network.sendMessage({
+                    type: MessageType.Move,
+                    moving: "left",
+                    playerId: board.me.playerId,
+                    tick: board.currentTick
+                });
+            }
+            board.playerMove(board.me, "left");
         } else {
-            this.gameManager.board!.playerHoldingRight(this.gameManager.board!.me, true);
+            if (board.me.moving !== "right") {
+                this.gameManager.network.sendMessage({
+                    type: MessageType.Move,
+                    moving: "right",
+                    playerId: board.me.playerId,
+                    tick: board.currentTick
+                });
+            }
+
+            board.playerMove(board.me, "right");
         }
     }
 
     private onMouseUp() {
         this.touchPosition = null;
-        this.gameManager.board!.me.holdingLeft = this.gameManager.board!.me.holdingRight = false;
+        let board = this.gameManager.board!;
+        if (board.me.moving !== "none") {
+            this.gameManager.network.sendMessage({
+                type: MessageType.Move,
+                moving: "none",
+                playerId: board.me.playerId,
+                tick: board.currentTick
+            });
+        }
+        board!.playerMove(board.me, "none");
     }
 
     private onMouseMove(ev: React.MouseEvent<HTMLCanvasElement>) {
+        let board = this.gameManager.board!;
+
         if (this.touchPosition) {
             this.touchPosition.x = ev.clientX;
             this.touchPosition.y = ev.clientY;
             if (this.touchPosition.x - this.canvas.width / 2 < 0) {
-                this.gameManager.board!.playerHoldingLeft(this.gameManager.board!.me, true);
+                if (board.me.moving !== "left") {
+                    this.gameManager.network.sendMessage({
+                        type: MessageType.Move,
+                        moving: "left",
+                        playerId: board.me.playerId,
+                        tick: board.currentTick
+                    });
+                }
+                board.playerMove(board.me, "left");
             } else {
-                this.gameManager.board!.playerHoldingRight(this.gameManager.board!.me, true);
+                if (board.me.moving !== "right") {
+                    this.gameManager.network.sendMessage({
+                        type: MessageType.Move,
+                        moving: "right",
+                        playerId: board.me.playerId,
+                        tick: board.currentTick
+                    });
+                }
+                board.playerMove(board.me, "right");
             }
         }
     }
@@ -64,7 +113,6 @@ export class GameBoard extends React.Component<{}, {}> {
                 onMouseUp={(ev) => this.onMouseUp()}
                 onMouseMove={(ev) => this.onMouseMove(ev)}
             >
-
             </canvas>
         );
     }

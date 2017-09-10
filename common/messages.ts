@@ -1,19 +1,30 @@
 export enum MessageType {
     GameStart,
     PlayerStart,
-    MoveLeftStart,
-    MoveLeftStop,
-    MoveRightStart,
-    MoveRightStop,
+    Move,
     SyncPlayer
 }
 
 export type TickMessage = {
     tick: number;
 };
+export type PlayerMessage = {
+    playerId: string;
+};
+
+export class MessageUtils {
+    static isPlayerMessage(message: Message): message is Message & PlayerMessage {
+        return (message as PlayerMessage).playerId !== undefined;
+    }
+
+    static isTickMessage(message: Message): message is Message & TickMessage {
+        return (message as TickMessage).tick !== undefined;
+    }
+
+}
 
 export interface SyncMessage {
-    players: { x: number, me: boolean; playerName: string; holdingLeft: boolean, holdingRight: boolean }[];
+    players: { x: number, me: boolean; playerId: string; playerName: string; moving: "left" | "right" | "none" }[];
 }
 
 export type Message =
@@ -24,11 +35,5 @@ export type Message =
     ) | (
     { type: MessageType.SyncPlayer; data: SyncMessage } & TickMessage
     ) | (
-    { type: MessageType.MoveLeftStart; } & TickMessage
-    ) | (
-    { type: MessageType.MoveLeftStop; } & TickMessage
-    ) | (
-    { type: MessageType.MoveRightStart; } & TickMessage
-    ) | (
-    { type: MessageType.MoveRightStop; } & TickMessage
+    { type: MessageType.Move; moving: "left" | "right" | "none"; } & TickMessage & PlayerMessage
     ) ;

@@ -1,14 +1,14 @@
 import * as React from 'react';
-import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from "./login.styles";
+import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from "./gameUI.styles";
 import {GameManager} from "../../game/gameManager";
-import {GameBoard} from "../gameBoard/gameBoard";
+import GameBoard from "../gameBoard/gameBoard";
 
 interface State {
     name: string;
     connectStatus: 'none' | 'fail' | 'connecting' | 'joining' | 'joined';
 }
 
-export class Login extends React.Component<{}, State> {
+export default class GameUI extends React.Component<{}, State> {
     constructor() {
         super();
         this.state = {
@@ -47,7 +47,7 @@ export class Login extends React.Component<{}, State> {
                     </LoginBox>
                 </Wrapper>
                 :
-                <GameBoard></GameBoard>
+                <GameBoard/>
         );
     }
 

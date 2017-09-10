@@ -1,5 +1,5 @@
 import {Network} from "./network";
-import {MessageType} from "@common/messages";
+import {MessageType, MessageUtils, PlayerMessage} from "@common/messages";
 import {ClientBoard} from "./clientBoard";
 
 export class GameManager {
@@ -15,7 +15,7 @@ export class GameManager {
         this.network = new Network();
     }
 
-    private network: Network;
+    network: Network;
     board: ClientBoard | null;
 
 
@@ -27,12 +27,25 @@ export class GameManager {
             switch (message.type) {
                 case MessageType.GameStart:
                     this.board = new ClientBoard();
-                    this.board.loadBoard(message.data,message.tick);
+                    this.board.loadBoard(message.data, message.tick);
                     statusChange('joined');
-                    break;
+                    return;
+                case MessageType.SyncPlayer:
+                    this.board!.updateBoard(message.data, message.tick);
+                    return;
+
             }
+
+            if (MessageUtils.isPlayerMessage(message)) {
+                let player = this.board!.players.find(a => a.playerId === message.playerId);
+                if (player) {
+                    this.board!.processMessage(player, message);
+                }
+            }
+
         });
     }
+
 
     die() {
         this.board = null;

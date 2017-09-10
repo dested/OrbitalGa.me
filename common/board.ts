@@ -16,41 +16,19 @@ export abstract class Board {
         this.players.splice(this.players.indexOf(player), 1);
     }
 
-    playerHoldingLeft(player: Player, isHolding: boolean) {
-        player.holdingRight = false;
-        player.holdingLeft = isHolding;
+    playerMove(player: Player, moving: "left" | "right" | "none") {
+        player.moving = moving;
     }
 
-    playerHoldingRight(player: Player, isHolding: boolean) {
-        player.holdingLeft = false;
-        player.holdingRight = isHolding;
-    }
-
-    scheduledMessages: { [tick: number]: { message: Message, player: Player }[] } = {};
-
-    scheduleMessage({tick, message, player}: { tick: number, message: Message, player: Player }) {
-        let scheduled = this.scheduledMessages[tick];
-        if (!scheduled) {
-            scheduled = this.scheduledMessages[tick] = [];
-        }
-        scheduled.push({message, player});
-    }
 
     tick() {
         this.currentTick++;
-        let messages = this.scheduledMessages[this.currentTick];
-        if (messages) {
-            for (let message of messages) {
-                this.executeMessage(message.player, message.message);
-            }
-            delete this.scheduledMessages[this.currentTick];
-        }
 
         for (let player of this.players) {
-            if (player.holdingLeft) {
+            if (player.moving === "left") {
                 player.x -= Config.horizontalMoveSpeed;
             }
-            if (player.holdingRight) {
+            if (player.moving === "right") {
                 player.x += Config.horizontalMoveSpeed;
             }
         }
@@ -58,22 +36,13 @@ export abstract class Board {
 
 
     executeMessage(player: Player, message: Message) {
-        console.log('executing message',player.playerName,message)
+        console.log('executing message', player.playerName, message)
         switch (message.type) {
             case MessageType.PlayerStart:
                 this.startPlayer(player, message.playerName);
                 break;
-            case MessageType.MoveLeftStart:
-                this.playerHoldingLeft(player, true);
-                break;
-            case MessageType.MoveLeftStop:
-                this.playerHoldingLeft(player, false);
-                break;
-            case MessageType.MoveRightStart:
-                this.playerHoldingRight(player, true);
-                break;
-            case MessageType.MoveRightStop:
-                this.playerHoldingRight(player, false);
+            case MessageType.Move:
+                this.playerMove(player, message.moving);
                 break;
         }
     }

@@ -1,5 +1,5 @@
 import * as React from 'react';
 import {render} from 'react-dom';
-import {Login} from "./views/login/login";
+import GameUI from "./views/gameUI/gameUI";
 
-render(<Login/>, document.getElementById('content'));
+render(<GameUI/>, document.getElementById('content'));
