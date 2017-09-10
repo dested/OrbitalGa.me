@@ -5,17 +5,21 @@
     "emitDecoratorMetadata": true,
     "removeComments": false,
     "strict": true,
+    "moduleResolution": "node",
     "target": "es2015",
     "lib": [
       "dom",
       "es2015",
       "esnext.asynciterable"
     ],
-    "outDir": "./dist/bundle.js",
+    "outDir": "./dist/",
     "inlineSourceMap": true,
     "baseUrl": "./",
+    "jsx": "react",
     "paths": {
-      "@common/*": ["../common/*"]
+      "@common/*": [
+        "../common/*"
+      ]
     }
   },
   "exclude": [

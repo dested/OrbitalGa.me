@@ -11,13 +11,18 @@ export class ServerBoard extends Board {
         player.playerName = playerName;
         player.x = (Math.random() * this.width) | 0;
         player.health = 100;
+        player.sendMessage({
+            type: MessageType.GameStart,
+            tick: this.currentTick,
+            data: this.buildSyncMessage(player)
+        });
     }
 
     syncPlayer(player: ServerPlayer) {
         player.sendMessage({
             type: MessageType.SyncPlayer,
             tick: this.currentTick,
-            data: this.buildSyncMessage()
+            data: this.buildSyncMessage(null)
         });
     }
 
@@ -43,17 +48,19 @@ export class ServerBoard extends Board {
             this.broadcast({
                 type: MessageType.SyncPlayer,
                 tick: this.currentTick,
-                data: this.buildSyncMessage()
+                data: this.buildSyncMessage(null)
             })
         }
     }
 
-    buildSyncMessage(): SyncMessage {
+    buildSyncMessage(me: ServerPlayer | null): SyncMessage {
         return {
             players: this.players.map(p => ({
+                me: me === p,
                 x: p.x,
                 holdingLeft: p.holdingLeft,
                 holdingRight: p.holdingRight,
+                playerName: p.playerName
             }))
         }
     }

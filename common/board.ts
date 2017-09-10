@@ -8,7 +8,9 @@ export abstract class Board {
     currentTick: number;
     players: Player[];
 
-    abstract startPlayer(player: Player, playerName: string): void;
+    startPlayer(player: Player, playerName: string): void {
+        throw new Error("Method not implemented.");
+    }
 
     removePlayer(player: Player) {
         this.players.splice(this.players.indexOf(player), 1);
@@ -55,9 +57,8 @@ export abstract class Board {
     }
 
 
-
-
     executeMessage(player: Player, message: Message) {
+        console.log('executing message',player.playerName,message)
         switch (message.type) {
             case MessageType.PlayerStart:
                 this.startPlayer(player, message.playerName);

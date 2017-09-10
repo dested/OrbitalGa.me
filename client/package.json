@@ -7,8 +7,15 @@
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
-  "dependencies": {},
+  "dependencies": {
+    "glamor": "^2.20.40",
+    "glamorous": "^4.8.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
+  },
   "devDependencies": {
+    "@types/react": "^16.0.5",
+    "@types/react-dom": "^15.5.4",
     "ts-loader": "^2.3.6",
     "typescript": "^2.5.2",
     "webpack": "^2.2.0",

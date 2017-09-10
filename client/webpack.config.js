@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-    entry: './app/index.ts',
+    entry: './app/index.tsx',
     output: {
         filename: './dist/bundle.js'
     },
@@ -16,6 +16,6 @@ module.exports = {
         loaders: [ // loaders will work with webpack 1 or 2; but will be renamed "rules" in future
             // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
             {test: /\.tsx?$/, loader: 'ts-loader'}
-        ],
+        ]
     }
 };
