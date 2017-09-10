@@ -1,10 +1,12 @@
 const path = require("path");
+const fs = require("fs");
 
-module.exports = {
-    entry: './app/index.ts',
+var config={
+    entry: './app/app.ts',
     output: {
         filename: './dist/bundle.js'
     },
+    target:"node",
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: ['.ts', '.tsx', '.js'], // note if using webpack 1 you'd also need a '' in the array as well
@@ -19,3 +21,15 @@ module.exports = {
         ],
     }
 };
+
+config.externals = fs.readdirSync("node_modules")
+    .reduce(function(acc, mod) {
+        if (mod === ".bin") {
+            return acc
+        }
+
+        acc[mod] = "commonjs " + mod
+        return acc
+    }, {});
+
+module.exports=config;

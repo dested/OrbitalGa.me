@@ -1,0 +1,26 @@
+{
+  "name": "orbital-crash",
+  "version": "1.0.0",
+  "author": "Salvatore <dested@gmail.com>",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack & node dist/bundle.js",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "build-dev": "cross-env NODE_ENV=development webpack"
+  },
+  "dependencies": {
+    "ws": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.28",
+    "@types/ws": "^3.0.2",
+    "node-hot-loader": "^0.3.10",
+    "ts-loader": "^2.3.6",
+    "typescript": "^2.5.2",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^3.0.2"
+  }
+}

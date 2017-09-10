@@ -1,26 +1,26 @@
-export interface INoise{
-    seed: (number) => void,
+export interface INoise {
+    seed: (number: number) => void,
     simplex2: (x: number, y: number) => number,
-    simplex3: (x: number, y: number,z: number) => number,
+    simplex3: (x: number, y: number, z: number) => number,
     perlin2: (x: number, y: number) => number,
-    perlin3: (x: number, y: number,z: number) => number,
+    perlin3: (x: number, y: number, z: number) => number,
 }
 
 let noise: INoise = {} as any;
 
-function Grad(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+class Grad {
+    constructor(public x: number, public y: number, public z: number) {
+    }
+
+    dot2(x: number, y: number) {
+        return this.x * x + this.y * y;
+    };
+
+    dot3(x: number, y: number, z: number) {
+        return this.x * x + this.y * y + this.z * z;
+    };
 }
 
-Grad.prototype.dot2 = function (x, y) {
-    return this.x * x + this.y * y;
-};
-
-Grad.prototype.dot3 = function (x, y, z) {
-    return this.x * x + this.y * y + this.z * z;
-};
 
 var grad3 = [new Grad(1, 1, 0), new Grad(-1, 1, 0), new Grad(1, -1, 0), new Grad(-1, -1, 0),
     new Grad(1, 0, 1), new Grad(-1, 0, 1), new Grad(1, 0, -1), new Grad(-1, 0, -1),
@@ -276,11 +276,11 @@ noise.simplex3 = function (xin, yin, zin) {
 
 // ##### Perlin noise stuff
 
-function fade(t) {
+function fade(t: number) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-function lerp(a, b, t) {
+function lerp(a: number, b: number, t: number) {
     return (1 - t) * a + t * b;
 }
 

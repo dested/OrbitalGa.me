@@ -11,8 +11,8 @@
       "es2015",
       "esnext.asynciterable"
     ],
-    "outDir": "./dist/bundle.js",
     "inlineSourceMap": true,
+    "outDir": "dist/",
     "baseUrl": "./",
     "paths": {
       "@common/*": ["../common/*"]
