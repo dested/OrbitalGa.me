@@ -4,6 +4,7 @@ export type PlayerDirection = "left" | "right" | "none";
 
 export class Player {
     playerId: string;
+    shipType: string;
     playerName: string;
     x: number;
     health: number;

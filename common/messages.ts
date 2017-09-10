@@ -24,7 +24,16 @@ export class MessageUtils {
 }
 
 export interface SyncMessage {
-    players: { x: number, me: boolean; playerId: string; playerName: string; moving: "left" | "right" | "none" }[];
+    players: SyncPlayer[];
+}
+
+export interface SyncPlayer {
+    x: number;
+    me: boolean;
+    playerId: string;
+    shipType: string;
+    playerName: string;
+    moving: "left" | "right" | "none";
 }
 
 export type Message =

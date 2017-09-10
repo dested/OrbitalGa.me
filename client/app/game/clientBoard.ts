@@ -1,9 +1,10 @@
 import {Board} from "@common/board";
-import {Message, MessageUtils, SyncMessage, TickMessage} from "@common/messages";
+import {Message, MessageUtils, SyncMessage, SyncPlayer, TickMessage} from "@common/messages";
 import {Config} from "@common/config";
 import {ClientPlayer} from "./clientPlayer";
 import {INoise, noise} from "../perlin";
 import {Player} from "@common/player";
+import {AssetManager} from "../common/assetManager";
 
 export class ClientBoard extends Board {
 
@@ -25,10 +26,14 @@ export class ClientBoard extends Board {
         this.view.height = this.canvas.height;
         this.view.follow(this.me);
 
+        let time = +new Date();
         let callback = () => {
             window.requestAnimationFrame(callback);
-            this.clientTick();
-            this.draw();
+            let diff = (+new Date()) - time;
+            time = +new Date();
+            console.log(diff);
+            this.clientTick(diff);
+            this.draw(diff);
         };
         window.requestAnimationFrame(callback);
     }
@@ -36,18 +41,24 @@ export class ClientBoard extends Board {
     loadBoard(data: SyncMessage, currentTick: number) {
         this.currentTick = currentTick;
         for (let playerData of data.players) {
-            let clientPlayer = new ClientPlayer();
-            clientPlayer.playerId = playerData.playerId;
-            clientPlayer.x = clientPlayer.drawX = playerData.x;
-            clientPlayer.drawY = currentTick * Config.verticalMoveSpeed;
-            clientPlayer.moving = playerData.moving;
-            clientPlayer.playerName = playerData.playerName;
-            this.players.push(clientPlayer);
+            let clientPlayer = this.newPlayer(playerData, currentTick);
             if (playerData.me) {
                 clientPlayer.me = true;
                 this.me = clientPlayer;
             }
         }
+    }
+
+    private newPlayer(playerData: SyncPlayer, currentTick: number) {
+        let clientPlayer = new ClientPlayer();
+        clientPlayer.playerId = playerData.playerId;
+        clientPlayer.shipType = playerData.shipType;
+        clientPlayer.x = clientPlayer.drawX = playerData.x;
+        clientPlayer.drawY = currentTick * Config.verticalMoveSpeed;
+        clientPlayer.moving = playerData.moving;
+        clientPlayer.playerName = playerData.playerName;
+        this.players.push(clientPlayer);
+        return clientPlayer;
     }
 
     updateBoard(data: SyncMessage, currentTick: number) {
@@ -57,17 +68,12 @@ export class ClientBoard extends Board {
             let clientPlayer = this.players.find(a => a.playerId === playerData.playerId);
             if (clientPlayer) {
                 clientPlayer.x = clientPlayer.drawX = playerData.x;
+                clientPlayer.shipType = playerData.shipType;
                 clientPlayer.drawY = currentTick * Config.verticalMoveSpeed;
                 clientPlayer.moving = playerData.moving;
-                missingPlayers.splice(missingPlayers.findIndex(a => a === clientPlayer),1);
+                missingPlayers.splice(missingPlayers.findIndex(a => a === clientPlayer), 1);
             } else {
-                let clientPlayer = new ClientPlayer();
-                clientPlayer.playerId = playerData.playerId;
-                clientPlayer.x = clientPlayer.drawX = playerData.x;
-                clientPlayer.drawY = currentTick * Config.verticalMoveSpeed;
-                clientPlayer.moving = playerData.moving;
-                clientPlayer.playerName = playerData.playerName;
-                this.players.push(clientPlayer);
+                this.newPlayer(playerData, currentTick);
             }
         }
         for (let missingPlayer of missingPlayers) {
@@ -75,8 +81,8 @@ export class ClientBoard extends Board {
         }
     }
 
-    private clientTick() {
-        let y = Config.verticalMoveSpeed * Config.ticksPerSecond / 60;
+    private clientTick(msDiff:number) {
+        let y = Config.verticalMoveSpeed * Config.ticksPerSecond / (1000/msDiff);
         for (let player of this.players) {
             player.drawY += y;
             if (player.moving === "left") {
@@ -105,7 +111,7 @@ export class ClientBoard extends Board {
     }
 
 
-    private draw() {
+    private draw(msDiff:number) {
         let context = this.context;
         context.fillStyle = '#000000';
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -126,13 +132,8 @@ export class ClientBoard extends Board {
         }
 
         for (let player of this.players) {
-            if (!player.me) {
-                context.fillStyle = 'blue';
-                context.fillRect(player.drawX - 40, player.drawY - 40, 40 * 2, 40 * 2);
-            } else {
-                context.fillStyle = 'red';
-                context.fillRect(player.drawX - 50, player.drawY - 50, 50 * 2, 50 * 2);
-            }
+            let ship = AssetManager.assets[player.shipType];
+            context.drawImage(ship.image, player.drawX - ship.size.width / 2, player.drawY - ship.size.height / 2);
         }
         context.restore();
 

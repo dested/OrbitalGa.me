@@ -10,6 +10,7 @@ export class ServerBoard extends Board {
     startPlayer(player: ServerPlayer, playerName: string) {
         player.playerId = (Math.random() * 10000000).toFixed();
         player.playerName = playerName;
+        player.shipType = this.pickShip();
         player.x = (Math.random() * this.width) | 0;
         player.health = 100;
         player.sendMessage({
@@ -72,6 +73,7 @@ export class ServerBoard extends Board {
                 me: me === p,
                 x: p.x,
                 playerId: p.playerId,
+                shipType: p.shipType,
                 moving: p.moving,
                 playerName: p.playerName
             }))
@@ -82,6 +84,15 @@ export class ServerBoard extends Board {
         for (let player of this.players) {
             if (exceptPlayer === player) continue;
             player.sendMessage(message);
+        }
+    }
+
+    private pickShip() {
+        let r = Math.random();
+        if (r < .50) {
+            return "ship1";
+        } else {
+            return "ship2";
         }
     }
 }
