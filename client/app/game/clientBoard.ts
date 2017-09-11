@@ -1,5 +1,5 @@
-import {Board} from "@common/board";
-import {Message, MessageType, MessageUtils, MoveMessage, SyncMessage, SyncPlayer, TickMessage} from "@common/messages";
+import {Board, Bullet} from "@common/board";
+import {AttackMessage, Message, MessageType, MessageUtils, MoveMessage, SyncMessage, SyncPlayer, TickMessage} from "@common/messages";
 import {Config} from "@common/config";
 import {ClientPlayer} from "./clientPlayer";
 import {INoise, noise} from "../perlin";
@@ -55,6 +55,8 @@ export class ClientBoard extends Board {
         clientPlayer.x = playerData.x;
         clientPlayer.y = this.me ? this.me.y : currentTick * Config.verticalMoveSpeed;
         clientPlayer.moving = playerData.moving;
+        clientPlayer.movingStart = playerData.movingStart;
+        clientPlayer.movingStartX = playerData.movingStartX;
         clientPlayer.playerName = playerData.playerName;
         this.players.push(clientPlayer);
         return clientPlayer;
@@ -66,8 +68,10 @@ export class ClientBoard extends Board {
         for (let playerData of data.players) {
             let clientPlayer = this.players.find(a => a.playerId === playerData.playerId);
             if (clientPlayer) {
-                // clientPlayer.x = playerData.x;
+                clientPlayer.x = playerData.x;
                 clientPlayer.shipType = playerData.shipType;
+                clientPlayer.movingStart = playerData.movingStart;
+                clientPlayer.movingStartX = playerData.movingStartX;
                 // clientPlayer.y = currentTick * Config.verticalMoveSpeed;
                 clientPlayer.moving = playerData.moving;
                 missingPlayers.splice(missingPlayers.findIndex(a => a === clientPlayer), 1);
@@ -84,25 +88,40 @@ export class ClientBoard extends Board {
         let distanceInTick = Config.ticksPerSecond / (1000 / msDiff);
 
         let y = Math.round(Config.verticalMoveSpeed * distanceInTick);
+        let now = +new Date();
+
         for (let player of this.players) {
             player.y += y;
             if (player.moving === "left") {
-                let duration = +new Date() - player.movingStart!;
-                GameManager.instance.debugValue("duration", duration);
+                let duration = now - player.movingStart!;
                 let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
-                GameManager.instance.debugValue("distance", distance);
                 player.x = player.movingStartX! - distance;
             }
             if (player.moving === "right") {
-                let duration = +new Date() - player.movingStart!;
-                GameManager.instance.debugValue("duration", duration);
+                let duration = now - player.movingStart!;
                 let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
-                GameManager.instance.debugValue("distance", distance);
                 player.x = player.movingStartX! + distance;
             }
-
-            GameManager.instance.debugValue("playerX", player.x.toFixed(0));
+            if (player.firingStart) {
+                let bulletsEvery = 1000 / player.bulletsPerSecond;
+                if ((now - player.firingStart) / bulletsEvery > player.bulletsFired!) {
+                    player.bulletsFired!++;
+                    this.bullets.push(new Bullet(player.x, player.y, player.bulletVelocity))
+                }
+            }
         }
+        for (let i = this.bullets.length - 1; i >= 0; i--) {
+            let bullet = this.bullets[i];
+            let duration = now - bullet.fireStart;
+            let distance = bullet.velocity * (Config.ticksPerSecond / (1000 / duration));
+            bullet.y = bullet.startY! + distance;
+            if (bullet.startY - bullet.y > 1000) {
+                this.bullets.splice(this.bullets.indexOf(bullet), 1)
+            }
+        }
+
+        GameManager.instance.debugValue("bullets", this.bullets.length);
+
         this.view.follow(this.me);
     }
 
@@ -116,24 +135,41 @@ export class ClientBoard extends Board {
         player.movingStartX = player.x;
     }
 
+    meFireStart(player: Player) {
+        player.firingStart = +new Date();
+        player.bulletsFired = 0;
+    }
+
+    meFireStop(player: Player) {
+        player.firingStart = null;
+        player.bulletsFired = null;
+    }
+
     meMoveStop(player: Player) {
         let duration = +new Date() - player.movingStart!;
         let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
         player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
 
-        GameManager.instance.debugValue("duration", duration);
-        GameManager.instance.debugValue("distance", distance);
 
         player.moving = "none";
         player.movingStart = null;
         player.movingStartX = null;
     }
 
+    private playerAttack(player: Player, message: AttackMessage) {
+        console.log('processing player attack', message)
+        if (message.duration > 0) {
+            player.firingStart = null;
+            player.bulletsFired = null;
+        } else {
+            player.firingStart = +new Date();
+            player.bulletsFired = 0;
+        }
+    }
 
     private playerMove(player: Player, message: MoveMessage) {
         console.log('processing player move', message)
         if (player.moving === "none") {
-            GameManager.instance.debugValue("playerX-ser", player.x.toString());
             player.movingStartX = player.x;
             player.moving = message.moving;
             player.movingStart = +new Date();
@@ -141,13 +177,11 @@ export class ClientBoard extends Board {
             // let msDuration = player.movingStart! + message.duration;
             let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
             player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-            GameManager.instance.debugValue("playerX-ser", player.x.toString());
             player.moving = "none";
         } else if (message.moving !== player.moving) {
             // let msDuration = player.movingStart! + message.duration;
             let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
             player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-            GameManager.instance.debugValue("playerX-ser", player.x.toString());
             player.movingStartX = player.x;
             player.moving = message.moving;
             player.movingStart = +new Date();
@@ -159,6 +193,9 @@ export class ClientBoard extends Board {
         switch (message.type) {
             case MessageType.Move:
                 this.playerMove(player, message);
+                break;
+            case MessageType.Attack:
+                this.playerAttack(player, message);
                 break;
         }
     }
@@ -182,6 +219,16 @@ export class ClientBoard extends Board {
                 16 * element.n
             );
         }
+        for (let element of this.bullets) {
+            context.fillStyle = `rgba(255,240,76,.7)`;
+            context.fillRect(
+                element.x - 4,
+                element.y - 8,
+                8,
+                16
+            );
+        }
+
 
         for (let player of this.players) {
             let ship = AssetManager.assets[player.shipType];

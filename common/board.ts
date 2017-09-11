@@ -1,10 +1,12 @@
 import {Player} from "./player";
 
+
 export abstract class Board {
     width: number;
     currentY: number;
     currentTick: number;
-    players: Player[];
+    players: Player[] = [];
+    bullets: Bullet[] = [];
 
     removePlayer(player: Player) {
         this.players.splice(this.players.indexOf(player), 1);
@@ -13,4 +15,22 @@ export abstract class Board {
     tick() {
         this.currentTick++;
     }
+}
+
+export class Bullet {
+    constructor(x: number, y: number, velocity: number) {
+        this.x = x;
+        this.y = y;
+
+        this.velocity = velocity;
+        this.startY = y;
+        this.fireStart = +new Date();
+    }
+
+    x: number;
+    y: number;
+
+    startY: number;
+    velocity: number;
+    fireStart: number;
 }

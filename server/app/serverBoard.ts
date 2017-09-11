@@ -27,18 +27,6 @@ export class ServerBoard extends Board {
 
     }
 
-
-    executeMessage(player: ServerPlayer, message: Message) {
-        switch (message.type) {
-            case MessageType.PlayerStart:
-                this.startPlayer(player, message.playerName);
-                break;
-            case MessageType.Move:
-                this.playerMove(player, message);
-                break;
-        }
-    }
-
     private playerMove(player: Player, message: MoveMessage) {
         console.log('processing player move', message)
         if (player.moving === "none") {
@@ -62,11 +50,37 @@ export class ServerBoard extends Board {
         }
     }
 
+    private playerAttack(player: Player, message: MoveMessage) {
+        console.log('processing player attack', message)
+
+        /*
+
+        server sends client start time
+        all information happens relative to that
+        bullets position and existence are based on creation and duration from start time
+
+        lerp between reality and start time
+
+         */
+    }
+
     processMessage(player: ServerPlayer, message: Message) {
 
-        this.executeMessage(player, message);
+        switch (message.type) {
+            case MessageType.PlayerStart:
+                this.startPlayer(player, message.playerName);
+                break;
+            case MessageType.Move:
+                this.playerMove(player, message);
+                break;
+            case MessageType.Attack:
+                this.playerMove(player, message);
+                break;
+        }
+
         switch (message.type) {
             case MessageType.Move:
+            case MessageType.Attack:
                 this.broadcast(message, player);
                 break;
         }
@@ -91,7 +105,9 @@ export class ServerBoard extends Board {
                 playerId: p.playerId,
                 shipType: p.shipType,
                 moving: p.moving,
-                playerName: p.playerName
+                movingStart: p.movingStart,
+                movingStartX: p.movingStartX,
+                playerName: p.playerName,
             }))
         }
     }

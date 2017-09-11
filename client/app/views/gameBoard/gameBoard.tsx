@@ -1,8 +1,10 @@
+///<reference path="../../../../common/player.ts"/>
 import * as React from 'react';
 import {GameManager} from "../../game/gameManager";
 import {Config} from "@common/config";
 import {MessageType} from "@common/messages";
 import {borderStyle} from "glamor/utils";
+import {AttackType} from "@common/player";
 
 export default class GameBoard extends React.Component<{}, { variables: any }> {
     canvas: HTMLCanvasElement;
@@ -49,6 +51,30 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
         }, 1000 / Config.ticksPerSecond);
     }
 
+
+    private fireMissile() {
+        let board = this.gameManager.board!;
+        this.gameManager.network.sendMessage({
+            type: MessageType.Attack,
+            playerId: board.me.playerId,
+            attackType: "bullet",
+            duration: 0
+        });
+        board.meFireStart(board.me);
+    }
+
+    private stopFireMissile() {
+        let board = this.gameManager.board!;
+        let duration = +new Date() - board.me.firingStart!;
+
+        this.gameManager.network.sendMessage({
+            type: MessageType.Attack,
+            playerId: board.me.playerId,
+            attackType: "bullet",
+            duration: duration
+        });
+        board.meFireStop(board.me);
+    }
 
     private onMouseDown(ev: React.MouseEvent<HTMLCanvasElement>) {
         this.touchPosition = {x: ev.clientX, y: ev.clientY};
@@ -144,7 +170,7 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
 
     render() {
         return (
-            <div>
+            <div style={{userSelect: 'none'}}>
                 <canvas
                     ref={(canvas) => this.canvas = canvas!}
                     onMouseDown={(ev) => this.onMouseDown(ev)}
@@ -152,6 +178,33 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
                     onMouseMove={(ev) => this.onMouseMove(ev)}
                 >
                 </canvas>
+
+                <div onMouseDown={() => this.fireMissile()} onMouseUp={() => this.stopFireMissile()} style={{
+                    position: 'absolute',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    border: '10px #838161 solid',
+                    borderRadius: 60,
+                    right: 30,
+                    bottom: 30,
+                    width: 100,
+                    height: 100,
+                    background: '#831e0a',
+                    color: 'white'
+                }}>
+                    <span style={{display: 'flex'}}>
+                        FIRE
+                    </span>
+                </div>
+                {/*
+                <div onClick={()=>this.fireBomb()} style={{position: 'absolute',display:'flex',justifyContent:'center',alignItems:'center',flexDirection:'column',border:'10px #838161 solid', borderRadius:30, right: 15, bottom: 140, width: 50, height: 50, background: '#505b83', color: 'white'}}>
+                    <span style={{display:'flex'}}>
+                        BOMB
+                    </span>
+                </div>
+*/}
                 <div style={{position: 'absolute', right: 0, top: 0, width: 200, height: 200, background: '#831e0a', color: 'white'}}>
                     {
                         Object.keys(this.state.variables).map(key =>

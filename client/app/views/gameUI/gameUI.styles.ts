@@ -8,6 +8,7 @@ export const Wrapper = glamorous.div({
     height: '100vh',
     alignItems: 'center',
     justifyContent: 'center',
+    userSelect:'none'
 });
 
 export const LoginBox = glamorous.div({

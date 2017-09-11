@@ -1,6 +1,7 @@
 import {Config} from "./config";
 
 export type PlayerDirection = "left" | "right" | "none";
+export type AttackType = "bullet" | "bomb";
 
 export class Player {
     playerId: string;
@@ -12,6 +13,12 @@ export class Player {
     movingStart?: number | null;
     movingStartX?: number | null;
 
-    playerHorizontalMoveSpeed: number = Config.horizontalMoveSpeed;
-    playerVerticalMoveSpeed: number = Config.verticalMoveSpeed;
+    firingStart?: number | null;
+    bulletsFired?: number | null;
+
+
+    bulletsPerSecond: number = 10;
+    bulletVelocity: number=-300;
+
+
 }
