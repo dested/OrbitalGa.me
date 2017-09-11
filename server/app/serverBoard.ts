@@ -1,5 +1,5 @@
 import {ServerPlayer} from "./serverPlayer";
-import { Message, MessageType, SyncMessage} from "@common/messages";
+import {Message, MessageType, SyncMessage} from "@common/messages";
 import {Board} from "@common/board";
 import {Player} from "@common/player";
 
@@ -26,7 +26,6 @@ export class ServerBoard extends Board {
     }
 
 
-
     processMessage(player: ServerPlayer, message: Message) {
 
         switch (message.type) {
@@ -49,15 +48,17 @@ export class ServerBoard extends Board {
         }
     }
 
+    private lastFullSync: number = 0;
+
     tick() {
-        /*
-                if (TimeUtils.getNow().time%3000 === 0) {
-                    this.broadcast({
-                        type: MessageType.SyncPlayer,
-                        data: this.buildSyncMessage(null)
-                    })
-                }
-        */
+        if (ServerTimeUtils.getNow() - this.lastFullSync > 3000) {
+            this.lastFullSync = ServerTimeUtils.getNow();
+            this.broadcast({
+                type: MessageType.SyncPlayer,
+                data: this.buildSyncMessage(null),
+                time: ServerTimeUtils.getNow()
+            });
+        }
     }
 
     buildSyncMessage(me: ServerPlayer | null): SyncMessage {

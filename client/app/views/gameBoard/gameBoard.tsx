@@ -37,6 +37,8 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
         window.addEventListener("resize", () => {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
+            this.gameManager.board!.view.width=window.innerWidth;
+            this.gameManager.board!.view.height=window.innerHeight;
         });
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
@@ -65,8 +67,8 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
         this.gameManager.network.sendMessage({
             type: MessageType.Attack,
             attackType: "bullet",
+            time: now,
             playerId: board.me.playerId,
-            time: now
         });
         board.me.updateAttack("bullet", now);
     }
@@ -83,8 +85,8 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
         board.me.updateAttack("none", now);
     }
 
-    private onMouseDown(ev: React.MouseEvent<HTMLCanvasElement>) {
-        this.touchPosition = {x: ev.clientX, y: ev.clientY};
+    private onTouchDown(ev: {x:number,y:number}) {
+        this.touchPosition = {x: ev.x, y: ev.x};
         let board = this.gameManager.board!;
         let now = ClientTimeUtils.getNow();
         let lastMoving = board.me.lastMoveAction.moving;
@@ -100,17 +102,17 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
         }
     }
 
-    private onMouseUp() {
+    private onTouchUp() {
         this.touchPosition = null;
         this.sendNone(ClientTimeUtils.getNow());
     }
 
-    private onMouseMove(ev: React.MouseEvent<HTMLCanvasElement>) {
+    private onTouchMove(ev: {x:number,y:number}) {
         let board = this.gameManager.board!;
         let now = ClientTimeUtils.getNow();
         if (this.touchPosition) {
-            this.touchPosition.x = ev.clientX;
-            this.touchPosition.y = ev.clientY;
+            this.touchPosition.x = ev.x;
+            this.touchPosition.y = ev.y;
             let lastAction = board.me.lastMoveAction;
 
             if (this.touchPosition.x - this.canvas.width / 2 < 0) {
@@ -166,13 +168,25 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
             <div style={{userSelect: 'none'}}>
                 <canvas
                     ref={(canvas) => this.canvas = canvas!}
-                    onMouseDown={(ev) => this.onMouseDown(ev)}
-                    onMouseUp={(ev) => this.onMouseUp()}
-                    onMouseMove={(ev) => this.onMouseMove(ev)}
+                    onMouseDown={(ev) => this.onTouchDown({x:ev.clientX,y:ev.clientY})}
+                    onMouseUp={(ev) => this.onTouchUp()}
+                    onMouseMove={(ev) => this.onTouchMove({x:ev.clientX,y:ev.clientY})}
+
+
+                    onTouchStart={(ev) => this.onTouchDown({x:ev.touches[0].clientX,y:ev.touches[0].clientY})}
+                    onTouchMove={(ev) => this.onTouchMove({x:ev.touches[0].clientX,y:ev.touches[0].clientY})}
+                    onTouchEnd={() => this.onTouchUp()}
                 >
                 </canvas>
 
-                <div onMouseDown={() => this.fireBullet()} onMouseUp={() => this.stopFireBullet()} style={{
+                <div
+                    onMouseDown={() => this.fireBullet()}
+                    onMouseUp={() => this.stopFireBullet()}
+
+                    onTouchStart={() => this.fireBullet()}
+                    onTouchEnd={() => this.stopFireBullet()}
+
+                    style={{
                     position: 'absolute',
                     display: 'flex',
                     justifyContent: 'center',

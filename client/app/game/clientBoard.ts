@@ -13,7 +13,7 @@ export class ClientBoard extends Board {
     private noise: INoise = noise;
     private context: CanvasRenderingContext2D;
     private canvas: HTMLCanvasElement;
-    private view: View;
+    view: View;
 
     loadContext(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
         this.canvas = canvas;
