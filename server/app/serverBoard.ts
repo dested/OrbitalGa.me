@@ -1,7 +1,7 @@
 import {ServerPlayer} from "./serverPlayer";
 import {Board} from "@common/board";
 import {Config} from "@common/config";
-import {Message, MessageType, MessageUtils, SyncMessage, TickMessage} from "@common/messages";
+import {Message, MessageType, MessageUtils, MoveMessage, SyncMessage, TickMessage} from "@common/messages";
 import {Player} from "@common/player";
 
 export class ServerBoard extends Board {
@@ -13,6 +13,7 @@ export class ServerBoard extends Board {
         player.shipType = this.pickShip();
         player.x = (Math.random() * this.width) | 0;
         player.health = 100;
+        player.moving = "none";
         player.sendMessage({
             type: MessageType.GameStart,
             tick: this.currentTick,
@@ -26,29 +27,44 @@ export class ServerBoard extends Board {
 
     }
 
-    syncPlayer(player: ServerPlayer) {
-        player.sendMessage({
-            type: MessageType.SyncPlayer,
-            tick: this.currentTick,
-            data: this.buildSyncMessage(null)
-        });
+
+    executeMessage(player: ServerPlayer, message: Message) {
+        switch (message.type) {
+            case MessageType.PlayerStart:
+                this.startPlayer(player, message.playerName);
+                break;
+            case MessageType.Move:
+                this.playerMove(player, message);
+                break;
+        }
+    }
+
+    private playerMove(player: Player, message: MoveMessage) {
+        console.log('processing player move', message)
+        if (player.moving === "none") {
+            player.movingStartX = player.x;
+            player.moving = message.moving;
+            player.movingStart = +new Date();
+        } else if (message.moving === "none") {
+            // let msDuration = player.movingStart! + message.duration;
+            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
+            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
+            console.log(message.x, player.x, message.duration, distance);
+            player.moving = "none";
+        } else if (message.moving !== player.moving) {
+            // let msDuration = player.movingStart! + message.duration;
+            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
+            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
+            console.log(message.x, player.x, message.duration, distance);
+            player.movingStartX = player.x;
+            player.moving = message.moving;
+            player.movingStart = +new Date();
+        }
     }
 
     processMessage(player: ServerPlayer, message: Message) {
-        if (MessageUtils.isTickMessage(message)) {
-            if (this.currentTick - message.tick > Config.ticksPerSecond) {
-                this.syncPlayer(player);
-                return;
-            }
-            else if (message.tick - this.currentTick > 2) {
-                this.syncPlayer(player);
-                return;
-            } else {
-                this.executeMessage(player, message);
-            }
-        } else {
-            this.executeMessage(player, message);
-        }
+
+        this.executeMessage(player, message);
         switch (message.type) {
             case MessageType.Move:
                 this.broadcast(message, player);
@@ -95,4 +111,5 @@ export class ServerBoard extends Board {
             return "ship2";
         }
     }
+
 }

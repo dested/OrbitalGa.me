@@ -9,6 +9,9 @@ export class Player {
     x: number;
     health: number;
     moving: PlayerDirection;
+    movingStart?: number | null;
+    movingStartX?: number | null;
+
     playerHorizontalMoveSpeed: number = Config.horizontalMoveSpeed;
     playerVerticalMoveSpeed: number = Config.verticalMoveSpeed;
 }

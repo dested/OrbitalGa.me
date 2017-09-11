@@ -76,7 +76,7 @@ export class AssetManager {
         this.$assetsLoaded++;
         if (this.$assetsLoaded === this.$assetsRequested) {
             setTimeout(() => {
-                this.completed();
+                this.completed && this.completed();
             }, 100);
         }
     }

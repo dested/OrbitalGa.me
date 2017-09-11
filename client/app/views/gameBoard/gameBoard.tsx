@@ -2,8 +2,9 @@ import * as React from 'react';
 import {GameManager} from "../../game/gameManager";
 import {Config} from "@common/config";
 import {MessageType} from "@common/messages";
+import {borderStyle} from "glamor/utils";
 
-export default class GameBoard extends React.Component<{}, {}> {
+export default class GameBoard extends React.Component<{}, { variables: any }> {
     canvas: HTMLCanvasElement;
     touchPosition: { x: number, y: number; } | null;
     private gameManager: GameManager;
@@ -11,6 +12,21 @@ export default class GameBoard extends React.Component<{}, {}> {
     constructor() {
         super();
         this.gameManager = GameManager.instance;
+        this.gameManager.setDebugger((key: string, value: string) => {
+            this.setVariable(key, value);
+        });
+        this.state = {
+            variables: {}
+        };
+    }
+
+    setVariable(key: string, value: string) {
+        this.setState({
+            variables: {
+                ...this.state.variables,
+                [key]: value
+            }
+        })
     }
 
     componentDidMount() {
@@ -38,26 +54,23 @@ export default class GameBoard extends React.Component<{}, {}> {
         this.touchPosition = {x: ev.clientX, y: ev.clientY};
         let board = this.gameManager.board!;
         if (this.touchPosition.x - this.canvas.width / 2 < 0) {
-            if (board.me.moving !== "left") {
-                this.gameManager.network.sendMessage({
-                    type: MessageType.Move,
-                    moving: "left",
-                    playerId: board.me.playerId,
-                    tick: board.currentTick
-                });
-            }
-            board.playerMove(board.me, "left");
+            this.gameManager.network.sendMessage({
+                type: MessageType.Move,
+                moving: "left",
+                playerId: board.me.playerId,
+                duration: 0,
+                x: board.me.x
+            });
+            board.meStartMove(board.me, "left");
         } else {
-            if (board.me.moving !== "right") {
-                this.gameManager.network.sendMessage({
-                    type: MessageType.Move,
-                    moving: "right",
-                    playerId: board.me.playerId,
-                    tick: board.currentTick
-                });
-            }
-
-            board.playerMove(board.me, "right");
+            this.gameManager.network.sendMessage({
+                type: MessageType.Move,
+                moving: "right",
+                playerId: board.me.playerId,
+                duration: 0,
+                x: board.me.x
+            });
+            board.meStartMove(board.me, "right");
         }
     }
 
@@ -65,14 +78,16 @@ export default class GameBoard extends React.Component<{}, {}> {
         this.touchPosition = null;
         let board = this.gameManager.board!;
         if (board.me.moving !== "none") {
+            let duration = +new Date() - board.me.movingStart!;
+            board!.meMoveStop(board.me);
             this.gameManager.network.sendMessage({
                 type: MessageType.Move,
                 moving: "none",
                 playerId: board.me.playerId,
-                tick: board.currentTick
+                duration: duration,
+                x: board.me.x
             });
         }
-        board!.playerMove(board.me, "none");
     }
 
     private onMouseMove(ev: React.MouseEvent<HTMLCanvasElement>) {
@@ -83,38 +98,72 @@ export default class GameBoard extends React.Component<{}, {}> {
             this.touchPosition.y = ev.clientY;
             if (this.touchPosition.x - this.canvas.width / 2 < 0) {
                 if (board.me.moving !== "left") {
+
+                    let duration = +new Date() - board.me.movingStart!;
+                    board!.meMoveStop(board.me);
+                    this.gameManager.network.sendMessage({
+                        type: MessageType.Move,
+                        moving: "none",
+                        playerId: board.me.playerId,
+                        duration: duration,
+                        x: board.me.x
+                    });
+
                     this.gameManager.network.sendMessage({
                         type: MessageType.Move,
                         moving: "left",
                         playerId: board.me.playerId,
-                        tick: board.currentTick
+                        duration: 0,
+                        x: board.me.x
                     });
+                    board.meStartMove(board.me, "left");
                 }
-                board.playerMove(board.me, "left");
             } else {
                 if (board.me.moving !== "right") {
+                    let duration = +new Date() - board.me.movingStart!;
+                    board!.meMoveStop(board.me);
+                    this.gameManager.network.sendMessage({
+                        type: MessageType.Move,
+                        moving: "none",
+                        playerId: board.me.playerId,
+                        duration: duration,
+                        x: board.me.x
+                    });
                     this.gameManager.network.sendMessage({
                         type: MessageType.Move,
                         moving: "right",
                         playerId: board.me.playerId,
-                        tick: board.currentTick
+                        duration: 0,
+                        x: board.me.x
                     });
+                    board.meStartMove(board.me, "right");
                 }
-                board.playerMove(board.me, "right");
             }
         }
     }
 
     render() {
         return (
-            <canvas
-                ref={(canvas) => this.canvas = canvas!}
-                onMouseDown={(ev) => this.onMouseDown(ev)}
-                onMouseUp={(ev) => this.onMouseUp()}
-                onMouseMove={(ev) => this.onMouseMove(ev)}
-            >
-            </canvas>
+            <div>
+                <canvas
+                    ref={(canvas) => this.canvas = canvas!}
+                    onMouseDown={(ev) => this.onMouseDown(ev)}
+                    onMouseUp={(ev) => this.onMouseUp()}
+                    onMouseMove={(ev) => this.onMouseMove(ev)}
+                >
+                </canvas>
+                <div style={{position: 'absolute', right: 0, top: 0, width: 200, height: 200, background: '#831e0a', color: 'white'}}>
+                    {
+                        Object.keys(this.state.variables).map(key =>
+                            (
+                                <div>{key} = {this.state.variables[key]}</div>
+                            )
+                        )
+                    }
+                </div>
+            </div>
         );
     }
+
 
 }

@@ -4,6 +4,7 @@ import {ClientBoard} from "./clientBoard";
 
 export class GameManager {
     private static _instance: GameManager;
+    public debugValue: (key: string, value: any) => void;
     static get instance(): GameManager {
         if (!this._instance) {
             this._instance = new GameManager();
@@ -33,7 +34,6 @@ export class GameManager {
                 case MessageType.SyncPlayer:
                     this.board!.updateBoard(message.data, message.tick);
                     return;
-
             }
 
             if (MessageUtils.isPlayerMessage(message)) {
@@ -50,5 +50,9 @@ export class GameManager {
     die() {
         this.board = null;
         this.network.disconnect();
+    }
+
+    setDebugger(debugValue: (key: string, value: string) => any) {
+        this.debugValue=debugValue;
     }
 }

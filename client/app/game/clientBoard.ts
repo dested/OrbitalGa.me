@@ -1,10 +1,11 @@
 import {Board} from "@common/board";
-import {Message, MessageUtils, SyncMessage, SyncPlayer, TickMessage} from "@common/messages";
+import {Message, MessageType, MessageUtils, MoveMessage, SyncMessage, SyncPlayer, TickMessage} from "@common/messages";
 import {Config} from "@common/config";
 import {ClientPlayer} from "./clientPlayer";
 import {INoise, noise} from "../perlin";
-import {Player} from "@common/player";
+import {Player, PlayerDirection} from "@common/player";
 import {AssetManager} from "../common/assetManager";
+import {GameManager} from "./gameManager";
 
 export class ClientBoard extends Board {
 
@@ -15,7 +16,6 @@ export class ClientBoard extends Board {
     private context: CanvasRenderingContext2D;
     private canvas: HTMLCanvasElement;
     private view: View;
-
 
     loadContext(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
         this.canvas = canvas;
@@ -31,7 +31,6 @@ export class ClientBoard extends Board {
             window.requestAnimationFrame(callback);
             let diff = (+new Date()) - time;
             time = +new Date();
-            console.log(diff);
             this.clientTick(diff);
             this.draw(diff);
         };
@@ -53,8 +52,8 @@ export class ClientBoard extends Board {
         let clientPlayer = new ClientPlayer();
         clientPlayer.playerId = playerData.playerId;
         clientPlayer.shipType = playerData.shipType;
-        clientPlayer.x = clientPlayer.drawX = playerData.x;
-        clientPlayer.drawY = currentTick * Config.verticalMoveSpeed;
+        clientPlayer.x = playerData.x;
+        clientPlayer.y = this.me ? this.me.y : currentTick * Config.verticalMoveSpeed;
         clientPlayer.moving = playerData.moving;
         clientPlayer.playerName = playerData.playerName;
         this.players.push(clientPlayer);
@@ -67,9 +66,9 @@ export class ClientBoard extends Board {
         for (let playerData of data.players) {
             let clientPlayer = this.players.find(a => a.playerId === playerData.playerId);
             if (clientPlayer) {
-                clientPlayer.x = clientPlayer.drawX = playerData.x;
+                // clientPlayer.x = playerData.x;
                 clientPlayer.shipType = playerData.shipType;
-                clientPlayer.drawY = currentTick * Config.verticalMoveSpeed;
+                // clientPlayer.y = currentTick * Config.verticalMoveSpeed;
                 clientPlayer.moving = playerData.moving;
                 missingPlayers.splice(missingPlayers.findIndex(a => a === clientPlayer), 1);
             } else {
@@ -81,37 +80,90 @@ export class ClientBoard extends Board {
         }
     }
 
-    private clientTick(msDiff:number) {
-        let y = Config.verticalMoveSpeed * Config.ticksPerSecond / (1000/msDiff);
+    private clientTick(msDiff: number) {
+        let distanceInTick = Config.ticksPerSecond / (1000 / msDiff);
+
+        let y = Math.round(Config.verticalMoveSpeed * distanceInTick);
         for (let player of this.players) {
-            player.drawY += y;
+            player.y += y;
             if (player.moving === "left") {
-                player.drawX -= Config.horizontalMoveSpeed * Config.ticksPerSecond / 60;
+                let duration = +new Date() - player.movingStart!;
+                GameManager.instance.debugValue("duration", duration);
+                let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
+                GameManager.instance.debugValue("distance", distance);
+                player.x = player.movingStartX! - distance;
             }
             if (player.moving === "right") {
-                player.drawX += Config.horizontalMoveSpeed * Config.ticksPerSecond / 60;
+                let duration = +new Date() - player.movingStart!;
+                GameManager.instance.debugValue("duration", duration);
+                let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
+                GameManager.instance.debugValue("distance", distance);
+                player.x = player.movingStartX! + distance;
             }
+
+            GameManager.instance.debugValue("playerX", player.x.toFixed(0));
         }
         this.view.follow(this.me);
     }
 
     processMessage(player: ClientPlayer, message: Message) {
-        if (MessageUtils.isTickMessage(message)) {
-            if (this.currentTick - message.tick > Config.ticksPerSecond) {
-                // this.syncPlayer(player);
-            }
-            else if (message.tick - this.currentTick > 2) {
-                // this.syncPlayer(player);
-            } else {
-                this.executeMessage(player, message);
-            }
-        } else {
-            this.executeMessage(player, message);
-        }
+        this.executeMessage(player, message);
+    }
+
+    meStartMove(player: Player, direction: PlayerDirection) {
+        player.moving = direction;
+        player.movingStart = +new Date();
+        player.movingStartX = player.x;
+    }
+
+    meMoveStop(player: Player) {
+        let duration = +new Date() - player.movingStart!;
+        let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
+        player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
+
+        GameManager.instance.debugValue("duration", duration);
+        GameManager.instance.debugValue("distance", distance);
+
+        player.moving = "none";
+        player.movingStart = null;
+        player.movingStartX = null;
     }
 
 
-    private draw(msDiff:number) {
+    private playerMove(player: Player, message: MoveMessage) {
+        console.log('processing player move', message)
+        if (player.moving === "none") {
+            GameManager.instance.debugValue("playerX-ser", player.x.toString());
+            player.movingStartX = player.x;
+            player.moving = message.moving;
+            player.movingStart = +new Date();
+        } else if (message.moving === "none") {
+            // let msDuration = player.movingStart! + message.duration;
+            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
+            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
+            GameManager.instance.debugValue("playerX-ser", player.x.toString());
+            player.moving = "none";
+        } else if (message.moving !== player.moving) {
+            // let msDuration = player.movingStart! + message.duration;
+            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
+            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
+            GameManager.instance.debugValue("playerX-ser", player.x.toString());
+            player.movingStartX = player.x;
+            player.moving = message.moving;
+            player.movingStart = +new Date();
+        }
+    }
+
+    executeMessage(player: Player, message: Message) {
+        console.log('executing message', player.playerName, message);
+        switch (message.type) {
+            case MessageType.Move:
+                this.playerMove(player, message);
+                break;
+        }
+    }
+
+    private draw(msDiff: number) {
         let context = this.context;
         context.fillStyle = '#000000';
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -133,7 +185,7 @@ export class ClientBoard extends Board {
 
         for (let player of this.players) {
             let ship = AssetManager.assets[player.shipType];
-            context.drawImage(ship.image, player.drawX - ship.size.width / 2, player.drawY - ship.size.height / 2);
+            context.drawImage(ship.image, player.x - ship.size.width / 2, player.y - ship.size.height / 2);
         }
         context.restore();
 
@@ -180,9 +232,9 @@ export class View {
     }
 
 
-    follow({drawX, drawY}: { drawX: number, drawY: number }) {
-        this.x = Math.round(drawX - this.width / 2);
-        this.y = Math.round(drawY - this.height / 4 * 3);
+    follow({x, y}: { x: number, y: number }) {
+        this.x = Math.round(x - this.width / 2);
+        this.y = Math.round(y - this.height / 4 * 3);
     }
 }
 

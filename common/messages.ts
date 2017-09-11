@@ -1,3 +1,5 @@
+import {PlayerDirection} from "./player";
+
 export enum MessageType {
     GameStart,
     PlayerStart,
@@ -33,16 +35,16 @@ export interface SyncPlayer {
     playerId: string;
     shipType: string;
     playerName: string;
-    moving: "left" | "right" | "none";
+    moving: PlayerDirection;
 }
 
+export type GameStartMessage = { type: MessageType.GameStart; data: SyncMessage; } & TickMessage;
+export type PlayerStartMessage = { type: MessageType.PlayerStart; playerName: string; };
+export type SyncPlayerMessage = { type: MessageType.SyncPlayer; data: SyncMessage } & TickMessage;
+export type MoveMessage = { type: MessageType.Move; moving: PlayerDirection; x: number; duration: number; } & PlayerMessage;
+
 export type Message =
-    (
-    { type: MessageType.GameStart; data: SyncMessage; } & TickMessage
-    ) | (
-    { type: MessageType.PlayerStart; playerName: string; }
-    ) | (
-    { type: MessageType.SyncPlayer; data: SyncMessage } & TickMessage
-    ) | (
-    { type: MessageType.Move; moving: "left" | "right" | "none"; } & TickMessage & PlayerMessage
-    ) ;
+    GameStartMessage |
+    PlayerStartMessage |
+    SyncPlayerMessage |
+    MoveMessage;
