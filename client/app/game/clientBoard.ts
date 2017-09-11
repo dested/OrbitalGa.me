@@ -1,9 +1,7 @@
-import {Board, Bullet} from "@common/board";
-import {AttackMessage, Message, MessageType, MessageUtils, MoveMessage, SyncMessage, SyncPlayer} from "@common/messages";
-import {Config} from "@common/config";
+import {Board} from "@common/board";
+import {Message, MessageType, SyncMessage, SyncPlayer} from "@common/messages";
 import {ClientPlayer} from "./clientPlayer";
 import {INoise, noise} from "../perlin";
-import {Player, PlayerDirection} from "@common/player";
 import {AssetManager} from "../common/assetManager";
 import {GameManager} from "./gameManager";
 
@@ -51,7 +49,7 @@ export class ClientBoard extends Board {
         let clientPlayer = new ClientPlayer();
         clientPlayer.playerId = playerData.playerId;
         clientPlayer.shipType = playerData.shipType;
-        clientPlayer.setActions(playerData.actions);
+        clientPlayer.setMoveActions(playerData.actions);
         clientPlayer.playerName = playerData.playerName;
         this.players.push(clientPlayer);
         return clientPlayer;
@@ -63,7 +61,7 @@ export class ClientBoard extends Board {
             let clientPlayer = this.players.find(a => a.playerId === playerData.playerId);
             if (clientPlayer) {
                 clientPlayer.shipType = playerData.shipType;
-                clientPlayer.setActions(playerData.actions);
+                clientPlayer.setMoveActions(playerData.actions);
                 missingPlayers.splice(missingPlayers.findIndex(a => a === clientPlayer), 1);
             } else {
                 this.newPlayer(playerData);
@@ -75,42 +73,6 @@ export class ClientBoard extends Board {
     }
 
     private clientTick(msDiff: number) {
-        /*let distanceInTick = Config.ticksPerSecond / (1000 / msDiff);
-
-
-
-        for (let player of this.players) {
-            player.y += y;
-            if (player.moving === "left") {
-                let duration = now - player.movingStart!;
-                let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
-                player.x = player.movingStartX! - distance;
-            }
-            if (player.moving === "right") {
-                let duration = now - player.movingStart!;
-                let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
-                player.x = player.movingStartX! + distance;
-            }
-            if (player.firingStart) {
-                let bulletsEvery = 1000 / player.bulletsPerSecond;
-                if ((now - player.firingStart) / bulletsEvery > player.bulletsFired!) {
-                    player.bulletsFired!++;
-                    this.bullets.push(new Bullet(player.x, player.y, player.bulletVelocity))
-                }
-            }
-        }
-        for (let i = this.bullets.length - 1; i >= 0; i--) {
-            let bullet = this.bullets[i];
-            let duration = now - bullet.fireStart;
-            let distance = bullet.velocity * (Config.ticksPerSecond / (1000 / duration));
-            bullet.y = bullet.startY! + distance;
-            if (bullet.startY - bullet.y > 1000) {
-                this.bullets.splice(this.bullets.indexOf(bullet), 1)
-            }
-        }*/
-
-        GameManager.instance.debugValue("bullets", this.bullets.length);
-
     }
 
     processMessage(player: ClientPlayer, message: Message) {
@@ -120,34 +82,9 @@ export class ClientBoard extends Board {
                 player.updateMoving(message.moving, message.time);
                 break;
             case MessageType.Attack:
-                this.playerAttack(player, message);
+                player.updateAttack(message.attackType, message.time);
                 break;
         }
-    }
-
-
-    meFireStart(player: Player) {
-        player.firingStart = +new Date();
-        player.bulletsFired = 0;
-    }
-
-    meFireStop(player: Player) {
-        player.firingStart = null;
-        player.bulletsFired = null;
-    }
-
-
-    private playerAttack(player: Player, message: AttackMessage) {
-        console.log('processing player attack', message)
-        /*
-                if (message.duration > 0) {
-                    player.firingStart = null;
-                    player.bulletsFired = null;
-                } else {
-                    player.firingStart = +new Date();
-                    player.bulletsFired = 0;
-                }
-        */
     }
 
 
@@ -172,15 +109,6 @@ export class ClientBoard extends Board {
                 16 * element.n
             );
         }
-        for (let element of this.bullets) {
-            context.fillStyle = `rgba(255,240,76,.7)`;
-            context.fillRect(
-                element.x - 4,
-                element.y - 8,
-                8,
-                16
-            );
-        }
 
 
         for (let player of this.players) {
@@ -188,6 +116,15 @@ export class ClientBoard extends Board {
             GameManager.instance.debugValue(player.playerId + "-x", player.x);
             GameManager.instance.debugValue(player.playerId + "-y", player.y);
             context.drawImage(ship.image, player.x - ship.size.width / 2, player.y - ship.size.height / 2);
+            for (let element of player.getAttacks()) {
+                context.fillStyle = `rgba(255,240,76,.7)`;
+                context.fillRect(
+                    element.x - 4,
+                    element.y - 8,
+                    8,
+                    16
+                );
+            }
         }
         context.restore();
 

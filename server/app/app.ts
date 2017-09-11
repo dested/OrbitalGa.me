@@ -1,8 +1,7 @@
 import {Server} from 'ws';
 import {ServerPlayer} from "./serverPlayer";
-import {Message, MessageType} from "@common/messages";
+import {Message} from "@common/messages";
 import {ServerBoard, ServerTimeUtils} from "./serverBoard";
-import {Config} from "@common/config";
 
 export class ServerApp {
     board: ServerBoard;

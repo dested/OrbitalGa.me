@@ -5,7 +5,6 @@ export abstract class Board {
     width: number;
     currentY: number;
     players: Player[] = [];
-    bullets: Bullet[] = [];
 
     removePlayer(player: Player) {
         this.players.splice(this.players.indexOf(player), 1);

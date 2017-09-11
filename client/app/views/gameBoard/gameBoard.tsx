@@ -46,28 +46,41 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
     }
 
 
-    private fireMissile() {
+    private fireBullet() {
+        let now = ClientTimeUtils.getNow();
         let board = this.gameManager.board!;
-        /*        this.gameManager.network.sendMessage({
-                    type: MessageType.Attack,
-                    playerId: board.me.playerId,
-                    attackType: "bullet",
-                    duration: 0
-                });*/
-        board.meFireStart(board.me);
+        let lastAttack = board.me.lastAttackAction.attack;
+
+        if (lastAttack !== "none") {
+            this.gameManager.network.sendMessage({
+                type: MessageType.Attack,
+                attackType: "none",
+                playerId: board.me.playerId,
+                time: now
+            });
+            board.me.updateAttack("none", now);
+        }
+
+
+        this.gameManager.network.sendMessage({
+            type: MessageType.Attack,
+            attackType: "bullet",
+            playerId: board.me.playerId,
+            time: now
+        });
+        board.me.updateAttack("bullet", now);
     }
 
-    private stopFireMissile() {
+    private stopFireBullet() {
+        let now = ClientTimeUtils.getNow();
         let board = this.gameManager.board!;
-        let duration = +new Date() - board.me.firingStart!;
-
-        /* this.gameManager.network.sendMessage({
-             type: MessageType.Attack,
-             playerId: board.me.playerId,
-             attackType: "bullet",
-             duration: duration
-         });*/
-        board.meFireStop(board.me);
+        this.gameManager.network.sendMessage({
+            type: MessageType.Attack,
+            attackType: "none",
+            playerId: board.me.playerId,
+            time: now
+        });
+        board.me.updateAttack("none", now);
     }
 
     private onMouseDown(ev: React.MouseEvent<HTMLCanvasElement>) {
@@ -159,7 +172,7 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
                 >
                 </canvas>
 
-                <div onMouseDown={() => this.fireMissile()} onMouseUp={() => this.stopFireMissile()} style={{
+                <div onMouseDown={() => this.fireBullet()} onMouseUp={() => this.stopFireBullet()} style={{
                     position: 'absolute',
                     display: 'flex',
                     justifyContent: 'center',

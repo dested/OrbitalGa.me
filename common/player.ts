@@ -2,7 +2,7 @@ import {Config} from "./config";
 import {ServerTimeUtils} from "../server/app/serverBoard";
 
 export type PlayerDirection = "left" | "right" | "none";
-export type AttackType = "bullet" | "bomb";
+export type AttackType = "bullet" | "none";
 
 export type PlayerMoveAction =
     { time: number; } &
@@ -18,22 +18,27 @@ export type PlayerMoveAction =
     }
     );
 
+
+export type PlayerAttackAction =
+    { time: number; } &
+    (
+    {
+        attack: AttackType;
+        duration: number;
+    }
+    );
+
 export class Player {
     playerId: string;
     shipType: string;
     playerName: string;
 
-    get lastMoveAction(): PlayerMoveAction {
-        return this.moveActions[this.moveActions.length - 1];
-    }
-
-    protected moveActions: PlayerMoveAction[] = [];
-
-    setActions(actions: PlayerMoveAction[]) {
-        this.moveActions = actions;
+    private get timeNow(): number {
+        return Config.isServer ? ServerTimeUtils.getNow() : ClientTimeUtils.getNow();
     }
 
     get x(): number {
+        let now = this.timeNow;
         let position = 0;
         for (let i = 0; i < this.moveActions.length; i++) {
             let action = this.moveActions[i];
@@ -45,7 +50,39 @@ export class Player {
                     break;
                 case "left":
                 case "right":
-                    let distance = Config.horizontalMoveSpeed * ((action.duration === 0 ? ClientTimeUtils.getNow() - action.time : action.duration) / 1000 );
+                    let distance = Config.horizontalMoveSpeed * ((action.duration === 0 ? now - action.time : action.duration) / 1000 );
+                    position = position + (distance * (action.moving === "left" ? -1 : 1));
+                    break;
+            }
+        }
+        return Math.round(position);
+    }
+
+    getXAtTime(now: number): number {
+        let position = 0;
+        for (let i = 0; i < this.moveActions.length; i++) {
+            let action = this.moveActions[i];
+            switch (action.moving) {
+                case "start":
+                    position = action.position;
+                    break;
+                case "none":
+                    break;
+                case "left":
+                case "right":
+                    if (now < action.time) continue;
+                    let time = 0;
+                    if (action.duration === 0) {
+                        time = now - action.time;
+                    } else {
+                        if (action.time + action.duration > now) {
+                            time = now - action.time;
+                        } else {
+                            time = action.duration;
+                        }
+                    }
+
+                    let distance = Config.horizontalMoveSpeed * (time / 1000 );
                     position = position + (distance * (action.moving === "left" ? -1 : 1));
                     break;
             }
@@ -54,8 +91,23 @@ export class Player {
     }
 
     get y(): number {
-        return Math.round(Config.verticalMoveSpeed * ( ClientTimeUtils.getNow() / 1000));
+        return this.getYAtTime(this.timeNow);
     }
+
+    private getYAtTime(now: number) {
+        return Math.round(Config.verticalMoveSpeed * ( now / 1000));
+    }
+
+    get lastMoveAction(): PlayerMoveAction {
+        return this.moveActions[this.moveActions.length - 1];
+    }
+
+    protected moveActions: PlayerMoveAction[] = [];
+
+    setMoveActions(actions: PlayerMoveAction[]) {
+        this.moveActions = actions;
+    }
+
 
     updateMoving(direction: PlayerDirection, time: number) {
         switch (this.lastMoveAction.moving) {
@@ -66,7 +118,7 @@ export class Player {
         }
 
         this.moveActions.push({moving: direction, time: time, duration: 0});
-        this.reconcileMoveActions();
+        // this.reconcileMoveActions();
     }
 
 
@@ -74,7 +126,7 @@ export class Player {
         let position = 0;
         if (this.lastMoveAction.moving !== "none") return;
 
-        let now = Config.isServer ? ServerTimeUtils.getNow() : ClientTimeUtils.getNow();
+        let now = this.timeNow;
 
         for (let i = 0; i < this.moveActions.length; i++) {
             let action = this.moveActions[i];
@@ -99,14 +151,66 @@ export class Player {
         this.moveActions = newActions;
     }
 
+
+    get lastAttackAction(): PlayerAttackAction {
+        return this.attackActions[this.attackActions.length - 1] || {attack: 'none'};
+    }
+
+    protected attackActions: PlayerAttackAction[] = [];
+
+    setAttackActions(actions: PlayerAttackAction[]) {
+        this.attackActions = actions;
+    }
+
+    updateAttack(attack: AttackType, time: number) {
+        switch (this.lastAttackAction.attack) {
+            case "bullet":
+                this.lastAttackAction.duration = time - this.lastAttackAction.time;
+                break;
+        }
+
+        this.attackActions.push({attack: attack, time: time, duration: 0});
+    }
+
+    * getAttacks(): Iterable<{ attack: AttackType; x: number; y: number }> {
+        let now = this.timeNow;
+        for (let i = this.attackActions.length - 1; i >= 0; i--) {
+            let attack = this.attackActions[i];
+            switch (attack.attack) {
+                case "bullet":
+                    let hit = false;
+                    for (let time = attack.time; time < (attack.duration === 0 ? now : attack.time + attack.duration); time += 1000 / this.bulletsPerSecond) {
+                        let bulletDistance = Math.round(((now - time) / 1000) * this.bulletVelocityPerSecond);
+                        if (Math.abs(bulletDistance) < 1500) {
+                            hit = true;
+                            yield {attack: attack.attack, x: this.getXAtTime(time), y: this.getYAtTime(time) + bulletDistance};
+                        }
+                    }
+                    if (!hit) {
+                        this.attackActions.splice(i, 1);
+                    }
+                    break;
+            }
+        }
+        let empty = true;
+        for (let i = this.attackActions.length - 1; i >= 0; i--) {
+            let attack = this.attackActions[i];
+            if (attack.attack !== "none") {
+                empty = false;
+                break;
+            }
+        }
+        if (empty) {
+            this.attackActions.length = 0;
+        }
+    }
+
+
     health: number;
 
-    firingStart?: number | null;
-    bulletsFired?: number | null;
 
-
-    bulletsPerSecond: number = 10;
-    bulletVelocity: number = -300;
+    bulletsPerSecond: number = 7;
+    bulletVelocityPerSecond: number = -800;
 
 
 }

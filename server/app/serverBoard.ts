@@ -1,5 +1,5 @@
 import {ServerPlayer} from "./serverPlayer";
-import {AttackMessage, Message, MessageType, MessageUtils, MoveMessage, SyncMessage} from "@common/messages";
+import { Message, MessageType, SyncMessage} from "@common/messages";
 import {Board} from "@common/board";
 import {Player} from "@common/player";
 
@@ -26,16 +26,6 @@ export class ServerBoard extends Board {
     }
 
 
-    private playerAttack(player: Player, message: AttackMessage) {
-        console.log('processing player attack', message)
-        /*
-            server sends client start time
-            all information happens relative to that
-            bullets position and existence are based on creation and duration from start time
-
-            lerp between reality and start time
-         */
-    }
 
     processMessage(player: ServerPlayer, message: Message) {
 
@@ -47,7 +37,7 @@ export class ServerBoard extends Board {
                 player.updateMoving(message.moving, message.time);
                 break;
             case MessageType.Attack:
-                this.playerAttack(player, message);
+                player.updateAttack(message.attackType, message.time);
                 break;
         }
 
