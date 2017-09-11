@@ -1,7 +1,7 @@
 class ConfigInstance {
-    ticksPerSecond: number = 5;
-    horizontalMoveSpeed: number = 80;
-    verticalMoveSpeed: number = -48;
+    horizontalMoveSpeed: number = 280;
+    verticalMoveSpeed: number = -100;
+    isServer: boolean = typeof(window)==="undefined";
 }
 
 export let Config = new ConfigInstance();

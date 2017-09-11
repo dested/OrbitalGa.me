@@ -1,10 +1,12 @@
 import {Network} from "./network";
 import {MessageType, MessageUtils, PlayerMessage} from "@common/messages";
 import {ClientBoard} from "./clientBoard";
+import {ClientTimeUtils} from "@common/player";
 
 export class GameManager {
     private static _instance: GameManager;
     public debugValue: (key: string, value: any) => void;
+
     static get instance(): GameManager {
         if (!this._instance) {
             this._instance = new GameManager();
@@ -22,17 +24,18 @@ export class GameManager {
 
     joinGame(playerName: string, statusChange: (status: 'fail' | 'connecting' | 'joining' | 'joined') => void) {
         this.network.connect(() => {
+            this.network.sendMessage({type: MessageType.PlayerStart, playerName, time: ClientTimeUtils.getNow()});
             statusChange("joining");
-            this.network.sendMessage({type: MessageType.PlayerStart, playerName});
         }, message => {
             switch (message.type) {
                 case MessageType.GameStart:
+                    ClientTimeUtils.setServerNow(message.time);
                     this.board = new ClientBoard();
-                    this.board.loadBoard(message.data, message.tick);
+                    this.board.loadBoard(message.data);
                     statusChange('joined');
                     return;
                 case MessageType.SyncPlayer:
-                    this.board!.updateBoard(message.data, message.tick);
+                    this.board!.updateBoard(message.data);
                     return;
             }
 
@@ -53,6 +56,6 @@ export class GameManager {
     }
 
     setDebugger(debugValue: (key: string, value: string) => any) {
-        this.debugValue=debugValue;
+        this.debugValue = debugValue;
     }
 }

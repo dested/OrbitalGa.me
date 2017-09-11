@@ -1,10 +1,8 @@
 ///<reference path="../../../../common/player.ts"/>
 import * as React from 'react';
 import {GameManager} from "../../game/gameManager";
-import {Config} from "@common/config";
 import {MessageType} from "@common/messages";
-import {borderStyle} from "glamor/utils";
-import {AttackType} from "@common/player";
+import {ClientTimeUtils} from "@common/player";
 
 export default class GameBoard extends React.Component<{}, { variables: any }> {
     canvas: HTMLCanvasElement;
@@ -45,21 +43,17 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
 
         const ctx = this.canvas.getContext('2d')!;
         this.gameManager.board!.loadContext(this.canvas, ctx);
-
-        setInterval(() => {
-            this.gameManager.board!.tick();
-        }, 1000 / Config.ticksPerSecond);
     }
 
 
     private fireMissile() {
         let board = this.gameManager.board!;
-        this.gameManager.network.sendMessage({
-            type: MessageType.Attack,
-            playerId: board.me.playerId,
-            attackType: "bullet",
-            duration: 0
-        });
+        /*        this.gameManager.network.sendMessage({
+                    type: MessageType.Attack,
+                    playerId: board.me.playerId,
+                    attackType: "bullet",
+                    duration: 0
+                });*/
         board.meFireStart(board.me);
     }
 
@@ -67,105 +61,91 @@ export default class GameBoard extends React.Component<{}, { variables: any }> {
         let board = this.gameManager.board!;
         let duration = +new Date() - board.me.firingStart!;
 
-        this.gameManager.network.sendMessage({
-            type: MessageType.Attack,
-            playerId: board.me.playerId,
-            attackType: "bullet",
-            duration: duration
-        });
+        /* this.gameManager.network.sendMessage({
+             type: MessageType.Attack,
+             playerId: board.me.playerId,
+             attackType: "bullet",
+             duration: duration
+         });*/
         board.meFireStop(board.me);
     }
 
     private onMouseDown(ev: React.MouseEvent<HTMLCanvasElement>) {
         this.touchPosition = {x: ev.clientX, y: ev.clientY};
         let board = this.gameManager.board!;
+        let now = ClientTimeUtils.getNow();
+        let lastMoving = board.me.lastMoveAction.moving;
+
+        if (lastMoving !== "none" && lastMoving !== "start") {
+            this.sendNone(now);
+        }
+
         if (this.touchPosition.x - this.canvas.width / 2 < 0) {
-            this.gameManager.network.sendMessage({
-                type: MessageType.Move,
-                moving: "left",
-                playerId: board.me.playerId,
-                duration: 0,
-                x: board.me.x
-            });
-            board.meStartMove(board.me, "left");
+            this.sendLeft(now);
         } else {
-            this.gameManager.network.sendMessage({
-                type: MessageType.Move,
-                moving: "right",
-                playerId: board.me.playerId,
-                duration: 0,
-                x: board.me.x
-            });
-            board.meStartMove(board.me, "right");
+            this.sendRight(now);
         }
     }
 
     private onMouseUp() {
         this.touchPosition = null;
-        let board = this.gameManager.board!;
-        if (board.me.moving !== "none") {
-            let duration = +new Date() - board.me.movingStart!;
-            board!.meMoveStop(board.me);
-            this.gameManager.network.sendMessage({
-                type: MessageType.Move,
-                moving: "none",
-                playerId: board.me.playerId,
-                duration: duration,
-                x: board.me.x
-            });
-        }
+        this.sendNone(ClientTimeUtils.getNow());
     }
 
     private onMouseMove(ev: React.MouseEvent<HTMLCanvasElement>) {
         let board = this.gameManager.board!;
-
+        let now = ClientTimeUtils.getNow();
         if (this.touchPosition) {
             this.touchPosition.x = ev.clientX;
             this.touchPosition.y = ev.clientY;
+            let lastAction = board.me.lastMoveAction;
+
             if (this.touchPosition.x - this.canvas.width / 2 < 0) {
-                if (board.me.moving !== "left") {
-
-                    let duration = +new Date() - board.me.movingStart!;
-                    board!.meMoveStop(board.me);
-                    this.gameManager.network.sendMessage({
-                        type: MessageType.Move,
-                        moving: "none",
-                        playerId: board.me.playerId,
-                        duration: duration,
-                        x: board.me.x
-                    });
-
-                    this.gameManager.network.sendMessage({
-                        type: MessageType.Move,
-                        moving: "left",
-                        playerId: board.me.playerId,
-                        duration: 0,
-                        x: board.me.x
-                    });
-                    board.meStartMove(board.me, "left");
+                if (lastAction.moving !== "left") {
+                    this.sendNone(now);
+                    this.sendLeft(now);
                 }
             } else {
-                if (board.me.moving !== "right") {
-                    let duration = +new Date() - board.me.movingStart!;
-                    board!.meMoveStop(board.me);
-                    this.gameManager.network.sendMessage({
-                        type: MessageType.Move,
-                        moving: "none",
-                        playerId: board.me.playerId,
-                        duration: duration,
-                        x: board.me.x
-                    });
-                    this.gameManager.network.sendMessage({
-                        type: MessageType.Move,
-                        moving: "right",
-                        playerId: board.me.playerId,
-                        duration: 0,
-                        x: board.me.x
-                    });
-                    board.meStartMove(board.me, "right");
+                if (lastAction.moving !== "right") {
+                    this.sendNone(now);
+                    this.sendRight(now);
                 }
             }
         }
+    }
+
+    private sendNone(now: number) {
+        now = now || ClientTimeUtils.getNow();
+        let board = this.gameManager.board!;
+        board.me.updateMoving("none", now);
+        this.gameManager.network.sendMessage({
+            type: MessageType.Move,
+            moving: "none",
+            playerId: board.me.playerId,
+            time: now
+        });
+    }
+
+    private sendLeft(now: number) {
+        let board = this.gameManager.board!;
+        this.gameManager.network.sendMessage({
+            type: MessageType.Move,
+            moving: "left",
+            playerId: board.me.playerId,
+            time: now
+        });
+        board.me.updateMoving("left", now);
+    }
+
+    private sendRight(now: number) {
+        let board = this.gameManager.board!;
+        this.gameManager.network.sendMessage({
+            type: MessageType.Move,
+            moving: "right",
+            playerId: board.me.playerId,
+            time: now
+        });
+        board.me.updateMoving("right", now);
     }
 
     render() {

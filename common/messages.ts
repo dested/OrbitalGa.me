@@ -1,4 +1,4 @@
-import {AttackType, PlayerDirection} from "./player";
+import {AttackType, PlayerMoveAction, PlayerDirection} from "./player";
 
 export enum MessageType {
     GameStart,
@@ -8,8 +8,8 @@ export enum MessageType {
     SyncPlayer
 }
 
-export type TickMessage = {
-    tick: number;
+export type TimeMessage = {
+    time: number;
 };
 export type PlayerMessage = {
     playerId: string;
@@ -19,11 +19,6 @@ export class MessageUtils {
     static isPlayerMessage(message: Message): message is Message & PlayerMessage {
         return (message as PlayerMessage).playerId !== undefined;
     }
-
-    static isTickMessage(message: Message): message is Message & TickMessage {
-        return (message as TickMessage).tick !== undefined;
-    }
-
 }
 
 export interface SyncMessage {
@@ -36,20 +31,20 @@ export interface SyncPlayer {
     playerId: string;
     shipType: string;
     playerName: string;
-    moving: PlayerDirection;
-    movingStart?: number|null;
-    movingStartX?: number|null;
+    actions: PlayerMoveAction[];
 }
 
-export type GameStartMessage = { type: MessageType.GameStart; data: SyncMessage; } & TickMessage;
-export type PlayerStartMessage = { type: MessageType.PlayerStart; playerName: string; };
-export type SyncPlayerMessage = { type: MessageType.SyncPlayer; data: SyncMessage } & TickMessage;
-export type MoveMessage = { type: MessageType.Move; moving: PlayerDirection; x: number; duration: number; } & PlayerMessage;
-export type AttackMessage = { type: MessageType.Attack; attackType: AttackType; duration: number;} & PlayerMessage;
+export type GameStartMessage = { type: MessageType.GameStart; data: SyncMessage; } & TimeMessage;
+export type PlayerStartMessage = { type: MessageType.PlayerStart; playerName: string; }& TimeMessage;
+export type SyncPlayerMessage = { type: MessageType.SyncPlayer; data: SyncMessage } & TimeMessage;
+export type MoveMessage = { type: MessageType.Move; moving: PlayerDirection; } & PlayerMessage& TimeMessage;
+export type AttackMessage = { type: MessageType.Attack; attackType: AttackType;  } & PlayerMessage& TimeMessage;
 
 export type Message =
+    (
     GameStartMessage |
     PlayerStartMessage |
     SyncPlayerMessage |
     AttackMessage |
-    MoveMessage;
+    MoveMessage
+    ) ;

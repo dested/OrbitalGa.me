@@ -12,5 +12,13 @@ export class ServerPlayer extends Player {
         this.socket.send(JSON.stringify(message));
     }
 
+    setStartX(x: number) {
+        this.moveActions.push({moving: "start", time: 0, position: x});
+    }
+
     live: boolean;
+
+    getActions() {
+        return this.moveActions;
+    }
 }

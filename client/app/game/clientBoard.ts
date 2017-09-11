@@ -1,5 +1,5 @@
 import {Board, Bullet} from "@common/board";
-import {AttackMessage, Message, MessageType, MessageUtils, MoveMessage, SyncMessage, SyncPlayer, TickMessage} from "@common/messages";
+import {AttackMessage, Message, MessageType, MessageUtils, MoveMessage, SyncMessage, SyncPlayer} from "@common/messages";
 import {Config} from "@common/config";
 import {ClientPlayer} from "./clientPlayer";
 import {INoise, noise} from "../perlin";
@@ -37,10 +37,9 @@ export class ClientBoard extends Board {
         window.requestAnimationFrame(callback);
     }
 
-    loadBoard(data: SyncMessage, currentTick: number) {
-        this.currentTick = currentTick;
+    loadBoard(data: SyncMessage) {
         for (let playerData of data.players) {
-            let clientPlayer = this.newPlayer(playerData, currentTick);
+            let clientPlayer = this.newPlayer(playerData);
             if (playerData.me) {
                 clientPlayer.me = true;
                 this.me = clientPlayer;
@@ -48,35 +47,26 @@ export class ClientBoard extends Board {
         }
     }
 
-    private newPlayer(playerData: SyncPlayer, currentTick: number) {
+    private newPlayer(playerData: SyncPlayer) {
         let clientPlayer = new ClientPlayer();
         clientPlayer.playerId = playerData.playerId;
         clientPlayer.shipType = playerData.shipType;
-        clientPlayer.x = playerData.x;
-        clientPlayer.y = this.me ? this.me.y : currentTick * Config.verticalMoveSpeed;
-        clientPlayer.moving = playerData.moving;
-        clientPlayer.movingStart = playerData.movingStart;
-        clientPlayer.movingStartX = playerData.movingStartX;
+        clientPlayer.setActions(playerData.actions);
         clientPlayer.playerName = playerData.playerName;
         this.players.push(clientPlayer);
         return clientPlayer;
     }
 
-    updateBoard(data: SyncMessage, currentTick: number) {
-        this.currentTick = currentTick;
+    updateBoard(data: SyncMessage) {
         let missingPlayers: ClientPlayer[] = [...this.players];
         for (let playerData of data.players) {
             let clientPlayer = this.players.find(a => a.playerId === playerData.playerId);
             if (clientPlayer) {
-                clientPlayer.x = playerData.x;
                 clientPlayer.shipType = playerData.shipType;
-                clientPlayer.movingStart = playerData.movingStart;
-                clientPlayer.movingStartX = playerData.movingStartX;
-                // clientPlayer.y = currentTick * Config.verticalMoveSpeed;
-                clientPlayer.moving = playerData.moving;
+                clientPlayer.setActions(playerData.actions);
                 missingPlayers.splice(missingPlayers.findIndex(a => a === clientPlayer), 1);
             } else {
-                this.newPlayer(playerData, currentTick);
+                this.newPlayer(playerData);
             }
         }
         for (let missingPlayer of missingPlayers) {
@@ -85,10 +75,9 @@ export class ClientBoard extends Board {
     }
 
     private clientTick(msDiff: number) {
-        let distanceInTick = Config.ticksPerSecond / (1000 / msDiff);
+        /*let distanceInTick = Config.ticksPerSecond / (1000 / msDiff);
 
-        let y = Math.round(Config.verticalMoveSpeed * distanceInTick);
-        let now = +new Date();
+
 
         for (let player of this.players) {
             player.y += y;
@@ -118,22 +107,24 @@ export class ClientBoard extends Board {
             if (bullet.startY - bullet.y > 1000) {
                 this.bullets.splice(this.bullets.indexOf(bullet), 1)
             }
-        }
+        }*/
 
         GameManager.instance.debugValue("bullets", this.bullets.length);
 
-        this.view.follow(this.me);
     }
 
     processMessage(player: ClientPlayer, message: Message) {
-        this.executeMessage(player, message);
+        console.log('executing message', player.playerName, message);
+        switch (message.type) {
+            case MessageType.Move:
+                player.updateMoving(message.moving, message.time);
+                break;
+            case MessageType.Attack:
+                this.playerAttack(player, message);
+                break;
+        }
     }
 
-    meStartMove(player: Player, direction: PlayerDirection) {
-        player.moving = direction;
-        player.movingStart = +new Date();
-        player.movingStartX = player.x;
-    }
 
     meFireStart(player: Player) {
         player.firingStart = +new Date();
@@ -145,62 +136,24 @@ export class ClientBoard extends Board {
         player.bulletsFired = null;
     }
 
-    meMoveStop(player: Player) {
-        let duration = +new Date() - player.movingStart!;
-        let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / duration));
-        player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-
-
-        player.moving = "none";
-        player.movingStart = null;
-        player.movingStartX = null;
-    }
 
     private playerAttack(player: Player, message: AttackMessage) {
         console.log('processing player attack', message)
-        if (message.duration > 0) {
-            player.firingStart = null;
-            player.bulletsFired = null;
-        } else {
-            player.firingStart = +new Date();
-            player.bulletsFired = 0;
-        }
+        /*
+                if (message.duration > 0) {
+                    player.firingStart = null;
+                    player.bulletsFired = null;
+                } else {
+                    player.firingStart = +new Date();
+                    player.bulletsFired = 0;
+                }
+        */
     }
 
-    private playerMove(player: Player, message: MoveMessage) {
-        console.log('processing player move', message)
-        if (player.moving === "none") {
-            player.movingStartX = player.x;
-            player.moving = message.moving;
-            player.movingStart = +new Date();
-        } else if (message.moving === "none") {
-            // let msDuration = player.movingStart! + message.duration;
-            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
-            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-            player.moving = "none";
-        } else if (message.moving !== player.moving) {
-            // let msDuration = player.movingStart! + message.duration;
-            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
-            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-            player.movingStartX = player.x;
-            player.moving = message.moving;
-            player.movingStart = +new Date();
-        }
-    }
-
-    executeMessage(player: Player, message: Message) {
-        console.log('executing message', player.playerName, message);
-        switch (message.type) {
-            case MessageType.Move:
-                this.playerMove(player, message);
-                break;
-            case MessageType.Attack:
-                this.playerAttack(player, message);
-                break;
-        }
-    }
 
     private draw(msDiff: number) {
+        this.view.follow(this.me);
+
         let context = this.context;
         context.fillStyle = '#000000';
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -232,6 +185,8 @@ export class ClientBoard extends Board {
 
         for (let player of this.players) {
             let ship = AssetManager.assets[player.shipType];
+            GameManager.instance.debugValue(player.playerId + "-x", player.x);
+            GameManager.instance.debugValue(player.playerId + "-y", player.y);
             context.drawImage(ship.image, player.x - ship.size.width / 2, player.y - ship.size.height / 2);
         }
         context.restore();

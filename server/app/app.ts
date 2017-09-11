@@ -1,7 +1,7 @@
 import {Server} from 'ws';
 import {ServerPlayer} from "./serverPlayer";
-import {Message, MessageType, TickMessage} from "@common/messages";
-import {ServerBoard} from "./serverBoard";
+import {Message, MessageType} from "@common/messages";
+import {ServerBoard, ServerTimeUtils} from "./serverBoard";
 import {Config} from "@common/config";
 
 export class ServerApp {
@@ -12,11 +12,10 @@ export class ServerApp {
         this.board.players = [];
         this.board.width = 1000;
         this.board.currentY = 0;
-        this.board.currentTick = 0;
-
+        ServerTimeUtils.start();
         setInterval(() => {
             this.board.tick();
-        }, 1000 / Config.ticksPerSecond);
+        }, 1000 / 10);
 
         const wss = new Server({port: 7898});
         console.log('server open');
@@ -36,8 +35,6 @@ export class ServerApp {
             });
         });
     }
-
-
 
 
 }

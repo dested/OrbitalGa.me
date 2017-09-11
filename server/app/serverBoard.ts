@@ -1,7 +1,6 @@
 import {ServerPlayer} from "./serverPlayer";
+import {AttackMessage, Message, MessageType, MessageUtils, MoveMessage, SyncMessage} from "@common/messages";
 import {Board} from "@common/board";
-import {Config} from "@common/config";
-import {Message, MessageType, MessageUtils, MoveMessage, SyncMessage, TickMessage} from "@common/messages";
 import {Player} from "@common/player";
 
 export class ServerBoard extends Board {
@@ -11,56 +10,30 @@ export class ServerBoard extends Board {
         player.playerId = (Math.random() * 10000000).toFixed();
         player.playerName = playerName;
         player.shipType = this.pickShip();
-        player.x = (Math.random() * this.width) | 0;
+        player.setStartX((Math.random() * this.width) | 0);
         player.health = 100;
-        player.moving = "none";
         player.sendMessage({
             type: MessageType.GameStart,
-            tick: this.currentTick,
-            data: this.buildSyncMessage(player)
+            data: this.buildSyncMessage(player),
+            time: ServerTimeUtils.getNow(),
         });
         this.broadcast({
             type: MessageType.SyncPlayer,
-            tick: this.currentTick,
-            data: this.buildSyncMessage(null)
+            data: this.buildSyncMessage(null),
+            time: ServerTimeUtils.getNow(),
         }, player);
 
     }
 
-    private playerMove(player: Player, message: MoveMessage) {
-        console.log('processing player move', message)
-        if (player.moving === "none") {
-            player.movingStartX = player.x;
-            player.moving = message.moving;
-            player.movingStart = +new Date();
-        } else if (message.moving === "none") {
-            // let msDuration = player.movingStart! + message.duration;
-            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
-            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-            console.log(message.x, player.x, message.duration, distance);
-            player.moving = "none";
-        } else if (message.moving !== player.moving) {
-            // let msDuration = player.movingStart! + message.duration;
-            let distance = Config.horizontalMoveSpeed * (Config.ticksPerSecond / (1000 / message.duration));
-            player.x = player.movingStartX! + (distance * (player.moving === "left" ? -1 : 1));
-            console.log(message.x, player.x, message.duration, distance);
-            player.movingStartX = player.x;
-            player.moving = message.moving;
-            player.movingStart = +new Date();
-        }
-    }
 
-    private playerAttack(player: Player, message: MoveMessage) {
+    private playerAttack(player: Player, message: AttackMessage) {
         console.log('processing player attack', message)
-
         /*
+            server sends client start time
+            all information happens relative to that
+            bullets position and existence are based on creation and duration from start time
 
-        server sends client start time
-        all information happens relative to that
-        bullets position and existence are based on creation and duration from start time
-
-        lerp between reality and start time
-
+            lerp between reality and start time
          */
     }
 
@@ -71,10 +44,10 @@ export class ServerBoard extends Board {
                 this.startPlayer(player, message.playerName);
                 break;
             case MessageType.Move:
-                this.playerMove(player, message);
+                player.updateMoving(message.moving, message.time);
                 break;
             case MessageType.Attack:
-                this.playerMove(player, message);
+                this.playerAttack(player, message);
                 break;
         }
 
@@ -87,14 +60,14 @@ export class ServerBoard extends Board {
     }
 
     tick() {
-        super.tick();
-        if (this.currentTick % Config.ticksPerSecond * 2 === 0) {
-            this.broadcast({
-                type: MessageType.SyncPlayer,
-                tick: this.currentTick,
-                data: this.buildSyncMessage(null)
-            })
-        }
+        /*
+                if (TimeUtils.getNow().time%3000 === 0) {
+                    this.broadcast({
+                        type: MessageType.SyncPlayer,
+                        data: this.buildSyncMessage(null)
+                    })
+                }
+        */
     }
 
     buildSyncMessage(me: ServerPlayer | null): SyncMessage {
@@ -104,10 +77,8 @@ export class ServerBoard extends Board {
                 x: p.x,
                 playerId: p.playerId,
                 shipType: p.shipType,
-                moving: p.moving,
-                movingStart: p.movingStart,
-                movingStartX: p.movingStartX,
                 playerName: p.playerName,
+                actions: p.getActions()
             }))
         }
     }
@@ -128,4 +99,16 @@ export class ServerBoard extends Board {
         }
     }
 
+}
+
+export class ServerTimeUtils {
+    static startTime: number;
+
+    static getNow(): number {
+        return +new Date() - this.startTime;
+    }
+
+    static start() {
+        this.startTime = +new Date();
+    }
 }

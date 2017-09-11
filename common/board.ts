@@ -4,7 +4,6 @@ import {Player} from "./player";
 export abstract class Board {
     width: number;
     currentY: number;
-    currentTick: number;
     players: Player[] = [];
     bullets: Bullet[] = [];
 
@@ -12,9 +11,6 @@ export abstract class Board {
         this.players.splice(this.players.indexOf(player), 1);
     }
 
-    tick() {
-        this.currentTick++;
-    }
 }
 
 export class Bullet {
