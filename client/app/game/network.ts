@@ -8,8 +8,8 @@ export class Network {
 
     connect(onJoin: () => void,
             onMessage: (message: Message) => void) {
-        // this.socket = new WebSocket('ws://localhost:7898');
-        this. socket = new WebSocket('ws://ec2-34-211-236-203.us-west-2.compute.amazonaws.com:7898');
+        this.socket = new WebSocket('ws://localhost:7898');
+        // this. socket = new WebSocket('ws://ec2-34-211-236-203.us-west-2.compute.amazonaws.com:7898');
         this.socket.binaryType = "arraybuffer";
         this.socket.onopen = () => {
             onJoin();
