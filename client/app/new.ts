@@ -1,12 +1,14 @@
 enum ActionType {
     Left = "left",
     Right = "right",
+    Up = "up",
+    Down = "down",
     Shoot = "shoot",
     Bomb = "bomb"
 }
 
 enum ActionSubType {
-    None = "None",
+    None = "none",
     Up = "up",
     Down = "down"
 }
@@ -41,10 +43,10 @@ type ServerMessage = {
 
 export class Socket {
 
-    static ClientLatency = 50;
-    static ServerLatency = 50;
+    static ClientLatency = 1000;
+    static ServerLatency = 1000;
 
-    public static clients: SocketClient[] = [];
+    public static sockets: SocketClient[] = [];
     private static onServerMessage: (clientId: string, message: ServerMessage) => void;
 
     static onClientJoin: (client: SocketClient) => void;
@@ -54,11 +56,11 @@ export class Socket {
             id: (Math.random() * 100000).toFixed(0),
             onMessage: onMessage,
             sendToServer: (message: ServerMessage) => {
-                console.log('send to server', JSON.stringify(message));
+                // console.log('send to server', JSON.stringify(message));
                 this.sendToServer(client.id, message);
             }
         };
-        this.clients.push(client);
+        this.sockets.push(client);
         this.onClientJoin(client);
         return client;
     }
@@ -70,16 +72,16 @@ export class Socket {
 
     static sendToServer(clientId: string, message: ServerMessage) {
         setTimeout(() => {
-            this.onServerMessage(clientId, message);
+            this.onServerMessage(clientId, JSON.parse(JSON.stringify(message)));
         }, this.ServerLatency);
     }
 
     static sendToClient(clientId: string, message: ServerMessage) {
-        let client = this.clients.find(a => a.id === clientId);
-        console.log('send to server', JSON.stringify(message));
+        let client = this.sockets.find(a => a.id === clientId);
+        // console.log('send to server', JSON.stringify(message));
         if (client) {
             setTimeout(() => {
-                client!.onMessage(message);
+                client!.onMessage(JSON.parse(JSON.stringify(message)));
             }, this.ClientLatency);
         }
     }
@@ -124,11 +126,11 @@ export class ClientGame {
         switch (message.messageType) {
             case "start":
                 this.onConnection(message.serverTick);
-                this.setServerState(message.state);
+                this.setServerState(message.state, true);
                 this.entities.find(a => a.id === message.yourEntityId)!.live = true;
                 break;
             case "worldState":
-                this.setServerState(message.state);
+                this.setServerState(message.state, false);
                 break;
             case "action":
                 this.unprocessedActions.push(message.action);
@@ -136,7 +138,7 @@ export class ClientGame {
         }
     }
 
-    private setServerState(state: WorldState) {
+    private setServerState(state: WorldState, initial: boolean) {
         for (let i = 0; i < state.entities.length; i++) {
             let entity = state.entities[i];
             let liveEntity = this.entities.find(a => a.id === entity.id);
@@ -144,11 +146,12 @@ export class ClientGame {
                 liveEntity = new PlayerEntity(entity.id, this);
                 this.entities.push(liveEntity)
             }
-            if (liveEntity.live) {
+            if (!initial && liveEntity.live) {
                 continue;
             }
 
             liveEntity.lastDownAction = entity.lastDownAction;
+            liveEntity.color = entity.color;
             liveEntity.x = entity.x;
             liveEntity.y = entity.y;
         }
@@ -161,7 +164,6 @@ export class ClientGame {
     }
 
     tick(timeSinceLastTick: number) {
-
         for (let i = 0; i < this.unprocessedActions.length; i++) {
             let action = this.unprocessedActions[i];
             let entity = this.entities.find(a => a.id === action.entityId);
@@ -190,22 +192,22 @@ export class ClientGame {
         }
     }
 
-    draw() {
+    draw(context: CanvasRenderingContext2D) {
         for (let i = 0; i < this.entities.length; i++) {
             let entity = this.entities[i];
-            entity.draw();
+            entity.draw(context);
         }
     }
 }
 
 
 export interface WorldState {
-    entities: { x: number, y: number, lastDownAction: { [action: string]: Action }, id: string }[];
+    entities: { x: number, color: string, y: number, lastDownAction: { [action: string]: Action }, id: string }[];
     currentTick: number;
 }
 
 export class PlayerEntity {
-    live: boolean;
+    live: boolean = false;
 
     constructor(public id: string, private game: ClientGame) {
     }
@@ -213,12 +215,18 @@ export class PlayerEntity {
     x: number = 0;
     y: number = 0;
 
-    speedPerSecond: number = 10;
+    speedPerSecond: number = 100;
+    color: string;
 
     pressingLeft = false;
     pressingRight = false;
     wasPressingLeft = false;
     wasPressingRight = false;
+
+    pressingUp = false;
+    pressingDown = false;
+    wasPressingUp = false;
+    wasPressingDown = false;
 
 
     pressLeft() {
@@ -237,22 +245,56 @@ export class PlayerEntity {
         this.pressingRight = false;
     }
 
+    pressUp() {
+        this.pressingUp = true;
+    }
 
-    tick(timeSinceLastTick: number, currentServerTick: number) {
+    pressDown() {
+        this.pressingDown = true;
+    }
+
+    releaseUp() {
+        this.pressingUp = false;
+    }
+
+    releaseDown() {
+        this.pressingDown = false;
+    }
+
+
+    tick(timeSinceLastTick: number, currentServerTick: number, isServer: boolean = false) {
         if (!this.live) {
             if (this.lastDownAction[ActionType.Left]) {
-                let lastLeft = this.lastDownAction[ActionType.Left];
-                this.x -= (currentServerTick - lastLeft.actionTick!) / 1000 * this.speedPerSecond;
-                lastLeft.actionTick = currentServerTick;
-                lastLeft.x = this.x;
-                lastLeft.y = this.y;
+                debugger;
+                let last = this.lastDownAction[ActionType.Left];
+                this.x -= (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+
+                last.actionTick = currentServerTick;
+                last.x = this.x;
+                last.y = this.y;
             }
             if (this.lastDownAction[ActionType.Right]) {
-                let lastRight = this.lastDownAction[ActionType.Right];
-                this.x += (currentServerTick - lastRight.actionTick!) / 1000 * this.speedPerSecond;
-                lastRight.actionTick = currentServerTick;
-                lastRight.x = this.x;
-                lastRight.y = this.y;
+                let last = this.lastDownAction[ActionType.Right];
+                this.x += (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+                last.actionTick = currentServerTick;
+                last.x = this.x;
+                last.y = this.y;
+            }
+
+            if (this.lastDownAction[ActionType.Up]) {
+                let last = this.lastDownAction[ActionType.Up];
+                this.y -= (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+
+                last.actionTick = currentServerTick;
+                last.x = this.x;
+                last.y = this.y;
+            }
+            if (this.lastDownAction[ActionType.Down]) {
+                let last = this.lastDownAction[ActionType.Down];
+                this.y += (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+                last.actionTick = currentServerTick;
+                last.x = this.x;
+                last.y = this.y;
             }
 
         } else {
@@ -268,7 +310,8 @@ export class PlayerEntity {
                     this.wasPressingLeft = true;
                 }
                 this.x -= timeSinceLastTick / 1000 * this.speedPerSecond;
-            } else if (this.pressingRight) {
+            }
+            if (this.pressingRight) {
                 if (!this.wasPressingRight) {
                     this.game.sendAction({
                         actionType: ActionType.Right,
@@ -277,10 +320,38 @@ export class PlayerEntity {
                         y: this.y,
                         entityId: this.id
                     });
-                    this.x += timeSinceLastTick / 1000 * this.speedPerSecond;
                     this.wasPressingRight = true;
                 }
+                this.x += timeSinceLastTick / 1000 * this.speedPerSecond;
             }
+
+            if (this.pressingUp) {
+                if (!this.wasPressingUp) {
+                    this.game.sendAction({
+                        actionType: ActionType.Up,
+                        actionSubType: ActionSubType.Down,
+                        x: this.x,
+                        y: this.y,
+                        entityId: this.id
+                    });
+                    this.wasPressingUp = true;
+                }
+                this.y -= timeSinceLastTick / 1000 * this.speedPerSecond;
+            }
+            if (this.pressingDown) {
+                if (!this.wasPressingDown) {
+                    this.game.sendAction({
+                        actionType: ActionType.Down,
+                        actionSubType: ActionSubType.Down,
+                        x: this.x,
+                        y: this.y,
+                        entityId: this.id
+                    });
+                    this.wasPressingDown = true;
+                }
+                this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
+            }
+
 
             if (!this.pressingLeft) {
                 if (this.wasPressingLeft) {
@@ -293,7 +364,8 @@ export class PlayerEntity {
                     });
                     this.wasPressingLeft = false;
                 }
-            } else if (!this.pressingRight) {
+            }
+            if (!this.pressingRight) {
                 if (this.wasPressingRight) {
                     this.game.sendAction({
                         actionType: ActionType.Right,
@@ -305,6 +377,31 @@ export class PlayerEntity {
                     this.wasPressingRight = false;
                 }
             }
+
+            if (!this.pressingUp) {
+                if (this.wasPressingUp) {
+                    this.game.sendAction({
+                        actionType: ActionType.Up,
+                        actionSubType: ActionSubType.Up,
+                        x: this.x,
+                        y: this.y,
+                        entityId: this.id
+                    });
+                    this.wasPressingUp = false;
+                }
+            }
+            if (!this.pressingDown) {
+                if (this.wasPressingDown) {
+                    this.game.sendAction({
+                        actionType: ActionType.Down,
+                        actionSubType: ActionSubType.Up,
+                        x: this.x,
+                        y: this.y,
+                        entityId: this.id
+                    });
+                    this.wasPressingDown = false;
+                }
+            }
         }
     }
 
@@ -312,12 +409,13 @@ export class PlayerEntity {
     lastDownAction: { [action: string]: Action } = {};
 
 
-    draw() {
-        console.log('client', this.id, this.live, this.x, this.y)
+    draw(context: CanvasRenderingContext2D) {
+        context.fillStyle = this.color;
+        context.fillRect((this.x + 500 * 10) % 500, (this.y + 500 * 10) % 500, 20, 20);
     }
 
 
-    processServerUp(message: Action) {
+    processServerUp(message: Action, isServer: boolean = false) {
         let lastDown = this.lastDownAction[message.actionType];
         switch (message.actionType) {
             case ActionType.Left:
@@ -325,6 +423,12 @@ export class PlayerEntity {
                 break;
             case ActionType.Right:
                 this.x = lastDown.x + (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
+                break;
+            case ActionType.Up:
+                this.y = lastDown.y - (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
+                break;
+            case ActionType.Down:
+                this.y = lastDown.y + (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
                 break;
         }
         delete this.lastDownAction[message.actionType];
@@ -354,26 +458,35 @@ export class Server {
         Socket.createServer((clientId, mesasage) => {
             this.unprocessedMessages.push(mesasage);
         }, (client) => {
-            this.clients.push(new PlayerEntity(client.id, null!));
+            let newClient = new PlayerEntity(client.id, null!);
+            newClient.x = parseInt((Math.random() * 500).toFixed());
+            newClient.y = parseInt((Math.random() * 500).toFixed());
+            newClient.color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+            this.clients.push(newClient);
             Socket.sendToClient(client.id, {
                 messageType: "start",
                 yourEntityId: client.id,
                 serverTick: this.currentTick,
                 state: this.getWorldState()
+            });
+            for (let c = 0; c < this.clients.length; c++) {
+                let client = this.clients[c];
+                if (client !== newClient) {
+                    Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState()})
+                }
+            }
 
-            })
         });
 
         setInterval(() => {
             this.process();
-        }, 5000);
+        }, 100);
     }
 
     lastTick = this.currentTick;
 
     process() {
         let curTick = this.currentTick;
-
         for (let i = 0; i < this.unprocessedMessages.length; i++) {
             const message = this.unprocessedMessages[i];
             if (message.messageType === "action") {
@@ -388,11 +501,10 @@ export class Server {
 
         for (let i = 0; i < this.clients.length; i++) {
             let client = this.clients[i];
-            client.tick(curTick - this.lastTick, curTick);
+            client.tick(curTick - this.lastTick, curTick, true);
         }
         this.lastTick = curTick;
         this.sendWorldState();
-
     }
 
 
@@ -403,7 +515,7 @@ export class Server {
                 break;
             }
             case ActionSubType.Up: {
-                client.processServerUp(message);
+                client.processServerUp(message, true);
                 break;
             }
             case ActionSubType.None: {
@@ -417,6 +529,7 @@ export class Server {
         return {
             entities: this.clients.map(c => ({
                 id: c.id,
+                color: c.color,
                 x: c.x,
                 y: c.y,
                 lastDownAction: c.lastDownAction,
@@ -426,10 +539,17 @@ export class Server {
     }
 
     sendWorldState() {
-        console.log('server, world state', JSON.stringify(this.getWorldState(), null, '\t'))
+        // console.log(JSON.stringify(this.getWorldState()));
         for (let c = 0; c < this.clients.length; c++) {
             let client = this.clients[c];
             Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState()})
+        }
+    }
+
+    draw(context: CanvasRenderingContext2D) {
+        for (let c = 0; c < this.clients.length; c++) {
+            let client = this.clients[c];
+            client.draw(context);
         }
     }
 }
@@ -444,9 +564,24 @@ let server = new Server();
 
 
 let clients: ClientGame[] = [];
-let clientA = new ClientGame();
-clientA.join();
-clients.push(clientA);
+let contexts: CanvasRenderingContext2D[] = [];
+
+for (let i = 0; i < 7; i++) {
+    let client = new ClientGame();
+    client.join();
+    clients.push(client);
+    let canvas = document.createElement("canvas");
+    canvas.style.border = 'solid 2px white';
+    canvas.height = canvas.width = 500;
+    contexts.push(canvas.getContext('2d')!);
+    document.body.appendChild(canvas)
+}
+let canvas = document.createElement("canvas");
+canvas.style.border = 'solid 2px red';
+canvas.height = canvas.width = 500;
+contexts.push(canvas.getContext('2d')!);
+document.body.appendChild(canvas);
+
 
 let lastTick = +new Date();
 setInterval(() => {
@@ -456,18 +591,73 @@ setInterval(() => {
         client.tick(curTick - lastTick)
     }
     lastTick = curTick;
-}, 1000);
+}, 16);
 setInterval(() => {
     for (let i = 0; i < clients.length; i++) {
         let client = clients[i];
-        client.draw()
+        contexts[i].clearRect(0, 0, 500, 500);
+        client.draw(contexts[i]);
     }
-}, 1000);
-setTimeout(() => {
-    clients[0].liveEntity.pressLeft();
-}, 1500);
+    contexts[clients.length].clearRect(0, 0, 500, 500);
+    server.draw(contexts[clients.length]);
+}, 16);
+let clientInd = 0;
+document.onkeydown = (e) => {
+    if (e.ctrlKey) {
+        clientInd = (clientInd + 1) % clients.length;
+    }
+    if (e.keyCode === 38) {
+        clients[clientInd].liveEntity.pressUp();
+    } else if (e.keyCode === 40) {
+        clients[clientInd].liveEntity.pressDown();
+    } else if (e.keyCode === 37) {
+        clients[clientInd].liveEntity.pressLeft();
+    } else if (e.keyCode === 39) {
+        clients[clientInd].liveEntity.pressRight();
+    }
+};
+document.onkeyup = (e) => {
+    if (e.keyCode === 38) {
+        clients[clientInd].liveEntity.releaseUp();
+    } else if (e.keyCode === 40) {
+        clients[clientInd].liveEntity.releaseDown();
+    } else if (e.keyCode === 37) {
+        clients[clientInd].liveEntity.releaseLeft();
+    } else if (e.keyCode === 39) {
+        clients[clientInd].liveEntity.releaseRight();
+    }
+};
 
-setTimeout(() => {
-    clients[0].liveEntity.releaseLeft();
-}, 5700);
+false && setInterval(() => {
+    for (let i = 0; i < clients.length; i++) {
+        let client = clients[i];
+
+        if (Math.random() * 1000 < 50) {
+            if (client.liveEntity.pressingLeft)
+                client.liveEntity.releaseLeft();
+            else
+                client.liveEntity.pressLeft();
+        } else {
+            if (Math.random() * 1000 < 50) {
+                if (client.liveEntity.pressingRight)
+                    client.liveEntity.releaseRight();
+                else
+                    client.liveEntity.pressRight();
+            }
+        }
+        if (Math.random() * 1000 < 50) {
+            if (client.liveEntity.pressingUp)
+                client.liveEntity.releaseUp();
+            else
+                client.liveEntity.pressUp();
+        } else {
+            if (Math.random() * 1000 < 50) {
+                if (client.liveEntity.pressingDown)
+                    client.liveEntity.releaseDown();
+                else
+                    client.liveEntity.pressDown();
+            }
+        }
+    }
+}, 500)
 
