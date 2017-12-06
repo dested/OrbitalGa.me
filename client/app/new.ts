@@ -43,8 +43,8 @@ type ServerMessage = {
 
 export class Socket {
 
-    static ClientLatency = 1000;
-    static ServerLatency = 1000;
+    static ClientLatency = 1000*0;
+    static ServerLatency = 1000*0;
 
     public static sockets: SocketClient[] = [];
     private static onServerMessage: (clientId: string, message: ServerMessage) => void;
@@ -56,7 +56,6 @@ export class Socket {
             id: (Math.random() * 100000).toFixed(0),
             onMessage: onMessage,
             sendToServer: (message: ServerMessage) => {
-                // console.log('send to server', JSON.stringify(message));
                 this.sendToServer(client.id, message);
             }
         };
@@ -71,18 +70,21 @@ export class Socket {
     }
 
     static sendToServer(clientId: string, message: ServerMessage) {
+        let msg = JSON.parse(JSON.stringify(message));
         setTimeout(() => {
-            this.onServerMessage(clientId, JSON.parse(JSON.stringify(message)));
-        }, this.ServerLatency);
+            // console.log('send to server', JSON.stringify(message));
+            this.onServerMessage(clientId, JSON.parse(JSON.stringify(msg)));
+        }, Math.random() * this.ServerLatency);
     }
 
     static sendToClient(clientId: string, message: ServerMessage) {
         let client = this.sockets.find(a => a.id === clientId);
-        // console.log('send to server', JSON.stringify(message));
+        let msg = JSON.parse(JSON.stringify(message));
         if (client) {
             setTimeout(() => {
-                client!.onMessage(JSON.parse(JSON.stringify(message)));
-            }, this.ClientLatency);
+                // console.log('send to client', JSON.stringify(message));
+                client!.onMessage(msg);
+            }, Math.random() * this.ClientLatency);
         }
     }
 }
@@ -126,11 +128,11 @@ export class ClientGame {
         switch (message.messageType) {
             case "start":
                 this.onConnection(message.serverTick);
-                this.setServerState(message.state, true);
+                this.setServerState(message.state);
                 this.entities.find(a => a.id === message.yourEntityId)!.live = true;
                 break;
             case "worldState":
-                this.setServerState(message.state, false);
+                this.setServerState(message.state);
                 break;
             case "action":
                 this.unprocessedActions.push(message.action);
@@ -138,7 +140,7 @@ export class ClientGame {
         }
     }
 
-    private setServerState(state: WorldState, initial: boolean) {
+    private setServerState(state: WorldState) {
         for (let i = 0; i < state.entities.length; i++) {
             let entity = state.entities[i];
             let liveEntity = this.entities.find(a => a.id === entity.id);
@@ -146,14 +148,14 @@ export class ClientGame {
                 liveEntity = new PlayerEntity(entity.id, this);
                 this.entities.push(liveEntity)
             }
-            if (!initial && liveEntity.live) {
-                continue;
-            }
+
 
             liveEntity.lastDownAction = entity.lastDownAction;
             liveEntity.color = entity.color;
-            liveEntity.x = entity.x;
-            liveEntity.y = entity.y;
+            if (state.resync) {
+                liveEntity.x = entity.x;
+                liveEntity.y = entity.y;
+            }
         }
         for (let i = this.entities.length - 1; i >= 0; i--) {
             let liveEntity = this.entities[i];
@@ -204,6 +206,7 @@ export class ClientGame {
 export interface WorldState {
     entities: { x: number, color: string, y: number, lastDownAction: { [action: string]: Action }, id: string }[];
     currentTick: number;
+    resync: boolean;
 }
 
 export class PlayerEntity {
@@ -265,17 +268,15 @@ export class PlayerEntity {
     tick(timeSinceLastTick: number, currentServerTick: number, isServer: boolean = false) {
         if (!this.live) {
             if (this.lastDownAction[ActionType.Left]) {
-                debugger;
                 let last = this.lastDownAction[ActionType.Left];
-                this.x -= (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
-
+                this.x -= timeSinceLastTick / 1000 * this.speedPerSecond;
                 last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
             }
             if (this.lastDownAction[ActionType.Right]) {
                 let last = this.lastDownAction[ActionType.Right];
-                this.x += (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+                this.x += timeSinceLastTick / 1000 * this.speedPerSecond;
                 last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
@@ -283,7 +284,7 @@ export class PlayerEntity {
 
             if (this.lastDownAction[ActionType.Up]) {
                 let last = this.lastDownAction[ActionType.Up];
-                this.y -= (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+                this.y -= timeSinceLastTick / 1000 * this.speedPerSecond;
 
                 last.actionTick = currentServerTick;
                 last.x = this.x;
@@ -291,7 +292,7 @@ export class PlayerEntity {
             }
             if (this.lastDownAction[ActionType.Down]) {
                 let last = this.lastDownAction[ActionType.Down];
-                this.y += (currentServerTick - last.actionTick!) / 1000 * this.speedPerSecond;
+                this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
                 last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
@@ -410,8 +411,13 @@ export class PlayerEntity {
 
 
     draw(context: CanvasRenderingContext2D) {
+        let x = (this.x + 500 * 10) % 500;
+        let y = (this.y + 500 * 10) % 500;
+        context.fillStyle = 'white';
+        context.font = "20px Arial";
+        context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10)
         context.fillStyle = this.color;
-        context.fillRect((this.x + 500 * 10) % 500, (this.y + 500 * 10) % 500, 20, 20);
+        context.fillRect(x, y, 20, 20);
     }
 
 
@@ -419,16 +425,32 @@ export class PlayerEntity {
         let lastDown = this.lastDownAction[message.actionType];
         switch (message.actionType) {
             case ActionType.Left:
-                this.x = lastDown.x - (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
+                if (Math.abs(message.x - this.x) < 2) {
+                    this.x = message.x;
+                } else {
+                    //keep x the same
+                }
                 break;
             case ActionType.Right:
-                this.x = lastDown.x + (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
+                if (Math.abs(message.x - this.x) < 2) {
+                    this.x = message.x;
+                } else {
+                    //keep x the same
+                }
                 break;
             case ActionType.Up:
-                this.y = lastDown.y - (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
+                if (Math.abs(message.y - this.y) < 2) {
+                    this.y = message.y;
+                } else {
+                    //keep y the same
+                }
                 break;
             case ActionType.Down:
-                this.y = lastDown.y + (message.actionTick! - lastDown.actionTick!) / 1000 * this.speedPerSecond;
+                if (Math.abs(message.y - this.y) < 2) {
+                    this.y = message.y;
+                } else {
+                    //keep y the same
+                }
                 break;
         }
         delete this.lastDownAction[message.actionType];
@@ -447,6 +469,9 @@ export class Server {
     private clients: PlayerEntity[] = [];
     private startingTick: number;
     private unprocessedMessages: ServerMessage[] = [];
+    private static resyncInterval: number = 1000;
+
+    private lastResyncTick: number = 0;
 
     get currentTick(): number {
         return +new Date() - this.startingTick;
@@ -467,12 +492,12 @@ export class Server {
                 messageType: "start",
                 yourEntityId: client.id,
                 serverTick: this.currentTick,
-                state: this.getWorldState()
+                state: this.getWorldState(true)
             });
             for (let c = 0; c < this.clients.length; c++) {
                 let client = this.clients[c];
                 if (client !== newClient) {
-                    Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState()})
+                    Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState(true)})
                 }
             }
 
@@ -525,7 +550,7 @@ export class Server {
         }
     }
 
-    getWorldState(): WorldState {
+    getWorldState(resync: boolean): WorldState {
         return {
             entities: this.clients.map(c => ({
                 id: c.id,
@@ -534,15 +559,22 @@ export class Server {
                 y: c.y,
                 lastDownAction: c.lastDownAction,
             })),
-            currentTick: this.currentTick
+            currentTick: this.currentTick,
+            resync: resync
         }
     }
 
     sendWorldState() {
+        let shouldResync = (this.currentTick - this.lastResyncTick) > Server.resyncInterval;
+        shouldResync = false;
+        if (shouldResync) {
+            this.lastResyncTick = this.currentTick;
+        }
+
         // console.log(JSON.stringify(this.getWorldState()));
         for (let c = 0; c < this.clients.length; c++) {
             let client = this.clients[c];
-            Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState()})
+            Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState(shouldResync)})
         }
     }
 
@@ -602,7 +634,12 @@ setInterval(() => {
     server.draw(contexts[clients.length]);
 }, 16);
 let clientInd = 0;
+let runSim = false;
 document.onkeydown = (e) => {
+    if (e.shiftKey) {
+        runSim = !runSim;
+    }
+
     if (e.ctrlKey) {
         clientInd = (clientInd + 1) % clients.length;
     }
@@ -629,6 +666,7 @@ document.onkeyup = (e) => {
 };
 
 false && setInterval(() => {
+    if (!runSim) return;
     for (let i = 0; i < clients.length; i++) {
         let client = clients[i];
 
