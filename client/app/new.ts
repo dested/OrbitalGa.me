@@ -23,7 +23,7 @@ interface Action {
 }
 
 interface SocketClient {
-    messages: string[];
+    lastLatency: number;
     id: string;
     onMessage: (message: ServerMessage) => void;
     sendToServer: (message: ServerMessage) => void;
@@ -42,10 +42,16 @@ type ServerMessage = {
     state: WorldState
 }
 
+export class Utils {
+    static generateId(): string {
+        return (Math.random() * 100000).toFixed(0);
+    }
+}
+
 export class Socket {
 
-    static ClientLatency = 1000;
-    static ServerLatency = 1000;
+    static ClientLatency = 10;
+    static ServerLatency = 10;
 
     public static sockets: SocketClient[] = [];
     private static onServerMessage: (clientId: string, message: ServerMessage) => void;
@@ -54,8 +60,8 @@ export class Socket {
 
     static clientJoin(onMessage: (message: ServerMessage) => void) {
         let client = {
-            id: (Math.random() * 100000).toFixed(0),
-            messages: [],
+            id: Utils.generateId(),
+            lastLatency: 0,
             onMessage: onMessage,
             sendToServer: (message: ServerMessage) => {
                 this.sendToServer(client.id, message);
@@ -77,36 +83,29 @@ export class Socket {
         let msg = JSON.parse(JSON.stringify(message));
 
         if (this.lastLatency > +new Date()) {
-            this.lastLatency = this.lastLatency + Math.random() * this.ServerLatency;
+            this.lastLatency = this.lastLatency + /*Math.random() * */this.ServerLatency;
         } else {
-            this.lastLatency = +new Date() + Math.random() * this.ServerLatency;
+            this.lastLatency = +new Date() + /*Math.random() * */this.ServerLatency;
         }
 
         setTimeout(() => {
             // console.log('send to server', JSON.stringify(message));
-            this.onServerMessage(clientId, JSON.parse(JSON.stringify(msg)));
-        }, +new Date() - this.lastLatency);
+            this.onServerMessage(clientId, msg);
+        }, this.lastLatency - +new Date());
     }
 
     static sendToClient(clientId: string, message: ServerMessage) {
-        let client = this.sockets.find(a => a.id === clientId);
-        let msg = JSON.stringify(message);
-
-        function send() {
-            setTimeout(() => {
-                // console.log('send to client', JSON.stringify(message));
-                if (client!.messages.length > 0) {
-                    client!.onMessage(JSON.parse(client!.messages[0]));
-                    client!.messages.splice(0, 1);
-                    send();
-                }
-            }, Math.random() * Socket.ClientLatency);
-        }
-
+        const client = this.sockets.find(a => a.id === clientId);
+        let msg = JSON.parse(JSON.stringify(message));
         if (client) {
-            client.messages.push(msg);
-            send();
-
+            if (client.lastLatency > +new Date()) {
+                client.lastLatency = client.lastLatency + /*Math.random() * */this.ClientLatency;
+            } else {
+                client.lastLatency = +new Date() + /*Math.random() * */this.ClientLatency;
+            }
+            setTimeout(() => {
+                client.onMessage(msg);
+            }, client.lastLatency - +new Date());
         }
     }
 }
@@ -115,10 +114,11 @@ export class ClientGame {
     private serverTick: number;
     private offsetTick: number;
     socketClient: SocketClient;
-    private entities: PlayerEntity[] = [];
+    private playerEntities: PlayerEntity[] = [];
+    entities: GameEntity[] = [];
 
     get liveEntity(): PlayerEntity {
-        return this.entities.find(a => a.live)!;
+        return this.playerEntities.find(a => a.live)!;
     }
 
     constructor() {
@@ -151,7 +151,7 @@ export class ClientGame {
             case "start":
                 this.onConnection(message.serverTick);
                 this.setServerState(message.state);
-                this.entities.find(a => a.id === message.yourEntityId)!.live = true;
+                this.playerEntities.find(a => a.id === message.yourEntityId)!.live = true;
                 break;
             case "worldState":
                 this.setServerState(message.state);
@@ -165,25 +165,23 @@ export class ClientGame {
     private setServerState(state: WorldState) {
         for (let i = 0; i < state.entities.length; i++) {
             let entity = state.entities[i];
-            let liveEntity = this.entities.find(a => a.id === entity.id);
+            let liveEntity = this.playerEntities.find(a => a.id === entity.id);
             if (!liveEntity) {
                 liveEntity = new PlayerEntity(entity.id, this);
                 liveEntity.x = entity.x;
                 liveEntity.y = entity.y;
-                this.entities.push(liveEntity)
+                this.playerEntities.push(liveEntity)
             }
-
-            liveEntity.lastDownAction = entity.lastDownAction;
             liveEntity.color = entity.color;
             if (state.resync) {
                 liveEntity.x = entity.x;
                 liveEntity.y = entity.y;
             }
         }
-        for (let i = this.entities.length - 1; i >= 0; i--) {
-            let liveEntity = this.entities[i];
+        for (let i = this.playerEntities.length - 1; i >= 0; i--) {
+            let liveEntity = this.playerEntities[i];
             if (!state.entities.find(a => a.id === liveEntity.id)) {
-                this.entities.splice(i, 1);
+                this.playerEntities.splice(i, 1);
             }
         }
     }
@@ -192,7 +190,7 @@ export class ClientGame {
 
         for (let i = 0; i < this.unprocessedActions.length; i++) {
             let action = this.unprocessedActions[i];
-            let entity = this.entities.find(a => a.id === action.entityId);
+            let entity = this.playerEntities.find(a => a.id === action.entityId);
             if (entity) {
                 switch (action.actionSubType) {
                     case ActionSubType.Down: {
@@ -212,6 +210,10 @@ export class ClientGame {
         }
 
         this.unprocessedActions.length = 0;
+        for (let i = 0; i < this.playerEntities.length; i++) {
+            let entity = this.playerEntities[i];
+            entity.tick(timeSinceLastTick, this.currentServerTick);
+        }
         for (let i = 0; i < this.entities.length; i++) {
             let entity = this.entities[i];
             entity.tick(timeSinceLastTick, this.currentServerTick);
@@ -219,18 +221,72 @@ export class ClientGame {
     }
 
     draw(context: CanvasRenderingContext2D) {
+        if (this.liveEntity) {
+            context.fillStyle = 'white';
+            context.fillText(this.liveEntity.id.toString(), 0, 20);
+        }
+        for (let i = 0; i < this.playerEntities.length; i++) {
+            let entity = this.playerEntities[i];
+            entity.draw(context);
+        }
+
         for (let i = 0; i < this.entities.length; i++) {
             let entity = this.entities[i];
             entity.draw(context);
         }
     }
+
+
+    addEntity(entity: GameEntity) {
+        this.entities.push(entity);
+    }
 }
 
-
 export interface WorldState {
-    entities: { x: number, color: string, y: number, lastDownAction: { [action: string]: Action }, id: string }[];
+    entities: { x: number, color: string, y: number, id: string }[];
     currentTick: number;
     resync: boolean;
+}
+
+export abstract class GameEntity {
+    constructor(private game: ClientGame, options: { tickCreated: number; x: number; y: number; ownerId: string }) {
+        this.id = Utils.generateId();
+        this.x = options.x;
+        this.y = options.y;
+        this.ownerId = options.ownerId;
+        this.tickCreated = options.tickCreated;
+    }
+
+    x: number;
+    y: number;
+    id: string;
+    ownerId: string;
+    tickCreated: number;
+
+    protected destroy() {
+        this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
+    }
+
+    abstract tick(timeSinceLastTick: number, currentServerTick: number): void;
+
+    abstract draw(context: CanvasRenderingContext2D): void;
+}
+
+export class ShotEntity extends GameEntity {
+    static shotSpeedPerSecond = 500;
+
+    tick(timeSinceLastTick: number, currentServerTick: number): void {
+        if (currentServerTick - this.tickCreated > 10 * 1000) {
+            this.destroy();
+        } else {
+            this.y -= timeSinceLastTick / 1000 * ShotEntity.shotSpeedPerSecond;
+        }
+    }
+
+    draw(context: CanvasRenderingContext2D) {
+        context.fillStyle = 'yellow';
+        context.fillRect(this.x - 3, this.y - 3, 6, 6);
+    }
 }
 
 export class PlayerEntity {
@@ -250,6 +306,9 @@ export class PlayerEntity {
     wasPressingLeft = false;
     wasPressingRight = false;
 
+    pressingShoot = false;
+    wasPressingShoot = false;
+
     pressingUp = false;
     pressingDown = false;
     wasPressingUp = false;
@@ -257,10 +316,12 @@ export class PlayerEntity {
 
 
     pressLeft() {
+        if (this.pressingRight) return;
         this.pressingLeft = true;
     }
 
     pressRight() {
+        if (this.pressingLeft) return;
         this.pressingRight = true;
     }
 
@@ -273,10 +334,12 @@ export class PlayerEntity {
     }
 
     pressUp() {
+        if (this.pressingDown) return;
         this.pressingUp = true;
     }
 
     pressDown() {
+        if (this.pressingUp) return;
         this.pressingDown = true;
     }
 
@@ -284,45 +347,70 @@ export class PlayerEntity {
         this.pressingUp = false;
     }
 
+
     releaseDown() {
         this.pressingDown = false;
     }
 
+    pressShoot() {
+        this.pressingShoot = true;
+    }
+
+    releaseShoot() {
+        this.pressingShoot = false;
+    }
 
     tick(timeSinceLastTick: number, currentServerTick: number, isServer: boolean = false) {
         if (!this.live) {
-            if (this.lastDownAction[ActionType.Left]) {
-                let last = this.lastDownAction[ActionType.Left];
-                this.x -= timeSinceLastTick / 1000 * this.speedPerSecond;
-                // last.actionTick = currentServerTick;
-                last.x = this.x;
-                last.y = this.y;
+
+            if (this.lastDownAction[ActionType.Shoot]) {
+                let shotEntity = new ShotEntity(this.game, {
+                    tickCreated: currentServerTick,
+                    x: this.x,
+                    y: this.y,
+                    ownerId: this.id
+                });
+                this.game.addEntity(shotEntity)
             }
+
+
+            if (this.lastDownAction[ActionType.Left]) {
+                this.x -= timeSinceLastTick / 1000 * this.speedPerSecond;
+            }
+
             if (this.lastDownAction[ActionType.Right]) {
-                let last = this.lastDownAction[ActionType.Right];
                 this.x += timeSinceLastTick / 1000 * this.speedPerSecond;
-                // last.actionTick = currentServerTick;
-                last.x = this.x;
-                last.y = this.y;
             }
 
             if (this.lastDownAction[ActionType.Up]) {
-                let last = this.lastDownAction[ActionType.Up];
                 this.y -= timeSinceLastTick / 1000 * this.speedPerSecond;
-
-                // last.actionTick = currentServerTick;
-                last.x = this.x;
-                last.y = this.y;
             }
             if (this.lastDownAction[ActionType.Down]) {
-                let last = this.lastDownAction[ActionType.Down];
                 this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
-                // last.actionTick = currentServerTick;
-                last.x = this.x;
-                last.y = this.y;
             }
 
         } else {
+
+            if (this.pressingShoot) {
+                if (!this.wasPressingShoot) {
+                    this.game.sendAction({
+                        actionType: ActionType.Shoot,
+                        actionSubType: ActionSubType.Down,
+                        x: this.x,
+                        y: this.y,
+                        entityId: this.id
+                    });
+                    this.wasPressingShoot = true;
+                }
+                let shotEntity = new ShotEntity(this.game, {
+                    tickCreated: currentServerTick,
+                    x: this.x,
+                    y: this.y,
+                    ownerId: this.id
+                });
+                this.game.addEntity(shotEntity)
+            }
+
             if (this.pressingLeft) {
                 if (!this.wasPressingLeft) {
                     this.game.sendAction({
@@ -375,6 +463,19 @@ export class PlayerEntity {
                     this.wasPressingDown = true;
                 }
                 this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
+            }
+
+            if (!this.pressingShoot) {
+                if (this.wasPressingShoot) {
+                    this.game.sendAction({
+                        actionType: ActionType.Shoot,
+                        actionSubType: ActionSubType.Up,
+                        x: this.x,
+                        y: this.y,
+                        entityId: this.id
+                    });
+                    this.wasPressingShoot = false;
+                }
             }
 
 
@@ -441,34 +542,38 @@ export class PlayerEntity {
         context.font = "20px Arial";
         context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
         context.fillStyle = this.color;
-        context.fillRect(x, y, 20, 20);
+        context.fillRect(x - 10, y - 10, 20, 20);
     }
 
 
-    processServerUp(message: Action, isServer: boolean = false) {
+    processServerUp(message: Action, isServer: boolean = false): boolean {
         let lastDown = this.lastDownAction[message.actionType];
+        if (!lastDown) return false;
+        let tickDiff = message.actionTick! - lastDown.actionTick!;
         switch (message.actionType) {
             case ActionType.Left:
-                this.x = message.x;
+                this.x = lastDown.x - tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Right:
-                this.x = message.x;
+                this.x = lastDown.x + tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Up:
-                this.y = message.y;
+                this.y = lastDown.y - tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Down:
-                this.y = message.y;
+                this.y = lastDown.y + tickDiff / 1000 * this.speedPerSecond;
                 break;
         }
         delete this.lastDownAction[message.actionType];
+        return true;
     }
 
-    processAction(message: Action) {
+    processAction(message: Action): boolean {
         switch (message.actionType) {
             case ActionType.Bomb:
                 break;
         }
+        return true;
     }
 }
 
@@ -480,6 +585,7 @@ export class Server {
     private static resyncInterval: number = 1000;
 
     private lastResyncTick: number = 0;
+    private game: ClientGame;
 
     get currentTick(): number {
         return +new Date() - this.startingTick;
@@ -487,11 +593,11 @@ export class Server {
 
     constructor() {
         this.startingTick = +new Date();
-
-        Socket.createServer((clientId, mesasage) => {
-            this.unprocessedMessages.push(mesasage);
+        this.game = new ClientGame();
+        Socket.createServer((clientId, message) => {
+            this.unprocessedMessages.push(message);
         }, (client) => {
-            let newClient = new PlayerEntity(client.id, null!);
+            let newClient = new PlayerEntity(client.id, this.game);
             newClient.x = parseInt((Math.random() * 500).toFixed());
             newClient.y = parseInt((Math.random() * 500).toFixed());
             newClient.color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
@@ -525,11 +631,10 @@ export class Server {
             if (message.messageType === "action") {
                 const client = this.clients.find(a => a.id === message.action.entityId);
                 if (client) {
-                    this.serverProcessAction(client, message.action);
-                    if (message.action.actionSubType !== ActionSubType.Down) {
+                    if (this.serverProcessAction(client, message.action)) {
                         for (let c = 0; c < this.clients.length; c++) {
                             let otherClient = this.clients[c];
-                            if (client !== otherClient) {
+                            if (client.id !== otherClient.id) {
                                 Socket.sendToClient(otherClient.id, message)
                             }
                         }
@@ -544,24 +649,39 @@ export class Server {
             let client = this.clients[i];
             client.tick(curTick - this.lastTick, curTick, true);
         }
+        for (let i = 0; i < this.game.entities.length; i++) {
+            let entity = this.game.entities[i];
+            entity.tick(curTick - this.lastTick, curTick);
+        }
+
         this.lastTick = curTick;
         this.sendWorldState();
     }
 
 
-    serverProcessAction(client: PlayerEntity, message: Action) {
+    serverProcessAction(client: PlayerEntity, message: Action): boolean {
         switch (message.actionSubType) {
             case ActionSubType.Down: {
+                if (message.actionType === ActionType.Left && client.lastDownAction[ActionType.Right]) {
+                    return false;
+                }
+                if (message.actionType === ActionType.Right && client.lastDownAction[ActionType.Left]) {
+                    return false;
+                }
+                if (message.actionType === ActionType.Down && client.lastDownAction[ActionType.Up]) {
+                    return false;
+                }
+                if (message.actionType === ActionType.Up && client.lastDownAction[ActionType.Down]) {
+                    return false;
+                }
                 client.lastDownAction[message.actionType] = message;
-                break;
+                return true;
             }
             case ActionSubType.Up: {
-                client.processServerUp(message, true);
-                break;
+                return client.processServerUp(message, true);
             }
             case ActionSubType.None: {
-                client.processAction(message);
-                break;
+                return client.processAction(message);
             }
         }
     }
@@ -586,7 +706,6 @@ export class Server {
         if (shouldResync) {
             this.lastResyncTick = this.currentTick;
         }
-        // console.log(JSON.stringify(this.getWorldState()));
         for (let c = 0; c < this.clients.length; c++) {
             let client = this.clients[c];
             Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState(shouldResync)})
@@ -597,6 +716,11 @@ export class Server {
         for (let c = 0; c < this.clients.length; c++) {
             let client = this.clients[c];
             client.draw(context);
+        }
+
+        for (let i = 0; i < this.game.entities.length; i++) {
+            let entity = this.game.entities[i];
+            entity.draw(context);
         }
     }
 }
@@ -613,7 +737,7 @@ let server = new Server();
 let clients: ClientGame[] = [];
 let contexts: CanvasRenderingContext2D[] = [];
 
-for (let i = 0; i < 2; i++) {
+for (let i = 0; i < 7; i++) {
     let client = new ClientGame();
     client.join();
     clients.push(client);
@@ -650,9 +774,23 @@ setInterval(() => {
 }, 16);
 let clientInd = 0;
 let runSim = false;
+
 document.onkeydown = (e) => {
+    if (e.keyCode === 65) {
+        clients[clientInd].liveEntity.pressShoot();
+    }
     if (e.shiftKey) {
         runSim = !runSim;
+        if (!runSim) {
+            for (let i = 0; i < clients.length; i++) {
+                let client = clients[i];
+                client.liveEntity.releaseLeft();
+                client.liveEntity.releaseRight();
+                client.liveEntity.releaseUp();
+                client.liveEntity.releaseDown();
+            }
+
+        }
     }
 
     if (e.ctrlKey) {
@@ -669,6 +807,9 @@ document.onkeydown = (e) => {
     }
 };
 document.onkeyup = (e) => {
+    if (e.keyCode === 65) {
+        clients[clientInd].liveEntity.releaseShoot();
+    }
     if (e.keyCode === 38) {
         clients[clientInd].liveEntity.releaseUp();
     } else if (e.keyCode === 40) {
@@ -714,3 +855,12 @@ setInterval(() => {
     }
 }, 500)
 
+
+/*
+
+collisions
+firing bullets
+firing bombs
+
+
+*/
