@@ -4,6 +4,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "removeComments": false,
+    "allowUnreachableCode": true,
     "strict": true,
     "moduleResolution": "node",
     "target": "es2015",

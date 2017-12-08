@@ -23,6 +23,7 @@ interface Action {
 }
 
 interface SocketClient {
+    messages: string[];
     id: string;
     onMessage: (message: ServerMessage) => void;
     sendToServer: (message: ServerMessage) => void;
@@ -43,8 +44,8 @@ type ServerMessage = {
 
 export class Socket {
 
-    static ClientLatency = 1000*0;
-    static ServerLatency = 1000*0;
+    static ClientLatency = 1000;
+    static ServerLatency = 1000;
 
     public static sockets: SocketClient[] = [];
     private static onServerMessage: (clientId: string, message: ServerMessage) => void;
@@ -54,6 +55,7 @@ export class Socket {
     static clientJoin(onMessage: (message: ServerMessage) => void) {
         let client = {
             id: (Math.random() * 100000).toFixed(0),
+            messages: [],
             onMessage: onMessage,
             sendToServer: (message: ServerMessage) => {
                 this.sendToServer(client.id, message);
@@ -69,22 +71,42 @@ export class Socket {
         this.onClientJoin = onClientJoin;
     }
 
+    private static lastLatency: number;
+
     static sendToServer(clientId: string, message: ServerMessage) {
         let msg = JSON.parse(JSON.stringify(message));
+
+        if (this.lastLatency > +new Date()) {
+            this.lastLatency = this.lastLatency + Math.random() * this.ServerLatency;
+        } else {
+            this.lastLatency = +new Date() + Math.random() * this.ServerLatency;
+        }
+
         setTimeout(() => {
             // console.log('send to server', JSON.stringify(message));
             this.onServerMessage(clientId, JSON.parse(JSON.stringify(msg)));
-        }, Math.random() * this.ServerLatency);
+        }, +new Date() - this.lastLatency);
     }
 
     static sendToClient(clientId: string, message: ServerMessage) {
         let client = this.sockets.find(a => a.id === clientId);
-        let msg = JSON.parse(JSON.stringify(message));
-        if (client) {
+        let msg = JSON.stringify(message);
+
+        function send() {
             setTimeout(() => {
                 // console.log('send to client', JSON.stringify(message));
-                client!.onMessage(msg);
-            }, Math.random() * this.ClientLatency);
+                if (client!.messages.length > 0) {
+                    client!.onMessage(JSON.parse(client!.messages[0]));
+                    client!.messages.splice(0, 1);
+                    send();
+                }
+            }, Math.random() * Socket.ClientLatency);
+        }
+
+        if (client) {
+            client.messages.push(msg);
+            send();
+
         }
     }
 }
@@ -146,9 +168,10 @@ export class ClientGame {
             let liveEntity = this.entities.find(a => a.id === entity.id);
             if (!liveEntity) {
                 liveEntity = new PlayerEntity(entity.id, this);
+                liveEntity.x = entity.x;
+                liveEntity.y = entity.y;
                 this.entities.push(liveEntity)
             }
-
 
             liveEntity.lastDownAction = entity.lastDownAction;
             liveEntity.color = entity.color;
@@ -166,6 +189,7 @@ export class ClientGame {
     }
 
     tick(timeSinceLastTick: number) {
+
         for (let i = 0; i < this.unprocessedActions.length; i++) {
             let action = this.unprocessedActions[i];
             let entity = this.entities.find(a => a.id === action.entityId);
@@ -270,14 +294,14 @@ export class PlayerEntity {
             if (this.lastDownAction[ActionType.Left]) {
                 let last = this.lastDownAction[ActionType.Left];
                 this.x -= timeSinceLastTick / 1000 * this.speedPerSecond;
-                last.actionTick = currentServerTick;
+                // last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
             }
             if (this.lastDownAction[ActionType.Right]) {
                 let last = this.lastDownAction[ActionType.Right];
                 this.x += timeSinceLastTick / 1000 * this.speedPerSecond;
-                last.actionTick = currentServerTick;
+                // last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
             }
@@ -286,14 +310,14 @@ export class PlayerEntity {
                 let last = this.lastDownAction[ActionType.Up];
                 this.y -= timeSinceLastTick / 1000 * this.speedPerSecond;
 
-                last.actionTick = currentServerTick;
+                // last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
             }
             if (this.lastDownAction[ActionType.Down]) {
                 let last = this.lastDownAction[ActionType.Down];
                 this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
-                last.actionTick = currentServerTick;
+                // last.actionTick = currentServerTick;
                 last.x = this.x;
                 last.y = this.y;
             }
@@ -415,7 +439,7 @@ export class PlayerEntity {
         let y = (this.y + 500 * 10) % 500;
         context.fillStyle = 'white';
         context.font = "20px Arial";
-        context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10)
+        context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
         context.fillStyle = this.color;
         context.fillRect(x, y, 20, 20);
     }
@@ -425,32 +449,16 @@ export class PlayerEntity {
         let lastDown = this.lastDownAction[message.actionType];
         switch (message.actionType) {
             case ActionType.Left:
-                if (Math.abs(message.x - this.x) < 2) {
-                    this.x = message.x;
-                } else {
-                    //keep x the same
-                }
+                this.x = message.x;
                 break;
             case ActionType.Right:
-                if (Math.abs(message.x - this.x) < 2) {
-                    this.x = message.x;
-                } else {
-                    //keep x the same
-                }
+                this.x = message.x;
                 break;
             case ActionType.Up:
-                if (Math.abs(message.y - this.y) < 2) {
-                    this.y = message.y;
-                } else {
-                    //keep y the same
-                }
+                this.y = message.y;
                 break;
             case ActionType.Down:
-                if (Math.abs(message.y - this.y) < 2) {
-                    this.y = message.y;
-                } else {
-                    //keep y the same
-                }
+                this.y = message.y;
                 break;
         }
         delete this.lastDownAction[message.actionType];
@@ -518,6 +526,14 @@ export class Server {
                 const client = this.clients.find(a => a.id === message.action.entityId);
                 if (client) {
                     this.serverProcessAction(client, message.action);
+                    if (message.action.actionSubType !== ActionSubType.Down) {
+                        for (let c = 0; c < this.clients.length; c++) {
+                            let otherClient = this.clients[c];
+                            if (client !== otherClient) {
+                                Socket.sendToClient(otherClient.id, message)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -570,7 +586,6 @@ export class Server {
         if (shouldResync) {
             this.lastResyncTick = this.currentTick;
         }
-
         // console.log(JSON.stringify(this.getWorldState()));
         for (let c = 0; c < this.clients.length; c++) {
             let client = this.clients[c];
@@ -598,7 +613,7 @@ let server = new Server();
 let clients: ClientGame[] = [];
 let contexts: CanvasRenderingContext2D[] = [];
 
-for (let i = 0; i < 7; i++) {
+for (let i = 0; i < 2; i++) {
     let client = new ClientGame();
     client.join();
     clients.push(client);
@@ -665,7 +680,7 @@ document.onkeyup = (e) => {
     }
 };
 
-false && setInterval(() => {
+setInterval(() => {
     if (!runSim) return;
     for (let i = 0; i < clients.length; i++) {
         let client = clients[i];
