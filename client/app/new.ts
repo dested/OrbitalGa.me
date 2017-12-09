@@ -16,7 +16,7 @@ enum ActionSubType {
 interface Action {
     actionType: ActionType;
     actionSubType: ActionSubType;
-    actionTick?: number,
+    actionTick: number,
     entityId: string,
     x: number,
     y: number,
@@ -111,14 +111,20 @@ export class Socket {
 }
 
 export class Game {
-    protected serverTick: number;
-    protected offsetTick: number;
+    protected serverTick: number = 0;
+    protected offsetTick: number = +new Date();
+
     public entities: GameEntity[] = [];
 
     public get playerEntities(): PlayerEntity[] {
         return this.entities
             .filter(a => a instanceof PlayerEntity)
             .map(a => a as PlayerEntity);
+    }
+
+    public get nonPlayerEntities(): GameEntity[] {
+        return this.entities
+            .filter(a => !(a instanceof PlayerEntity));
     }
 
     constructor() {
@@ -158,8 +164,6 @@ export class Game {
 export class ServerGame extends Game {
     private lastResyncTick: number;
 
-    serverTick: number = 0;
-    offsetTick: number = +new Date();
 
     tick(timeSinceLastTick: number) {
         for (let i = 0; i < this.unprocessedActions.length; i++) {
@@ -187,15 +191,7 @@ export class ServerGame extends Game {
 
     getWorldState(resync: boolean): WorldState {
         return {
-            entities: this.playerEntities
-                .map(c => ({
-                    id: c.id,
-                    color: c.color,
-                    x: c.x,
-                    y: c.y,
-                    lastDownAction: c.lastDownAction,
-                    type: 'player' as 'player'
-                })),
+            entities: this.entities.map(c => c.serialize()),
             currentTick: this.currentServerTick,
             resync: resync
         }
@@ -236,7 +232,6 @@ export class ClientGame extends Game {
     }
 
     sendAction(action: Action) {
-        action.actionTick = this.currentServerTick;
         this.socketClient.sendToServer({messageType: 'action', action});
     }
 
@@ -286,6 +281,19 @@ export class ClientGame extends Game {
                     (liveEntity as PlayerEntity).color = entity.color;
                     break;
                 }
+                case "shot": {
+                    if (!liveEntity) {
+                        liveEntity = new ShotEntity(this, {
+                            tickCreated: entity.tickCreated,
+                            ownerId: entity.ownerId,
+                            x: entity.x,
+                            y: entity.y
+                        }, entity.initialY);
+                        liveEntity.id = entity.id;
+                        this.entities.push(liveEntity)
+                    }
+                    break;
+                }
             }
             if (liveEntity) {
                 if (state.resync) {
@@ -294,9 +302,10 @@ export class ClientGame extends Game {
                 }
             }
         }
+
         for (let i = this.entities.length - 1; i >= 0; i--) {
             let entity = this.entities[i];
-            if (entity instanceof PlayerEntity && !state.entities.find(a => a.id === entity.id)) {
+            if (!state.entities.find(a => a.id === entity.id)) {
                 this.entities.splice(i, 1);
             }
         }
@@ -317,10 +326,29 @@ export class ClientGame extends Game {
 
 
 export interface WorldState {
-    entities: { lastDownAction: { [action: string]: Action }; x: number, color: string, y: number, id: string, type: 'player' }[];
+    entities: SerializedEntity[];
     currentTick: number;
     resync: boolean;
 }
+
+export type SerializedEntity = ({
+    id: string;
+    x: number;
+    y: number;
+}
+    ) & (
+    {
+        type: 'player';
+        color: string;
+        lastDownAction: { [action: string]: Action };
+    } |
+    {
+        type: 'shot';
+        ownerId: string;
+        tickCreated: number;
+        initialY: number;
+    }
+    )
 
 export abstract class GameEntity {
     constructor(protected game: Game, options: { tickCreated: number; x: number; y: number; ownerId?: string }) {
@@ -337,6 +365,8 @@ export abstract class GameEntity {
     ownerId?: string;
     tickCreated: number;
 
+    abstract serialize(): SerializedEntity;
+
     protected destroy() {
         this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
     }
@@ -349,12 +379,28 @@ export abstract class GameEntity {
 export class ShotEntity extends GameEntity {
     shotSpeedPerSecond = 500;
 
+    constructor(protected game: Game, options: { tickCreated: number; x: number; y: number; ownerId?: string }, private initialY: number) {
+        super(game, options);
+    }
+
     tick(timeSinceLastTick: number, currentServerTick: number): void {
         if (currentServerTick - this.tickCreated > 10 * 1000) {
             this.destroy();
         } else {
-            this.y -= timeSinceLastTick / 1000 * this.shotSpeedPerSecond;
+            this.y = this.initialY - (currentServerTick - this.tickCreated ) / 1000 * this.shotSpeedPerSecond;
         }
+    }
+
+    serialize(): SerializedEntity {
+        return {
+            type: "shot",
+            x: this.x,
+            y: this.y,
+            id: this.id,
+            tickCreated: this.tickCreated,
+            ownerId: this.ownerId!,
+            initialY: this.initialY
+        };
     }
 
     draw(context: CanvasRenderingContext2D) {
@@ -368,15 +414,59 @@ export class PlayerEntity extends GameEntity {
     speedPerSecond: number = 100;
     color: string;
 
-    tick(timeSinceLastTick: number, currentServerTick: number, isServer: boolean = false) {
+    serialize(): SerializedEntity {
+        return {
+            type: "player",
+            x: this.x,
+            y: this.y,
+            id: this.id,
+            lastDownAction: this.lastDownAction,
+            color: this.color
+        };
+    }
+
+    shootEveryTick = 100;
+    lastShotTick = 0;
+
+
+    tick(timeSinceLastTick: number, currentServerTick: number) {
         if (this.lastDownAction[ActionType.Shoot]) {
-            let shotEntity = new ShotEntity(this.game, {
-                tickCreated: currentServerTick,
-                x: this.x,
-                y: this.y,
-                ownerId: this.id
-            });
-            this.game.addEntity(shotEntity)
+            if (this.lastShotTick === 0) {
+                this.lastShotTick = this.lastDownAction[ActionType.Shoot].actionTick + this.lastDownAction[ActionType.Shoot].actionTick % this.shootEveryTick;
+            }
+            for (let shotTick = this.lastShotTick + this.shootEveryTick; shotTick < currentServerTick; shotTick += this.shootEveryTick) {
+
+                let shotX = this.x;
+                let shotY = this.y;
+
+                if (this.lastDownAction[ActionType.Left]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Left].actionTick;
+                    shotX = this.lastDownAction[ActionType.Left].x - tickDiff / 1000 * this.speedPerSecond
+                }
+                else if (this.lastDownAction[ActionType.Right]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Right].actionTick;
+                    shotX = this.lastDownAction[ActionType.Right].x + tickDiff / 1000 * this.speedPerSecond
+                }
+                if (this.lastDownAction[ActionType.Up]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Up].actionTick;
+                    shotY = this.lastDownAction[ActionType.Up].y - tickDiff / 1000 * this.speedPerSecond
+                }
+                else if (this.lastDownAction[ActionType.Down]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Down].actionTick;
+                    shotY = this.lastDownAction[ActionType.Down].y + tickDiff / 1000 * this.speedPerSecond
+                }
+
+                let shotEntity = new ShotEntity(this.game, {
+                    tickCreated: shotTick,
+                    x: shotX,
+                    y: shotY,
+                    ownerId: this.id
+                }, shotY);
+                this.game.addEntity(shotEntity);
+
+                this.lastShotTick = shotTick;
+            }
+
         }
 
 
@@ -413,10 +503,14 @@ export class PlayerEntity extends GameEntity {
     processActionUp(message: Action): boolean {
         let lastDown = this.lastDownAction[message.actionType];
         if (!lastDown) return false;
-        let tickDiff = message.actionTick! - lastDown.actionTick!;
+        let tickDiff = message.actionTick - lastDown.actionTick;
         switch (message.actionType) {
             case ActionType.Left:
                 this.x = lastDown.x - tickDiff / 1000 * this.speedPerSecond;
+                break;
+            case ActionType.Shoot:
+                this.lastShotTick = 0;
+                //todo destroy any unduly created shots
                 break;
             case ActionType.Right:
                 this.x = lastDown.x + tickDiff / 1000 * this.speedPerSecond;
@@ -542,6 +636,7 @@ export class LivePlayerEntity extends PlayerEntity {
         this.pressingShoot = false;
     }
 
+
     tick(timeSinceLastTick: number, currentServerTick: number, isServer: boolean = false) {
         if (this.pressingShoot) {
             if (!this.wasPressingShoot) {
@@ -550,17 +645,47 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Down,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
+                this.lastShotTick = currentServerTick + currentServerTick % this.shootEveryTick;
                 this.wasPressingShoot = true;
             }
-            let shotEntity = new ShotEntity(this.game, {
-                tickCreated: currentServerTick,
-                x: this.x,
-                y: this.y,
-                ownerId: this.id
-            });
-            this.game.addEntity(shotEntity)
+
+
+            for (let shotTick = this.lastShotTick + this.shootEveryTick; shotTick < currentServerTick; shotTick += this.shootEveryTick) {
+
+                let shotX = this.x;
+                let shotY = this.y;
+
+                if (this.lastDownAction[ActionType.Left]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Left].actionTick;
+                    shotX = this.lastDownAction[ActionType.Left].x - tickDiff / 1000 * this.speedPerSecond
+                }
+                else if (this.lastDownAction[ActionType.Right]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Right].actionTick;
+                    shotX = this.lastDownAction[ActionType.Right].x + tickDiff / 1000 * this.speedPerSecond
+                }
+                if (this.lastDownAction[ActionType.Up]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Up].actionTick;
+                    shotY = this.lastDownAction[ActionType.Up].y - tickDiff / 1000 * this.speedPerSecond
+                }
+                else if (this.lastDownAction[ActionType.Down]) {
+                    let tickDiff = shotTick - this.lastDownAction[ActionType.Down].actionTick;
+                    shotY = this.lastDownAction[ActionType.Down].y + tickDiff / 1000 * this.speedPerSecond
+                }
+
+                let shotEntity = new ShotEntity(this.game, {
+                    tickCreated: shotTick,
+                    x: shotX,
+                    y: shotY,
+                    ownerId: this.id
+                }, shotY);
+                this.game.addEntity(shotEntity);
+
+                this.lastShotTick = shotTick;
+            }
+
         }
 
         if (this.pressingLeft) {
@@ -570,7 +695,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Down,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingLeft = true;
             }
@@ -583,7 +709,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Down,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingRight = true;
             }
@@ -597,7 +724,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Down,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingUp = true;
             }
@@ -610,7 +738,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Down,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingDown = true;
             }
@@ -624,7 +753,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Up,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingShoot = false;
             }
@@ -638,7 +768,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Up,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingLeft = false;
             }
@@ -650,7 +781,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Up,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingRight = false;
             }
@@ -663,7 +795,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Up,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingUp = false;
             }
@@ -675,7 +808,8 @@ export class LivePlayerEntity extends PlayerEntity {
                     actionSubType: ActionSubType.Up,
                     x: this.x,
                     y: this.y,
-                    entityId: this.id
+                    entityId: this.id,
+                    actionTick: this.game.currentServerTick
                 });
                 this.wasPressingDown = false;
             }
@@ -748,8 +882,18 @@ canvas.height = canvas.width = 500;
 contexts.push(canvas.getContext('2d')!);
 document.body.appendChild(canvas);
 
+for (let i = 0; i < 2; i++) {
+    let client = new ClientGame();
+    client.join();
+    clients.push(client);
+    let canvas = document.createElement("canvas");
+    canvas.style.border = 'solid 2px white';
+    canvas.height = canvas.width = 500;
+    contexts.push(canvas.getContext('2d')!);
+    document.body.appendChild(canvas)
+}
 
-setInterval(() => {
+false && setInterval(() => {
     let client = new ClientGame();
     client.join();
     clients.push(client);
