@@ -5,6 +5,7 @@
     "emitDecoratorMetadata": true,
     "removeComments": false,
     "allowUnreachableCode": true,
+    "allowJs": true,
     "strict": true,
     "moduleResolution": "node",
     "target": "es2015",

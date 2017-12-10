@@ -1,6 +1,10 @@
-import {LivePlayerEntity, PlayerEntity, ShotEntity} from "../base/entity";
+import {EnemyEntity, LivePlayerEntity, PlayerEntity, ShotEntity} from "../base/entity";
 import {Game} from "../base/game";
-import {Action, ServerMessage, Socket, SocketClient, WorldState} from "../socket";
+import {Socket, SocketClient} from "../socket";
+import {Action, ServerMessage, WorldState} from "../base/types";
+import Collisions from '../utils/src/Collisions';
+
+
 
 export class ClientGame extends Game {
     socketClient: SocketClient;
@@ -49,31 +53,30 @@ export class ClientGame extends Game {
         for (let i = 0; i < state.entities.length; i++) {
             let entity = state.entities[i];
             let liveEntity = this.entities.find(a => a.id === entity.id);
-
             switch (entity.type) {
                 case "player": {
                     if (!liveEntity) {
                         if (myEntityId === entity.id) {
-                            liveEntity = new LivePlayerEntity(this, {tickCreated: 0, x: entity.x, y: entity.y});
+                            liveEntity = new LivePlayerEntity(this, entity);
                         } else {
-                            liveEntity = new PlayerEntity(this, {tickCreated: 0, x: entity.x, y: entity.y});
+                            liveEntity = new PlayerEntity(this, entity);
                         }
-                        liveEntity.id = entity.id;
                         this.entities.push(liveEntity)
                     }
+
                     (liveEntity as PlayerEntity).lastDownAction = entity.lastDownAction;
-                    (liveEntity as PlayerEntity).color = entity.color;
                     break;
                 }
                 case "shot": {
                     if (!liveEntity) {
-                        liveEntity = new ShotEntity(this, {
-                            tickCreated: entity.tickCreated,
-                            ownerId: entity.ownerId,
-                            x: entity.x,
-                            y: entity.y
-                        }, entity.initialY);
-                        liveEntity.id = entity.id;
+                        liveEntity = new ShotEntity(this, entity);
+                        this.entities.push(liveEntity)
+                    }
+                    break;
+                }
+                case "enemy": {
+                    if (!liveEntity) {
+                        liveEntity = new EnemyEntity(this, entity);
                         this.entities.push(liveEntity)
                     }
                     break;

@@ -4,9 +4,7 @@ import {Server} from "./server/server";
 
 export class Start {
     static start() {
-
         let server = new Server();
-
 
         let clients: ClientGame[] = [];
         let contexts: CanvasRenderingContext2D[] = [];

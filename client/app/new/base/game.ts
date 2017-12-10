@@ -1,10 +1,11 @@
 import {GameEntity, PlayerEntity} from "./entity";
-import {Action} from "../socket";
+import {Action} from "./types";
+import Collisions from "../utils/src/Collisions";
 
 export class Game {
     protected serverTick: number = 0;
     protected offsetTick: number = +new Date();
-
+    public collisionEngine: Collisions;
     public entities: GameEntity[] = [];
 
     public get playerEntities(): PlayerEntity[] {
@@ -21,6 +22,7 @@ export class Game {
     // public world:GameWord;
 
     constructor() {
+        this.collisionEngine = new Collisions()
     }
 
     unprocessedActions: Action[] = [];
@@ -45,6 +47,21 @@ export class Game {
             let entity = this.entities[i];
             entity.tick(timeSinceLastTick, this.currentServerTick);
         }
+
+        this.collisionEngine.update();
+
+        for (let i = 0; i < this.entities.length; i++) {
+            let entity = this.entities[i];
+            const potentials = entity.polygon.potentials();
+
+            for (const body of potentials) {
+                if (entity.polygon.collides(body)) {
+                    entity.collide((body as any).entity)
+                }
+            }
+
+        }
+
     }
 
 

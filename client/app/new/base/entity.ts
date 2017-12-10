@@ -1,22 +1,21 @@
 import {Game} from "./game";
-import {Utils} from "../utils";
-import {Action, ActionSubType, ActionType, SerializedEntity} from "../socket";
 import {ClientGame} from "../client/clientGame";
+import {Action, ActionSubType, ActionType, EnemyEntityOptions, EntityOptions, PlayerEntityOptions, SerializedEntity, ShotEntityOptions} from "./types";
+import {Polygon} from "../utils/src/Collisions";
+import {Utils} from "../utils/utils";
 
 export abstract class GameEntity {
-    constructor(protected game: Game, options: { tickCreated: number; x: number; y: number; ownerId?: string }) {
-        this.id = Utils.generateId();
+    polygon: Polygon;
+
+    constructor(protected game: Game, options: EntityOptions) {
+        this.id = options.id;
         this.x = options.x;
         this.y = options.y;
-        this.ownerId = options.ownerId;
-        this.tickCreated = options.tickCreated;
     }
 
     x: number;
     y: number;
     id: string;
-    ownerId?: string;
-    tickCreated: number;
 
     abstract serialize(): SerializedEntity;
 
@@ -26,15 +25,81 @@ export abstract class GameEntity {
 
     abstract tick(timeSinceLastTick: number, currentServerTick: number): void;
 
+    abstract collide(otherEntity: GameEntity): void;
+
     abstract draw(context: CanvasRenderingContext2D): void;
+}
+
+export class EnemyEntity extends GameEntity {
+    private color: string;
+    private health: number;
+
+    constructor(protected game: Game, private options: EnemyEntityOptions) {
+        super(game, options);
+        this.color = options.color;
+        this.health = options.health;
+        this.polygon = new Polygon(this.x, this.y, [[-20, -20], [20, -20], [20, 20], [-20, 20]])
+        this.polygon.entity = this;
+        this.game.collisionEngine.insert(this.polygon);
+
+    }
+
+    tick(timeSinceLastTick: number, currentServerTick: number): void {
+        this.polygon.x = this.x;
+        this.polygon.y = this.y;
+    }
+
+    serialize(): SerializedEntity {
+        return {
+            type: "enemy",
+            x: this.x,
+            y: this.y,
+            id: this.id,
+            color: this.color,
+            health: this.health
+        };
+    }
+
+    collide(otherEntity: GameEntity) {
+
+    }
+
+    draw(context: CanvasRenderingContext2D) {
+        let x = (this.x + 500 * 10) % 500;
+        let y = (this.y + 500 * 10) % 500;
+
+        context.fillStyle = this.color;
+        context.fillRect(x - 20, y - 20, 40, 40);
+    }
+
+    hit(strength: number) {
+        this.health -= strength;
+        if (this.health <= 0) {
+            this.destroy();
+        }
+    }
 }
 
 
 export class ShotEntity extends GameEntity {
-    shotSpeedPerSecond = 500;
+    shotSpeedPerSecond: number;
+    private initialY: number;
+    ownerId?: string;
+    tickCreated: number;
+    private strength: number;
 
-    constructor(protected game: Game, options: { tickCreated: number; x: number; y: number; ownerId?: string }, private initialY: number) {
+    constructor(protected game: Game, options: ShotEntityOptions) {
         super(game, options);
+
+        this.strength = options.strength;
+        this.ownerId = options.ownerId;
+        this.tickCreated = options.tickCreated;
+        this.initialY = options.initialY;
+        this.shotSpeedPerSecond = options.shotSpeedPerSecond;
+        this.polygon = new Polygon(this.x, this.y, [[-3, -3], [3, -3], [3, 3], [-3, 3]])
+        this.polygon.entity = this;
+        this.game.collisionEngine.insert(this.polygon);
+
     }
 
     tick(timeSinceLastTick: number, currentServerTick: number): void {
@@ -43,6 +108,23 @@ export class ShotEntity extends GameEntity {
         } else {
             this.y = this.initialY - (currentServerTick - this.tickCreated) / 1000 * this.shotSpeedPerSecond;
         }
+        /*
+                for (let i = 0; i < this.game.entities.length; i++) {
+                    let ent = this.game.entities[i];
+                    if (ent instanceof PlayerEntity && ent.id !== this.ownerId) {
+                        this.destroy();
+                        break;
+                    } else if (ent instanceof EnemyEntity) {
+                        ent.hit(this.strength);
+                        break;
+                    }
+                }
+        */
+
+    }
+
+    collide(otherEntity: GameEntity) {
+
     }
 
     serialize(): SerializedEntity {
@@ -51,9 +133,11 @@ export class ShotEntity extends GameEntity {
             x: this.x,
             y: this.y,
             id: this.id,
+            strength: this.strength,
             tickCreated: this.tickCreated,
             ownerId: this.ownerId!,
-            initialY: this.initialY
+            initialY: this.initialY,
+            shotSpeedPerSecond: this.shotSpeedPerSecond,
         };
     }
 
@@ -69,8 +153,14 @@ export class ShotEntity extends GameEntity {
 
 export class PlayerEntity extends GameEntity {
 
-    speedPerSecond: number = 100;
-    color: string;
+    lastShotTick = 0;
+    shotSpeedPerSecond = 0;
+
+    protected speedPerSecond: number;
+    protected color: string;
+    protected shotStrength: number;
+    protected shootEveryTick: number;
+    lastDownAction: { [action: string]: Action } = {};
 
     serialize(): SerializedEntity {
         return {
@@ -79,13 +169,30 @@ export class PlayerEntity extends GameEntity {
             y: this.y,
             id: this.id,
             lastDownAction: this.lastDownAction,
-            color: this.color
+            speedPerSecond: this.speedPerSecond,
+            color: this.color,
+            shotStrength: this.shotStrength,
+            shootEveryTick: this.shootEveryTick,
+            shotSpeedPerSecond: this.shotSpeedPerSecond
         };
     }
 
-    shootEveryTick = 100;
-    lastShotTick = 0;
+    constructor(protected game: Game, options: PlayerEntityOptions) {
+        super(game, options);
+        this.shotStrength = options.shotStrength;
+        this.shotSpeedPerSecond = options.shotSpeedPerSecond;
+        this.color = options.color;
+        this.speedPerSecond = options.speedPerSecond;
+        this.shootEveryTick = options.shootEveryTick;
 
+        this.polygon = new Polygon(this.x, this.y, [[-10, -10], [10, -10], [10, 10], [-10, 10]])
+        this.polygon.entity = this;
+        this.game.collisionEngine.insert(this.polygon);
+    }
+
+    collide(otherEntity: GameEntity) {
+
+    }
 
     tick(timeSinceLastTick: number, currentServerTick: number) {
         if (this.lastDownAction[ActionType.Shoot]) {
@@ -111,12 +218,29 @@ export class PlayerEntity extends GameEntity {
                     shotY = this.lastDownAction[ActionType.Down].y + tickDiff / 1000 * this.speedPerSecond
                 }
 
+                console.log({
+                    tickCreated: shotTick,
+                    x: shotX,
+                    y: shotY,
+                    ownerId: this.id,
+                    initialY: shotY,
+                    strength: this.shotStrength,
+                    id: Utils.generateId(),
+                    type: 'shot',
+                    shotSpeedPerSecond: this.shotSpeedPerSecond
+                });
+
                 let shotEntity = new ShotEntity(this.game, {
                     tickCreated: shotTick,
                     x: shotX,
                     y: shotY,
-                    ownerId: this.id
-                }, shotY);
+                    ownerId: this.id,
+                    initialY: shotY,
+                    strength: this.shotStrength,
+                    id: Utils.generateId(),
+                    type: 'shot',
+                    shotSpeedPerSecond: this.shotSpeedPerSecond
+                });
                 this.game.addEntity(shotEntity);
 
                 this.lastShotTick = shotTick;
@@ -140,8 +264,6 @@ export class PlayerEntity extends GameEntity {
             this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
         }
     }
-
-    lastDownAction: { [action: string]: Action } = {};
 
 
     draw(context: CanvasRenderingContext2D) {
@@ -191,8 +313,13 @@ export class PlayerEntity extends GameEntity {
                         tickCreated: shotTick,
                         x: shotX,
                         y: shotY,
-                        ownerId: this.id
-                    }, shotY);
+                        ownerId: this.id,
+                        initialY: shotY,
+                        strength: this.shotStrength,
+                        id: Utils.generateId(),
+                        type: 'shot',
+                        shotSpeedPerSecond: this.shotSpeedPerSecond,
+                    });
                     this.game.addEntity(shotEntity);
                 }
 
@@ -263,7 +390,7 @@ export class PlayerEntity extends GameEntity {
 
 
 export class LivePlayerEntity extends PlayerEntity {
-    constructor(game: ClientGame, options: { tickCreated: number; x: number; y: number; ownerId?: string }) {
+    constructor(game: ClientGame, options: PlayerEntityOptions) {
         super(game, options)
     }
 
@@ -344,7 +471,6 @@ export class LivePlayerEntity extends PlayerEntity {
                 this.wasPressingShoot = true;
             }
 
-
             for (let shotTick = this.lastShotTick + this.shootEveryTick; shotTick < currentServerTick; shotTick += this.shootEveryTick) {
 
                 let shotX = this.x;
@@ -371,8 +497,14 @@ export class LivePlayerEntity extends PlayerEntity {
                     tickCreated: shotTick,
                     x: shotX,
                     y: shotY,
-                    ownerId: this.id
-                }, shotY);
+                    ownerId: this.id,
+                    initialY: shotY,
+                    strength: this.shotStrength,
+                    id: Utils.generateId(),
+                    type: 'shot',
+                    shotSpeedPerSecond: this.shotSpeedPerSecond,
+
+                });
                 this.game.addEntity(shotEntity);
                 this.lastShotTick = shotTick;
             }

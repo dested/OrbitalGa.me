@@ -1,5 +1,8 @@
-import {Socket, WorldState} from "../socket";
 import {Game} from "../base/game";
+import {Socket} from "../socket";
+import {WorldState} from "../base/types";
+import {EnemyEntity} from "../base/entity";
+import {Utils} from "../utils/utils";
 
 export class ServerGame extends Game {
     private lastResyncTick: number;
@@ -22,10 +25,22 @@ export class ServerGame extends Game {
 
         this.unprocessedActions.length = 0;
 
+        if (this.currentServerTick / 10000 > this.nonPlayerEntities.filter(a => a instanceof EnemyEntity).length) {
+            this.addEntity(new EnemyEntity(this, {
+                x: parseInt((Math.random() * 500).toFixed()),
+                y: parseInt((Math.random() * 500).toFixed()),
+                color: 'green',
+                health: 10,
+                type: 'enemy',
+                id: Utils.generateId()
+            }))
+        }
+
         for (let i = 0; i < this.entities.length; i++) {
             let entity = this.entities[i];
             entity.tick(timeSinceLastTick, this.currentServerTick);
         }
+
         this.sendWorldState();
     }
 

@@ -16,13 +16,18 @@ export class Server {
         }, (client) => {
             let newPlayer = new PlayerEntity(this.game,
                 {
-                    tickCreated: this.game.currentServerTick,
+                    type: "player",
                     x: parseInt((Math.random() * 500).toFixed()),
-                    y: parseInt((Math.random() * 500).toFixed())
+                    y: parseInt((Math.random() * 500).toFixed()),
+                    id: client.id,
+                    color: "#" + ((1 << 24) * Math.random() | 0).toString(16),
+                    shootEveryTick: 100,
+                    shotSpeedPerSecond: 500,
+                    lastDownAction: {},
+                    shotStrength: 2,
+                    speedPerSecond: 100
                 }
             );
-            newPlayer.id = client.id;
-            newPlayer.color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
             this.game.entities.push(newPlayer);
             Socket.sendToClient(client.id, {
                 messageType: "start",
