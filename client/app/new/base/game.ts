@@ -1,12 +1,13 @@
 import {GameEntity, PlayerEntity} from "./entity";
 import {Action} from "./types";
-import Collisions from "../utils/src/Collisions";
+import Collisions,{Result} from "../utils/src/Collisions";
 
 export class Game {
     protected serverTick: number = 0;
     protected offsetTick: number = +new Date();
     public collisionEngine: Collisions;
     public entities: GameEntity[] = [];
+    private collisionResult: Result;
 
     public get playerEntities(): PlayerEntity[] {
         return this.entities
@@ -22,7 +23,8 @@ export class Game {
     // public world:GameWord;
 
     constructor() {
-        this.collisionEngine = new Collisions()
+        this.collisionEngine = new Collisions();
+        this.collisionResult = this.collisionEngine.createResult();
     }
 
     unprocessedActions: Action[] = [];
@@ -37,7 +39,7 @@ export class Game {
             let action = this.unprocessedActions[i];
             let entity = this.entities.find(a => a.id === action.entityId) as PlayerEntity;
             if (entity) {
-                entity.handleAction(action);
+                entity.handleAction(action, this.currentServerTick);
             }
         }
 
@@ -46,24 +48,28 @@ export class Game {
         for (let i = 0; i < this.entities.length; i++) {
             let entity = this.entities[i];
             entity.tick(timeSinceLastTick, this.currentServerTick);
+            entity.updatePolygon();
         }
+        this.checkCollisions();
+    }
+
+    protected checkCollisions() {
 
         this.collisionEngine.update();
 
         for (let i = 0; i < this.entities.length; i++) {
             let entity = this.entities[i];
-            const potentials = entity.polygon.potentials();
-
+            const potentials = entity.polygon!.potentials();
             for (const body of potentials) {
-                if (entity.polygon.collides(body)) {
-                    entity.collide((body as any).entity)
+
+                if (entity.polygon && entity.polygon.collides(body, this.collisionResult)) {
+                    if (entity.collide((body as any).entity,this.collisionResult)) {
+                        break;
+                    }
                 }
             }
-
         }
-
     }
-
 
     addEntity(entity: GameEntity) {
         this.entities.push(entity);

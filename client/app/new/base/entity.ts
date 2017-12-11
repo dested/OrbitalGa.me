@@ -3,9 +3,10 @@ import {ClientGame} from "../client/clientGame";
 import {Action, ActionSubType, ActionType, EnemyEntityOptions, EntityOptions, PlayerEntityOptions, SerializedEntity, ShotEntityOptions} from "./types";
 import {Polygon} from "../utils/src/Collisions";
 import {Utils} from "../utils/utils";
+import {Result} from "../utils/src/Collisions";
 
 export abstract class GameEntity {
-    polygon: Polygon;
+    polygon: Polygon | null;
 
     constructor(protected game: Game, options: EntityOptions) {
         this.id = options.id;
@@ -19,34 +20,44 @@ export abstract class GameEntity {
 
     abstract serialize(): SerializedEntity;
 
-    protected destroy() {
+    destroy(): void {
         this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
+        this.game.collisionEngine.remove(this.polygon!);
+        this.polygon = null;
+
     }
 
     abstract tick(timeSinceLastTick: number, currentServerTick: number): void;
 
-    abstract collide(otherEntity: GameEntity): void;
+    abstract collide(otherEntity: GameEntity, collisionResult: Result): boolean;
+
+    updatePolygon(): void {
+        if (!this.polygon) return;
+        this.polygon.x = this.x;
+        this.polygon.y = this.y;
+    }
 
     abstract draw(context: CanvasRenderingContext2D): void;
 }
 
-export class EnemyEntity extends GameEntity {
+export class EnemyEntity extends GameEntity implements ISolidEntity {
     private color: string;
     private health: number;
+    width = 40;
+    height = 40;
+    solid: true = true;
 
     constructor(protected game: Game, private options: EnemyEntityOptions) {
         super(game, options);
         this.color = options.color;
         this.health = options.health;
-        this.polygon = new Polygon(this.x, this.y, [[-20, -20], [20, -20], [20, 20], [-20, 20]])
+        this.polygon = new Polygon(this.x, this.y, [[-this.width / 2, -this.height / 2], [this.width / 2, -this.height / 2], [this.width / 2, this.height / 2], [-this.width / 2, this.height / 2]])
         this.polygon.entity = this;
         this.game.collisionEngine.insert(this.polygon);
 
     }
 
     tick(timeSinceLastTick: number, currentServerTick: number): void {
-        this.polygon.x = this.x;
-        this.polygon.y = this.y;
     }
 
     serialize(): SerializedEntity {
@@ -61,7 +72,10 @@ export class EnemyEntity extends GameEntity {
     }
 
     collide(otherEntity: GameEntity) {
-
+        if (otherEntity instanceof ShotEntity) {
+            return this.hit(otherEntity.strength);
+        }
+        return false;
     }
 
     draw(context: CanvasRenderingContext2D) {
@@ -72,11 +86,13 @@ export class EnemyEntity extends GameEntity {
         context.fillRect(x - 20, y - 20, 40, 40);
     }
 
-    hit(strength: number) {
+    hit(strength: number): boolean {
         this.health -= strength;
         if (this.health <= 0) {
             this.destroy();
+            return true;
         }
+        return false;
     }
 }
 
@@ -86,7 +102,10 @@ export class ShotEntity extends GameEntity {
     private initialY: number;
     ownerId?: string;
     tickCreated: number;
-    private strength: number;
+    strength: number;
+
+    width = 6;
+    height = 6
 
     constructor(protected game: Game, options: ShotEntityOptions) {
         super(game, options);
@@ -96,35 +115,31 @@ export class ShotEntity extends GameEntity {
         this.tickCreated = options.tickCreated;
         this.initialY = options.initialY;
         this.shotSpeedPerSecond = options.shotSpeedPerSecond;
-        this.polygon = new Polygon(this.x, this.y, [[-3, -3], [3, -3], [3, 3], [-3, 3]])
+        this.polygon = new Polygon(this.x, this.y, [[-this.width / 2, -this.height / 2], [this.width / 2, -this.height / 2], [this.width / 2, this.height / 2], [-this.width / 2, this.height / 2]])
         this.polygon.entity = this;
         this.game.collisionEngine.insert(this.polygon);
-
     }
 
     tick(timeSinceLastTick: number, currentServerTick: number): void {
         if (currentServerTick - this.tickCreated > 10 * 1000) {
             this.destroy();
+            return;
         } else {
             this.y = this.initialY - (currentServerTick - this.tickCreated) / 1000 * this.shotSpeedPerSecond;
         }
-        /*
-                for (let i = 0; i < this.game.entities.length; i++) {
-                    let ent = this.game.entities[i];
-                    if (ent instanceof PlayerEntity && ent.id !== this.ownerId) {
-                        this.destroy();
-                        break;
-                    } else if (ent instanceof EnemyEntity) {
-                        ent.hit(this.strength);
-                        break;
-                    }
-                }
-        */
-
     }
 
     collide(otherEntity: GameEntity) {
+        if (otherEntity instanceof EnemyEntity) {
+            this.destroy();
+            return true;
+        }
+        if (otherEntity instanceof PlayerEntity && otherEntity.id != this.ownerId) {
+            this.destroy();
+            return true;
+        }
 
+        return false;
     }
 
     serialize(): SerializedEntity {
@@ -151,10 +166,22 @@ export class ShotEntity extends GameEntity {
     }
 }
 
-export class PlayerEntity extends GameEntity {
+export interface ISolidEntity {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    solid: true;
+}
+
+export class PlayerEntity extends GameEntity implements ISolidEntity {
 
     lastShotTick = 0;
     shotSpeedPerSecond = 0;
+
+    solid: true = true;
+    width: number = 20;
+    height: number = 20;
 
     protected speedPerSecond: number;
     protected color: string;
@@ -185,13 +212,23 @@ export class PlayerEntity extends GameEntity {
         this.speedPerSecond = options.speedPerSecond;
         this.shootEveryTick = options.shootEveryTick;
 
-        this.polygon = new Polygon(this.x, this.y, [[-10, -10], [10, -10], [10, 10], [-10, 10]])
+        this.polygon = new Polygon(this.x, this.y, [[-this.width / 2, -this.height / 2], [this.width / 2, -this.height / 2], [this.width / 2, this.height / 2], [-this.width / 2, this.height / 2]])
         this.polygon.entity = this;
         this.game.collisionEngine.insert(this.polygon);
     }
 
-    collide(otherEntity: GameEntity) {
+    collide(otherEntity: GameEntity, collisionResult: Result) {
 
+        if (otherEntity instanceof ShotEntity && this.id !== otherEntity.ownerId) {
+            otherEntity.destroy();
+            return true;
+        }
+        if (Utils.isSolidEntity(otherEntity)) {
+            this.x -= collisionResult.overlap * collisionResult.overlap_x;
+            this.y -= collisionResult.overlap * collisionResult.overlap_y;
+            this.updatePolygon();
+        }
+        return false;
     }
 
     tick(timeSinceLastTick: number, currentServerTick: number) {
@@ -200,35 +237,6 @@ export class PlayerEntity extends GameEntity {
 
                 let shotX = this.x;
                 let shotY = this.y;
-
-                if (this.lastDownAction[ActionType.Left]) {
-                    let tickDiff = shotTick - this.lastDownAction[ActionType.Left].actionTick;
-                    shotX = this.lastDownAction[ActionType.Left].x - tickDiff / 1000 * this.speedPerSecond
-                }
-                else if (this.lastDownAction[ActionType.Right]) {
-                    let tickDiff = shotTick - this.lastDownAction[ActionType.Right].actionTick;
-                    shotX = this.lastDownAction[ActionType.Right].x + tickDiff / 1000 * this.speedPerSecond
-                }
-                if (this.lastDownAction[ActionType.Up]) {
-                    let tickDiff = shotTick - this.lastDownAction[ActionType.Up].actionTick;
-                    shotY = this.lastDownAction[ActionType.Up].y - tickDiff / 1000 * this.speedPerSecond
-                }
-                else if (this.lastDownAction[ActionType.Down]) {
-                    let tickDiff = shotTick - this.lastDownAction[ActionType.Down].actionTick;
-                    shotY = this.lastDownAction[ActionType.Down].y + tickDiff / 1000 * this.speedPerSecond
-                }
-
-                console.log({
-                    tickCreated: shotTick,
-                    x: shotX,
-                    y: shotY,
-                    ownerId: this.id,
-                    initialY: shotY,
-                    strength: this.shotStrength,
-                    id: Utils.generateId(),
-                    type: 'shot',
-                    shotSpeedPerSecond: this.shotSpeedPerSecond
-                });
 
                 let shotEntity = new ShotEntity(this.game, {
                     tickCreated: shotTick,
@@ -277,37 +285,17 @@ export class PlayerEntity extends GameEntity {
     }
 
 
-    processActionUp(message: Action): boolean {
+    processActionUp(message: Action, currentServerTick: number): boolean {
         let lastDown = this.lastDownAction[message.actionType];
         if (!lastDown) return false;
         let tickDiff = message.actionTick - lastDown.actionTick;
         switch (message.actionType) {
-            case ActionType.Left:
-                this.x = lastDown.x - tickDiff / 1000 * this.speedPerSecond;
-                break;
             case ActionType.Shoot:
 
-                for (let shotTick = this.lastShotTick + this.shootEveryTick; shotTick < this.game.currentServerTick; shotTick += this.shootEveryTick) {
+                for (let shotTick = this.lastShotTick + this.shootEveryTick; shotTick < currentServerTick; shotTick += this.shootEveryTick) {
 
                     let shotX = this.x;
                     let shotY = this.y;
-
-                    if (this.lastDownAction[ActionType.Left]) {
-                        let tickDiff = shotTick - this.lastDownAction[ActionType.Left].actionTick;
-                        shotX = this.lastDownAction[ActionType.Left].x - tickDiff / 1000 * this.speedPerSecond
-                    }
-                    else if (this.lastDownAction[ActionType.Right]) {
-                        let tickDiff = shotTick - this.lastDownAction[ActionType.Right].actionTick;
-                        shotX = this.lastDownAction[ActionType.Right].x + tickDiff / 1000 * this.speedPerSecond
-                    }
-                    if (this.lastDownAction[ActionType.Up]) {
-                        let tickDiff = shotTick - this.lastDownAction[ActionType.Up].actionTick;
-                        shotY = this.lastDownAction[ActionType.Up].y - tickDiff / 1000 * this.speedPerSecond
-                    }
-                    else if (this.lastDownAction[ActionType.Down]) {
-                        let tickDiff = shotTick - this.lastDownAction[ActionType.Down].actionTick;
-                        shotY = this.lastDownAction[ActionType.Down].y + tickDiff / 1000 * this.speedPerSecond
-                    }
 
                     let shotEntity = new ShotEntity(this.game, {
                         tickCreated: shotTick,
@@ -328,21 +316,24 @@ export class PlayerEntity extends GameEntity {
 
                 //todo destroy any unduly created shots
                 break;
+            case ActionType.Left:
+                // this.x = lastDown.x - tickDiff / 1000 * this.speedPerSecond;
+                break;
             case ActionType.Right:
-                this.x = lastDown.x + tickDiff / 1000 * this.speedPerSecond;
+                // this.x = lastDown.x + tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Up:
-                this.y = lastDown.y - tickDiff / 1000 * this.speedPerSecond;
+                // this.y = lastDown.y - tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Down:
-                this.y = lastDown.y + tickDiff / 1000 * this.speedPerSecond;
+                // this.y = lastDown.y + tickDiff / 1000 * this.speedPerSecond;
                 break;
         }
         delete this.lastDownAction[message.actionType];
         return true;
     }
 
-    processActionOther(message: Action): boolean {
+    processActionOther(message: Action, currentServerTick: number): boolean {
         switch (message.actionType) {
             case ActionType.Bomb:
                 this.color = 'red';
@@ -351,7 +342,7 @@ export class PlayerEntity extends GameEntity {
         return true;
     }
 
-    processActionDown(message: Action): boolean {
+    processActionDown(message: Action, currentServerTick: number): boolean {
         if (message.actionType === ActionType.Left && this.lastDownAction[ActionType.Right]) {
             return false;
         }
@@ -371,16 +362,16 @@ export class PlayerEntity extends GameEntity {
         return true;
     }
 
-    handleAction(message: Action): boolean {
+    handleAction(message: Action, currentServerTick: number): boolean {
         switch (message.actionSubType) {
             case ActionSubType.Down: {
-                return this.processActionDown(message)
+                return this.processActionDown(message, currentServerTick)
             }
             case ActionSubType.Up: {
-                return this.processActionUp(message);
+                return this.processActionUp(message, currentServerTick);
             }
             case ActionSubType.Other: {
-                return this.processActionOther(message);
+                return this.processActionOther(message, currentServerTick);
             }
         }
         return false;
@@ -456,7 +447,7 @@ export class LivePlayerEntity extends PlayerEntity {
     }
 
 
-    tick(timeSinceLastTick: number, currentServerTick: number, isServer: boolean = false) {
+    tick(timeSinceLastTick: number, currentServerTick: number) {
         if (this.pressingShoot) {
             if (!this.wasPressingShoot) {
                 this.game.sendAction({
@@ -465,7 +456,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.lastShotTick = currentServerTick + currentServerTick % this.shootEveryTick;
                 this.wasPressingShoot = true;
@@ -518,7 +509,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingLeft = true;
             }
@@ -532,7 +523,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingRight = true;
             }
@@ -547,7 +538,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingUp = true;
             }
@@ -561,7 +552,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingDown = true;
             }
@@ -576,7 +567,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingShoot = false;
             }
@@ -591,7 +582,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingLeft = false;
             }
@@ -604,7 +595,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingRight = false;
             }
@@ -618,7 +609,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingUp = false;
             }
@@ -631,7 +622,7 @@ export class LivePlayerEntity extends PlayerEntity {
                     x: this.x,
                     y: this.y,
                     entityId: this.id,
-                    actionTick: this.game.currentServerTick
+                    actionTick: currentServerTick
                 });
                 this.wasPressingDown = false;
             }

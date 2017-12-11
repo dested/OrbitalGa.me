@@ -9,11 +9,14 @@ export class ServerGame extends Game {
 
 
     tick(timeSinceLastTick: number) {
+        let currentServerTick = this.currentServerTick;
+
+
         for (let i = 0; i < this.unprocessedActions.length; i++) {
             let action = this.unprocessedActions[i];
             let entity = this.playerEntities.find(a => a.id === action.entityId);
             if (entity) {
-                if (entity.handleAction(action)) {
+                if (entity.handleAction(action, currentServerTick)) {
                     for (let otherClient of this.playerEntities) {
                         if (entity.id !== otherClient.id) {
                             Socket.sendToClient(otherClient.id, {action: action, messageType: 'action'})
@@ -25,7 +28,7 @@ export class ServerGame extends Game {
 
         this.unprocessedActions.length = 0;
 
-        if (this.currentServerTick / 10000 > this.nonPlayerEntities.filter(a => a instanceof EnemyEntity).length) {
+        if (currentServerTick / 10000 > this.nonPlayerEntities.filter(a => a instanceof EnemyEntity).length) {
             this.addEntity(new EnemyEntity(this, {
                 x: parseInt((Math.random() * 500).toFixed()),
                 y: parseInt((Math.random() * 500).toFixed()),
@@ -36,9 +39,14 @@ export class ServerGame extends Game {
             }))
         }
 
-        for (let i = 0; i < this.entities.length; i++) {
-            let entity = this.entities[i];
-            entity.tick(timeSinceLastTick, this.currentServerTick);
+        let tickSplit = timeSinceLastTick / 5;
+        for (let t = tickSplit; t <= timeSinceLastTick; t += tickSplit) {
+            for (let i = 0; i < this.entities.length; i++) {
+                let entity = this.entities[i];
+                entity.tick(tickSplit, currentServerTick - timeSinceLastTick + t);
+                entity.updatePolygon();
+            }
+            this.checkCollisions();
         }
 
         this.sendWorldState();
@@ -70,4 +78,5 @@ export class ServerGame extends Game {
             entity.draw(context);
         }
     }
+
 }
