@@ -33,6 +33,8 @@ export abstract class GameEntity {
 
     updatePolygon(): void {
         if (!this.polygon) return;
+        this.x = Utils.round(this.x, 1)
+        this.y = Utils.round(this.y, 1)
         this.polygon.x = this.x;
         this.polygon.y = this.y;
     }
@@ -259,17 +261,21 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
 
         if (this.lastDownAction[ActionType.Left]) {
             this.x -= timeSinceLastTick / 1000 * this.speedPerSecond;
+            this.lastDownAction[ActionType.Left].actionTick = currentServerTick;
         }
 
         if (this.lastDownAction[ActionType.Right]) {
             this.x += timeSinceLastTick / 1000 * this.speedPerSecond;
+            this.lastDownAction[ActionType.Right].actionTick = currentServerTick;
         }
 
         if (this.lastDownAction[ActionType.Up]) {
             this.y -= timeSinceLastTick / 1000 * this.speedPerSecond;
+            this.lastDownAction[ActionType.Up].actionTick = currentServerTick;
         }
         if (this.lastDownAction[ActionType.Down]) {
             this.y += timeSinceLastTick / 1000 * this.speedPerSecond;
+            this.lastDownAction[ActionType.Down].actionTick = currentServerTick;
         }
     }
 
@@ -288,7 +294,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     processActionUp(message: Action, currentServerTick: number): boolean {
         let lastDown = this.lastDownAction[message.actionType];
         if (!lastDown) return false;
-        let tickDiff = message.actionTick - lastDown.actionTick;
+        let tickDiff = currentServerTick - lastDown.actionTick;
         switch (message.actionType) {
             case ActionType.Shoot:
 
@@ -317,16 +323,17 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
                 //todo destroy any unduly created shots
                 break;
             case ActionType.Left:
-                // this.x = lastDown.x - tickDiff / 1000 * this.speedPerSecond;
+                console.log(this.x, tickDiff / 1000 * this.speedPerSecond, this.x - tickDiff / 1000 * this.speedPerSecond, message.x)
+                this.x -= tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Right:
-                // this.x = lastDown.x + tickDiff / 1000 * this.speedPerSecond;
+                this.x += tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Up:
-                // this.y = lastDown.y - tickDiff / 1000 * this.speedPerSecond;
+                this.y -= tickDiff / 1000 * this.speedPerSecond;
                 break;
             case ActionType.Down:
-                // this.y = lastDown.y + tickDiff / 1000 * this.speedPerSecond;
+                this.y += tickDiff / 1000 * this.speedPerSecond;
                 break;
         }
         delete this.lastDownAction[message.actionType];
