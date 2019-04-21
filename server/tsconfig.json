@@ -5,6 +5,8 @@
     "emitDecoratorMetadata": true,
     "removeComments": false,
     "strict": true,
+    "strictNullChecks": false,
+    "noEmit": true,
     "target": "es2015",
     "lib": [
       "dom",

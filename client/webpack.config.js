@@ -14,9 +14,25 @@ module.exports = {
         }
     },
     module: {
-        loaders: [ // loaders will work with webpack 1 or 2; but will be renamed "rules" in future
-            // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-            {test: /\.tsx?$/, loader: 'ts-loader'}
-        ]
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                options: {
+                    compilerOptions: {noEmit: false}
+                }
+            },
+            {
+                test: /\.less$/,
+                loader: 'less-loader' // compiles Less to CSS
+            },
+            {
+                test: /\.css$/,
+                loader: 'style-loader!css-loader'
+            },
+            {
+                test: /\.(gif|svg|jpg|png)$/,
+                loader: 'file-loader'
+            }]
     }
 };

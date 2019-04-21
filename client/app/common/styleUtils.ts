@@ -1,1 +1,1 @@
-export let flex: { display: 'flex' } = {display: 'flex'};
+export let flex: {display: 'flex'} = {display: 'flex'};

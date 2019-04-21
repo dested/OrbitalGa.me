@@ -4,23 +4,31 @@
   "author": "Salvatore <dested@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack & node dist/bundle.js",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "build-dev": "cross-env NODE_ENV=development webpack"
+    "lint": "npx tslint -p tsconfig.json --fix",
+    "dev": "webpack --mode=development --progress --hide-modules & node dist/bundle.js",
+    "build-dev": "webpack --mode=development --progress --hide-modules ",
+    "build": "webpack  --mode=production --progress --hide-modules "
   },
   "dependencies": {
-    "ws": "^3.1.0"
+    "ws": "^6.2.1"
   },
   "devDependencies": {
-    "@types/node": "^8.0.28",
-    "@types/ws": "^3.0.2",
-    "node-hot-loader": "^0.3.10",
-    "ts-loader": "^2.3.6",
-    "typescript": "^2.5.2",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "@types/node": "^11.13.6",
+    "@types/ws": "^6.0.1",
+    "node-hot-loader": "^1.12.3",
+    "ts-loader": "^5.3.3",
+    "prettier": "^1.16.3",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.4.4",
+    "webpack-cli": "^3.0.8",
+    "webpack": "^4.30.0",
+    "webpack-dev-server": "^3.3.1"
   },
   "optionalDependencies": {
-    "bufferutil": "^3.0.2"
+    "bufferutil": "^4.0.1"
   }
 }

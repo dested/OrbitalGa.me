@@ -1,23 +1,15 @@
 {
-  "name": "orbital-crash",
+  "name": "orbital-crash-common",
   "version": "1.0.0",
   "author": "Salvatore <dested@gmail.com>",
   "private": true,
   "scripts": {
-    "lint": "npx tslint -p ./tsconfig.json --fix",
-    "dev": "webpack-dev-server --mode=development --progress --hide-modules --watch",
-    "prod": "webpack  --mode=production --progress --hide-modules "
+    "lint": "npx tslint -p ./tsconfig.json --fix"
   },
   "dependencies": {
-    "collisions": "^2.0.13",
-    "glamor": "^2.20.40",
-    "glamorous": "^4.8.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "collisions": "^2.0.13"
   },
   "devDependencies": {
-    "@types/react": "^16.8.14",
-    "@types/react-dom": "^16.8.4",
     "ts-loader": "^5.3.3",
     "typescript": "^3.4.4",
     "prettier": "^1.16.3",

@@ -1,21 +1,26 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
+    "noEmitOnError": false,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "removeComments": false,
     "allowUnreachableCode": true,
-    "allowJs": true,
     "strict": true,
-    "moduleResolution": "node",
     "target": "es2015",
     "lib": [
+      "esnext",
       "dom",
-      "es2015",
+      "es2017",
       "esnext.asynciterable"
     ],
-    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "commonjs",
     "inlineSourceMap": true,
+    "strictNullChecks": false,
+    "pretty": true,
+    "noEmit": true,
+    "moduleResolution": "node",
+    "strictPropertyInitialization": false,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "baseUrl": "./",
     "jsx": "react",
     "paths": {
@@ -25,6 +30,7 @@
     }
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

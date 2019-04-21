@@ -1,5 +1,3 @@
-export class LightShooter{
-    shoot(){
-
-    }
+export class LightShooter {
+  shoot() {}
 }

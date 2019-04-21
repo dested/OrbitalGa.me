@@ -1,7 +1,5 @@
-import {Player} from "@common/player";
+import {Player} from '@common/player';
 
-export class ClientPlayer extends Player{
-    me: boolean;
-
-
+export class ClientPlayer extends Player {
+  me: boolean;
 }
