@@ -1,3 +1,4 @@
+import {Game} from './base/game';
 import {ClientGame} from './client/clientGame';
 import {Server} from './server/server';
 
@@ -14,7 +15,7 @@ export class Start {
     contexts.push(canvas.getContext('2d')!);
     document.body.appendChild(canvas);
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       const client = new ClientGame();
       client.join();
       clients.push(client);
@@ -25,7 +26,7 @@ export class Start {
       document.body.appendChild(clientCanvas);
     }
 
-    false &&
+    /*    
       setInterval(() => {
         const client = new ClientGame();
         client.join();
@@ -35,9 +36,7 @@ export class Start {
         clientCanvas.height = clientCanvas.width = 500;
         contexts.push(clientCanvas.getContext('2d')!);
         document.body.appendChild(clientCanvas);
-      }, Math.random() * 5000 + 1000);
-
-    let lastTick = +new Date();
+      }, Math.random() * 5000 + 1000)*/ let lastTick = +new Date();
     setInterval(() => {
       const curTick = +new Date();
       for (const client of clients) {
@@ -47,12 +46,10 @@ export class Start {
     }, 16);
 
     setInterval(() => {
-      const curTick = +new Date();
       for (const client of clients) {
         client.lockTick();
       }
-      lastTick = curTick;
-    }, 100);
+    }, Game.tickRate);
 
     setInterval(() => {
       contexts[0].clearRect(0, 0, 500, 500);

@@ -1,4 +1,6 @@
 import {PlayerEntity} from '../base/entities/playerEntity';
+import {Game} from '../base/game';
+import {Action} from '../base/types';
 import {Socket} from '../socket';
 import {ServerGame} from './serverGame';
 
@@ -22,7 +24,7 @@ export class Server {
           color: '#' + (((1 << 24) * Math.random()) | 0).toString(16),
           shootEveryTick: 100,
           shotSpeedPerSecond: 500,
-          lastDownAction: {},
+          bufferedActions: [],
           shotStrength: 2,
           speedPerSecond: 100,
         });
@@ -30,7 +32,7 @@ export class Server {
         Socket.sendToClient(client.id, {
           messageType: 'start',
           yourEntityId: client.id,
-          serverTick: this.game.currentServerTick,
+          serverTick: this.game.serverTick,
           state: this.game.getWorldState(true),
         });
 
@@ -43,10 +45,8 @@ export class Server {
     );
 
     setInterval(() => {
-      const curTick = +new Date();
-      this.game.tick(curTick - this.lastTick);
-      this.lastTick = curTick;
-    }, 100);
+      this.game.lockTick();
+    }, Game.tickRate);
   }
 
   lastTick = +new Date();

@@ -1,5 +1,6 @@
 import {ClientGame} from '../../client/clientGame';
 import {Utils} from '../../utils/utils';
+import {Game} from '../game';
 import {ActionType, PlayerEntityOptions} from '../types';
 import {PlayerEntity} from './playerEntity';
 import {ShotEntity} from './shotEntity';
@@ -7,7 +8,12 @@ import {ShotEntity} from './shotEntity';
 export class LivePlayerEntity extends PlayerEntity {
   constructor(game: ClientGame, options: PlayerEntityOptions) {
     super(game, options);
+    this.serverX = this.x;
+    this.serverY = this.y;
   }
+
+  serverX: number;
+  serverY: number;
 
   game: ClientGame;
 
@@ -71,40 +77,27 @@ export class LivePlayerEntity extends PlayerEntity {
     this.pressingShoot = false;
   }
 
-  lockPressingShoot = false;
-  lockPressingLeft = false;
-  lockPressingRight = false;
-  lockPressingUp = false;
-  lockPressingDown = false;
-
-  tick(timeSinceLastTick: number, currentServerTick: number) {
-    if (this.lockPressingLeft) {
-      this.x -= (timeSinceLastTick / 1000) * this.speedPerSecond;
+  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number) {
+    const [actionSub2, actionSub1] = this.bufferedActions.slice(-2);
+    if (!actionSub1) {
+      return;
     }
-    if (this.lockPressingRight) {
-      this.x += (timeSinceLastTick / 1000) * this.speedPerSecond;
-    }
-
-    if (this.lockPressingUp) {
-      this.y -= (timeSinceLastTick / 1000) * this.speedPerSecond;
-    }
-    if (this.lockPressingDown) {
-      this.y += (timeSinceLastTick / 1000) * this.speedPerSecond;
-    }
+    /*
+    console.log(
+      actionSub1.x,
+      actionSub2.x,
+      (actionSub1.x - actionSub2.x) / Game.tickRate,
+      ((actionSub1.x - actionSub2.x) / Game.tickRate) * timeSinceLastTick,
+      actionSub2.x + ((actionSub1.x - actionSub2.x) / Game.tickRate) * timeSinceLastTick
+    );
+*/
+    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / Game.tickRate);
+    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / Game.tickRate);
   }
 
-  lockTick(currentServerTick: number): void {
+  serverTick(currentServerTick: number): void {
     if (this.pressingShoot) {
       const id = Utils.generateId();
-      this.game.sendAction({
-        actionType: ActionType.Shoot,
-        id,
-        x: this.x,
-        y: this.y,
-        entityId: this.id,
-        actionTick: currentServerTick,
-      });
-
       const shotEntity = new ShotEntity(this.game, {
         tickCreated: currentServerTick,
         x: this.x,
@@ -118,48 +111,47 @@ export class LivePlayerEntity extends PlayerEntity {
       this.game.addEntity(shotEntity);
     }
 
+    const controls = {
+      left: false,
+      right: false,
+      down: false,
+      up: false,
+      shoot: false,
+    };
+
     if (this.pressingLeft) {
-      this.game.sendAction({
-        actionType: ActionType.Left,
-        x: this.x,
-        y: this.y,
-        entityId: this.id,
-        actionTick: currentServerTick,
-      });
+      controls.left = true;
     }
     if (this.pressingRight) {
-      this.game.sendAction({
-        actionType: ActionType.Right,
-        x: this.x,
-        y: this.y,
-        entityId: this.id,
-        actionTick: currentServerTick,
-      });
+      controls.right = true;
     }
-
     if (this.pressingUp) {
-      this.game.sendAction({
-        actionType: ActionType.Up,
-        x: this.x,
-        y: this.y,
-        entityId: this.id,
-        actionTick: currentServerTick,
-      });
+      controls.up = true;
     }
     if (this.pressingDown) {
-      this.game.sendAction({
-        actionType: ActionType.Down,
-        x: this.x,
-        y: this.y,
-        entityId: this.id,
-        actionTick: currentServerTick,
-      });
+      controls.down = true;
+    }
+    if (this.pressingShoot) {
+      controls.shoot = true;
     }
 
-    this.lockPressingShoot = this.pressingShoot;
-    this.lockPressingLeft = this.pressingLeft;
-    this.lockPressingRight = this.pressingRight;
-    this.lockPressingUp = this.pressingUp;
-    this.lockPressingDown = this.pressingDown;
+    this.game.sendAction({
+      controls,
+      x: this.serverX,
+      y: this.serverY,
+      entityId: this.id,
+      actionTick: currentServerTick,
+    });
+    const action = {
+      controls,
+      x: this.serverX,
+      y: this.serverY,
+      entityId: this.id,
+      actionTick: currentServerTick,
+    };
+    this.processAction(action);
+    this.addAction(action);
+    this.serverX = action.x;
+    this.serverY = action.y;
   }
 }

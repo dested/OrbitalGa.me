@@ -12,7 +12,7 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
   height = 40;
   solid: true = true;
 
-  lockTick(currentServerTick: number): void {}
+  serverTick(currentServerTick: number): void {}
 
   constructor(protected game: Game, private options: EnemyEntityOptions) {
     super(game, options);
@@ -28,7 +28,7 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  tick(timeSinceLastTick: number, currentServerTick: number): void {}
+  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void {}
 
   serialize(): SerializedEntity {
     return {

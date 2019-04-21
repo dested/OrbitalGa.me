@@ -6,7 +6,7 @@ import {EntityOptions, SerializedEntity} from '../types';
 export abstract class GameEntity {
   polygon: Polygon | null;
 
-  constructor(protected game: Game, options: EntityOptions) {
+  protected constructor(protected game: Game, options: EntityOptions) {
     this.id = options.id;
     this.x = options.x;
     this.y = options.y;
@@ -24,9 +24,9 @@ export abstract class GameEntity {
     this.polygon = null;
   }
 
-  abstract tick(timeSinceLastTick: number, currentServerTick: number): void;
+  abstract tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void;
 
-  abstract lockTick(currentServerTick: number): void;
+  abstract serverTick(serverTick: number): void;
 
   abstract collide(otherEntity: GameEntity, collisionResult: Result): boolean;
 

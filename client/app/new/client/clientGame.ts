@@ -14,9 +14,12 @@ export class ClientGame extends Game {
   }
 
   unprocessedActions: Action[] = [];
+  protected lastServerTick: number = 0;
+  protected serverTick: number = 0;
+  protected offsetTick: number = +new Date();
 
   get currentServerTick() {
-    return this.serverTick + (+new Date() - this.offsetTick);
+    return this.serverTick + Math.floor((+new Date() - this.offsetTick) / Game.tickRate);
   }
 
   sendAction(action: Action) {
@@ -32,6 +35,22 @@ export class ClientGame extends Game {
     this.socketClient = Socket.clientJoin(message => {
       this.onServerMessage(message);
     });
+  }
+
+  tick(timeSinceLastTick: number) {
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
+      entity.tick(timeSinceLastTick, +new Date() - this.lastServerTick, this.currentServerTick);
+      entity.updatePolygon();
+    }
+    this.checkCollisions();
+  }
+
+  lockTick() {
+    if (this.liveEntity) {
+      this.liveEntity.serverTick(this.currentServerTick);
+    }
+    this.lastServerTick = +new Date();
   }
 
   private onServerMessage(message: ServerMessage) {
@@ -50,41 +69,46 @@ export class ClientGame extends Game {
   }
 
   private setServerState(state: WorldState, myEntityId?: string) {
-    for (const entity of state.entities) {
-      let liveEntity = this.entities.find(a => a.id === entity.id);
-      switch (entity.type) {
+    this.serverTick = state.serverTick;
+    this.offsetTick = +new Date();
+    for (const stateEntity of state.entities) {
+      let entity = this.entities.find(a => a.id === stateEntity.id);
+      switch (stateEntity.type) {
         case 'player': {
-          if (!liveEntity) {
-            if (myEntityId === entity.id) {
-              liveEntity = new LivePlayerEntity(this, entity);
+          if (!entity) {
+            if (myEntityId === stateEntity.id) {
+              entity = new LivePlayerEntity(this, stateEntity);
             } else {
-              liveEntity = new PlayerEntity(this, entity);
+              entity = new PlayerEntity(this, stateEntity);
             }
-            this.entities.push(liveEntity);
+            this.entities.push(entity);
           }
-
-          (liveEntity as PlayerEntity).lastDownAction = entity.lastDownAction;
+          // todo if live then interpolate
+          if (entity instanceof LivePlayerEntity) {
+          } else {
+            (entity as PlayerEntity).bufferedActions = stateEntity.bufferedActions;
+          }
           break;
         }
         case 'shot': {
-          if (!liveEntity) {
-            liveEntity = new ShotEntity(this, entity);
-            this.entities.push(liveEntity);
+          if (!entity) {
+            entity = new ShotEntity(this, stateEntity);
+            this.entities.push(entity);
           }
           break;
         }
         case 'enemy': {
-          if (!liveEntity) {
-            liveEntity = new EnemyEntity(this, entity);
-            this.entities.push(liveEntity);
+          if (!entity) {
+            entity = new EnemyEntity(this, stateEntity);
+            this.entities.push(entity);
           }
           break;
         }
       }
-      if (liveEntity) {
+      if (entity) {
         if (state.resync) {
-          liveEntity.x = entity.x;
-          liveEntity.y = entity.y;
+          entity.x = stateEntity.x;
+          entity.y = stateEntity.y;
         }
       }
     }
@@ -102,7 +126,7 @@ export class ClientGame extends Game {
     context.fillStyle = 'white';
     if (this.liveEntity) {
       context.fillText(this.liveEntity.id.toString(), 0, 20);
-      context.fillText((Math.round(this.currentServerTick / 100) * 100).toFixed(0), 400, 20);
+      context.fillText(this.currentServerTick.toString(), 400, 20);
     }
     for (const entity of this.entities) {
       entity.draw(context);

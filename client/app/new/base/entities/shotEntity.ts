@@ -31,9 +31,9 @@ export class ShotEntity extends GameEntity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  lockTick(currentServerTick: number): void {}
+  serverTick(currentServerTick: number): void {}
 
-  tick(timeSinceLastTick: number, currentServerTick: number): void {
+  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void {
     if (currentServerTick - this.tickCreated > 10 * 1000) {
       this.destroy();
       return;

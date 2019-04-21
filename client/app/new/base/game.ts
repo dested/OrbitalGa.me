@@ -7,8 +7,8 @@ import {PlayerEntity} from './entities/playerEntity';
 import {Action} from './types';
 
 export class Game {
-  protected serverTick: number = 0;
-  protected offsetTick: number = +new Date();
+  static tickRate = 50;
+
   collisionEngine: Collisions;
   entities: GameEntity[] = [];
   private readonly collisionResult: Result;
@@ -26,44 +26,6 @@ export class Game {
   constructor() {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
-  }
-
-  unprocessedActions: Action[] = [];
-
-  get currentServerTick() {
-    return this.serverTick + (+new Date() - this.offsetTick);
-  }
-
-  tick(timeSinceLastTick: number) {
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities[i];
-      entity.tick(timeSinceLastTick, this.currentServerTick);
-      entity.updatePolygon();
-    }
-    this.checkCollisions();
-  }
-
-  lockTick() {
-    for (const playerEntity of this.playerEntities) {
-      if (!(playerEntity instanceof LivePlayerEntity)) {
-        playerEntity.lastDownAction = {};
-      }
-    }
-
-    for (const action of this.unprocessedActions) {
-      const entity = this.entities.find(a => a.id === action.entityId) as PlayerEntity;
-      if (entity) {
-        entity.handleAction(action, this.currentServerTick);
-      }
-    }
-
-    this.unprocessedActions.length = 0;
-
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities[i];
-      entity.lockTick(this.currentServerTick);
-      entity.updatePolygon();
-    }
   }
 
   protected checkCollisions() {

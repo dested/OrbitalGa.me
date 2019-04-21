@@ -11,18 +11,19 @@ export type Action = {
   entityId: string;
   x: number;
   y: number;
-} & (
-  | {
-      actionType: ActionType.Down | ActionType.Left | ActionType.Up | ActionType.Right;
-    }
-  | {
-      actionType: ActionType.Shoot;
-      id: string;
-    });
+} & ({
+  controls: {
+    left: boolean;
+    right: boolean;
+    down: boolean;
+    up: boolean;
+    shoot: boolean;
+  };
+});
 
 export interface WorldState {
   entities: SerializedEntity[];
-  currentTick: number;
+  serverTick: number;
   resync: boolean;
 }
 
@@ -30,7 +31,7 @@ export type EntityOptions = {id: string; x: number; y: number};
 export type PlayerEntityOptions = EntityOptions & {
   type: 'player';
   color: string;
-  lastDownAction: {[action in ActionType]?: Action};
+  bufferedActions: Action[];
   speedPerSecond: number;
   shotStrength: number;
   shootEveryTick: number;

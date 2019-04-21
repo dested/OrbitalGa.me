@@ -17,7 +17,12 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
   protected color: string;
   protected shotStrength: number;
   protected shootEveryTick: number;
-  lastDownAction: {[action in ActionType]?: Action} = {};
+
+  bufferedActions: Action[] = [];
+  addAction(action: Action) {
+    this.bufferedActions.push(action);
+    this.bufferedActions = this.bufferedActions.filter(a => a.actionTick >= action.actionTick - 5);
+  }
 
   serialize(): SerializedEntity {
     return {
@@ -25,7 +30,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
       x: this.x,
       y: this.y,
       id: this.id,
-      lastDownAction: this.lastDownAction,
+      bufferedActions: this.bufferedActions.slice(-3),
       speedPerSecond: this.speedPerSecond,
       color: this.color,
       shotStrength: this.shotStrength,
@@ -64,27 +69,40 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     return false;
   }
 
-  lockTick(currentServerTick: number): void {}
+  serverTick(currentServerTick: number): void {
+    const [action] = this.bufferedActions.slice(-1);
+    if (!action) {
+      return;
+    }
+    this.processAction(action);
+    this.x = action.x;
+    this.y = action.y;
+  }
 
-  tick(timeSinceLastTick: number, currentServerTick: number) {
-    if (this.lastDownAction[ActionType.Left]) {
-      this.x -= (timeSinceLastTick / 1000) * this.speedPerSecond;
-      this.lastDownAction[ActionType.Left].actionTick = currentServerTick;
+  processAction(action: Action) {
+    if (action.controls.left) {
+      action.x -= (Game.tickRate / 1000) * this.speedPerSecond;
+    }
+    if (action.controls.right) {
+      action.x += (Game.tickRate / 1000) * this.speedPerSecond;
     }
 
-    if (this.lastDownAction[ActionType.Right]) {
-      this.x += (timeSinceLastTick / 1000) * this.speedPerSecond;
-      this.lastDownAction[ActionType.Right].actionTick = currentServerTick;
+    if (action.controls.up) {
+      action.y -= (Game.tickRate / 1000) * this.speedPerSecond;
+    }
+    if (action.controls.down) {
+      action.y += (Game.tickRate / 1000) * this.speedPerSecond;
+    }
+  }
+
+  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number) {
+    const [actionSub2, actionSub1] = this.bufferedActions.slice(-2);
+    if (!actionSub2 || !actionSub1) {
+      return;
     }
 
-    if (this.lastDownAction[ActionType.Up]) {
-      this.y -= (timeSinceLastTick / 1000) * this.speedPerSecond;
-      this.lastDownAction[ActionType.Up].actionTick = currentServerTick;
-    }
-    if (this.lastDownAction[ActionType.Down]) {
-      this.y += (timeSinceLastTick / 1000) * this.speedPerSecond;
-      this.lastDownAction[ActionType.Down].actionTick = currentServerTick;
-    }
+    this.x = this.x + (actionSub1.x - this.x) * (timeSinceLastServerTick / Game.tickRate);
+    this.y = this.y + (actionSub1.y - this.y) * (timeSinceLastServerTick / Game.tickRate);
   }
 
   draw(context: CanvasRenderingContext2D) {
@@ -95,39 +113,5 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
     context.fillStyle = this.color;
     context.fillRect(x - 10, y - 10, 20, 20);
-  }
-
-  processAction(message: Action, currentServerTick: number): boolean {
-    if (message.actionType === ActionType.Left && this.lastDownAction[ActionType.Right]) {
-      return false;
-    }
-    if (message.actionType === ActionType.Right && this.lastDownAction[ActionType.Left]) {
-      return false;
-    }
-    if (message.actionType === ActionType.Down && this.lastDownAction[ActionType.Up]) {
-      return false;
-    }
-    if (message.actionType === ActionType.Up && this.lastDownAction[ActionType.Down]) {
-      return false;
-    }
-    this.lastDownAction[message.actionType] = message;
-    if (message.actionType === ActionType.Shoot) {
-      const shotEntity = new ShotEntity(this.game, {
-        tickCreated: message.actionTick,
-        x: message.x,
-        y: message.y,
-        ownerId: this.id,
-        strength: this.shotStrength,
-        id: message.id,
-        type: 'shot',
-        shotSpeedPerSecond: this.shotSpeedPerSecond,
-      });
-      this.game.addEntity(shotEntity);
-    }
-    return true;
-  }
-
-  handleAction(message: Action, currentServerTick: number): boolean {
-    return this.processAction(message, currentServerTick);
   }
 }
