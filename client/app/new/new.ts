@@ -14,15 +14,15 @@ export class Start {
     contexts.push(canvas.getContext('2d')!);
     document.body.appendChild(canvas);
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 1; i++) {
       const client = new ClientGame();
       client.join();
       clients.push(client);
-      const canvas = document.createElement('canvas');
-      canvas.style.border = 'solid 2px white';
-      canvas.height = canvas.width = 500;
-      contexts.push(canvas.getContext('2d')!);
-      document.body.appendChild(canvas);
+      const clientCanvas = document.createElement('canvas');
+      clientCanvas.style.border = 'solid 2px white';
+      clientCanvas.height = clientCanvas.width = 500;
+      contexts.push(clientCanvas.getContext('2d')!);
+      document.body.appendChild(clientCanvas);
     }
 
     false &&
@@ -30,18 +30,17 @@ export class Start {
         const client = new ClientGame();
         client.join();
         clients.push(client);
-        const canvas = document.createElement('canvas');
-        canvas.style.border = 'solid 2px white';
-        canvas.height = canvas.width = 500;
-        contexts.push(canvas.getContext('2d')!);
-        document.body.appendChild(canvas);
+        const clientCanvas = document.createElement('canvas');
+        clientCanvas.style.border = 'solid 2px white';
+        clientCanvas.height = clientCanvas.width = 500;
+        contexts.push(clientCanvas.getContext('2d')!);
+        document.body.appendChild(clientCanvas);
       }, Math.random() * 5000 + 1000);
 
     let lastTick = +new Date();
     setInterval(() => {
       const curTick = +new Date();
-      for (let i = 0; i < clients.length; i++) {
-        const client = clients[i];
+      for (const client of clients) {
         client.tick(curTick - lastTick);
       }
       lastTick = curTick;
@@ -68,8 +67,7 @@ export class Start {
       if (e.shiftKey) {
         runSim = !runSim;
         if (!runSim) {
-          for (let i = 0; i < clients.length; i++) {
-            const client = clients[i];
+          for (const client of clients) {
             client.liveEntity.releaseLeft();
             client.liveEntity.releaseRight();
             client.liveEntity.releaseUp();
@@ -110,9 +108,7 @@ export class Start {
       if (!runSim) {
         return;
       }
-      for (let i = 0; i < clients.length; i++) {
-        const client = clients[i];
-
+      for (const client of clients) {
         if (Math.random() * 1000 < 50) {
           if (client.liveEntity.pressingLeft) {
             client.liveEntity.releaseLeft();

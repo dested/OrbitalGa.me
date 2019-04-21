@@ -10,8 +10,7 @@ export class ServerGame extends Game {
   tick(timeSinceLastTick: number) {
     const currentServerTick = this.currentServerTick;
 
-    for (let i = 0; i < this.unprocessedActions.length; i++) {
-      const action = this.unprocessedActions[i];
+    for (const action of this.unprocessedActions) {
       const entity = this.playerEntities.find(a => a.id === action.entityId);
       if (entity) {
         if (entity.handleAction(action, currentServerTick)) {
@@ -41,8 +40,7 @@ export class ServerGame extends Game {
 
     const tickSplit = timeSinceLastTick / 5;
     for (let t = tickSplit; t <= timeSinceLastTick; t += tickSplit) {
-      for (let i = 0; i < this.entities.length; i++) {
-        const entity = this.entities[i];
+      for (const entity of this.entities) {
         entity.tick(tickSplit, currentServerTick - timeSinceLastTick + t);
         entity.updatePolygon();
       }
@@ -73,8 +71,7 @@ export class ServerGame extends Game {
 
   debugDraw(context: CanvasRenderingContext2D) {
     context.fillText((Math.round(this.currentServerTick / 100) * 100).toFixed(0), 400, 20);
-    for (let i = 0; i < this.entities.length; i++) {
-      const entity = this.entities[i];
+    for (const entity of this.entities) {
       entity.draw(context);
     }
   }

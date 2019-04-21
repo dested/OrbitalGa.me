@@ -47,8 +47,7 @@ export class ClientGame extends Game {
   }
 
   private setServerState(state: WorldState, myEntityId?: string) {
-    for (let i = 0; i < state.entities.length; i++) {
-      const entity = state.entities[i];
+    for (const entity of state.entities) {
       let liveEntity = this.entities.find(a => a.id === entity.id);
       switch (entity.type) {
         case 'player': {
@@ -101,8 +100,7 @@ export class ClientGame extends Game {
       context.fillText(this.liveEntity.id.toString(), 0, 20);
       context.fillText((Math.round(this.currentServerTick / 100) * 100).toFixed(0), 400, 20);
     }
-    for (let i = 0; i < this.entities.length; i++) {
-      const entity = this.entities[i];
+    for (const entity of this.entities) {
       entity.draw(context);
     }
   }

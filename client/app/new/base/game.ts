@@ -1,4 +1,4 @@
-import {Collisions, Polygon, Result} from 'collisions';
+import {Collisions, Result} from 'collisions';
 import {GameEntity, PlayerEntity} from './entity';
 import {Action} from './types';
 
@@ -7,7 +7,7 @@ export class Game {
   protected offsetTick: number = +new Date();
   collisionEngine: Collisions;
   entities: GameEntity[] = [];
-  private collisionResult: Result;
+  private readonly collisionResult: Result;
 
   get playerEntities(): PlayerEntity[] {
     return this.entities.filter(a => a instanceof PlayerEntity).map(a => a as PlayerEntity);
@@ -31,8 +31,7 @@ export class Game {
   }
 
   tick(timeSinceLastTick: number) {
-    for (let i = 0; i < this.unprocessedActions.length; i++) {
-      const action = this.unprocessedActions[i];
+    for (const action of this.unprocessedActions) {
       const entity = this.entities.find(a => a.id === action.entityId) as PlayerEntity;
       if (entity) {
         entity.handleAction(action, this.currentServerTick);
@@ -41,8 +40,7 @@ export class Game {
 
     this.unprocessedActions.length = 0;
 
-    for (let i = 0; i < this.entities.length; i++) {
-      const entity = this.entities[i];
+    for (const entity of this.entities) {
       entity.tick(timeSinceLastTick, this.currentServerTick);
       entity.updatePolygon();
     }
@@ -52,8 +50,7 @@ export class Game {
   protected checkCollisions() {
     this.collisionEngine.update();
 
-    for (let i = 0; i < this.entities.length; i++) {
-      const entity = this.entities[i];
+    for (const entity of this.entities) {
       const potentials = entity.polygon!.potentials();
       for (const body of potentials) {
         if (entity.polygon && entity.polygon.collides(body, this.collisionResult)) {

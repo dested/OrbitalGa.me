@@ -1,5 +1,5 @@
+import {Polygon, Result} from 'collisions';
 import {ClientGame} from '../client/clientGame';
-import {Polygon,Result} from 'collisions';
 import {Utils} from '../utils/utils';
 import {Game} from './game';
 import {
@@ -152,7 +152,7 @@ export class ShotEntity extends GameEntity {
       this.destroy();
       return true;
     }
-    if (otherEntity instanceof PlayerEntity && otherEntity.id != this.ownerId) {
+    if (otherEntity instanceof PlayerEntity && otherEntity.id !== this.ownerId) {
       this.destroy();
       return true;
     }
@@ -203,7 +203,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
   protected color: string;
   protected shotStrength: number;
   protected shootEveryTick: number;
-  lastDownAction: {[action: string]: Action} = {};
+  lastDownAction: {[action in ActionType]?: Action} = {};
 
   serialize(): SerializedEntity {
     return {
@@ -540,6 +540,7 @@ export class LivePlayerEntity extends PlayerEntity {
 
     if (this.pressingLeft) {
       if (!this.wasPressingLeft) {
+        console.log('a', currentServerTick);
         this.game.sendAction({
           actionType: ActionType.Left,
           actionSubType: ActionSubType.Down,
@@ -612,6 +613,7 @@ export class LivePlayerEntity extends PlayerEntity {
 
     if (!this.pressingLeft) {
       if (this.wasPressingLeft) {
+        console.log('b', currentServerTick);
         this.game.sendAction({
           actionType: ActionType.Left,
           actionSubType: ActionSubType.Up,

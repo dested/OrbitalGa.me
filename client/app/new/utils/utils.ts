@@ -1,4 +1,4 @@
-import {GameEntity, ISolidEntity} from '../base/entity';
+import {ISolidEntity} from '../base/entity';
 
 export class Utils {
   static generateId(): string {

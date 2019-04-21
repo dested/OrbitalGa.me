@@ -32,7 +32,7 @@ export type EntityOptions = {id: string; x: number; y: number};
 export type PlayerEntityOptions = EntityOptions & {
   type: 'player';
   color: string;
-  lastDownAction: {[action: string]: Action};
+  lastDownAction: {[action in ActionType]?: Action};
   speedPerSecond: number;
   shotStrength: number;
   shootEveryTick: number;
