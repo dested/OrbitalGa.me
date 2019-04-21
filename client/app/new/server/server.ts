@@ -22,7 +22,7 @@ export class Server {
           y: parseInt((Math.random() * 500).toFixed()),
           id: client.id,
           color: '#' + (((1 << 24) * Math.random()) | 0).toString(16),
-          shootEveryTick: 100,
+          shootEveryTick: 4,
           shotSpeedPerSecond: 500,
           bufferedActions: [],
           shotStrength: 2,

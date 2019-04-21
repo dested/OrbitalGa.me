@@ -1,7 +1,7 @@
 import {ClientGame} from '../../client/clientGame';
 import {Utils} from '../../utils/utils';
 import {Game} from '../game';
-import {ActionType, PlayerEntityOptions} from '../types';
+import {PlayerEntityOptions} from '../types';
 import {PlayerEntity} from './playerEntity';
 import {ShotEntity} from './shotEntity';
 
@@ -87,22 +87,7 @@ export class LivePlayerEntity extends PlayerEntity {
     this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * ((+new Date() - this.lastSendActionTime) / Game.tickRate);
   }
 
-  serverTick(currentServerTick: number): void {
-    if (this.pressingShoot) {
-      const id = Utils.generateId();
-      const shotEntity = new ShotEntity(this.game, {
-        tickCreated: currentServerTick,
-        x: this.x,
-        y: this.y,
-        ownerId: this.id,
-        strength: this.shotStrength,
-        id,
-        type: 'shot',
-        shotSpeedPerSecond: this.shotSpeedPerSecond,
-      });
-      this.game.addEntity(shotEntity);
-    }
-
+  lockTick(currentServerTick: number): void {
     const controls = {
       left: false,
       right: false,
@@ -127,13 +112,6 @@ export class LivePlayerEntity extends PlayerEntity {
       controls.shoot = true;
     }
 
-    this.game.sendAction({
-      controls,
-      x: this.serverX,
-      y: this.serverY,
-      entityId: this.id,
-      actionTick: currentServerTick,
-    });
     const action = {
       controls,
       x: this.serverX,
@@ -141,10 +119,16 @@ export class LivePlayerEntity extends PlayerEntity {
       entityId: this.id,
       actionTick: currentServerTick,
     };
+    this.game.sendAction({...action});
     this.processAction(action);
     this.addAction(action);
-    this.serverX = action.x;
-    this.serverY = action.y;
+    if (controls.left || controls.right || controls.up || controls.down) {
+      this.game.collisionEngine.update();
+      this.updatePolygon();
+      this.checkCollisions(true);
+      this.serverX = action.x;
+      this.serverY = action.y;
+    }
     this.lastSendActionTime = +new Date();
   }
 }

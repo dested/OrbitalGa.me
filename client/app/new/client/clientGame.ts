@@ -43,12 +43,22 @@ export class ClientGame extends Game {
       entity.tick(timeSinceLastTick, +new Date() - this.lastServerTick, this.currentServerTick);
       entity.updatePolygon();
     }
-    this.checkCollisions();
+    this.checkCollisions(true);
   }
 
   lockTick() {
-    if (this.liveEntity) {
-      this.liveEntity.serverTick(this.currentServerTick);
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
+      if (entity) {
+        entity.lockTick(this.currentServerTick);
+        entity.updatePolygon();
+      }
+    }
+    this.checkCollisions(false);
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      if (this.entities[i].willDestroy) {
+        this.entities[i].destroy();
+      }
     }
   }
 
@@ -69,6 +79,9 @@ export class ClientGame extends Game {
   }
 
   private setServerState(state: WorldState, myEntityId?: string) {
+    if (state.resync === false) {
+      return;
+    }
     this.serverTick = state.serverTick;
     this.offsetTick = +new Date();
     for (const stateEntity of state.entities) {
@@ -106,18 +119,25 @@ export class ClientGame extends Game {
         }
       }
       if (entity) {
+        /*
         if (state.resync) {
           entity.x = stateEntity.x;
           entity.y = stateEntity.y;
         }
+*/
       }
     }
 
     const entities = this.entities.filter(a => !(a instanceof ShotEntity));
+    for (const entity of this.entities.filter(a => !(a instanceof ShotEntity))) {
+      if (!state.entities.find(a => a.id === entity.id)) {
+        entity.willDestroy = true;
+      }
+    }
     for (let i = entities.length - 1; i >= 0; i--) {
       const entity = entities[i];
-      if (!state.entities.find(a => a.id === entity.id)) {
-        this.entities.splice(i, 1);
+      if (entity.willDestroy) {
+        entity.destroy();
       }
     }
   }
@@ -125,8 +145,9 @@ export class ClientGame extends Game {
   draw(context: CanvasRenderingContext2D) {
     context.fillStyle = 'white';
     if (this.liveEntity) {
-      context.fillText(this.liveEntity.id.toString(), 0, 20);
+      context.fillStyle = 'white';
       context.fillText(this.currentServerTick.toString(), 400, 20);
+      context.fillText(this.entities.length.toString(), 400, 50);
     }
     for (const entity of this.entities) {
       entity.draw(context);

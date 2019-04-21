@@ -19,10 +19,10 @@ export class Socket {
   static clientJoin(onMessage: (message: ServerMessage) => void) {
     const client = {
       id: Utils.generateId(),
-      latency: Math.random() * 100 + 100,
+      latency: Math.random() * 500 + 300,
       onMessage,
       sendToServer: (message: ServerMessage) => {
-        this.sendToServer(client.id, message);
+        this.sendToServer(client.id, client.latency, message);
       },
     };
     this.sockets.push(client);
@@ -38,13 +38,13 @@ export class Socket {
     this.onClientJoin = onClientJoin;
   }
 
-  static sendToServer(clientId: string, message: ServerMessage) {
+  static sendToServer(clientId: string, latency: number, message: ServerMessage) {
     const msg = JSON.parse(JSON.stringify(message));
 
     setTimeout(() => {
       // console.log('send to server', JSON.stringify(message));
       this.onServerMessage(clientId, msg);
-    }, this.ServerLatency);
+    }, latency);
   }
 
   static sendToClient(clientId: string, message: ServerMessage) {

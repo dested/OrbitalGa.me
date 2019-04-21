@@ -26,17 +26,19 @@ export class Start {
       document.body.appendChild(clientCanvas);
     }
 
-    /*    
-      setInterval(() => {
-        const client = new ClientGame();
-        client.join();
-        clients.push(client);
-        const clientCanvas = document.createElement('canvas');
-        clientCanvas.style.border = 'solid 2px white';
-        clientCanvas.height = clientCanvas.width = 500;
-        contexts.push(clientCanvas.getContext('2d')!);
-        document.body.appendChild(clientCanvas);
-      }, Math.random() * 5000 + 1000)*/ let lastTick = +new Date();
+    /*
+    setInterval(() => {
+      const client = new ClientGame();
+      client.join();
+      clients.push(client);
+      const clientCanvas = document.createElement('canvas');
+      clientCanvas.style.border = 'solid 2px white';
+      clientCanvas.height = clientCanvas.width = 500;
+      contexts.push(clientCanvas.getContext('2d')!);
+      document.body.appendChild(clientCanvas);
+    }, 5000);
+*/
+    let lastTick = +new Date();
     setInterval(() => {
       const curTick = +new Date();
       for (const client of clients) {
@@ -76,6 +78,7 @@ export class Start {
             client.liveEntity.releaseLeft();
             client.liveEntity.releaseRight();
             client.liveEntity.releaseUp();
+            client.liveEntity.releaseShoot();
             client.liveEntity.releaseDown();
           }
         }
@@ -143,6 +146,12 @@ export class Start {
               client.liveEntity.pressDown();
             }
           }
+        }
+        if (Math.random() * 1000 < 100) {
+          client.liveEntity.pressShoot();
+        }
+        if (Math.random() * 1000 < 100) {
+          client.liveEntity.releaseShoot();
         }
       }
     }, 500);

@@ -1,11 +1,3 @@
-export enum ActionType {
-  Left = 'left',
-  Right = 'right',
-  Up = 'up',
-  Down = 'down',
-  Shoot = 'shoot',
-}
-
 export type Action = {
   actionTick: number;
   entityId: string;
@@ -21,13 +13,21 @@ export type Action = {
   };
 });
 
-export interface WorldState {
-  entities: SerializedEntity[];
+export type WorldState = {
   serverTick: number;
-  resync: boolean;
-}
+} & (
+  | {
+      resync: true;
+      entities: SerializedEntity[];
+    }
+  | {
+      resync: false;
+      entities: LightSerializedEntity[];
+    });
 
 export type EntityOptions = {id: string; x: number; y: number};
+export type LightEntityOptions = {id: string; x: number; y: number};
+
 export type PlayerEntityOptions = EntityOptions & {
   type: 'player';
   color: string;
@@ -37,6 +37,11 @@ export type PlayerEntityOptions = EntityOptions & {
   shootEveryTick: number;
   shotSpeedPerSecond: number;
 };
+export type LightPlayerEntityOptions = {
+  type: 'player';
+  bufferedActions: Action[];
+};
+
 export type ShotEntityOptions = EntityOptions & {
   type: 'shot';
   strength: number;
@@ -44,9 +49,15 @@ export type ShotEntityOptions = EntityOptions & {
   ownerId?: string;
   shotSpeedPerSecond: number;
 };
+
+export type LightShotEntityOptions = {type: 'shot'};
+
 export type EnemyEntityOptions = EntityOptions & {type: 'enemy'; health: number; color: string};
+export type LightEnemyEntityOptions = {type: 'enemy'; health: number};
 
 export type SerializedEntity = EntityOptions & (PlayerEntityOptions | ShotEntityOptions | EnemyEntityOptions);
+export type LightSerializedEntity = LightEntityOptions &
+  (LightPlayerEntityOptions | LightShotEntityOptions | LightEnemyEntityOptions);
 
 export type ServerMessage =
   | {

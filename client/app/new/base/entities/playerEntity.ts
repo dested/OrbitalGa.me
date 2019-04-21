@@ -1,7 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Utils} from '../../utils/utils';
 import {Game} from '../game';
-import {Action, ActionType, PlayerEntityOptions, SerializedEntity} from '../types';
+import {Action, LightSerializedEntity, PlayerEntityOptions, SerializedEntity} from '../types';
 import {GameEntity} from './gameEntity';
 import {ISolidEntity} from './ISolidEntity';
 import {ShotEntity} from './shotEntity';
@@ -26,6 +26,18 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     this.bufferedActions = this.bufferedActions.filter(a => a.actionTick >= action.actionTick - 5);
   }
 
+  get latestAction() {
+    return this.bufferedActions.slice(-1)[0];
+  }
+
+  updatePolygon(action: Action = this.latestAction): void {
+    if (!this.polygon || !action) {
+      return;
+    }
+    this.polygon.x = Utils.round(action.x, 1);
+    this.polygon.y = Utils.round(action.y, 1);
+  }
+
   serialize(): SerializedEntity {
     return {
       type: 'player',
@@ -38,6 +50,16 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
       shotStrength: this.shotStrength,
       shootEveryTick: this.shootEveryTick,
       shotSpeedPerSecond: this.shotSpeedPerSecond,
+    };
+  }
+
+  serializeLight(): LightSerializedEntity {
+    return {
+      type: 'player',
+      x: this.x,
+      y: this.y,
+      id: this.id,
+      bufferedActions: this.bufferedActions.slice(-3),
     };
   }
 
@@ -59,13 +81,13 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  collide(otherEntity: GameEntity, collisionResult: Result) {
+  collide(otherEntity: GameEntity, collisionResult: Result, solidOnly: boolean) {
     if (otherEntity instanceof ShotEntity && this.id !== otherEntity.ownerId) {
       return true;
     }
     if (Utils.isSolidEntity(otherEntity)) {
-      this.x -= collisionResult.overlap * collisionResult.overlap_x;
-      this.y -= collisionResult.overlap * collisionResult.overlap_y;
+      this.latestAction.x -= collisionResult.overlap * collisionResult.overlap_x;
+      this.latestAction.y -= collisionResult.overlap * collisionResult.overlap_y;
       this.updatePolygon();
     }
     return false;
@@ -78,7 +100,30 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     }
     this.processAction(action);
     this.x = action.x;
+    console.log(this.x);
     this.y = action.y;
+  }
+
+  lockTick(currentServerTick: number): void {
+    const [action] = this.bufferedActions.slice(-1);
+    if (!action) {
+      return;
+    }
+    if (action.controls.shoot) {
+      if (action.actionTick % this.shootEveryTick === 0) {
+        const shotEntity = new ShotEntity(this.game, {
+          tickCreated: action.actionTick,
+          x: action.x,
+          y: action.y,
+          ownerId: this.id,
+          strength: this.shotStrength,
+          id: Utils.generateId(),
+          type: 'shot',
+          shotSpeedPerSecond: this.shotSpeedPerSecond,
+        });
+        this.game.addEntity(shotEntity);
+      }
+    }
   }
 
   processAction(action: Action) {
@@ -95,6 +140,21 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     if (action.controls.down) {
       action.y += (Game.tickRate / 1000) * this.speedPerSecond;
     }
+    if (action.controls.shoot) {
+      if (action.actionTick % this.shootEveryTick === 0) {
+        const shotEntity = new ShotEntity(this.game, {
+          tickCreated: action.actionTick,
+          x: action.x,
+          y: action.y,
+          ownerId: this.id,
+          strength: this.shotStrength,
+          id: Utils.generateId(),
+          type: 'shot',
+          shotSpeedPerSecond: this.shotSpeedPerSecond,
+        });
+        this.game.addEntity(shotEntity);
+      }
+    }
   }
 
   tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number) {
@@ -102,7 +162,6 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     if (!actionSub2 || !actionSub1) {
       return;
     }
-
     this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / Game.tickRate);
     this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / Game.tickRate);
   }

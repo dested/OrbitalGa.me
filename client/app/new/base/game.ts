@@ -1,4 +1,4 @@
-import {Collisions, Result} from 'collisions';
+import {Collisions, Polygon, Result} from 'collisions';
 import {GameEntity} from './entities/gameEntity';
 import {PlayerEntity} from './entities/playerEntity';
 
@@ -7,7 +7,7 @@ export class Game {
 
   collisionEngine: Collisions;
   entities: GameEntity[] = [];
-  private readonly collisionResult: Result;
+  readonly collisionResult: Result;
 
   get playerEntities(): PlayerEntity[] {
     return this.entities.filter(a => a instanceof PlayerEntity).map(a => a as PlayerEntity);
@@ -21,10 +21,15 @@ export class Game {
 
   constructor() {
     this.collisionEngine = new Collisions();
+    const boardSize = 500;
+    this.collisionEngine.insert(new Polygon(-20, 0, [[0, 0], [20, 0], [20, boardSize], [0, boardSize]]));
+    this.collisionEngine.insert(new Polygon(boardSize, 0, [[0, 0], [20, 0], [20, boardSize], [0, boardSize]]));
+    this.collisionEngine.insert(new Polygon(0, -20, [[0, 0], [0, 20], [boardSize, 20], [boardSize, 0]]));
+    this.collisionEngine.insert(new Polygon(0, boardSize, [[0, 0], [0, 20], [boardSize, 20], [boardSize, 0]]));
     this.collisionResult = this.collisionEngine.createResult();
   }
 
-  protected checkCollisions() {
+  protected checkCollisions(solidOnly: boolean) {
     this.collisionEngine.update();
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
@@ -32,16 +37,7 @@ export class Game {
       if (!entity) {
         continue;
       }
-      const potentials = entity.polygon.potentials();
-      for (const body of potentials) {
-        if (entity.polygon && entity.polygon.collides(body, this.collisionResult)) {
-          const e1 = entity.collide(body.entity, this.collisionResult);
-          const e2 = body.entity.collide(entity, this.collisionResult);
-          if (e1 || e2) {
-            break;
-          }
-        }
-      }
+      entity.checkCollisions(solidOnly);
     }
   }
 

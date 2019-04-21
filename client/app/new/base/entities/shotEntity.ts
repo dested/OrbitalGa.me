@@ -1,6 +1,6 @@
-import {Polygon} from 'collisions';
+import {Polygon, Result} from 'collisions';
 import {Game} from '../game';
-import {SerializedEntity, ShotEntityOptions} from '../types';
+import {LightSerializedEntity, SerializedEntity, ShotEntityOptions} from '../types';
 import {EnemyEntity} from './enemyEntity';
 import {GameEntity} from './gameEntity';
 import {PlayerEntity} from './playerEntity';
@@ -31,24 +31,32 @@ export class ShotEntity extends GameEntity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  serverTick(currentServerTick: number): void {}
-
-  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void {
+  serverTick(currentServerTick: number): void {
     if (currentServerTick - this.tickCreated > 10 * 1000) {
-      this.destroy();
+      this.queueDestroy();
       return;
     } else {
-      this.y -= (timeSinceLastTick / 1000) * this.shotSpeedPerSecond;
+      this.y -= (Game.tickRate / 1000) * this.shotSpeedPerSecond;
     }
   }
 
-  collide(otherEntity: GameEntity) {
-    if (otherEntity instanceof EnemyEntity) {
-      this.destroy();
+  lockTick(currentServerTick: number): void {
+    if (currentServerTick - this.tickCreated > 10 * 1000) {
+      this.queueDestroy();
+    }
+  }
+
+  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void {
+    this.y -= (timeSinceLastTick / 1000) * this.shotSpeedPerSecond;
+  }
+
+  collide(otherEntity: GameEntity, collisionResult: Result, solidOnly: boolean) {
+    if (!solidOnly && otherEntity instanceof EnemyEntity) {
+      this.queueDestroy();
       return true;
     }
-    if (otherEntity instanceof PlayerEntity && otherEntity.id !== this.ownerId) {
-      this.destroy();
+    if (!solidOnly && otherEntity instanceof PlayerEntity && otherEntity.id !== this.ownerId) {
+      this.queueDestroy();
       return true;
     }
 
@@ -65,6 +73,15 @@ export class ShotEntity extends GameEntity {
       tickCreated: this.tickCreated,
       ownerId: this.ownerId!,
       shotSpeedPerSecond: this.shotSpeedPerSecond,
+    };
+  }
+
+  serializeLight(): LightSerializedEntity {
+    return {
+      type: 'shot',
+      x: this.x,
+      y: this.y,
+      id: this.id,
     };
   }
 

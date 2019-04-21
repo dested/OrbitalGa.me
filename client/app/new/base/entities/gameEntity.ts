@@ -1,10 +1,11 @@
 import {Polygon, Result} from 'collisions';
 import {Utils} from '../../utils/utils';
 import {Game} from '../game';
-import {EntityOptions, SerializedEntity} from '../types';
+import {EntityOptions, LightSerializedEntity, SerializedEntity} from '../types';
 
 export abstract class GameEntity {
   polygon: Polygon | null;
+  willDestroy: boolean;
 
   protected constructor(protected game: Game, options: EntityOptions) {
     this.id = options.id;
@@ -17,6 +18,7 @@ export abstract class GameEntity {
   id: string;
 
   abstract serialize(): SerializedEntity;
+  abstract serializeLight(): LightSerializedEntity;
 
   destroy(): void {
     this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
@@ -24,11 +26,16 @@ export abstract class GameEntity {
     this.polygon = null;
   }
 
+  queueDestroy(): void {
+    this.willDestroy = true;
+  }
+
   abstract tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void;
 
   abstract serverTick(serverTick: number): void;
+  abstract lockTick(serverTick: number): void;
 
-  abstract collide(otherEntity: GameEntity, collisionResult: Result): boolean;
+  abstract collide(otherEntity: GameEntity, collisionResult: Result, solidOnly: boolean): boolean;
 
   updatePolygon(): void {
     if (!this.polygon) {
@@ -41,4 +48,16 @@ export abstract class GameEntity {
   }
 
   abstract draw(context: CanvasRenderingContext2D): void;
+
+  checkCollisions(solidOnly: boolean) {
+    const potentials = this.polygon.potentials();
+    for (const body of potentials) {
+      if (this.polygon && this.polygon.collides(body, this.game.collisionResult)) {
+        const e1 = this.collide(body.entity, this.game.collisionResult, solidOnly);
+        if (e1) {
+          break;
+        }
+      }
+    }
+  }
 }
