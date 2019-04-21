@@ -1,4 +1,5 @@
 import {EnemyEntity} from '../base/entities/enemyEntity';
+import {ShotEntity} from '../base/entities/shotEntity';
 import {Game} from '../base/game';
 import {WorldState} from '../base/types';
 import {Socket} from '../socket';
@@ -15,7 +16,6 @@ export class ServerGame extends Game {
     }
 
     for (const action of this.unprocessedActions) {
-      debugger;
       const entity = this.playerEntities.find(a => a.id === action.entityId);
       if (entity) {
         if (entity.handleAction(action, currentServerTick)) {
@@ -52,13 +52,12 @@ export class ServerGame extends Game {
       }
       this.checkCollisions();
     }
-
     this.sendWorldState();
   }
 
   getWorldState(resync: boolean): WorldState {
     return {
-      entities: this.entities.map(c => c.serialize()),
+      entities: this.entities.filter(a => !(a instanceof ShotEntity)).map(c => c.serialize()),
       currentTick: this.currentServerTick,
       resync,
     };
@@ -71,7 +70,7 @@ export class ServerGame extends Game {
       this.lastResyncTick = this.currentServerTick;
     }
     const worldState = this.getWorldState(shouldResync);
-    console.log(worldState);
+    // console.log(worldState);
     for (const client of this.playerEntities) {
       Socket.sendToClient(client.id, {messageType: 'worldState', state: worldState});
     }

@@ -9,8 +9,8 @@ export interface SocketClient {
 }
 
 export class Socket {
-  static ClientLatency = 10;
-  static ServerLatency = 10;
+  static ClientLatency = 100;
+  static ServerLatency = 100;
 
   static sockets: SocketClient[] = [];
   private static onServerMessage: (clientId: string, message: ServerMessage) => void;
@@ -45,9 +45,9 @@ export class Socket {
     const msg = JSON.parse(JSON.stringify(message));
 
     if (this.lastLatency > +new Date()) {
-      this.lastLatency = this.lastLatency + /*Math.random() * */ this.ServerLatency;
+      this.lastLatency = this.lastLatency + Math.random() * this.ServerLatency;
     } else {
-      this.lastLatency = +new Date() + /*Math.random() * */ this.ServerLatency;
+      this.lastLatency = +new Date() + Math.random() * this.ServerLatency;
     }
 
     setTimeout(() => {
@@ -61,9 +61,9 @@ export class Socket {
     const msg = JSON.parse(JSON.stringify(message));
     if (client) {
       if (client.lastLatency > +new Date()) {
-        client.lastLatency = client.lastLatency + /*Math.random() * */ this.ClientLatency;
+        client.lastLatency = client.lastLatency + Math.random() * this.ClientLatency;
       } else {
-        client.lastLatency = +new Date() + /*Math.random() * */ this.ClientLatency;
+        client.lastLatency = +new Date() + Math.random() * this.ClientLatency;
       }
       setTimeout(() => {
         client.onMessage(msg);

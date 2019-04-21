@@ -98,9 +98,10 @@ export class LivePlayerEntity extends PlayerEntity {
       const id = Utils.generateId();
       this.game.sendAction({
         actionType: ActionType.Shoot,
+        id,
         x: this.x,
         y: this.y,
-        entityId: id,
+        entityId: this.id,
         actionTick: currentServerTick,
       });
 

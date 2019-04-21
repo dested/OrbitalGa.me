@@ -35,7 +35,8 @@ export class Game {
   }
 
   tick(timeSinceLastTick: number) {
-    for (const entity of this.entities) {
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
       entity.tick(timeSinceLastTick, this.currentServerTick);
       entity.updatePolygon();
     }
@@ -58,7 +59,8 @@ export class Game {
 
     this.unprocessedActions.length = 0;
 
-    for (const entity of this.entities) {
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
       entity.lockTick(this.currentServerTick);
       entity.updatePolygon();
     }
@@ -67,11 +69,17 @@ export class Game {
   protected checkCollisions() {
     this.collisionEngine.update();
 
-    for (const entity of this.entities) {
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
+      if (!entity) {
+        continue;
+      }
       const potentials = entity.polygon.potentials();
       for (const body of potentials) {
         if (entity.polygon && entity.polygon.collides(body, this.collisionResult)) {
-          if (entity.collide(body.entity, this.collisionResult)) {
+          const e1 = entity.collide(body.entity, this.collisionResult);
+          const e2 = body.entity.collide(entity, this.collisionResult);
+          if (e1 || e2) {
             break;
           }
         }

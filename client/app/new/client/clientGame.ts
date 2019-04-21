@@ -52,7 +52,6 @@ export class ClientGame extends Game {
   private setServerState(state: WorldState, myEntityId?: string) {
     for (const entity of state.entities) {
       let liveEntity = this.entities.find(a => a.id === entity.id);
-      let updatePosition = true;
       switch (entity.type) {
         case 'player': {
           if (!liveEntity) {
@@ -72,7 +71,6 @@ export class ClientGame extends Game {
             liveEntity = new ShotEntity(this, entity);
             this.entities.push(liveEntity);
           }
-          updatePosition = false;
           break;
         }
         case 'enemy': {
@@ -83,7 +81,7 @@ export class ClientGame extends Game {
           break;
         }
       }
-      if (liveEntity && updatePosition) {
+      if (liveEntity) {
         if (state.resync) {
           liveEntity.x = entity.x;
           liveEntity.y = entity.y;
@@ -91,8 +89,9 @@ export class ClientGame extends Game {
       }
     }
 
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities[i];
+    const entities = this.entities.filter(a => !(a instanceof ShotEntity));
+    for (let i = entities.length - 1; i >= 0; i--) {
+      const entity = entities[i];
       if (!state.entities.find(a => a.id === entity.id)) {
         this.entities.splice(i, 1);
       }

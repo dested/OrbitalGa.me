@@ -6,13 +6,19 @@ export enum ActionType {
   Shoot = 'shoot',
 }
 
-export interface Action {
-  actionType: ActionType;
+export type Action = {
   actionTick: number;
   entityId: string;
   x: number;
   y: number;
-}
+} & (
+  | {
+      actionType: ActionType.Down | ActionType.Left | ActionType.Up | ActionType.Right;
+    }
+  | {
+      actionType: ActionType.Shoot;
+      id: string;
+    });
 
 export interface WorldState {
   entities: SerializedEntity[];

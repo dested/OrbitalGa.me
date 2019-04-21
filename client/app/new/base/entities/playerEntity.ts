@@ -54,7 +54,6 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
 
   collide(otherEntity: GameEntity, collisionResult: Result) {
     if (otherEntity instanceof ShotEntity && this.id !== otherEntity.ownerId) {
-      otherEntity.destroy();
       return true;
     }
     if (Utils.isSolidEntity(otherEntity)) {
@@ -119,7 +118,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
         y: message.y,
         ownerId: this.id,
         strength: this.shotStrength,
-        id: message.entityId,
+        id: message.id,
         type: 'shot',
         shotSpeedPerSecond: this.shotSpeedPerSecond,
       });

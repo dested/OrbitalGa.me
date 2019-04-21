@@ -14,7 +14,7 @@ export class Start {
     contexts.push(canvas.getContext('2d')!);
     document.body.appendChild(canvas);
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 3; i++) {
       const client = new ClientGame();
       client.join();
       clients.push(client);
