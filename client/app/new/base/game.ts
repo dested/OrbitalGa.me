@@ -1,10 +1,6 @@
 import {Collisions, Result} from 'collisions';
-import {Simulate} from 'react-dom/test-utils';
 import {GameEntity} from './entities/gameEntity';
-import play = Simulate.play;
-import {LivePlayerEntity} from './entities/livePlayerEntity';
 import {PlayerEntity} from './entities/playerEntity';
-import {Action} from './types';
 
 export class Game {
   static tickRate = 50;

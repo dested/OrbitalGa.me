@@ -6,6 +6,7 @@ import {PlayerEntity} from './playerEntity';
 import {ShotEntity} from './shotEntity';
 
 export class LivePlayerEntity extends PlayerEntity {
+  private lastSendActionTime: number = 0;
   constructor(game: ClientGame, options: PlayerEntityOptions) {
     super(game, options);
     this.serverX = this.x;
@@ -82,17 +83,8 @@ export class LivePlayerEntity extends PlayerEntity {
     if (!actionSub1) {
       return;
     }
-    /*
-    console.log(
-      actionSub1.x,
-      actionSub2.x,
-      (actionSub1.x - actionSub2.x) / Game.tickRate,
-      ((actionSub1.x - actionSub2.x) / Game.tickRate) * timeSinceLastTick,
-      actionSub2.x + ((actionSub1.x - actionSub2.x) / Game.tickRate) * timeSinceLastTick
-    );
-*/
-    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / Game.tickRate);
-    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / Game.tickRate);
+    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * ((+new Date() - this.lastSendActionTime) / Game.tickRate);
+    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * ((+new Date() - this.lastSendActionTime) / Game.tickRate);
   }
 
   serverTick(currentServerTick: number): void {
@@ -153,5 +145,6 @@ export class LivePlayerEntity extends PlayerEntity {
     this.addAction(action);
     this.serverX = action.x;
     this.serverY = action.y;
+    this.lastSendActionTime = +new Date();
   }
 }

@@ -18,6 +18,8 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
   protected shotStrength: number;
   protected shootEveryTick: number;
 
+  protected msg: string;
+
   bufferedActions: Action[] = [];
   addAction(action: Action) {
     this.bufferedActions.push(action);
@@ -101,8 +103,8 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
       return;
     }
 
-    this.x = this.x + (actionSub1.x - this.x) * (timeSinceLastServerTick / Game.tickRate);
-    this.y = this.y + (actionSub1.y - this.y) * (timeSinceLastServerTick / Game.tickRate);
+    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / Game.tickRate);
+    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / Game.tickRate);
   }
 
   draw(context: CanvasRenderingContext2D) {
@@ -111,6 +113,9 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     context.fillStyle = 'white';
     context.font = '20px Arial';
     context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
+    if (this.msg) {
+      context.fillText(`${this.msg}`, 0, 80);
+    }
     context.fillStyle = this.color;
     context.fillRect(x - 10, y - 10, 20, 20);
   }

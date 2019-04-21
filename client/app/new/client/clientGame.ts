@@ -50,7 +50,6 @@ export class ClientGame extends Game {
     if (this.liveEntity) {
       this.liveEntity.serverTick(this.currentServerTick);
     }
-    this.lastServerTick = +new Date();
   }
 
   private onServerMessage(message: ServerMessage) {
@@ -61,6 +60,7 @@ export class ClientGame extends Game {
         break;
       case 'worldState':
         this.setServerState(message.state);
+        this.lastServerTick = +new Date();
         break;
       case 'action':
         this.unprocessedActions.push(message.action);
