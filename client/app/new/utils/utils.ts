@@ -1,4 +1,4 @@
-import {ISolidEntity} from '../base/entity';
+import {ISolidEntity} from '../base/entities/ISolidEntity';
 
 export class Utils {
   static generateId(): string {

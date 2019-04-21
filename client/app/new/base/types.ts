@@ -1,54 +1,63 @@
-export enum ActionType {
-  Left = 'left',
-  Right = 'right',
-  Up = 'up',
-  Down = 'down',
-  Shoot = 'shoot',
-  Bomb = 'bomb',
-}
-
-export enum ActionSubType {
-  Other = 'other',
-  Up = 'up',
-  Down = 'down',
-}
-
-export interface Action {
-  actionType: ActionType;
-  actionSubType: ActionSubType;
+export type Action = {
   actionTick: number;
   entityId: string;
   x: number;
   y: number;
-}
+} & ({
+  controls: {
+    left: boolean;
+    right: boolean;
+    down: boolean;
+    up: boolean;
+    shoot: boolean;
+  };
+});
 
-export interface WorldState {
-  entities: SerializedEntity[];
-  currentTick: number;
-  resync: boolean;
-}
+export type WorldState = {
+  serverTick: number;
+} & (
+  | {
+      resync: true;
+      entities: SerializedEntity[];
+    }
+  | {
+      resync: false;
+      entities: LightSerializedEntity[];
+    });
 
 export type EntityOptions = {id: string; x: number; y: number};
+export type LightEntityOptions = {id: string; x: number; y: number};
+
 export type PlayerEntityOptions = EntityOptions & {
   type: 'player';
   color: string;
-  lastDownAction: {[action in ActionType]?: Action};
+  bufferedActions: Action[];
   speedPerSecond: number;
   shotStrength: number;
   shootEveryTick: number;
   shotSpeedPerSecond: number;
 };
+export type LightPlayerEntityOptions = {
+  type: 'player';
+  bufferedActions: Action[];
+};
+
 export type ShotEntityOptions = EntityOptions & {
   type: 'shot';
   strength: number;
   tickCreated: number;
   ownerId?: string;
-  initialY: number;
   shotSpeedPerSecond: number;
 };
+
+export type LightShotEntityOptions = {type: 'shot'};
+
 export type EnemyEntityOptions = EntityOptions & {type: 'enemy'; health: number; color: string};
+export type LightEnemyEntityOptions = {type: 'enemy'; health: number};
 
 export type SerializedEntity = EntityOptions & (PlayerEntityOptions | ShotEntityOptions | EnemyEntityOptions);
+export type LightSerializedEntity = LightEntityOptions &
+  (LightPlayerEntityOptions | LightShotEntityOptions | LightEnemyEntityOptions);
 
 export type ServerMessage =
   | {

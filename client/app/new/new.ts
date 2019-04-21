@@ -1,3 +1,4 @@
+import {Game} from './base/game';
 import {ClientGame} from './client/clientGame';
 import {Server} from './server/server';
 
@@ -14,7 +15,7 @@ export class Start {
     contexts.push(canvas.getContext('2d')!);
     document.body.appendChild(canvas);
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 2; i++) {
       const client = new ClientGame();
       client.join();
       clients.push(client);
@@ -25,18 +26,18 @@ export class Start {
       document.body.appendChild(clientCanvas);
     }
 
-    false &&
-      setInterval(() => {
-        const client = new ClientGame();
-        client.join();
-        clients.push(client);
-        const clientCanvas = document.createElement('canvas');
-        clientCanvas.style.border = 'solid 2px white';
-        clientCanvas.height = clientCanvas.width = 500;
-        contexts.push(clientCanvas.getContext('2d')!);
-        document.body.appendChild(clientCanvas);
-      }, Math.random() * 5000 + 1000);
-
+    /*
+    setInterval(() => {
+      const client = new ClientGame();
+      client.join();
+      clients.push(client);
+      const clientCanvas = document.createElement('canvas');
+      clientCanvas.style.border = 'solid 2px white';
+      clientCanvas.height = clientCanvas.width = 500;
+      contexts.push(clientCanvas.getContext('2d')!);
+      document.body.appendChild(clientCanvas);
+    }, 5000);
+*/
     let lastTick = +new Date();
     setInterval(() => {
       const curTick = +new Date();
@@ -45,6 +46,12 @@ export class Start {
       }
       lastTick = curTick;
     }, 16);
+
+    setInterval(() => {
+      for (const client of clients) {
+        client.lockTick();
+      }
+    }, Game.tickRate);
 
     setInterval(() => {
       contexts[0].clearRect(0, 0, 500, 500);
@@ -71,6 +78,7 @@ export class Start {
             client.liveEntity.releaseLeft();
             client.liveEntity.releaseRight();
             client.liveEntity.releaseUp();
+            client.liveEntity.releaseShoot();
             client.liveEntity.releaseDown();
           }
         }
@@ -138,6 +146,12 @@ export class Start {
               client.liveEntity.pressDown();
             }
           }
+        }
+        if (Math.random() * 1000 < 100) {
+          client.liveEntity.pressShoot();
+        }
+        if (Math.random() * 1000 < 100) {
+          client.liveEntity.releaseShoot();
         }
       }
     }, 500);

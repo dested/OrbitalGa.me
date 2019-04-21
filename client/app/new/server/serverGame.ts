@@ -1,31 +1,28 @@
-import {EnemyEntity} from '../base/entity';
+import {EnemyEntity} from '../base/entities/enemyEntity';
+import {PlayerEntity} from '../base/entities/playerEntity';
+import {ShotEntity} from '../base/entities/shotEntity';
 import {Game} from '../base/game';
-import {WorldState} from '../base/types';
+import {Action, WorldState} from '../base/types';
 import {Socket} from '../socket';
 import {Utils} from '../utils/utils';
 
 export class ServerGame extends Game {
-  private lastResyncTick: number;
-
-  tick(timeSinceLastTick: number) {
-    const currentServerTick = this.currentServerTick;
+  serverTick: number = 0;
+  unprocessedActions: Action[] = [];
+  lockTick() {
+    this.serverTick++;
 
     for (const action of this.unprocessedActions) {
       const entity = this.playerEntities.find(a => a.id === action.entityId);
       if (entity) {
-        if (entity.handleAction(action, currentServerTick)) {
-          for (const otherClient of this.playerEntities) {
-            if (entity.id !== otherClient.id) {
-              Socket.sendToClient(otherClient.id, {action, messageType: 'action'});
-            }
-          }
-        }
+        // todo validate tick is not more than 1 tick int eh past
+        entity.addAction(action);
       }
     }
 
     this.unprocessedActions.length = 0;
 
-    if (currentServerTick / 10000 > this.nonPlayerEntities.filter(a => a instanceof EnemyEntity).length) {
+    if (this.serverTick % 100 === 1) {
       this.addEntity(
         new EnemyEntity(this, {
           x: parseInt((Math.random() * 500).toFixed()),
@@ -38,39 +35,53 @@ export class ServerGame extends Game {
       );
     }
 
-    const tickSplit = timeSinceLastTick / 5;
-    for (let t = tickSplit; t <= timeSinceLastTick; t += tickSplit) {
-      for (const entity of this.entities) {
-        entity.tick(tickSplit, currentServerTick - timeSinceLastTick + t);
-        entity.updatePolygon();
-      }
-      this.checkCollisions();
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
+      entity.serverTick(this.serverTick);
+      entity.updatePolygon();
     }
-
+    this.checkCollisions(false);
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      if (this.entities[i].willDestroy) {
+        this.entities[i].destroy();
+      }
+    }
     this.sendWorldState();
   }
 
   getWorldState(resync: boolean): WorldState {
-    return {
-      entities: this.entities.map(c => c.serialize()),
-      currentTick: this.currentServerTick,
-      resync,
-    };
+    if (resync) {
+      return {
+        entities: this.entities
+          .filter(a => a instanceof PlayerEntity || a instanceof EnemyEntity)
+          .map(c => c.serialize()),
+        serverTick: this.serverTick,
+        resync: true,
+      };
+    } else {
+      return {
+        entities: this.entities
+          .filter(a => a instanceof PlayerEntity || a instanceof EnemyEntity)
+          .map(c => c.serializeLight()),
+        serverTick: this.serverTick,
+        resync: false,
+      };
+    }
   }
 
   sendWorldState() {
     // let shouldResync = (this.currentTick - this.lastResyncTick) > Server.resyncInterval;
-    const shouldResync = false;
-    if (shouldResync) {
-      this.lastResyncTick = this.currentServerTick;
-    }
+    const worldState = this.getWorldState(true);
+    // console.log(worldState);
     for (const client of this.playerEntities) {
-      Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState(shouldResync)});
+      Socket.sendToClient(client.id, {messageType: 'worldState', state: worldState});
     }
   }
 
   debugDraw(context: CanvasRenderingContext2D) {
-    context.fillText((Math.round(this.currentServerTick / 100) * 100).toFixed(0), 400, 20);
+    context.fillStyle = 'white';
+    context.fillText(this.serverTick.toString(), 400, 20);
+    context.fillText(this.entities.length.toString(), 400, 50);
     for (const entity of this.entities) {
       entity.draw(context);
     }

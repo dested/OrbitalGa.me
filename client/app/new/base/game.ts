@@ -1,13 +1,13 @@
-import {Collisions, Result} from 'collisions';
-import {GameEntity, PlayerEntity} from './entity';
-import {Action} from './types';
+import {Collisions, Polygon, Result} from 'collisions';
+import {GameEntity} from './entities/gameEntity';
+import {PlayerEntity} from './entities/playerEntity';
 
 export class Game {
-  protected serverTick: number = 0;
-  protected offsetTick: number = +new Date();
+  static tickRate = 50;
+
   collisionEngine: Collisions;
   entities: GameEntity[] = [];
-  private readonly collisionResult: Result;
+  readonly collisionResult: Result;
 
   get playerEntities(): PlayerEntity[] {
     return this.entities.filter(a => a instanceof PlayerEntity).map(a => a as PlayerEntity);
@@ -21,44 +21,23 @@ export class Game {
 
   constructor() {
     this.collisionEngine = new Collisions();
+    const boardSize = 500;
+    this.collisionEngine.insert(new Polygon(-20, 0, [[0, 0], [20, 0], [20, boardSize], [0, boardSize]]));
+    this.collisionEngine.insert(new Polygon(boardSize, 0, [[0, 0], [20, 0], [20, boardSize], [0, boardSize]]));
+    this.collisionEngine.insert(new Polygon(0, -20, [[0, 0], [0, 20], [boardSize, 20], [boardSize, 0]]));
+    this.collisionEngine.insert(new Polygon(0, boardSize, [[0, 0], [0, 20], [boardSize, 20], [boardSize, 0]]));
     this.collisionResult = this.collisionEngine.createResult();
   }
 
-  unprocessedActions: Action[] = [];
-
-  get currentServerTick() {
-    return this.serverTick + (+new Date() - this.offsetTick);
-  }
-
-  tick(timeSinceLastTick: number) {
-    for (const action of this.unprocessedActions) {
-      const entity = this.entities.find(a => a.id === action.entityId) as PlayerEntity;
-      if (entity) {
-        entity.handleAction(action, this.currentServerTick);
-      }
-    }
-
-    this.unprocessedActions.length = 0;
-
-    for (const entity of this.entities) {
-      entity.tick(timeSinceLastTick, this.currentServerTick);
-      entity.updatePolygon();
-    }
-    this.checkCollisions();
-  }
-
-  protected checkCollisions() {
+  protected checkCollisions(solidOnly: boolean) {
     this.collisionEngine.update();
 
-    for (const entity of this.entities) {
-      const potentials = entity.polygon!.potentials();
-      for (const body of potentials) {
-        if (entity.polygon && entity.polygon.collides(body, this.collisionResult)) {
-          if (entity.collide((body as any).entity, this.collisionResult)) {
-            break;
-          }
-        }
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
+      if (!entity) {
+        continue;
       }
+      entity.checkCollisions(solidOnly);
     }
   }
 
