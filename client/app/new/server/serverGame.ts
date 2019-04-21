@@ -1,4 +1,4 @@
-import {EnemyEntity} from '../base/entity';
+import {EnemyEntity} from '../base/entities/enemyEntity';
 import {Game} from '../base/game';
 import {WorldState} from '../base/types';
 import {Socket} from '../socket';
@@ -10,7 +10,12 @@ export class ServerGame extends Game {
   tick(timeSinceLastTick: number) {
     const currentServerTick = this.currentServerTick;
 
+    for (const playerEntity of this.playerEntities) {
+      playerEntity.lastDownAction = {};
+    }
+
     for (const action of this.unprocessedActions) {
+      debugger;
       const entity = this.playerEntities.find(a => a.id === action.entityId);
       if (entity) {
         if (entity.handleAction(action, currentServerTick)) {
@@ -40,7 +45,8 @@ export class ServerGame extends Game {
 
     const tickSplit = timeSinceLastTick / 5;
     for (let t = tickSplit; t <= timeSinceLastTick; t += tickSplit) {
-      for (const entity of this.entities) {
+      for (let i = this.entities.length - 1; i >= 0; i--) {
+        const entity = this.entities[i];
         entity.tick(tickSplit, currentServerTick - timeSinceLastTick + t);
         entity.updatePolygon();
       }
@@ -64,8 +70,10 @@ export class ServerGame extends Game {
     if (shouldResync) {
       this.lastResyncTick = this.currentServerTick;
     }
+    const worldState = this.getWorldState(shouldResync);
+    console.log(worldState);
     for (const client of this.playerEntities) {
-      Socket.sendToClient(client.id, {messageType: 'worldState', state: this.getWorldState(shouldResync)});
+      Socket.sendToClient(client.id, {messageType: 'worldState', state: worldState});
     }
   }
 

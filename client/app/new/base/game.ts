@@ -1,5 +1,9 @@
 import {Collisions, Result} from 'collisions';
-import {GameEntity, PlayerEntity} from './entity';
+import {Simulate} from 'react-dom/test-utils';
+import {GameEntity} from './entities/gameEntity';
+import play = Simulate.play;
+import {LivePlayerEntity} from './entities/livePlayerEntity';
+import {PlayerEntity} from './entities/playerEntity';
 import {Action} from './types';
 
 export class Game {
@@ -31,6 +35,20 @@ export class Game {
   }
 
   tick(timeSinceLastTick: number) {
+    for (const entity of this.entities) {
+      entity.tick(timeSinceLastTick, this.currentServerTick);
+      entity.updatePolygon();
+    }
+    this.checkCollisions();
+  }
+
+  lockTick() {
+    for (const playerEntity of this.playerEntities) {
+      if (!(playerEntity instanceof LivePlayerEntity)) {
+        playerEntity.lastDownAction = {};
+      }
+    }
+
     for (const action of this.unprocessedActions) {
       const entity = this.entities.find(a => a.id === action.entityId) as PlayerEntity;
       if (entity) {
@@ -41,20 +59,19 @@ export class Game {
     this.unprocessedActions.length = 0;
 
     for (const entity of this.entities) {
-      entity.tick(timeSinceLastTick, this.currentServerTick);
+      entity.lockTick(this.currentServerTick);
       entity.updatePolygon();
     }
-    this.checkCollisions();
   }
 
   protected checkCollisions() {
     this.collisionEngine.update();
 
     for (const entity of this.entities) {
-      const potentials = entity.polygon!.potentials();
+      const potentials = entity.polygon.potentials();
       for (const body of potentials) {
         if (entity.polygon && entity.polygon.collides(body, this.collisionResult)) {
-          if (entity.collide((body as any).entity, this.collisionResult)) {
+          if (entity.collide(body.entity, this.collisionResult)) {
             break;
           }
         }

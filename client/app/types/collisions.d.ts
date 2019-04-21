@@ -1,3 +1,4 @@
+//tslint:disable
 declare module 'collisions' {
   /**
    * The base class for bodies used to detect collisions

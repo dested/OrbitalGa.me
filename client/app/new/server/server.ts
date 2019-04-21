@@ -1,4 +1,4 @@
-import {PlayerEntity} from '../base/entity';
+import {PlayerEntity} from '../base/entities/playerEntity';
 import {Socket} from '../socket';
 import {ServerGame} from './serverGame';
 

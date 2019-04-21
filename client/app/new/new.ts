@@ -47,6 +47,14 @@ export class Start {
     }, 16);
 
     setInterval(() => {
+      const curTick = +new Date();
+      for (const client of clients) {
+        client.lockTick();
+      }
+      lastTick = curTick;
+    }, 100);
+
+    setInterval(() => {
       contexts[0].clearRect(0, 0, 500, 500);
       server.game.debugDraw(contexts[0]);
 

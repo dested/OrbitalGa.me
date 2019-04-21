@@ -1,4 +1,7 @@
-import {EnemyEntity, LivePlayerEntity, PlayerEntity, ShotEntity} from '../base/entity';
+import {EnemyEntity} from '../base/entities/enemyEntity';
+import {LivePlayerEntity} from '../base/entities/livePlayerEntity';
+import {PlayerEntity} from '../base/entities/playerEntity';
+import {ShotEntity} from '../base/entities/shotEntity';
 import {Game} from '../base/game';
 import {Action, ServerMessage, WorldState} from '../base/types';
 import {Socket, SocketClient} from '../socket';
@@ -49,6 +52,7 @@ export class ClientGame extends Game {
   private setServerState(state: WorldState, myEntityId?: string) {
     for (const entity of state.entities) {
       let liveEntity = this.entities.find(a => a.id === entity.id);
+      let updatePosition = true;
       switch (entity.type) {
         case 'player': {
           if (!liveEntity) {
@@ -68,6 +72,7 @@ export class ClientGame extends Game {
             liveEntity = new ShotEntity(this, entity);
             this.entities.push(liveEntity);
           }
+          updatePosition = false;
           break;
         }
         case 'enemy': {
@@ -78,7 +83,7 @@ export class ClientGame extends Game {
           break;
         }
       }
-      if (liveEntity) {
+      if (liveEntity && updatePosition) {
         if (state.resync) {
           liveEntity.x = entity.x;
           liveEntity.y = entity.y;

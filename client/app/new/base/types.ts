@@ -4,18 +4,10 @@ export enum ActionType {
   Up = 'up',
   Down = 'down',
   Shoot = 'shoot',
-  Bomb = 'bomb',
-}
-
-export enum ActionSubType {
-  Other = 'other',
-  Up = 'up',
-  Down = 'down',
 }
 
 export interface Action {
   actionType: ActionType;
-  actionSubType: ActionSubType;
   actionTick: number;
   entityId: string;
   x: number;
@@ -43,7 +35,6 @@ export type ShotEntityOptions = EntityOptions & {
   strength: number;
   tickCreated: number;
   ownerId?: string;
-  initialY: number;
   shotSpeedPerSecond: number;
 };
 export type EnemyEntityOptions = EntityOptions & {type: 'enemy'; health: number; color: string};
