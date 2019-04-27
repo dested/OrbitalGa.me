@@ -22,10 +22,11 @@ export class Game {
   constructor() {
     this.collisionEngine = new Collisions();
     const boardSize = 500;
-    this.collisionEngine.insert(new Polygon(-20, 0, [[0, 0], [20, 0], [20, boardSize], [0, boardSize]]));
-    this.collisionEngine.insert(new Polygon(boardSize, 0, [[0, 0], [20, 0], [20, boardSize], [0, boardSize]]));
-    this.collisionEngine.insert(new Polygon(0, -20, [[0, 0], [0, 20], [boardSize, 20], [boardSize, 0]]));
-    this.collisionEngine.insert(new Polygon(0, boardSize, [[0, 0], [0, 20], [boardSize, 20], [boardSize, 0]]));
+    const buffer = 100;
+    this.collisionEngine.insert(new Polygon(-buffer, 0, [[0, 0], [buffer, 0], [buffer, boardSize], [0, boardSize]]));
+    this.collisionEngine.insert(new Polygon(boardSize, 0, [[0, 0], [buffer, 0], [buffer, boardSize], [0, boardSize]]));
+    this.collisionEngine.insert(new Polygon(0, -buffer, [[0, 0], [0, buffer], [boardSize, buffer], [boardSize, 0]]));
+    this.collisionEngine.insert(new Polygon(0, boardSize, [[0, 0], [0, buffer], [boardSize, buffer], [boardSize, 0]]));
     this.collisionResult = this.collisionEngine.createResult();
   }
 

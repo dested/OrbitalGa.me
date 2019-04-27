@@ -6,7 +6,7 @@ export class Utils {
   }
 
   static isSolidEntity(otherEntity: any): otherEntity is ISolidEntity {
-    return (otherEntity as any).solid;
+    return !otherEntity || (otherEntity as any).solid;
   }
 
   static round(value: number, decimals: number) {

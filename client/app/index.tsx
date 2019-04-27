@@ -6,7 +6,9 @@ import GameUI from './views/gameUI/gameUI';
 Start.start();
 /*
 
-every 100ms
+  if you kill a thing it doesnt die yet
+  support for mouse click movement
+  migrate to node
 
 */
 /* 

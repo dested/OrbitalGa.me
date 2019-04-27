@@ -26,8 +26,22 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     this.bufferedActions = this.bufferedActions.filter(a => a.actionTick >= action.actionTick - 5);
   }
 
-  get latestAction() {
-    return this.bufferedActions.slice(-1)[0];
+  get latestAction(): Action {
+    return (
+      this.bufferedActions.slice(-1)[0] || {
+        x: this.x,
+        y: this.y,
+        controls: {
+          shoot: false,
+          down: false,
+          up: false,
+          right: false,
+          left: false,
+        },
+        actionTick: 0,
+        entityId: this.id,
+      }
+    );
   }
 
   updatePolygon(action: Action = this.latestAction): void {
@@ -50,6 +64,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
       shotStrength: this.shotStrength,
       shootEveryTick: this.shootEveryTick,
       shotSpeedPerSecond: this.shotSpeedPerSecond,
+      isClient: false,
     };
   }
 
@@ -120,6 +135,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
           id: Utils.generateId(),
           type: 'shot',
           shotSpeedPerSecond: this.shotSpeedPerSecond,
+          isClient: this.isClient,
         });
         this.game.addEntity(shotEntity);
       }
@@ -151,6 +167,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
           id: Utils.generateId(),
           type: 'shot',
           shotSpeedPerSecond: this.shotSpeedPerSecond,
+          isClient: this.isClient,
         });
         this.game.addEntity(shotEntity);
       }

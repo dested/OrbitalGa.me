@@ -9,8 +9,6 @@ export interface SocketClient {
 }
 
 export class Socket {
-  static ServerLatency = 200;
-
   static sockets: SocketClient[] = [];
   private static onServerMessage: (clientId: string, message: ServerMessage) => void;
 
@@ -19,7 +17,7 @@ export class Socket {
   static clientJoin(onMessage: (message: ServerMessage) => void) {
     const client = {
       id: Utils.generateId(),
-      latency: Math.random() * 500 + 300,
+      latency: Math.random() * 50 + 50,
       onMessage,
       sendToServer: (message: ServerMessage) => {
         this.sendToServer(client.id, client.latency, message);

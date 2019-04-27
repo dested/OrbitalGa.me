@@ -73,6 +73,7 @@ export class ShotEntity extends GameEntity {
       tickCreated: this.tickCreated,
       ownerId: this.ownerId!,
       shotSpeedPerSecond: this.shotSpeedPerSecond,
+      isClient: false,
     };
   }
 

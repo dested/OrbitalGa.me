@@ -9,12 +9,7 @@ export class LivePlayerEntity extends PlayerEntity {
   private lastSendActionTime: number = 0;
   constructor(game: ClientGame, options: PlayerEntityOptions) {
     super(game, options);
-    this.serverX = this.x;
-    this.serverY = this.y;
   }
-
-  serverX: number;
-  serverY: number;
 
   game: ClientGame;
 
@@ -114,21 +109,14 @@ export class LivePlayerEntity extends PlayerEntity {
 
     const action = {
       controls,
-      x: this.serverX,
-      y: this.serverY,
+      x: this.latestAction.x,
+      y: this.latestAction.y,
       entityId: this.id,
       actionTick: currentServerTick,
     };
     this.game.sendAction({...action});
     this.processAction(action);
     this.addAction(action);
-    if (controls.left || controls.right || controls.up || controls.down) {
-      this.game.collisionEngine.update();
-      this.updatePolygon();
-      this.checkCollisions(true);
-      this.serverX = action.x;
-      this.serverY = action.y;
-    }
     this.lastSendActionTime = +new Date();
   }
 }

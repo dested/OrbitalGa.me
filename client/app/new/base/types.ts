@@ -25,7 +25,7 @@ export type WorldState = {
       entities: LightSerializedEntity[];
     });
 
-export type EntityOptions = {id: string; x: number; y: number};
+export type EntityOptions = {id: string; x: number; y: number; isClient: boolean};
 export type LightEntityOptions = {id: string; x: number; y: number};
 
 export type PlayerEntityOptions = EntityOptions & {

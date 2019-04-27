@@ -41,6 +41,7 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
       id: this.id,
       color: this.color,
       health: this.health,
+      isClient: false,
     };
   }
 
@@ -85,8 +86,12 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
     }
     return false;
   }
+
   queueDestroy(): void {
-    debugger;
-    this.willDestroy = true;
+    if (this.isClient) {
+      this.clientDeath = true;
+    } else {
+      this.willDestroy = true;
+    }
   }
 }

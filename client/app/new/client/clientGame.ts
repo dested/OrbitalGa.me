@@ -40,6 +40,9 @@ export class ClientGame extends Game {
   tick(timeSinceLastTick: number) {
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities[i];
+      if (entity.clientDeath) {
+        continue;
+      }
       entity.tick(timeSinceLastTick, +new Date() - this.lastServerTick, this.currentServerTick);
       entity.updatePolygon();
     }
@@ -90,13 +93,12 @@ export class ClientGame extends Game {
         case 'player': {
           if (!entity) {
             if (myEntityId === stateEntity.id) {
-              entity = new LivePlayerEntity(this, stateEntity);
+              entity = new LivePlayerEntity(this, {...stateEntity, isClient: true});
             } else {
-              entity = new PlayerEntity(this, stateEntity);
+              entity = new PlayerEntity(this, {...stateEntity, isClient: true});
             }
             this.entities.push(entity);
           }
-          // todo if live then interpolate
           if (entity instanceof LivePlayerEntity) {
           } else {
             (entity as PlayerEntity).bufferedActions = stateEntity.bufferedActions;
@@ -105,14 +107,14 @@ export class ClientGame extends Game {
         }
         case 'shot': {
           if (!entity) {
-            entity = new ShotEntity(this, stateEntity);
+            entity = new ShotEntity(this, {...stateEntity, isClient: true});
             this.entities.push(entity);
           }
           break;
         }
         case 'enemy': {
           if (!entity) {
-            entity = new EnemyEntity(this, stateEntity);
+            entity = new EnemyEntity(this, {...stateEntity, isClient: true});
             this.entities.push(entity);
           }
           break;
@@ -150,6 +152,9 @@ export class ClientGame extends Game {
       context.fillText(this.entities.length.toString(), 400, 50);
     }
     for (const entity of this.entities) {
+      if (entity.clientDeath) {
+        continue;
+      }
       entity.draw(context);
     }
   }

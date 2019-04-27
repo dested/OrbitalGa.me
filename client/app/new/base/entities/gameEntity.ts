@@ -6,24 +6,31 @@ import {EntityOptions, LightSerializedEntity, SerializedEntity} from '../types';
 export abstract class GameEntity {
   polygon: Polygon | null;
   willDestroy: boolean;
+  clientDeath: boolean;
 
   protected constructor(protected game: Game, options: EntityOptions) {
     this.id = options.id;
     this.x = options.x;
     this.y = options.y;
+    this.isClient = options.isClient;
   }
 
   x: number;
   y: number;
   id: string;
+  isClient: boolean;
 
   abstract serialize(): SerializedEntity;
   abstract serializeLight(): LightSerializedEntity;
 
   destroy(): void {
-    this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
-    this.game.collisionEngine.remove(this.polygon!);
-    this.polygon = null;
+    if (!this.clientDeath) {
+      this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
+    }
+    if (this.polygon) {
+      this.game.collisionEngine.remove(this.polygon!);
+      this.polygon = null;
+    }
   }
 
   queueDestroy(): void {
