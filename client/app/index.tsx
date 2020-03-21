@@ -6,7 +6,7 @@ import GameUI from './views/gameUI/gameUI';
 AssetManager.addAsset('ship1', './assets/ships/ship1.png', {width: 64, height: 48}, {x: 0, y: 0});
 AssetManager.addAsset('ship2', './assets/ships/ship2.png', {width: 64, height: 48}, {x: 0, y: 0});
 AssetManager.start();
-Start.start();
+// Start.start();
 /*
 
   if you kill a thing it doesnt die yet
@@ -14,7 +14,6 @@ Start.start();
   migrate to node
 
 */
-/* 
 
 
 
@@ -22,4 +21,3 @@ Start.start();
 
 render(<GameUI/>, document.getElementById('content'));
 
- */
