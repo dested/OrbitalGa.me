@@ -1,5 +1,5 @@
 export class GameConstants {
   static debug = false;
   static binaryTransport = false;
-  static tickRate = 500;
+  static tickRate = 50;
 }

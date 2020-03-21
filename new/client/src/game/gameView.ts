@@ -104,6 +104,9 @@ export class GameView {
     localStorage.setItem('view-x' + this.canvas.id, this.x.toString());
     localStorage.setItem('view-y' + this.canvas.id, this.y.toString());
   }
+  setCenterPosition(x: number, y: number) {
+    this.setPosition(x - this.width / 2, y - this.height / 2);
+  }
 
   offsetPosition(x: number, y: number) {
     this.setPosition(this.x + x, this.y + y);
