@@ -5,8 +5,10 @@ import {Action, LightSerializedEntity, PlayerEntityOptions, SerializedEntity, Wo
 import {GameEntity} from './gameEntity';
 import {ISolidEntity} from './ISolidEntity';
 import {ShotEntity} from './shotEntity';
+import {GameConstants} from '../gameConstants';
 
 export class PlayerEntity extends GameEntity implements ISolidEntity {
+  draw(context: CanvasRenderingContext2D): void {}
   shotSpeedPerSecond = 0;
 
   shipType: string;
@@ -147,17 +149,17 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
 
   processAction(action: Action) {
     if (action.controls.left) {
-      action.x -= (Game.tickRate / 1000) * this.speedPerSecond;
+      action.x -= (GameConstants.tickRate / 1000) * this.speedPerSecond;
     }
     if (action.controls.right) {
-      action.x += (Game.tickRate / 1000) * this.speedPerSecond;
+      action.x += (GameConstants.tickRate / 1000) * this.speedPerSecond;
     }
 
     if (action.controls.up) {
-      action.y -= (Game.tickRate / 1000) * this.speedPerSecond;
+      action.y -= (GameConstants.tickRate / 1000) * this.speedPerSecond;
     }
     if (action.controls.down) {
-      action.y += (Game.tickRate / 1000) * this.speedPerSecond;
+      action.y += (GameConstants.tickRate / 1000) * this.speedPerSecond;
     }
     if (action.controls.shoot) {
       if (action.actionTick % this.shootEveryTick === 0) {
@@ -182,23 +184,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     if (!actionSub2 || !actionSub1) {
       return;
     }
-    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / Game.tickRate);
-    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / Game.tickRate);
-  }
-
-  draw(context: CanvasRenderingContext2D) {
-    const x = this.x;
-    const y = this.y;
-    context.fillStyle = 'white';
-    context.font = '20px Arial';
-    // context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
-    if (this.msg) {
-      context.fillText(`${this.msg}`, 0, 80);
-    }
-    const ship = AssetManager.assets[this.shipType];
-    context.drawImage(ship.image, x - ship.size.width / 2, y - ship.size.height / 2);
-
-    // context.fillStyle = this.color;
-    // context.fillRect(x - 10, y - 10, 20, 20);
+    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / GameConstants.tickRate);
+    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / GameConstants.tickRate);
   }
 }

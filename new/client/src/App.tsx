@@ -1,11 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {AnimationUtils} from '../../common/src/utils/animationUtils';
-import {ServerGame} from '../../server/src/game/serverGame';
 import './App.css';
 import {ClientGameUI} from './game/clientGameUI';
 import {ClientSocket} from './clientSocket';
-import {ClientGame} from './game/clientGame';
-import {Utils} from '../../common/src/utils/utils';
 
 const App: React.FC<{width: number; height: number}> = props => {
   const client = useRef<ClientGameUI>(null);
@@ -16,7 +12,7 @@ const App: React.FC<{width: number; height: number}> = props => {
   }, []);
 
   function connect() {
-    (client as React.MutableRefObject<ClientGameUI>).current = new ClientGameUI(
+    client.current = new ClientGameUI(
       {
         onDied: () => {
           setDied(true);

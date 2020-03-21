@@ -4,8 +4,11 @@ import './index.css';
 import App from './App';
 import {AssetManager} from './utils/assetManager';
 
-AssetManager.addAsset('ship1', './assets/ships/ship1.png', {width: 64, height: 48}, {x: 0, y: 0});
-AssetManager.addAsset('ship2', './assets/ships/ship2.png', {width: 64, height: 48}, {x: 0, y: 0});
+import ship1 from './assets/ships/ship1.png';
+import ship2 from './assets/ships/ship2.png';
+
+AssetManager.addAsset('ship1', ship1, {width: 64, height: 48}, {x: 0, y: 0});
+AssetManager.addAsset('ship2', ship2, {width: 64, height: 48}, {x: 0, y: 0});
 AssetManager.start();
 
 ReactDOM.render(

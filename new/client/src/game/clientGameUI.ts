@@ -47,6 +47,36 @@ export class ClientGameUI extends ClientGame {
 
     manager.on('doubletap', e => {});
 
+    document.onkeydown = e => {
+      if (e.keyCode === 65) {
+        this.liveEntity.pressShoot();
+      }
+      if (e.keyCode === 38) {
+        this.liveEntity.pressUp();
+      } else if (e.keyCode === 40) {
+        this.liveEntity.pressDown();
+      } else if (e.keyCode === 37) {
+        this.liveEntity.pressLeft();
+      } else if (e.keyCode === 39) {
+        this.liveEntity.pressRight();
+      }
+      e.preventDefault();
+    };
+    document.onkeyup = e => {
+      if (e.keyCode === 65) {
+        this.liveEntity.releaseShoot();
+      }
+      if (e.keyCode === 38) {
+        this.liveEntity.releaseUp();
+      } else if (e.keyCode === 40) {
+        this.liveEntity.releaseDown();
+      } else if (e.keyCode === 37) {
+        this.liveEntity.releaseLeft();
+      } else if (e.keyCode === 39) {
+        this.liveEntity.releaseRight();
+      }
+    };
+
     const requestNextFrame = () => {
       requestAnimationFrame(() => {
         this.draw();
@@ -68,7 +98,7 @@ export class ClientGameUI extends ClientGame {
       return;
     }
     context.save();
-
+    super.draw(context);
     context.restore();
   }
 }

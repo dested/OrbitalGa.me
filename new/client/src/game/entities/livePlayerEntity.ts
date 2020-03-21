@@ -1,17 +1,16 @@
-import {Utils} from '../../utils/utils';
-import {Game} from '../game';
-import {PlayerEntityOptions} from '../types';
-import {PlayerEntity} from './playerEntity';
-import {ShotEntity} from './shotEntity';
+import {Game} from '../../../../common/src/game/game';
+import {PlayerEntityOptions} from '../../../../common/src/game/types';
+import {ClientGame} from '../clientGame';
+import {PlayerEntity} from '../../../../common/src/game/entities/playerEntity';
+import {GameConstants} from '../../../../common/src/game/gameConstants';
+import {PlayerEntityClient} from './playerEntityClient';
 
-export class LivePlayerEntity extends PlayerEntity {
+export class LivePlayerEntity extends PlayerEntityClient {
   private lastSendActionTime: number = 0;
   private lastActionChanged: boolean;
-  constructor(game: ClientGame, options: PlayerEntityOptions) {
+  constructor(protected game: ClientGame, options: PlayerEntityOptions) {
     super(game, options);
   }
-
-  game: ClientGame;
 
   pressingLeft = false;
   pressingRight = false;
@@ -78,8 +77,10 @@ export class LivePlayerEntity extends PlayerEntity {
     if (!actionSub1) {
       return;
     }
-    this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * ((+new Date() - this.lastSendActionTime) / Game.tickRate);
-    this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * ((+new Date() - this.lastSendActionTime) / Game.tickRate);
+    this.x =
+      actionSub2.x + (actionSub1.x - actionSub2.x) * ((+new Date() - this.lastSendActionTime) / GameConstants.tickRate);
+    this.y =
+      actionSub2.y + (actionSub1.y - actionSub2.y) * ((+new Date() - this.lastSendActionTime) / GameConstants.tickRate);
   }
 
   lockTick(currentServerTick: number): void {

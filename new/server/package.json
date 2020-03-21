@@ -12,7 +12,8 @@
     "deploy": "yarn build-prod & eb deploy"
   },
   "dependencies": {
-    "ws": "^7.2.1"
+    "ws": "^7.2.1",
+    "collisions": "^2.0.13"
   },
   "devDependencies": {
     "@types/node": "13.9.2",

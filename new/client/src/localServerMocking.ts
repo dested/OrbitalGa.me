@@ -1,3 +1,5 @@
+export const foo = 1;
+/*
 import {GameConstants} from '../../common/src/game/gameConstants';
 import {ClientToServerMessage, ServerToClientMessage} from '../../common/src/models/messages';
 import {ClientToServerMessageParser} from '../../common/src/parsers/clientToServerMessageParser';
@@ -167,3 +169,4 @@ export class LocalClientSocket implements IClientSocket {
     this.socket?.close();
   }
 }
+*/

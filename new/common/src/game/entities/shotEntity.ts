@@ -4,6 +4,7 @@ import {LightSerializedEntity, SerializedEntity, ShotEntityOptions} from '../typ
 import {EnemyEntity} from './enemyEntity';
 import {GameEntity} from './gameEntity';
 import {PlayerEntity} from './playerEntity';
+import {GameConstants} from '../gameConstants';
 
 export class ShotEntity extends GameEntity {
   shotSpeedPerSecond: number;
@@ -36,7 +37,7 @@ export class ShotEntity extends GameEntity {
       this.queueDestroy();
       return;
     } else {
-      this.y -= (Game.tickRate / 1000) * this.shotSpeedPerSecond;
+      this.y -= (GameConstants.tickRate / 1000) * this.shotSpeedPerSecond;
     }
   }
 
