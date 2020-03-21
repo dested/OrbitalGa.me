@@ -5,8 +5,8 @@ import {ClientSocket} from './clientSocket';
 
 const App: React.FC<{width: number; height: number}> = props => {
   const client = useRef<ClientGameUI>(null);
-  const [died, setDied] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
+
   useEffect(() => {
     connect();
   }, []);
@@ -14,9 +14,6 @@ const App: React.FC<{width: number; height: number}> = props => {
   function connect() {
     client.current = new ClientGameUI(
       {
-        onDied: () => {
-          setDied(true);
-        },
         onDisconnect: () => {
           setDisconnected(true);
         },

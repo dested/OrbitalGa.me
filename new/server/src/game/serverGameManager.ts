@@ -27,7 +27,7 @@ export class ServerGameManager {
           shotSpeedPerSecond: 800,
           bufferedActions: [],
           shotStrength: 2,
-          speedPerSecond: 250,
+          speedPerSecond: 500,
           isClient: false,
           shipType: Math.random() * 1000 < 500 ? 'ship1' : 'ship2',
         });

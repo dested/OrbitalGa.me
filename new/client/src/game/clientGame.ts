@@ -11,12 +11,8 @@ import {LivePlayerEntity} from './entities/livePlayerEntity';
 
 export class ClientGame extends Game {
   connectionId: string;
-  protected isDead: boolean = false;
 
-  constructor(
-    private options: {onDied: (me: ClientGame) => void; onDisconnect: (me: ClientGame) => void},
-    private socket: IClientSocket
-  ) {
+  constructor(private options: {onDisconnect: (me: ClientGame) => void}, private socket: IClientSocket) {
     super();
     this.connectionId = uuid();
     this.socket.connect({
@@ -38,11 +34,7 @@ export class ClientGame extends Game {
   private startTick() {
     let time = +new Date();
     let paused = 0;
-    const int = setInterval(() => {
-      if (this.isDead) {
-        clearInterval(int);
-        return;
-      }
+    setInterval(() => {
       const now = +new Date();
       const duration = now - time;
       if (duration > 900 || duration < 4) {

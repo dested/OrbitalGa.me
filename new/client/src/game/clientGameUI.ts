@@ -8,7 +8,7 @@ export class ClientGameUI extends ClientGame {
   private context: CanvasRenderingContext2D;
   view: GameView;
 
-  constructor(options: {onDied: () => void; onDisconnect: () => void}, socket: IClientSocket) {
+  constructor(options: {onDisconnect: () => void}, socket: IClientSocket) {
     super(options, socket);
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
@@ -60,7 +60,7 @@ export class ClientGameUI extends ClientGame {
       } else if (e.keyCode === 39) {
         this.liveEntity.pressRight();
       }
-      e.preventDefault();
+      // e.preventDefault();
     };
     document.onkeyup = e => {
       if (e.keyCode === 65) {
