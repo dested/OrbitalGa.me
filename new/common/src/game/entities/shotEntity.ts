@@ -5,6 +5,7 @@ import {EnemyEntity} from './enemyEntity';
 import {GameEntity} from './gameEntity';
 import {PlayerEntity} from './playerEntity';
 import {GameConstants} from '../gameConstants';
+import {SwoopingEnemyEntity} from './swoopingEnemy';
 
 export class ShotEntity extends GameEntity {
   shotSpeedPerSecond: number;
@@ -33,7 +34,7 @@ export class ShotEntity extends GameEntity {
   }
 
   serverTick(currentServerTick: number): void {
-    if (currentServerTick - this.tickCreated > 10 * 1000) {
+    if ((currentServerTick - this.tickCreated) * GameConstants.tickRate > 3 * 1000) {
       this.queueDestroy();
       return;
     } else {
@@ -42,7 +43,7 @@ export class ShotEntity extends GameEntity {
   }
 
   lockTick(currentServerTick: number): void {
-    if (currentServerTick - this.tickCreated > 10 * 1000) {
+    if ((currentServerTick - this.tickCreated) * GameConstants.tickRate > 3 * 1000) {
       this.queueDestroy();
     }
   }
@@ -53,6 +54,10 @@ export class ShotEntity extends GameEntity {
 
   collide(otherEntity: GameEntity, collisionResult: Result, solidOnly: boolean) {
     if (!solidOnly && otherEntity instanceof EnemyEntity) {
+      this.queueDestroy();
+      return true;
+    }
+    if (!solidOnly && otherEntity instanceof SwoopingEnemyEntity) {
       this.queueDestroy();
       return true;
     }

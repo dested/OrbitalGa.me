@@ -56,9 +56,11 @@ export type ShotEntityOptions = EntityOptions & {
 export type LightShotEntityOptions = {type: 'shot'};
 
 export type EnemyEntityOptions = EntityOptions & {type: 'enemy'; health: number; color: string};
+export type SwoopingEnemyEntityOptions = EntityOptions & {type: 'swooping-enemy'; health: number; color: string};
 export type LightEnemyEntityOptions = {type: 'enemy'; health: number};
+export type LightSwoopingEnemyEntityOptions = {type: 'swooping-enemy'; health: number};
 
-export type SerializedEntity = EntityOptions & (PlayerEntityOptions | ShotEntityOptions | EnemyEntityOptions);
+export type SerializedEntity = EntityOptions &
+  (PlayerEntityOptions | ShotEntityOptions | EnemyEntityOptions | SwoopingEnemyEntityOptions);
 export type LightSerializedEntity = LightEntityOptions &
-  (LightPlayerEntityOptions | LightShotEntityOptions | LightEnemyEntityOptions);
-
+  (LightPlayerEntityOptions | LightShotEntityOptions | LightEnemyEntityOptions | LightSwoopingEnemyEntityOptions);

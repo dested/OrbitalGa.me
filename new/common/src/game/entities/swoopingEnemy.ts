@@ -5,7 +5,7 @@ import {GameEntity} from './gameEntity';
 import {ISolidEntity} from './ISolidEntity';
 import {ShotEntity} from './shotEntity';
 
-export class EnemyEntity extends GameEntity implements ISolidEntity {
+export class SwoopingEnemyEntity extends GameEntity implements ISolidEntity {
   private color: string;
   private health: number;
   private maxHealth: number;
@@ -16,7 +16,7 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
   serverTick(currentServerTick: number): void {}
   lockTick(currentServerTick: number): void {}
 
-  constructor(protected game: Game, private options: EnemyEntityOptions) {
+  constructor(protected game: Game, private options: SwoopingEnemyEntityOptions) {
     super(game, options);
     this.color = options.color;
     this.health = options.health;
@@ -29,13 +29,22 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
     ]);
     this.polygon.entity = this;
     this.game.collisionEngine.insert(this.polygon);
+
+    this.startX = this.x;
+    this.startY = this.y;
   }
 
-  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void {}
+  private startX: number;
+  private startY: number;
+
+  tick(timeSinceLastTick: number, timeSinceLastServerTick: number, currentServerTick: number): void {
+    this.y = this.startX + Math.sin(currentServerTick / 10) * 50;
+    this.x = this.startY + Math.cos(currentServerTick / 10) * 50;
+  }
 
   serialize(): SerializedEntity {
     return {
-      type: 'enemy',
+      type: 'swooping-enemy',
       x: this.x,
       y: this.y,
       id: this.id,
@@ -47,7 +56,7 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
 
   serializeLight(): LightSerializedEntity {
     return {
-      type: 'enemy',
+      type: 'swooping-enemy',
       x: this.x,
       y: this.y,
       health: this.health,
@@ -65,11 +74,8 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
   draw(context: CanvasRenderingContext2D) {
     const x = this.x;
     const y = this.y;
-
     context.fillStyle = this.color;
     context.fillRect(x - this.width / 2, y - this.height / 2, this.width, this.height);
-    context.fillStyle = 'red';
-    context.fillText(this.health.toString(), x, y);
     context.fillRect(
       x - this.width / 2,
       y + this.height / 4,

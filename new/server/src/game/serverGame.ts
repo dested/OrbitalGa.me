@@ -9,6 +9,7 @@ import {EnemyEntity} from '../../../common/src/game/entities/enemyEntity';
 import {Utils} from '../../../common/src/utils/utils';
 import {Game} from '../../../common/src/game/game';
 import {WorldState} from '../../../common/src/game/types';
+import {SwoopingEnemyEntity} from '../../../common/src/game/entities/swoopingEnemy';
 
 export class ServerGame extends Game {
   users: {connectionId: string; player?: PlayerEntity}[] = [];
@@ -147,12 +148,12 @@ export class ServerGame extends Game {
 
     if (this.tickIndex % 100 === 1) {
       this.addEntity(
-        new EnemyEntity(this, {
+        new SwoopingEnemyEntity(this, {
           x: parseInt((Math.random() * 400).toFixed()) + 50,
           y: parseInt((Math.random() * 400).toFixed()) + 50,
-          color: 'green',
+          color: 'blue',
           health: 10,
-          type: 'enemy',
+          type: 'swooping-enemy',
           id: Utils.generateId(),
           isClient: false,
         })
@@ -164,12 +165,15 @@ export class ServerGame extends Game {
       entity.serverTick(this.tickIndex);
       entity.updatePolygon();
     }
+
     this.checkCollisions(false);
+
     for (let i = this.entities.length - 1; i >= 0; i--) {
       if (this.entities[i].willDestroy) {
         this.entities[i].destroy();
       }
     }
+
     this.sendWorldState();
 
     for (const c of this.users) {
@@ -190,7 +194,7 @@ export class ServerGame extends Game {
     if (resync) {
       return {
         entities: this.entities
-          .filter(a => a instanceof PlayerEntity || a instanceof EnemyEntity)
+          .filter(a => a instanceof PlayerEntity || a instanceof EnemyEntity || a instanceof SwoopingEnemyEntity)
           .map(c => c.serialize()),
         serverTick: this.tickIndex,
         resync: true,
@@ -198,7 +202,7 @@ export class ServerGame extends Game {
     } else {
       return {
         entities: this.entities
-          .filter(a => a instanceof PlayerEntity || a instanceof EnemyEntity)
+          .filter(a => a instanceof PlayerEntity || a instanceof EnemyEntity || a instanceof SwoopingEnemyEntity)
           .map(c => c.serializeLight()),
         serverTick: this.tickIndex,
         resync: false,

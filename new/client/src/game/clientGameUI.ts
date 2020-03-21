@@ -112,7 +112,7 @@ export class ClientGameUI extends ClientGame {
     context.translate(-box.x, -box.y);
 
     context.save();
-    context.translate(0, this.frame);
+    context.translate(0, this.frame / 2);
     for (const element of this.getStars()) {
       context.fillStyle = `rgba(255,255,255,${element.n / 2})`;
       context.fillRect(
@@ -131,8 +131,8 @@ export class ClientGameUI extends ClientGame {
   *getStars(): Iterable<Star> {
     const starX = Math.round(this.view.viewX / 16);
     const starW = Math.round((this.view.viewX + this.view.viewWidth) / 16);
-    const starY = Math.round((this.view.viewY - this.frame) / 16);
-    const starH = Math.round((this.view.viewY - this.frame + this.view.viewHeight) / 16);
+    const starY = Math.round((this.view.viewY - this.frame / 2) / 16);
+    const starH = Math.round((this.view.viewY - this.frame / 2 + this.view.viewHeight) / 16);
 
     for (let x = starX - 2; x < starW + 2; x += 1) {
       for (let y = starY - 5; y < starH + 5; y += 1) {

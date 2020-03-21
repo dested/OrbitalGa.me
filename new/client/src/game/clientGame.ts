@@ -9,6 +9,7 @@ import {GameConstants} from '../../../common/src/game/gameConstants';
 import {LivePlayerEntity} from './entities/livePlayerEntity';
 import {ClientToServerMessage, ServerToClientMessage} from '../../../common/src/models/messages';
 import {unreachable} from '../../../common/src/utils/unreachable';
+import {SwoopingEnemyEntity} from '../../../common/src/game/entities/swoopingEnemy';
 
 export class ClientGame extends Game {
   connectionId: string;
@@ -53,7 +54,6 @@ export class ClientGame extends Game {
       this.tick(duration);
       time = +new Date();
     }, 1000 / 60);
-
 
     setInterval(() => {
       this.lockTick();
@@ -175,6 +175,13 @@ export class ClientGame extends Game {
         case 'enemy': {
           if (!entity) {
             entity = new EnemyEntity(this, {...stateEntity, isClient: true});
+            this.entities.push(entity);
+          }
+          break;
+        }
+        case 'swooping-enemy': {
+          if (!entity) {
+            entity = new SwoopingEnemyEntity(this, {...stateEntity, isClient: true});
             this.entities.push(entity);
           }
           break;
