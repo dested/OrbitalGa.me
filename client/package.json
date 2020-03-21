@@ -12,22 +12,22 @@
     "collisions": "^2.0.13",
     "glamor": "^2.20.40",
     "glamorous": "^4.8.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "@types/react": "^16.8.14",
-    "@types/react-dom": "^16.8.4",
-    "ts-loader": "^5.3.3",
-    "typescript": "^3.4.4",
-    "prettier": "^1.16.3",
-    "tslint": "^5.12.1",
-    "tslint-config-prettier": "^1.17.0",
+    "@types/react": "^16.9.25",
+    "@types/react-dom": "^16.9.5",
+    "prettier": "^1.19.1",
+    "ts-loader": "^6.2.1",
+    "tslint": "^6.1.0",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-eslint-rules": "^5.4.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "tslint-react": "^3.6.0",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.3.1"
+    "tslint-plugin-prettier": "^2.2.0",
+    "tslint-react": "^4.2.0",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   }
 }

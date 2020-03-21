@@ -63,8 +63,8 @@ export class EnemyEntity extends GameEntity implements ISolidEntity {
   }
 
   draw(context: CanvasRenderingContext2D) {
-    const x = (this.x + 500 * 10) % 500;
-    const y = (this.y + 500 * 10) % 500;
+    const x = this.x;
+    const y = this.y;
 
     context.fillStyle = this.color;
     context.fillRect(x - this.width / 2, y - this.height / 2, this.width, this.height);

@@ -36,6 +36,8 @@ export type PlayerEntityOptions = EntityOptions & {
   shotStrength: number;
   shootEveryTick: number;
   shotSpeedPerSecond: number;
+
+  shipType: string;
 };
 export type LightPlayerEntityOptions = {
   type: 'player';
@@ -69,6 +71,9 @@ export type ServerMessage =
   | {
       messageType: 'action';
       action: Action;
+    }
+  | {
+      messageType: 'none';
     }
   | {
       messageType: 'worldState';

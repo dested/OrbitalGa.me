@@ -1,7 +1,8 @@
 import {Polygon, Result} from 'collisions';
+import {AssetManager} from '../../../common/assetManager';
 import {Utils} from '../../utils/utils';
 import {Game} from '../game';
-import {Action, LightSerializedEntity, PlayerEntityOptions, SerializedEntity} from '../types';
+import {Action, LightSerializedEntity, PlayerEntityOptions, SerializedEntity, WorldState} from '../types';
 import {GameEntity} from './gameEntity';
 import {ISolidEntity} from './ISolidEntity';
 import {ShotEntity} from './shotEntity';
@@ -9,9 +10,11 @@ import {ShotEntity} from './shotEntity';
 export class PlayerEntity extends GameEntity implements ISolidEntity {
   shotSpeedPerSecond = 0;
 
+  shipType: string;
+
   solid: true = true;
-  width: number = 20;
-  height: number = 20;
+  width: number = 64;
+  height: number = 48;
 
   protected speedPerSecond: number;
   protected color: string;
@@ -64,6 +67,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
       shotStrength: this.shotStrength,
       shootEveryTick: this.shootEveryTick,
       shotSpeedPerSecond: this.shotSpeedPerSecond,
+      shipType: this.shipType,
       isClient: false,
     };
   }
@@ -85,6 +89,7 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     this.color = options.color;
     this.speedPerSecond = options.speedPerSecond;
     this.shootEveryTick = options.shootEveryTick;
+    this.shipType = options.shipType;
 
     this.polygon = new Polygon(this.x, this.y, [
       [-this.width / 2, -this.height / 2],
@@ -115,7 +120,6 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     }
     this.processAction(action);
     this.x = action.x;
-    console.log(this.x);
     this.y = action.y;
   }
 
@@ -184,15 +188,18 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
   }
 
   draw(context: CanvasRenderingContext2D) {
-    const x = (this.x + 500 * 10) % 500;
-    const y = (this.y + 500 * 10) % 500;
+    const x = this.x;
+    const y = this.y;
     context.fillStyle = 'white';
     context.font = '20px Arial';
-    context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
+    // context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
     if (this.msg) {
       context.fillText(`${this.msg}`, 0, 80);
     }
-    context.fillStyle = this.color;
-    context.fillRect(x - 10, y - 10, 20, 20);
+    const ship = AssetManager.assets[this.shipType];
+    context.drawImage(ship.image, x - ship.size.width / 2, y - ship.size.height / 2);
+
+    // context.fillStyle = this.color;
+    // context.fillRect(x - 10, y - 10, 20, 20);
   }
 }

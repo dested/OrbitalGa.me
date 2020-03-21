@@ -7,6 +7,7 @@ import {ShotEntity} from './shotEntity';
 
 export class LivePlayerEntity extends PlayerEntity {
   private lastSendActionTime: number = 0;
+  private lastActionChanged: boolean;
   constructor(game: ClientGame, options: PlayerEntityOptions) {
     super(game, options);
   }
@@ -91,19 +92,26 @@ export class LivePlayerEntity extends PlayerEntity {
       shoot: false,
     };
 
+    let change = false;
+
     if (this.pressingLeft) {
+      change = true;
       controls.left = true;
     }
     if (this.pressingRight) {
+      change = true;
       controls.right = true;
     }
     if (this.pressingUp) {
+      change = true;
       controls.up = true;
     }
     if (this.pressingDown) {
+      change = true;
       controls.down = true;
     }
     if (this.pressingShoot) {
+      change = true;
       controls.shoot = true;
     }
 
@@ -114,9 +122,17 @@ export class LivePlayerEntity extends PlayerEntity {
       entityId: this.id,
       actionTick: currentServerTick,
     };
-    this.game.sendAction({...action});
-    this.processAction(action);
-    this.addAction(action);
+
+    if (change || this.lastActionChanged) {
+      this.lastActionChanged = change;
+
+      this.game.sendAction({...action});
+
+      this.processAction(action);
+      this.addAction(action);
+    } else {
+      this.lastActionChanged = false;
+    }
     this.lastSendActionTime = +new Date();
   }
 }

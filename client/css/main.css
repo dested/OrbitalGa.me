@@ -9,7 +9,7 @@ body {
   height: 100%;
   position: relative;
   width: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
   background-color: #06003e;
   color: white;
   font-family: 'Telex', sans-serif !important;

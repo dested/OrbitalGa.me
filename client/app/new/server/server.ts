@@ -18,15 +18,17 @@ export class Server {
       client => {
         const newPlayer = new PlayerEntity(this.game, {
           type: 'player',
-          x: parseInt((Math.random() * 500).toFixed()),
-          y: parseInt((Math.random() * 500).toFixed()),
+          x: parseInt((Math.random() * 400).toFixed()) + 50,
+          y: parseInt((Math.random() * 400).toFixed()) + 50,
           id: client.id,
           color: '#' + (((1 << 24) * Math.random()) | 0).toString(16),
-          shootEveryTick: 4,
-          shotSpeedPerSecond: 500,
+          shootEveryTick: 3,
+          shotSpeedPerSecond: 800,
           bufferedActions: [],
           shotStrength: 2,
-          speedPerSecond: 100,
+          speedPerSecond: 250,
+          isClient: false,
+          shipType: Math.random() * 1000 < 500 ? 'ship1' : 'ship2',
         });
         this.game.entities.push(newPlayer);
         Socket.sendToClient(client.id, {

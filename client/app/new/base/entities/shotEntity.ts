@@ -87,7 +87,7 @@ export class ShotEntity extends GameEntity {
   }
 
   draw(context: CanvasRenderingContext2D) {
-    const x = (this.x + 500 * 10) % 500;
+    const x = this.x;
     const y = this.y;
 
     context.fillStyle = 'yellow';

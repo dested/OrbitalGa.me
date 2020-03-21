@@ -25,12 +25,13 @@ export class ServerGame extends Game {
     if (this.serverTick % 100 === 1) {
       this.addEntity(
         new EnemyEntity(this, {
-          x: parseInt((Math.random() * 500).toFixed()),
-          y: parseInt((Math.random() * 500).toFixed()),
+          x: parseInt((Math.random() * 400).toFixed())+50,
+          y: parseInt((Math.random() * 400).toFixed())+50,
           color: 'green',
           health: 10,
           type: 'enemy',
           id: Utils.generateId(),
+          isClient: false,
         })
       );
     }

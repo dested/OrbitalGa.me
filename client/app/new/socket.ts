@@ -7,7 +7,9 @@ export interface SocketClient {
   onMessage: (message: ServerMessage) => void;
   sendToServer: (message: ServerMessage) => void;
 }
-
+declare let window: any;
+window.incomingChatter = 0;
+window.outgoingChatter = 0;
 export class Socket {
   static sockets: SocketClient[] = [];
   private static onServerMessage: (clientId: string, message: ServerMessage) => void;
@@ -40,7 +42,8 @@ export class Socket {
     const msg = JSON.parse(JSON.stringify(message));
 
     setTimeout(() => {
-      // console.log('send to server', JSON.stringify(message));
+      window.outgoingChatter += JSON.stringify(message).length;
+      console.log(JSON.stringify(message))
       this.onServerMessage(clientId, msg);
     }, latency);
   }
@@ -50,6 +53,7 @@ export class Socket {
     const msg = JSON.parse(JSON.stringify(message));
     if (client) {
       setTimeout(() => {
+        window.incomingChatter += JSON.stringify(message).length;
         client.onMessage(msg);
       }, client.latency);
     }

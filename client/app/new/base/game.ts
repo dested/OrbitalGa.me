@@ -23,10 +23,10 @@ export class Game {
     this.collisionEngine = new Collisions();
     const boardSize = 500;
     const buffer = 100;
-    this.collisionEngine.insert(new Polygon(-buffer, 0, [[0, 0], [buffer, 0], [buffer, boardSize], [0, boardSize]]));
-    this.collisionEngine.insert(new Polygon(boardSize, 0, [[0, 0], [buffer, 0], [buffer, boardSize], [0, boardSize]]));
-    this.collisionEngine.insert(new Polygon(0, -buffer, [[0, 0], [0, buffer], [boardSize, buffer], [boardSize, 0]]));
-    this.collisionEngine.insert(new Polygon(0, boardSize, [[0, 0], [0, buffer], [boardSize, buffer], [boardSize, 0]]));
+    // this.collisionEngine.insert(new Polygon(-buffer, 0, [[0, 0], [buffer, 0], [buffer, boardSize], [0, boardSize]]));
+    // this.collisionEngine.insert(new Polygon(boardSize, 0, [[0, 0], [buffer, 0], [buffer, boardSize], [0, boardSize]]));
+    // this.collisionEngine.insert(new Polygon(0, -buffer, [[0, 0], [0, buffer], [boardSize, buffer], [boardSize, 0]]));
+    // this.collisionEngine.insert(new Polygon(0, boardSize, [[0, 0], [0, buffer], [boardSize, buffer], [boardSize, 0]]));
     this.collisionResult = this.collisionEngine.createResult();
   }
 
@@ -35,7 +35,7 @@ export class Game {
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities[i];
-      if (!entity) {
+      if (!entity || entity.clientDeath || entity.willDestroy) {
         continue;
       }
       entity.checkCollisions(solidOnly);

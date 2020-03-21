@@ -15,13 +15,14 @@ export class Start {
     contexts.push(canvas.getContext('2d')!);
     document.body.appendChild(canvas);
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 20; i++) {
       const client = new ClientGame();
       client.join();
       clients.push(client);
       const clientCanvas = document.createElement('canvas');
       clientCanvas.style.border = 'solid 2px white';
-      clientCanvas.height = clientCanvas.width = 500;
+      clientCanvas.width = window.innerWidth;
+      clientCanvas.height = 800;
       contexts.push(clientCanvas.getContext('2d')!);
       document.body.appendChild(clientCanvas);
     }
@@ -59,7 +60,7 @@ export class Start {
 
       for (let i = 0; i < clients.length; i++) {
         const client = clients[i];
-        contexts[i + 1].clearRect(0, 0, 500, 500);
+        contexts[i + 1].clearRect(0, 0, contexts[i + 1].canvas.width, contexts[i + 1].canvas.height);
         client.draw(contexts[i + 1]);
       }
     }, 16);
@@ -96,6 +97,7 @@ export class Start {
       } else if (e.keyCode === 39) {
         clients[clientInd].liveEntity.pressRight();
       }
+      e.preventDefault();
     };
     document.onkeyup = e => {
       if (e.keyCode === 65) {
@@ -160,9 +162,6 @@ export class Start {
 
 /*
 
-collisions
-firing bullets
 firing bombs
-
 
 */
