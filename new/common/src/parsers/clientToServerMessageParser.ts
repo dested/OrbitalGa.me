@@ -6,16 +6,15 @@ export class ClientToServerMessageParser {
   static fromClientToServerMessage(message: ClientToServerMessage) {
     const buff = new ArrayBufferBuilder();
 
+    /*
     switch (message.type) {
       case 'join':
         buff.addUint8(1);
         break;
-      case 'join2':
-        buff.addUint8(2);
-        break;
       default:
         throw unreachable(message);
     }
+*/
     return buff.buildBuffer();
   }
 
@@ -23,7 +22,7 @@ export class ClientToServerMessageParser {
     const reader = new ArrayBufferReader(buffer);
     const type = reader.readUint8();
 
-    switch (type) {
+    /*  switch (type) {
       case 1:
         return {
           type: 'join',
@@ -34,6 +33,7 @@ export class ClientToServerMessageParser {
         };
       default:
         throw new Error('Missing buffer enum');
-    }
+    }*/
+    return undefined as any;
   }
 }

@@ -62,21 +62,3 @@ export type SerializedEntity = EntityOptions & (PlayerEntityOptions | ShotEntity
 export type LightSerializedEntity = LightEntityOptions &
   (LightPlayerEntityOptions | LightShotEntityOptions | LightEnemyEntityOptions);
 
-export type ServerMessage =
-  | {
-      messageType: 'start';
-      state: WorldState;
-      yourEntityId: string;
-      serverTick: number;
-    }
-  | {
-      messageType: 'action';
-      action: Action;
-    }
-  | {
-      messageType: 'none';
-    }
-  | {
-      messageType: 'worldState';
-      state: WorldState;
-    };

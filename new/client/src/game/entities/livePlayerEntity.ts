@@ -3,9 +3,8 @@ import {PlayerEntityOptions} from '../../../../common/src/game/types';
 import {ClientGame} from '../clientGame';
 import {PlayerEntity} from '../../../../common/src/game/entities/playerEntity';
 import {GameConstants} from '../../../../common/src/game/gameConstants';
-import {PlayerEntityClient} from './playerEntityClient';
 
-export class LivePlayerEntity extends PlayerEntityClient {
+export class LivePlayerEntity extends PlayerEntity {
   private lastSendActionTime: number = 0;
   private lastActionChanged: boolean;
   constructor(protected game: ClientGame, options: PlayerEntityOptions) {
@@ -125,7 +124,7 @@ export class LivePlayerEntity extends PlayerEntityClient {
 
     if (change || this.lastActionChanged) {
       this.lastActionChanged = change;
-
+      console.log('sending', action);
       this.game.sendAction({...action});
 
       this.processAction(action);

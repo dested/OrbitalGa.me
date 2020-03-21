@@ -1,13 +1,14 @@
 import {Game} from '../../../common/src/game/game';
-import {Action, ServerMessage, WorldState} from '../../../common/src/game/types';
+import {Action, WorldState} from '../../../common/src/game/types';
 import {PlayerEntity} from '../../../common/src/game/entities/playerEntity';
 import {ShotEntity} from '../../../common/src/game/entities/shotEntity';
 import {EnemyEntity} from '../../../common/src/game/entities/enemyEntity';
 import {IClientSocket} from '../clientSocket';
 import {uuid} from '../../../common/src/utils/uuid';
 import {GameConstants} from '../../../common/src/game/gameConstants';
-import {PlayerEntityClient} from './entities/playerEntityClient';
 import {LivePlayerEntity} from './entities/livePlayerEntity';
+import {ClientToServerMessage, ServerToClientMessage} from '../../../common/src/models/messages';
+import {unreachable} from '../../../common/src/utils/unreachable';
 
 export class ClientGame extends Game {
   connectionId: string;
@@ -27,7 +28,6 @@ export class ClientGame extends Game {
         this.processMessages(messages);
       },
     });
-
     this.startTick();
   }
 
@@ -53,31 +53,38 @@ export class ClientGame extends Game {
       this.tick(duration);
       time = +new Date();
     }, 1000 / 60);
+
+
     setInterval(() => {
       this.lockTick();
     }, GameConstants.tickRate);
   }
 
-  sendMessageToServer(message: any /*ClientToServerMessage*/) {
+  sendMessageToServer(message: ClientToServerMessage) {
     this.socket.sendMessage(message);
   }
 
-  processMessages(messages: any /*ServerToClientMessage[]*/) {
-    this.onServerMessage(messages);
-    /*for (const message of messages) {
+  processMessages(messages: ServerToClientMessage[]) {
+    for (const message of messages) {
       switch (message.type) {
-        case 'joined':
-          // this.myTeamId = message.yourTeamId;
+        case 'start':
+          this.onConnection(message.serverTick);
+          this.setServerState(message.state, message.yourEntityId);
           break;
-
-        case 'joined2':
-          // this.myTeamId = message.yourTeamId;
+        case 'worldState':
+          this.setServerState(message.state);
+          this.lastServerTick = +new Date();
+          break;
+        case 'action':
+          this.unprocessedActions.push(message.action);
+          break;
+        case 'none':
           break;
         default:
           unreachable(message);
           break;
       }
-    }*/
+    }
   }
 
   disconnect() {
@@ -98,7 +105,7 @@ export class ClientGame extends Game {
   }
 
   sendAction(action: Action) {
-    this.sendMessageToServer({messageType: 'action', action});
+    this.sendMessageToServer({type: 'action', action});
   }
 
   onConnection(serverTick: number) {
@@ -134,22 +141,6 @@ export class ClientGame extends Game {
     }
   }
 
-  private onServerMessage(message: ServerMessage) {
-    switch (message.messageType) {
-      case 'start':
-        this.onConnection(message.serverTick);
-        this.setServerState(message.state, message.yourEntityId);
-        break;
-      case 'worldState':
-        this.setServerState(message.state);
-        this.lastServerTick = +new Date();
-        break;
-      case 'action':
-        this.unprocessedActions.push(message.action);
-        break;
-    }
-  }
-
   private setServerState(state: WorldState, myEntityId?: string) {
     if (state.resync === false) {
       return;
@@ -164,7 +155,7 @@ export class ClientGame extends Game {
             if (myEntityId === stateEntity.id) {
               entity = new LivePlayerEntity(this, {...stateEntity, isClient: true});
             } else {
-              entity = new PlayerEntityClient(this, {...stateEntity, isClient: true});
+              entity = new PlayerEntity(this, {...stateEntity, isClient: true});
             }
             this.entities.push(entity);
           }

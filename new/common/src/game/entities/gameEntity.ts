@@ -25,7 +25,10 @@ export abstract class GameEntity {
 
   destroy(): void {
     if (!this.clientDeath) {
-      this.game.entities.splice(this.game.entities.findIndex(a => a.id === this.id), 1);
+      this.game.entities.splice(
+        this.game.entities.findIndex(a => a.id === this.id),
+        1
+      );
     }
     if (this.polygon) {
       this.game.collisionEngine.remove(this.polygon!);

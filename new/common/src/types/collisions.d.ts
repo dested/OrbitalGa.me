@@ -10,7 +10,7 @@ declare module 'collisions' {
     x: number;
     y: number;
     padding: number;
-    entity:any;
+    entity: any;
 
     /**
      * Determines if the body is colliding with another body
@@ -77,7 +77,15 @@ declare module 'collisions' {
      * @param {number} [scale_y = 1] The starting scale long the Y axis
      * @param {number} [padding = 0] The amount to pad the bounding volume when testing for potential collisions
      */
-    constructor(x?: number, y?: number, points?: number[][], angle?: number, scale_x?: number, scale_y?: number, padding?: number);
+    constructor(
+      x?: number,
+      y?: number,
+      points?: number[][],
+      angle?: number,
+      scale_x?: number,
+      scale_y?: number,
+      padding?: number
+    );
 
     angle: number;
     scale_x: number;
@@ -140,7 +148,15 @@ declare module 'collisions' {
      * @param {number} [padding = 0] The amount to pad the bounding volume when testing for potential collisions
      * @returns {Polygon}
      */
-    createPolygon(x?: number, y?: number, points?: number[][], angle?: number, scale_x?: number, scale_y?: number, padding?: number): Polygon;
+    createPolygon(
+      x?: number,
+      y?: number,
+      points?: number[][],
+      angle?: number,
+      scale_x?: number,
+      scale_y?: number,
+      padding?: number
+    ): Polygon;
 
     /**
      * Creates a {@link Point} and inserts it into the collision system
@@ -206,5 +222,4 @@ declare module 'collisions' {
      */
     drawBVH(context: CanvasRenderingContext2D): void;
   }
-
 }

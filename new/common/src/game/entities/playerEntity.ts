@@ -6,9 +6,9 @@ import {GameEntity} from './gameEntity';
 import {ISolidEntity} from './ISolidEntity';
 import {ShotEntity} from './shotEntity';
 import {GameConstants} from '../gameConstants';
+import {AssetManager} from '../../utils/assetManager';
 
 export class PlayerEntity extends GameEntity implements ISolidEntity {
-  draw(context: CanvasRenderingContext2D): void {}
   shotSpeedPerSecond = 0;
 
   shipType: string;
@@ -186,5 +186,21 @@ export class PlayerEntity extends GameEntity implements ISolidEntity {
     }
     this.x = actionSub2.x + (actionSub1.x - actionSub2.x) * (timeSinceLastServerTick / GameConstants.tickRate);
     this.y = actionSub2.y + (actionSub1.y - actionSub2.y) * (timeSinceLastServerTick / GameConstants.tickRate);
+  }
+
+  draw(context: CanvasRenderingContext2D) {
+    const x = this.x;
+    const y = this.y;
+    context.fillStyle = 'white';
+    context.font = '20px Arial';
+    // context.fillText(`${this.x.toFixed()},${this.y.toFixed()}`, x, y - 10);
+    if (this.msg) {
+      context.fillText(`${this.msg}`, 0, 80);
+    }
+    const ship = AssetManager.assets[this.shipType];
+    if (ship) context.drawImage(ship.image, x - ship.size.width / 2, y - ship.size.height / 2);
+
+    // context.fillStyle = this.color;
+    // context.fillRect(x - 10, y - 10, 20, 20);
   }
 }
