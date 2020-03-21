@@ -1,3 +1,5 @@
+import {ISolidEntity} from '../game/entities/ISolidEntity';
+
 export class Utils {
   static toDictionary<T>(items: T[], getKey: (t: T) => string): {[key: string]: T} {
     const dictionary: {[key: string]: T} = {};
@@ -176,5 +178,17 @@ export class Utils {
 
   static roundUpTo8(value: number) {
     return value + (8 - (value % 8));
+  }
+
+  static generateId(): string {
+    return (Math.random() * 100000).toFixed(0);
+  }
+
+  static isSolidEntity(otherEntity: any): otherEntity is ISolidEntity {
+    return !otherEntity || (otherEntity as any).solid;
+  }
+
+  static round(value: number, decimals: number) {
+    return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals);
   }
 }

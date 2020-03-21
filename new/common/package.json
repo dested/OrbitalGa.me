@@ -2,7 +2,9 @@
   "name": "dots-game-common",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "collisions": "^2.0.13"
+  },
   "devDependencies": {
     "@types/node": "^13.9.2",
     "prettier": "^1.19.1",
