@@ -14,7 +14,7 @@ import {
   WallEntity,
 } from '../../../common/src/entities/entity';
 import {Game} from '../../../common/src/game/game';
-import {assert} from '../../../common/src/utils/utils';
+import {assert, Utils} from '../../../common/src/utils/utils';
 
 export class ClientGame extends Game {
   connectionId: string;
@@ -392,5 +392,32 @@ export class LivePlayerEntity extends PlayerEntity {
   }
   releaseRight() {
     this.keys.right = false;
+  }
+
+  get drawX(): number {
+    if (!this.positionLerp) {
+      return this.x;
+    } else {
+      const {x, y, startTime, duration} = this.positionLerp;
+      const now = +new Date();
+      if (now >= startTime + duration) {
+        return this.x;
+      } else {
+        return Utils.lerp(x, this.x, (now - startTime) / duration);
+      }
+    }
+  }
+  get drawY(): number {
+    if (!this.positionLerp) {
+      return this.y;
+    } else {
+      const {x, y, startTime, duration} = this.positionLerp;
+      const now = +new Date();
+      if (now >= startTime + duration) {
+        return this.y;
+      } else {
+        return Utils.lerp(y, this.y, (now - startTime) / duration);
+      }
+    }
   }
 }

@@ -2,8 +2,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import './index.css';
 import {ClientGameUI} from '../../game/clientGameUI';
 import {ClientSocket} from '../../clientSocket';
+import {observer} from 'mobx-react';
 
-export const GameScreen: React.FC<{width: number; height: number}> = props => {
+export const GameScreen: React.FC = observer(props => {
   const client = useRef<ClientGameUI>(null);
   const [died, setDied] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
@@ -27,7 +28,7 @@ export const GameScreen: React.FC<{width: number; height: number}> = props => {
 
   return (
     <div className="App">
-      <canvas key={'canvas'} id={'game'} width={props.width} height={props.height} />
+      <canvas id={'game'} width={window.innerWidth} height={window.innerHeight} />
       {disconnected && (
         <div
           style={{
@@ -55,4 +56,4 @@ export const GameScreen: React.FC<{width: number; height: number}> = props => {
       )}
     </div>
   );
-};
+});

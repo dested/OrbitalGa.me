@@ -7,18 +7,16 @@ import {start} from 'repl';
 import {EnemyShotEntity, ShotEntity, SwoopingEnemyEntity, WallEntity} from '../../../common/src/entities/entity';
 import {INoise, noise} from '../utils/perlin';
 import {unreachable} from '../../../common/src/utils/unreachable';
+import {GameData} from './gameData';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
-  view: GameView;
-  private noise: INoise = noise;
 
   constructor(options: {onDied: () => void; onDisconnect: () => void}, socket: IClientSocket) {
     super(options, socket);
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
-    this.view = new GameView(this.canvas);
 
     const manager = new Manager(this.canvas);
     manager.add(new Press({time: 0}));
@@ -33,7 +31,7 @@ export class ClientGameUI extends ClientGame {
       () => {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
-        this.view.setBounds(window.innerWidth, window.innerHeight);
+        GameData.instance.view.setBounds(window.innerWidth, window.innerHeight);
         this.draw();
       },
       true
@@ -102,13 +100,15 @@ export class ClientGameUI extends ClientGame {
     requestNextFrame();
   }
 
-  frame = 0;
   draw() {
-    this.frame++;
     const context = this.context;
-
-    context.fillStyle = 'rgba(0,0,0,1)';
-    context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (this.liveEntity) {
+      GameData.instance.view.setCenterPosition(
+        GameData.instance.view.transformPoint(this.liveEntity.drawX),
+        GameData.instance.view.viewHeight / 2
+      );
+    }
 
     if (!this.connectionId) {
       context.fillStyle = 'white';
@@ -117,24 +117,10 @@ export class ClientGameUI extends ClientGame {
     }
     context.save();
 
-    context.save();
-    const outerBox = this.view.outerViewBox;
-    const box = this.view.viewBox;
-    context.scale(this.view.scale, this.view.scale);
+    const outerBox = GameData.instance.view.outerViewBox;
+    const box = GameData.instance.view.viewBox;
+    context.scale(GameData.instance.view.scale, GameData.instance.view.scale);
     context.translate(-box.x, -box.y);
-
-    context.save();
-    context.translate(0, this.frame / 2);
-    for (const element of this.getStars()) {
-      context.fillStyle = `rgba(255,255,255,${element.n / 2})`;
-      context.fillRect(
-        element.x + (16 - element.n * 16) / 2,
-        element.y + (16 - element.n * 16) / 2,
-        16 * element.n,
-        16 * element.n
-      );
-    }
-    context.restore();
 
     context.font = '25px bold';
     for (const entity of this.entities) {
@@ -160,7 +146,7 @@ export class ClientGameUI extends ClientGame {
           break;
         case 'swoopingEnemy':
           assert(entity instanceof SwoopingEnemyEntity);
-          context.fillStyle = 'rgba(255,0,0,.5)';
+          context.fillStyle = 'rgba(255,0,0,1)';
           context.fillText(`${entity.health.toFixed(0)}`, entity.x, entity.y - 25);
           context.fillRect(entity.x - 25, entity.y - 25, 50, 50);
           break;
@@ -177,22 +163,7 @@ export class ClientGameUI extends ClientGame {
             context.fillStyle = 'green';
             // context.fillText(`${entity.x.toFixed(1)},${entity.y.toFixed(1)}`, entity.x, entity.y - 25);
 
-            if (!entity.positionLerp) {
-              context.fillRect(entity.x - 15, entity.y - 15, 30, 30);
-            } else {
-              const {x, y, startTime, duration} = entity.positionLerp;
-              const now = +new Date();
-              if (now >= startTime + duration) {
-                context.fillRect(entity.x - 15, entity.y - 15, 30, 30);
-              } else {
-                context.fillRect(
-                  Utils.lerp(x, entity.x, (now - startTime) / duration) - 15,
-                  Utils.lerp(y, entity.y, (now - startTime) / duration) - 15,
-                  30,
-                  30
-                );
-              }
-            }
+            context.fillRect(entity.drawX - 15, entity.drawY - 15, 30, 30);
           } else {
             context.fillStyle = 'blue';
             // context.fillText(`${entity.x.toFixed(1)},${entity.y.toFixed(1)}`, entity.x, entity.y - 25);
@@ -201,26 +172,7 @@ export class ClientGameUI extends ClientGame {
           break;
       }
     }
-    context.restore();
 
     context.restore();
-  }
-
-  *getStars(): Iterable<Star> {
-    const starX = Math.round(this.view.viewX / 16);
-    const starW = Math.round((this.view.viewX + this.view.viewWidth) / 16);
-    const starY = Math.round((this.view.viewY - this.frame / 2) / 16);
-    const starH = Math.round((this.view.viewY - this.frame / 2 + this.view.viewHeight) / 16);
-
-    for (let x = starX - 2; x < starW + 2; x += 1) {
-      for (let y = starY - 5; y < starH + 5; y += 1) {
-        const n = this.noise.simplex2(x, y);
-        if (n < 1) {
-          yield {x: x * 16, y: y * 16, n};
-        }
-      }
-    }
   }
 }
-
-type Star = {x: number; y: number; n: number};

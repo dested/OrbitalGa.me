@@ -2,14 +2,26 @@ import React, {useEffect, useRef, useState} from 'react';
 import './index.css';
 import {ClientGameUI} from '../../game/clientGameUI';
 import {ClientSocket} from '../../clientSocket';
+import {create} from 'mobx-persist';
+import {uiStore} from '../../store/uiStore';
+import {Utils} from '../../../../common/src/utils/utils';
+import {observer} from 'mobx-react-lite';
 
-export const LoadingScreen: React.FC<{width: number; height: number}> = props => {
+export const LoadingScreen: React.FC = observer(props => {
   useEffect(() => {
+    async function load() {
+      const hydrate = await create({
+        jsonify: true,
+      });
+      await hydrate('uiStore', uiStore);
+    }
+    Promise.all([load(), Utils.timeout(1000)]).then(() => {
+      uiStore.setScreen('login');
+    });
   }, []);
 
   return (
     <div className="App">
-      <canvas key={'canvas'} id={'game'} width={props.width} height={props.height} />
       <div
         style={{
           position: 'absolute',
@@ -27,4 +39,4 @@ export const LoadingScreen: React.FC<{width: number; height: number}> = props =>
       </div>
     </div>
   );
-};
+});

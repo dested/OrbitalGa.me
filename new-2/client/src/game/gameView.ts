@@ -1,10 +1,8 @@
 import {AnimationUtils} from '../../../common/src/utils/animationUtils';
 
 export class GameView {
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
+  private x: number = 0;
+  private y: number = 0;
 
   scale: number;
 
@@ -18,20 +16,7 @@ export class GameView {
     };
   }
 
-  constructor(private canvas: HTMLCanvasElement) {
-    if (localStorage.getItem('view-x' + canvas.id)) {
-      this.x = parseInt(localStorage.getItem('view-x' + canvas.id)!);
-    } else {
-      this.x = 0;
-    }
-    if (localStorage.getItem('view-y' + canvas.id)) {
-      this.y = parseInt(localStorage.getItem('view-y' + canvas.id)!);
-    } else {
-      this.y = 0;
-    }
-
-    this.width = canvas.width;
-    this.height = canvas.height;
+  constructor(private width: number, private height: number) {
     this.scale = 1;
   }
 
@@ -100,9 +85,6 @@ export class GameView {
     this.x = x;
     this.y = y;
     this.clamp();
-
-    localStorage.setItem('view-x' + this.canvas.id, this.x.toString());
-    localStorage.setItem('view-y' + this.canvas.id, this.y.toString());
   }
 
   offsetPosition(x: number, y: number) {
@@ -176,5 +158,9 @@ export class GameView {
 
   transformPoint(p: number) {
     return p / this.scale;
+  }
+
+  setCenterPosition(x: number, y: number) {
+    this.setPosition(x - this.width / 2, y - this.height / 2);
   }
 }
