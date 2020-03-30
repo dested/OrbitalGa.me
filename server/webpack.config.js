@@ -1,51 +1,35 @@
-const path = require("path");
-const fs = require("fs");
+const webpack = require('webpack');
+const fs = require('fs');
+const path = require('path');
 
-var config={
-    entry: './app/app.ts',
+module.exports = env => {
+  return {
+    entry: './src/index.ts',
     output: {
-        filename: './dist/bundle.js'
+      path: path.join(__dirname, 'dist'),
+      filename: 'index.js',
+      libraryTarget: 'commonjs2'
     },
-    target:"node",
+    target: 'node',
     resolve: {
-        // Add `.ts` and `.tsx` as a resolvable extension.
-        extensions: ['.ts', '.tsx', '.js'], // note if using webpack 1 you'd also need a '' in the array as well
-        alias: {
-            "@common": path.resolve(__dirname, "../common/")
-        }
+      extensions: ['.ts', '.tsx', '.js'],
+      alias: {
+      }
     },
+    externals: {},
+    mode: 'development',
+    plugins: [
+    ].filter(a => a),
     module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                loader: 'ts-loader',
-                options: {
-                    compilerOptions: {noEmit: false}
-                }
-            },
-            {
-                test: /\.less$/,
-                loader: 'less-loader' // compiles Less to CSS
-            },
-            {
-                test: /\.css$/,
-                loader: 'style-loader!css-loader'
-            },
-            {
-                test: /\.(gif|svg|jpg|png)$/,
-                loader: 'file-loader'
-            }]
-    }
-};
-
-config.externals = fs.readdirSync("node_modules")
-    .reduce(function(acc, mod) {
-        if (mod === ".bin") {
-            return acc
+      rules: [
+        {
+          test: /\.tsx?$/,
+          loader: 'ts-loader',
+          options: {
+            compilerOptions: {noEmit: false}
+          }
         }
-
-        acc[mod] = "commonjs " + mod
-        return acc
-    }, {});
-
-module.exports=config;
+      ]
+    }
+  };
+};

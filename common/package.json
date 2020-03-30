@@ -1,25 +1,21 @@
 {
-  "name": "orbital-crash-common",
-  "version": "1.0.0",
-  "author": "Salvatore <dested@gmail.com>",
+  "name": "dots-game-common",
+  "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "lint": "npx tslint -p ./tsconfig.json --fix"
-  },
   "dependencies": {
     "collisions": "^2.0.13"
   },
   "devDependencies": {
-    "ts-loader": "^5.3.3",
-    "typescript": "^3.4.4",
-    "prettier": "^1.16.3",
-    "tslint": "^5.12.1",
-    "tslint-config-prettier": "^1.17.0",
+    "@types/node": "^13.9.2",
+    "prettier": "^1.19.1",
+    "react-app-rewired": "^2.1.5",
+    "ts-loader": "^6.2.1",
+    "tslint": "^6.1.0",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-eslint-rules": "^5.4.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "tslint-react": "^3.6.0",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.3.1"
-  }
+    "tslint-plugin-prettier": "^2.2.0",
+    "tslint-react": "^4.2.0",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {}
 }
