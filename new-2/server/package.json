@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "", 
+  "scripts": {
+    "build": "rimraf dist && webpack --mode development",
+    "watch": "rimraf dist && webpack --mode development --watch",
+    "nodemon": "nodemon",
+    "start": "node --expose-gc ./dist/index.js",
+    "debug": "node --expose-gc --inspect-brk ./dist/index.js",
+    "build-prod": "rimraf dist && webpack --mode production  --progress --hide-modules",
+    "deploy": "yarn build-prod & eb deploy"
+  },
+  "dependencies": {
+    "ws": "^7.2.1",
+    "collisions": "^2.0.13"
+  },
+  "devDependencies": {
+    "@types/node": "13.9.2",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1",
+    "ts-loader": "^6.2.1",
+    "ts-node": "^8.7.0",
+    "tslint": "^6.1.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-plugin-prettier": "^2.2.0",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
+  }}

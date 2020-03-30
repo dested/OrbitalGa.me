@@ -3,7 +3,7 @@ export type Action = {
   entityId: string;
   x: number;
   y: number;
-} & ({
+} & {
   controls: {
     left: boolean;
     right: boolean;
@@ -11,7 +11,7 @@ export type Action = {
     up: boolean;
     shoot: boolean;
   };
-});
+};
 
 export type WorldState = {
   serverTick: number;
@@ -23,7 +23,8 @@ export type WorldState = {
   | {
       resync: false;
       entities: LightSerializedEntity[];
-    });
+    }
+);
 
 export type EntityOptions = {id: string; x: number; y: number; isClient: boolean};
 export type LightEntityOptions = {id: string; x: number; y: number};
