@@ -13,7 +13,7 @@ async function main() {
     onDied: () => {},
   });
   return;*/
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const options = {
       onDisconnect: () => {
         new BotClientGame(options, new ClientSocket());

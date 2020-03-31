@@ -32,7 +32,7 @@ Todo
     * [ ] die
  * [ ] add mouse movement
     * [ ] move rotate code from sonic
- * [ ] binary transfer
+ * [x] binary transfer
  * [ ] better background
  * [ ] refactor code
      * [ ] better separation
@@ -42,8 +42,8 @@ Todo
  * [ ] come up with more enemies
  * [ ] come up with realtime events
     * [ ] big bosses every 5 min?
- * [ ] build bots
- * [ ] load test
+ * [x] build bots
+ * [x] load test
  * [ ] deploy to beanstalk
  * [ ] determine how to scale up servers dynamically
     * [ ] add lambda for join/etc, checks redis for servers, spins one up?

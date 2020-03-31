@@ -133,9 +133,12 @@ export class ClientGameUI extends ClientGame {
           break;
         case 'enemyShot':
           assert(entity instanceof EnemyShotEntity);
-          context.fillStyle = 'pink';
-          // context.fillText(`${entity.x.toFixed(1)},${entity.y.toFixed(1)}`, entity.x, entity.y - 25);
-          context.fillRect(entity.x - 5, entity.y - 5, 10, 10);
+          const laserRed = AssetManager.assets['laser.red'];
+          context.save();
+          context.rotate(Math.PI);
+          context.translate(entity.x, entity.y);
+          context.drawImage(laserRed.image, -laserRed.size.width / 2, -laserRed.size.height / 2);
+          context.restore();
           break;
         case 'wall':
           assert(entity instanceof WallEntity);
@@ -144,9 +147,11 @@ export class ClientGameUI extends ClientGame {
           break;
         case 'shot':
           assert(entity instanceof ShotEntity);
-          context.fillStyle = 'yellow';
-          // context.fillText(`${entity.x.toFixed(1)},${entity.y.toFixed(1)}`, entity.x, entity.y - 25);
-          context.fillRect(entity.x - 5, entity.y - 5, 10, 10);
+          const laserBlue = AssetManager.assets['laser.blue'];
+          context.save();
+          context.translate(entity.x, entity.y);
+          context.drawImage(laserBlue.image, -laserBlue.size.width / 2, -laserBlue.size.height / 2);
+          context.restore();
           break;
         case 'swoopingEnemy':
           assert(entity instanceof SwoopingEnemyEntity);

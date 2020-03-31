@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useAnimationFrame} from '../hooks/useAnimationFrame';
 import {getStars} from '../game/components/stars';
 import {GameData} from '../game/gameData';
+import {AssetManager} from '../utils/assetManager';
 
 export const StarBackground: React.FC = props => {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -23,29 +24,20 @@ export const StarBackground: React.FC = props => {
     const outerBox = view.outerViewBox;
     const box = view.viewBox;
     context.scale(view.scale, view.scale);
-    context.translate(-box.x * 2, -box.y);
+    context.translate(-box.x, -box.y);
 
     context.translate(0, frame.current / 2);
-    const starMultiple = 30;
-    for (const element of getStars(
-      starMultiple,
-      view.viewX + box.x,
-      view.viewY,
-      frame.current,
-      view.viewWidth,
-      view.viewHeight
-    )) {
-      context.beginPath();
-      context.fillStyle = `rgba(255,255,255,${element.n / 2})`;
-      context.arc(
-        element.x + (starMultiple - element.n * starMultiple) / 2,
-        element.y + (starMultiple - element.n * starMultiple) / 2,
-        Math.abs((starMultiple * element.n) / 2),
-        0,
-        Math.PI * 2
-      );
-      context.fill();
+
+    const viewY = view.viewY - frame.current / 2;
+    let count = 0;
+    for (let x = view.viewX - (view.viewX % 256) - 256; x < view.viewX + view.viewWidth + 256 * 2; x += 256) {
+      for (let y = viewY - (viewY % 256) - 256; y < view.viewY + view.viewHeight + 256 * 2; y += 256) {
+        context.drawImage(AssetManager.assets.stars.image, x, y);
+        count++;
+      }
     }
+
+    console.log(count);
     context.restore();
   });
 

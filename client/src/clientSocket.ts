@@ -31,7 +31,7 @@ export class ClientSocket implements IClientSocket {
         totalLength += e.data.length;
         options.onMessage(JSON.parse(e.data));
       }
-      console.log((totalLength / 1024).toFixed(2) + 'kb');
+      // console.log((totalLength / 1024).toFixed(2) + 'kb');
     };
     this.socket.onclose = () => {
       options.onDisconnect();
