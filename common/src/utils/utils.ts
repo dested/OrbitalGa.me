@@ -153,7 +153,7 @@ export class Utils {
   }
 
   static randomElement<T>(array: T[]) {
-    const n = Math.floor(Math.random() * (array.length - 1));
+    const n = Math.floor(Math.random() * array.length);
     return array[n];
   }
 
@@ -184,6 +184,21 @@ export class Utils {
 
   static flipCoin<T, T2>(heads: T, tails: T2) {
     return Math.random() < 0.5 ? heads : tails;
+  }
+
+  static randomInRange(x0: number, x1: number) {
+    return (x1 - x0) * Math.random() + x0;
+  }
+
+  static bitsToInt(...bools: boolean[]) {
+    return parseInt('1' + bools.map(a => (a ? '1' : '0')).join(''), 2);
+  }
+  static intToBits(int: number): boolean[] {
+    return int
+      .toString(2)
+      .split('')
+      .map(a => a === '1')
+      .slice(1);
   }
 }
 

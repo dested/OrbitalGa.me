@@ -23,7 +23,7 @@ export class ServerSocket implements IServerSocket {
     this.wss.on('connection', ws => {
       ws.binaryType = 'arraybuffer';
       const me = {socket: ws, connectionId: uuid()};
-      // console.log('new connection', me.connectionId);
+      console.count('new connection');
       this.connections.push(me);
 
       ws.on('message', message => {

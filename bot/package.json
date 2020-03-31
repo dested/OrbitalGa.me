@@ -1,0 +1,37 @@
+{
+  "name": "dots-game-bot",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "rimraf dist && webpack --mode development",
+    "watch": "rimraf dist && webpack --mode development --watch",
+    "nodemon": "nodemon",
+    "start": "node ./dist/index.js",
+    "debug": "node --inspect-brk ./dist/index.js",
+    "build-prod": "rimraf dist && webpack --mode production  --progress --hide-modules",
+    "deploy": "yarn build-prod & eb deploy"
+  },
+  "dependencies": {
+    "@types/websocket": "^1.0.0",
+    "websocket": "^1.0.31",
+    "ws": "^7.2.1",
+    "collisions": "^2.0.13"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.28",
+    "@types/node-fetch": "^2.1.1",
+    "@types/ws": "^6.0.4",
+    "nodemon": "^1.12.1",
+    "prettier": "^1.19.1",
+    "ts-loader": "^6.2.1",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-plugin-prettier": "^2.1.0",
+    "typescript": "^3.7.4",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "zip-webpack-plugin": "2.1.0"
+  }
+}

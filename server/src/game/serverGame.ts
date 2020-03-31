@@ -1,7 +1,7 @@
 import {ClientToServerMessage, ServerToClientMessage} from '../../../common/src/models/messages';
 import {unreachable} from '../../../common/src/utils/unreachable';
 import {IServerSocket} from '../serverSocket';
-import {uuid} from '../../../common/src/utils/uuid';
+import {nextId, uuid} from '../../../common/src/utils/uuid';
 import {ColorUtils} from '../../../common/src/utils/colorUtils';
 import {GameConstants} from '../../../common/src/game/gameConstants';
 import {
@@ -16,7 +16,7 @@ import {
   WallEntity,
 } from '../../../common/src/entities/entity';
 import {Game} from '../../../common/src/game/game';
-import {assert, assertType} from '../../../common/src/utils/utils';
+import {assert, assertType, Utils} from '../../../common/src/utils/utils';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -60,11 +60,11 @@ export class ServerGame extends Game {
           console.log('bad duration', duration);
         }
         time = +new Date();
-        // console.time('server tick');
+        console.time('server tick');
         const newTickTime = +new Date();
         this.serverTick(++serverTick, duration, tickTime);
         tickTime = +new Date() - newTickTime;
-        // console.timeEnd('server tick');
+        console.timeEnd('server tick');
         // console.time('gc');
         // global.gc();
         // console.timeEnd('gc');
@@ -92,9 +92,12 @@ export class ServerGame extends Game {
   clientJoin(connectionId: string) {
     // const teamId = uuid();
     // const color = ColorUtils.randomColor();
-    const entity = new ServerPlayerEntity(this, uuid());
-    entity.x = Math.random() * 1000;
-    entity.y = Math.random() * 1000;
+    const entity = new ServerPlayerEntity(this, nextId());
+
+    const {x0, x1} = this.getPlayerRange(200);
+
+    entity.x = Utils.randomInRange(x0, x1);
+    entity.y = Math.random() * 400 + 600;
     this.users.push({connectionId, entity});
     this.entities.push(entity);
     this.sendMessageToClient(connectionId, {
@@ -116,7 +119,7 @@ export class ServerGame extends Game {
     const time = +new Date();
     let stopped = false;
     for (let i = 0; i < this.queuedMessages.length; i++) {
-      if (time + 500 < +new Date()) {
+      if (time + 100 < +new Date()) {
         console.log('stopped');
         stopped = true;
         this.queuedMessages.splice(0, i);
@@ -134,7 +137,8 @@ export class ServerGame extends Game {
           const user = this.users.find(a => a.connectionId === q.connectionId);
           if (user) {
             user.entity.applyInput(q.message);
-            this.checkCollisions();
+            this.collisionEngine.update();
+            user.entity.checkCollisions();
           } // }
 
           break;
@@ -150,9 +154,17 @@ export class ServerGame extends Game {
       console.log(this.queuedMessages.length, 'remaining');
     }
 
-    if (tickIndex % 50 < 3) {
-      const x = Math.random() * 1000;
-      this.createEntity('swoopingEnemy', {x, y: -100, health: 10});
+    if (tickIndex % 50 < 4) {
+      if (this.users.length > 0) {
+        for (let i = 0; i < 10; i++) {
+          const {x0, x1} = this.getPlayerRange(200);
+          this.createEntity('swoopingEnemy', {
+            x: Utils.randomInRange(x0, x1),
+            y: -100 + Math.random() * 150,
+            health: 10,
+          });
+        }
+      }
     }
 
     for (const entity of this.entities) {
@@ -261,7 +273,7 @@ export class ServerGame extends Game {
       case 'shot':
         {
           assertType<EntityTypeOptions[typeof entityType]>(options);
-          const shotEntity = new ShotEntity(this, uuid());
+          const shotEntity = new ShotEntity(this, nextId());
           shotEntity.start(options.x, options.y);
           this.sendMessageToClients({
             type: 'createEntity',
@@ -275,7 +287,7 @@ export class ServerGame extends Game {
         break;
       case 'swoopingEnemy': {
         assertType<EntityTypeOptions[typeof entityType]>(options);
-        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, uuid(), options.health);
+        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), options.health);
         swoopingEnemyEntity.setStartPosition(options.x, options.y);
         swoopingEnemyEntity.start(options.x, options.y);
         this.sendMessageToClients({
@@ -291,7 +303,7 @@ export class ServerGame extends Game {
       }
       case 'enemyShot': {
         assertType<EntityTypeOptions[typeof entityType]>(options);
-        const shotEntity = new EnemyShotEntity(this, uuid());
+        const shotEntity = new EnemyShotEntity(this, nextId());
         shotEntity.start(options.x, options.y);
         this.sendMessageToClients({
           type: 'createEntity',
@@ -307,6 +319,21 @@ export class ServerGame extends Game {
         unreachable(entityType);
         break;
     }
+  }
+
+  private getPlayerRange(padding: number) {
+    const range = {x0: Number.POSITIVE_INFINITY, x1: Number.NEGATIVE_INFINITY};
+    if (this.users.length === 0) {
+      return {x0: 0, x1: 0};
+    }
+    for (const user of this.users) {
+      if (!user.entity) {
+        continue;
+      }
+      range.x0 = Math.min(range.x0, user.entity.x);
+      range.x1 = Math.max(range.x1, user.entity.x);
+    }
+    return {x0: range.x0 - padding, x1: range.x1 + padding};
   }
 }
 

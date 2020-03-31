@@ -1,6 +1,5 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-import {ServerGame} from '../../../server/src/game/serverGame';
 import {Utils} from '../utils/utils';
 import {unreachable} from '../utils/unreachable';
 
@@ -29,7 +28,7 @@ export abstract class Entity {
   x: number = 0;
   y: number = 0;
   positionBuffer: {time: number; x: number; y: number}[] = [];
-  constructor(protected game: Game, public entityId: string, public type: EntityTypes) {}
+  constructor(protected game: Game, public entityId: number, public type: EntityTypes) {}
 
   start(x: number, y: number) {
     this.x = x;
@@ -100,12 +99,12 @@ export class PlayerEntity extends Entity {
   pendingInputs: PendingInput[] = [];
   inputSequenceNumber: number = 0;
 
-  constructor(game: Game, entityId: string) {
+  constructor(game: Game, entityId: number) {
     super(game, entityId, 'player');
     this.createPolygon();
   }
 
-  speed = 200;
+  speed = 500;
 
   shootTimer: number = 1;
   applyInput(input: PendingInput) {
@@ -153,7 +152,7 @@ export class PlayerEntity extends Entity {
         // console.log('shot');
         return false;
       case 'enemyShot':
-        console.log('hurt');
+        // console.log('hurt');
         return false;
       case 'swoopingEnemy':
         // console.log('shot');
@@ -178,7 +177,7 @@ export class WallEntity extends Entity {
     this.game.collisionEngine.insert(this.polygon);
   }
   tick(): void {}
-  constructor(game: Game, entityId: string, public width: number, public height: number) {
+  constructor(game: Game, entityId: number, public width: number, public height: number) {
     super(game, entityId, 'wall');
     this.createPolygon();
   }
@@ -315,7 +314,7 @@ export class SwoopingEnemyEntity extends Entity {
 
     this.updatePosition();
   }
-  constructor(game: Game, entityId: string, public health: number) {
+  constructor(game: Game, entityId: number, public health: number) {
     super(game, entityId, 'swoopingEnemy');
     this.createPolygon();
   }
@@ -343,7 +342,7 @@ export class ShotEntity extends Entity {
     this.polygon.entity = this;
     this.game.collisionEngine.insert(this.polygon);
   }
-  constructor(game: Game, entityId: string) {
+  constructor(game: Game, entityId: number) {
     super(game, entityId, 'shot');
     this.createPolygon();
   }
@@ -382,7 +381,7 @@ export class EnemyShotEntity extends Entity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  constructor(game: Game, entityId: string) {
+  constructor(game: Game, entityId: number) {
     super(game, entityId, 'enemyShot');
     this.createPolygon();
   }

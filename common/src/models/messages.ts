@@ -13,43 +13,45 @@ export type ClientToServerMessage =
       down: boolean;
     };
 
+export type WorldStateEntity = {entityId: number; x: number; y: number} & (
+  | {
+      type: 'player';
+      lastProcessedInputSequenceNumber: number;
+    }
+  | {
+      type: 'swoopingEnemy';
+      health: number;
+    }
+  | {
+      type: 'wall';
+      width: number;
+      height: number;
+    }
+  | {
+      type: 'shot';
+      markToDestroy: boolean;
+    }
+  | {
+      type: 'enemyShot';
+      markToDestroy: boolean;
+    }
+);
+export type ServerToClientCreateEntity = {
+  type: 'createEntity';
+  entityId: number;
+  x: number;
+  y: number;
+} & ({entityType: 'shot'} | {entityType: 'enemyShot'} | {entityType: 'swoopingEnemy'; health: number});
 export type ServerToClientMessage =
   | {
       type: 'joined';
       clientId: string;
-      entityId: string;
+      entityId: number;
       x: number;
       y: number;
     }
-  | ({
-      type: 'createEntity';
-      entityId: string;
-      x: number;
-      y: number;
-    } & ({entityType: 'shot'} | {entityType: 'enemyShot'} | {entityType: 'swoopingEnemy'; health: number}))
+  | ServerToClientCreateEntity
   | {
       type: 'worldState';
-      entities: ({entityId: string; x: number; y: number} & (
-        | {
-            type: 'player';
-            lastProcessedInputSequenceNumber: number;
-          }
-        | {
-            type: 'swoopingEnemy';
-            health: number;
-          }
-        | {
-            type: 'wall';
-            width: number;
-            height: number;
-          }
-        | {
-            type: 'shot';
-            markToDestroy: boolean;
-          }
-        | {
-            type: 'enemyShot';
-            markToDestroy: boolean;
-          }
-      ))[];
+      entities: WorldStateEntity[];
     };

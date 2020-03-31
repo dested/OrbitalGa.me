@@ -17,22 +17,34 @@ export const StarBackground: React.FC = props => {
     context.fillRect(0, 0, canvas.current.width, canvas.current.height);
     frame.current++;
     context.save();
+
     const view = GameData.instance.view;
 
     const outerBox = view.outerViewBox;
     const box = view.viewBox;
     context.scale(view.scale, view.scale);
-    context.translate(-box.x, -box.y);
+    context.translate(-box.x * 2, -box.y);
 
     context.translate(0, frame.current / 2);
-    for (const element of getStars(view.viewX, view.viewY, frame.current, view.viewWidth, view.viewHeight)) {
+    const starMultiple = 30;
+    for (const element of getStars(
+      starMultiple,
+      view.viewX + box.x,
+      view.viewY,
+      frame.current,
+      view.viewWidth,
+      view.viewHeight
+    )) {
+      context.beginPath();
       context.fillStyle = `rgba(255,255,255,${element.n / 2})`;
-      context.fillRect(
-        element.x + (16 - element.n * 16) / 2,
-        element.y + (16 - element.n * 16) / 2,
-        16 * element.n,
-        16 * element.n
+      context.arc(
+        element.x + (starMultiple - element.n * starMultiple) / 2,
+        element.y + (starMultiple - element.n * starMultiple) / 2,
+        Math.abs((starMultiple * element.n) / 2),
+        0,
+        Math.PI * 2
       );
+      context.fill();
     }
     context.restore();
   });

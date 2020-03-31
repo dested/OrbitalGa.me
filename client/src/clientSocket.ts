@@ -10,11 +10,13 @@ export class ClientSocket implements IClientSocket {
     onMessage: (messages: ServerToClientMessage[]) => void;
     onDisconnect: () => void;
   }) {
+    let totalLength = 0;
     // this.socket = new WebSocket('wss://game.quickga.me');
     this.socket = new WebSocket('ws://localhost:8081');
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       options.onOpen();
+      console.count('opened');
     };
     this.socket.onerror = e => {
       console.log(e);
@@ -23,10 +25,13 @@ export class ClientSocket implements IClientSocket {
     };
     this.socket.onmessage = e => {
       if (GameConstants.binaryTransport) {
+        totalLength += (e.data as ArrayBuffer).byteLength;
         options.onMessage(ServerToClientMessageParser.toServerToClientMessages(e.data));
       } else {
+        totalLength += e.data.length;
         options.onMessage(JSON.parse(e.data));
       }
+      console.log((totalLength / 1024).toFixed(2) + 'kb');
     };
     this.socket.onclose = () => {
       options.onDisconnect();

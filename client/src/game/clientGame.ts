@@ -276,7 +276,8 @@ export class ClientGame extends Game {
     for (const entity of this.entities) {
       // entity.tick(duration);
     }
-    this.checkCollisions();
+    this.collisionEngine.update();
+    this.liveEntity?.checkCollisions();
   }
 
   private interpolateEntities() {
@@ -354,7 +355,7 @@ export class ClientGame extends Game {
 }
 
 export class LivePlayerEntity extends PlayerEntity {
-  constructor(game: Game, public entityId: string) {
+  constructor(game: Game, public entityId: number) {
     super(game, entityId);
   }
 

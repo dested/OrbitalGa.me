@@ -1,0 +1,43 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-eslint-rules",
+    "tslint-config-prettier"
+  ],
+  "jsRules": {
+  },
+  "rules": {
+    "variable-name": false,
+    "no-reference": false,
+    "forin": false,
+    "radix": false,
+    "no-console": false,
+    "member-ordering": false,
+    "no-bitwise": false,
+    "array-type": false,
+    "no-empty": false,
+    "object-literal-sort-keys": false,
+    "jsx-no-lambda": false,
+    "jsx-boolean-value": false,
+    "no-empty-interface": false,
+    "max-classes-per-file": false,
+    "no-unused-expression": false,
+    "interface-name": [
+      true,
+      "never-prefix"
+    ],
+    "member-access": [
+      true,
+      "no-public"
+    ],
+    "prettier": true,
+    "ter-arrow-body-style": [
+      true,
+      "as-needed"
+    ]
+  },
+  "rulesDirectory": [
+    "tslint-plugin-prettier"
+  ]
+}

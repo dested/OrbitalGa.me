@@ -107,7 +107,7 @@ export class ClientGameUI extends ClientGame {
     if (this.liveEntity) {
       GameData.instance.view.setCenterPosition(
         GameData.instance.view.transformPoint(this.liveEntity.drawX),
-        GameData.instance.view.viewHeight / 2
+        GameData.instance.view.viewHeight / 2 + this.liveEntity.drawY / 5
       );
     }
 
@@ -125,6 +125,9 @@ export class ClientGameUI extends ClientGame {
 
     context.font = '25px bold';
     for (const entity of this.entities) {
+      if (!GameData.instance.view.contains(entity)) {
+        continue;
+      }
       switch (entity.type) {
         case 'player':
           break;
@@ -147,9 +150,12 @@ export class ClientGameUI extends ClientGame {
           break;
         case 'swoopingEnemy':
           assert(entity instanceof SwoopingEnemyEntity);
-          context.fillStyle = 'rgba(255,0,0,1)';
-          context.fillText(`${entity.health.toFixed(0)}`, entity.x, entity.y - 25);
-          context.fillRect(entity.x - 25, entity.y - 25, 50, 50);
+          const ship = AssetManager.assets.ship2;
+          context.save();
+          context.translate(entity.x, entity.y);
+          context.rotate(Math.PI);
+          context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
+          context.restore();
           break;
         default:
           unreachable(entity.type);

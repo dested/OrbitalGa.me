@@ -48,6 +48,11 @@ export class ArrayBufferBuilder {
     this.view.setUint8(this.curPosition, value);
     this.curPosition += 1;
   }
+  addBoolean(value: boolean) {
+    this.testSize(1);
+    this.view.setUint8(this.curPosition, value ? 1 : 0);
+    this.curPosition += 1;
+  }
 
   addUint16(value: number) {
     this.testSize(2);
@@ -169,6 +174,10 @@ export class ArrayBufferReader {
       strs.push(String.fromCharCode(this.readUint16()));
     }
     return strs.join('');
+  }
+
+  readBoolean() {
+    return this.readUint8() === 1;
   }
 }
 

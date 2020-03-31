@@ -163,4 +163,11 @@ export class GameView {
   setCenterPosition(x: number, y: number) {
     this.setPosition(x - this.width / 2, y - this.height / 2);
   }
+
+  contains(entity: {x: number; y: number}) {
+    const outer = this.outerViewBox;
+    return (
+      outer.x < entity.x && outer.x + outer.width > entity.x && outer.y < entity.y && outer.y + outer.height > entity.y
+    );
+  }
 }
