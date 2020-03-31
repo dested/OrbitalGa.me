@@ -1,7 +1,7 @@
-import {GameConstants} from '../../common/src/game/gameConstants';
-import {ClientToServerMessage, ServerToClientMessage} from '../../common/src/models/messages';
-import {ClientToServerMessageParser} from '../../common/src/parsers/clientToServerMessageParser';
-import {ServerToClientMessageParser} from '../../common/src/parsers/serverToClientMessageParser';
+import {GameConstants} from '@common/game/gameConstants';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
+import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
@@ -18,12 +18,12 @@ export class ClientSocket implements IClientSocket {
       options.onOpen();
       console.count('opened');
     };
-    this.socket.onerror = e => {
+    this.socket.onerror = (e) => {
       console.log(e);
       this.socket?.close();
       options.onDisconnect();
     };
-    this.socket.onmessage = e => {
+    this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         totalLength += (e.data as ArrayBuffer).byteLength;
         options.onMessage(ServerToClientMessageParser.toServerToClientMessages(e.data));

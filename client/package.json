@@ -29,13 +29,13 @@
   "devDependencies": {
     "@types/hammerjs": "^2.0.36",
     "customize-cra": "^0.9.1",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.2",
     "react-app-rewired": "^2.1.5",
     "ts-loader": "^6.2.1",
     "tslint": "^6.1.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-eslint-rules": "^5.4.0",
-    "tslint-plugin-prettier": "^2.2.0",
+    "tslint-plugin-prettier": "^2.3.0",
     "tslint-react": "^4.2.0"
   },
   "scripts": {

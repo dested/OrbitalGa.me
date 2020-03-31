@@ -1,14 +1,14 @@
-import {Manager, Pan, Pinch, Press, Swipe, Tap} from 'hammerjs';
-import {ClientSocket, IClientSocket} from '../clientSocket';
+import {Manager, Press, Tap} from 'hammerjs';
+import {IClientSocket} from '../clientSocket';
 import {ClientGame, LivePlayerEntity} from './clientGame';
-import {GameView} from './gameView';
-import {assert, Utils} from '../../../common/src/utils/utils';
-import {start} from 'repl';
-import {EnemyShotEntity, ShotEntity, SwoopingEnemyEntity, WallEntity} from '../../../common/src/entities/entity';
-import {INoise, noise} from '../utils/perlin';
-import {unreachable} from '../../../common/src/utils/unreachable';
+import {assert} from '@common/utils/utils';
+import {unreachable} from '@common/utils/unreachable';
 import {GameData} from './gameData';
 import {AssetManager} from '../utils/assetManager';
+import {WallEntity} from '@common/entities/wallEntity';
+import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
+import {ShotEntity} from '@common/entities/shotEntity';
+import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -40,17 +40,17 @@ export class ClientGameUI extends ClientGame {
 
     let lastPress: Date = new Date();
     let doubleTap = false;
-    manager.on('press', e => {
+    manager.on('press', (e) => {
       doubleTap = +new Date() - +lastPress < 200;
       lastPress = new Date();
     });
-    manager.on('pressup', e => {
+    manager.on('pressup', (e) => {
       doubleTap = false;
     });
 
     const path: {x: number; y: number}[] = [];
     let startPoint: {x: number; y: number};
-    manager.on('tap', e => {
+    manager.on('tap', (e) => {
       if (path.length === 0) {
         path.push({x: 0, y: 0});
         startPoint = e.center;
@@ -60,8 +60,8 @@ export class ClientGameUI extends ClientGame {
       console.log(JSON.stringify(path, null, 2));
     });
 
-    manager.on('doubletap', e => {});
-    document.onkeydown = e => {
+    manager.on('doubletap', (e) => {});
+    document.onkeydown = (e) => {
       if (e.keyCode === 65) {
         this.liveEntity?.pressShoot();
       }
@@ -76,7 +76,7 @@ export class ClientGameUI extends ClientGame {
       }
       // e.preventDefault();
     };
-    document.onkeyup = e => {
+    document.onkeyup = (e) => {
       if (e.keyCode === 65) {
         this.liveEntity?.releaseShoot();
       }

@@ -1,4 +1,4 @@
-import {action, observable, toJS} from 'mobx';
+import {action, observable} from 'mobx';
 import {persist} from 'mobx-persist';
 
 type Screens = 'loading' | 'login' | 'game';

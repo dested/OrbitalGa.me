@@ -1,10 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect} from 'react';
 import './index.css';
-import {ClientGameUI} from '../../game/clientGameUI';
-import {ClientSocket} from '../../clientSocket';
 import {create} from 'mobx-persist';
 import {uiStore} from '../../store/uiStore';
-import {Utils} from '../../../../common/src/utils/utils';
+import {Utils} from '@common/utils/utils';
 import {observer} from 'mobx-react-lite';
 import {AssetManager} from '../../utils/assetManager';
 
@@ -14,7 +12,7 @@ import ship1 from '../../assets/ships/playerShip1_blue.png';
 import ship2 from '../../assets/ships/playerShip2_red.png';
 import stars from '../../assets/stars.png';
 
-export const LoadingScreen: React.FC = observer(props => {
+export const LoadingScreen: React.FC = observer((props) => {
   useEffect(() => {
     async function load() {
       const hydrate = await create({

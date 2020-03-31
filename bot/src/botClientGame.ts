@@ -1,6 +1,6 @@
 import {IClientSocket} from '../../client/src/clientSocket';
 import {ClientGame} from '../../client/src/game/clientGame';
-import {Utils} from '../../common/src/utils/utils';
+import {Utils} from '@common/utils/utils';
 
 type Moving = 'left' | 'right' | 'up' | 'down';
 

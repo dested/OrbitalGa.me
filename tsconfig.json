@@ -15,11 +15,6 @@
     "moduleResolution": "node",
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "./src",
-    "outDir": "./dist",
-    "skipLibCheck": true,
-    "paths": {
-      "@common/*": ["../../common/src/*"]
-    }
+    "skipLibCheck": true
   }
 }

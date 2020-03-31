@@ -1,5 +1,3 @@
-import {AnimationUtils} from './animationUtils';
-
 export class MathUtils {
   static randomItem<T>(item: T[]): T {
     return item[Math.floor(Math.random() * item.length)];

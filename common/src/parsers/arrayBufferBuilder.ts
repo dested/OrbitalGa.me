@@ -1,5 +1,3 @@
-import {Utils} from '../utils/utils';
-
 export class ArrayBufferBuilder {
   buffer = new ArrayBuffer(50000);
   view = new DataView(this.buffer);

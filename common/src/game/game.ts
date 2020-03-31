@@ -1,6 +1,5 @@
 import {Collisions, Result} from 'collisions';
-import {Entity, EntityTypeOptions, EntityTypes, ShotEntity} from '../entities/entity';
-import {uuid} from '../utils/uuid';
+import {Entity, EntityTypeOptions, EntityTypes} from '../entities/entity';
 
 export abstract class Game {
   entities: Entity[] = [];

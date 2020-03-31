@@ -1,22 +1,17 @@
-import {ClientToServerMessage, ServerToClientMessage} from '../../../common/src/models/messages';
-import {unreachable} from '../../../common/src/utils/unreachable';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {unreachable} from '@common/utils/unreachable';
 import {IServerSocket} from '../serverSocket';
-import {nextId, uuid} from '../../../common/src/utils/uuid';
-import {ColorUtils} from '../../../common/src/utils/colorUtils';
-import {GameConstants} from '../../../common/src/game/gameConstants';
-import {
-  EnemyShotEntity,
-  Entity,
-  EntityTypeOptions,
-  EntityTypes,
-  PendingInput,
-  PlayerEntity,
-  ShotEntity,
-  SwoopingEnemyEntity,
-  WallEntity,
-} from '../../../common/src/entities/entity';
-import {Game} from '../../../common/src/game/game';
-import {assert, assertType, Utils} from '../../../common/src/utils/utils';
+import {nextId} from '@common/utils/uuid';
+import {GameConstants} from '@common/game/gameConstants';
+import {EntityTypeOptions, EntityTypes} from '@common/entities/entity';
+import {Game} from '@common/game/game';
+import {assert, assertType, Utils} from '@common/utils/utils';
+import {PlayerEntity} from '@common/entities/playerEntity';
+import {WallEntity} from '@common/entities/wallEntity';
+import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
+import {ShotEntity} from '@common/entities/shotEntity';
+import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
+import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -24,8 +19,8 @@ export class ServerGame extends Game {
   constructor(private serverSocket: IServerSocket) {
     super(false);
     serverSocket.start(
-      connectionId => {},
-      connectionId => {
+      (connectionId) => {},
+      (connectionId) => {
         this.clientLeave(connectionId);
       },
       (connectionId, message) => {
@@ -81,7 +76,7 @@ export class ServerGame extends Game {
   }
 
   clientLeave(connectionId: string) {
-    const client = this.users.find(c => c.connectionId === connectionId);
+    const client = this.users.find((c) => c.connectionId === connectionId);
     if (!client) {
       return;
     }
@@ -134,7 +129,7 @@ export class ServerGame extends Game {
           break;
         case 'playerInput': {
           // if (this.validateInput(q.message)) {
-          const user = this.users.find(a => a.connectionId === q.connectionId);
+          const user = this.users.find((a) => a.connectionId === q.connectionId);
           if (user) {
             user.entity.applyInput(q.message);
             this.collisionEngine.update();
@@ -175,7 +170,7 @@ export class ServerGame extends Game {
 
     this.sendMessageToClients({
       type: 'worldState',
-      entities: this.entities.map(entity => {
+      entities: this.entities.map((entity) => {
         switch (entity.type) {
           case 'player':
             assert(entity instanceof PlayerEntity);
@@ -334,15 +329,5 @@ export class ServerGame extends Game {
       range.x1 = Math.max(range.x1, user.entity.x);
     }
     return {x0: range.x0 - padding, x1: range.x1 + padding};
-  }
-}
-
-export class ServerPlayerEntity extends PlayerEntity {
-  tick(): void {
-    super.tick();
-  }
-  applyInput(input: PendingInput) {
-    super.applyInput(input);
-    this.lastProcessedInputSequenceNumber = input.inputSequenceNumber;
   }
 }

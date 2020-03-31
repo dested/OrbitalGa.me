@@ -1,20 +1,16 @@
-import {ClientToServerMessage, ServerToClientMessage} from '../../../common/src/models/messages';
-import {unreachable} from '../../../common/src/utils/unreachable';
-import {uuid} from '../../../common/src/utils/uuid';
-import {ClientSocket, IClientSocket} from '../clientSocket';
-import {GameConstants} from '../../../common/src/game/gameConstants';
-import {
-  EnemyShotEntity,
-  Entity,
-  EntityTypeOptions,
-  EntityTypes,
-  PlayerEntity,
-  ShotEntity,
-  SwoopingEnemyEntity,
-  WallEntity,
-} from '../../../common/src/entities/entity';
-import {Game} from '../../../common/src/game/game';
-import {assert, Utils} from '../../../common/src/utils/utils';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {unreachable} from '@common/utils/unreachable';
+import {uuid} from '@common/utils/uuid';
+import {IClientSocket} from '../clientSocket';
+import {GameConstants} from '@common/game/gameConstants';
+import {EntityTypeOptions, EntityTypes} from '@common/entities/entity';
+import {Game} from '@common/game/game';
+import {assert, Utils} from '@common/utils/utils';
+import {PlayerEntity} from '@common/entities/playerEntity';
+import {WallEntity} from '@common/entities/wallEntity';
+import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
+import {ShotEntity} from '@common/entities/shotEntity';
+import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 
 export class ClientGame extends Game {
   connectionId: string;
@@ -36,7 +32,7 @@ export class ClientGame extends Game {
         options.onDisconnect(this);
       },
 
-      onMessage: messages => {
+      onMessage: (messages) => {
         this.processMessages(messages);
       },
     });
@@ -164,13 +160,13 @@ export class ClientGame extends Game {
           {
             for (let i = this.entities.length - 1; i >= 0; i--) {
               const entity = this.entities[i];
-              if (message.entities.find(a => a.entityId === entity.entityId)) {
+              if (message.entities.find((a) => a.entityId === entity.entityId)) {
                 continue;
               }
               this.entities.splice(i, 1);
             }
             for (const entity of message.entities) {
-              let foundEntity = this.entities.find(a => a.entityId === entity.entityId);
+              let foundEntity = this.entities.find((a) => a.entityId === entity.entityId);
               if (!foundEntity) {
                 switch (entity.type) {
                   case 'player':

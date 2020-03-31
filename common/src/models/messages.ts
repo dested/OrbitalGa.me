@@ -36,12 +36,14 @@ export type WorldStateEntity = {entityId: number; x: number; y: number} & (
       markToDestroy: boolean;
     }
 );
+
 export type ServerToClientCreateEntity = {
   type: 'createEntity';
   entityId: number;
   x: number;
   y: number;
 } & ({entityType: 'shot'} | {entityType: 'enemyShot'} | {entityType: 'swoopingEnemy'; health: number});
+
 export type ServerToClientMessage =
   | {
       type: 'joined';

@@ -1,9 +1,10 @@
+///<reference path="./types/ws.d.ts"/>
 import * as WebServer from 'ws';
-import {ClientToServerMessage, ServerToClientMessage} from '../../common/src/models/messages';
-import {GameConstants} from '../../common/src/game/gameConstants';
-import {uuid} from '../../common/src/utils/uuid';
-import {ClientToServerMessageParser} from '../../common/src/parsers/clientToServerMessageParser';
-import {ServerToClientMessageParser} from '../../common/src/parsers/serverToClientMessageParser';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {GameConstants} from '@common/game/gameConstants';
+import {uuid} from '@common/utils/uuid';
+import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
+import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 
 export class ServerSocket implements IServerSocket {
   wss?: WebServer.Server;
@@ -20,13 +21,13 @@ export class ServerSocket implements IServerSocket {
       console.error('error', a, b);
     });
 
-    this.wss.on('connection', ws => {
+    this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
       const me = {socket: ws, connectionId: uuid()};
       console.count('new connection');
       this.connections.push(me);
 
-      ws.on('message', message => {
+      ws.on('message', (message) => {
         if (GameConstants.binaryTransport) {
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
           onMessage(me.connectionId, ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer));
@@ -36,7 +37,7 @@ export class ServerSocket implements IServerSocket {
       });
 
       ws.onclose = () => {
-        const ind = this.connections.findIndex(a => a.connectionId === me.connectionId);
+        const ind = this.connections.findIndex((a) => a.connectionId === me.connectionId);
         if (ind === -1) {
           return;
         }
@@ -48,7 +49,7 @@ export class ServerSocket implements IServerSocket {
   }
 
   sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
-    const client = this.connections.find(a => a.connectionId === connectionId);
+    const client = this.connections.find((a) => a.connectionId === connectionId);
     if (!client) {
       return;
     }

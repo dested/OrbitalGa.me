@@ -1,5 +1,5 @@
 export function uuid() {
-  return 'xxxxxxxx'.replace(/[x]/g, c => {
+  return 'xxxxxxxx'.replace(/[x]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     return r.toString(16);
   });

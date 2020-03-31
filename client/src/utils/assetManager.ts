@@ -27,7 +27,7 @@ export class AssetManager {
     for (const name in this.assetQueue) {
       if (this.assetQueue.hasOwnProperty(name)) {
         promises.push(
-          new Promise(res => {
+          new Promise((res) => {
             const img = new Image();
             img.onload = () => {
               this.imageLoaded(img, name);

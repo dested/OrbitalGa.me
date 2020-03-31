@@ -1,6 +1,5 @@
 import {ServerToClientCreateEntity, ServerToClientMessage, WorldStateEntity} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
-import {Utils} from '../utils/utils';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 
 export class ServerToClientMessageParser {

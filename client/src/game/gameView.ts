@@ -1,4 +1,4 @@
-import {AnimationUtils} from '../../../common/src/utils/animationUtils';
+import {AnimationUtils} from '@common/utils/animationUtils';
 
 export class GameView {
   private x: number = 0;
@@ -124,7 +124,7 @@ export class GameView {
       finish: scale,
       duration: 250,
       easing: AnimationUtils.easings.easeInCubic,
-      callback: c => {
+      callback: (c) => {
         this.setScale(c);
       },
     });
@@ -142,7 +142,7 @@ export class GameView {
       finish: 1,
       duration: 250,
       easing: AnimationUtils.easings.easeInCubic,
-      callback: c => {
+      callback: (c) => {
         this.setPosition(AnimationUtils.lerp(startX, endX, c), AnimationUtils.lerp(startY, endY, c));
       },
     });

@@ -148,4 +148,3 @@ export class AnimationInstance {
   stop: boolean = false;
   cancel: boolean = false;
 }
-

@@ -4,7 +4,7 @@ import {ClientGameUI} from '../../game/clientGameUI';
 import {ClientSocket} from '../../clientSocket';
 import {observer} from 'mobx-react';
 
-export const GameScreen: React.FC = observer(props => {
+export const GameScreen: React.FC = observer((props) => {
   const client = useRef<ClientGameUI>(null);
   const [died, setDied] = useState(false);
   const [disconnected, setDisconnected] = useState(false);

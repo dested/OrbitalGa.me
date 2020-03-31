@@ -81,7 +81,7 @@ export class Utils {
   }
 
   static timeout(timeout: number): Promise<void> {
-    return new Promise(res => {
+    return new Promise((res) => {
       setTimeout(() => {
         res();
       }, timeout);
@@ -116,7 +116,7 @@ export class Utils {
     const maps: {[key in TKey]: TResult[]} = {} as any;
 
     for (const group in groups) {
-      maps[group] = groups[group].map(a => resultCallback(a));
+      maps[group] = groups[group].map((a) => resultCallback(a));
     }
 
     return maps;
@@ -191,13 +191,13 @@ export class Utils {
   }
 
   static bitsToInt(...bools: boolean[]) {
-    return parseInt('1' + bools.map(a => (a ? '1' : '0')).join(''), 2);
+    return parseInt('1' + bools.map((a) => (a ? '1' : '0')).join(''), 2);
   }
   static intToBits(int: number): boolean[] {
     return int
       .toString(2)
       .split('')
-      .map(a => a === '1')
+      .map((a) => a === '1')
       .slice(1);
   }
 }

@@ -1,11 +1,11 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './index.css';
 import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
-import {Utils} from '../../../../common/src/utils/utils';
+import {Utils} from '@common/utils/utils';
 
-export const LoginScreen: React.FC = observer(props => {
+export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
   const [name, setName] = useState('');
   const [connectStatus, setConnectingStatus] = useState<'none' | 'fail' | 'connecting' | 'joining' | 'joined'>('none');

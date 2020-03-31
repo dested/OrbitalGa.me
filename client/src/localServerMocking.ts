@@ -1,8 +1,8 @@
-import {GameConstants} from '../../common/src/game/gameConstants';
-import {ClientToServerMessage, ServerToClientMessage} from '../../common/src/models/messages';
-import {ClientToServerMessageParser} from '../../common/src/parsers/clientToServerMessageParser';
-import {ServerToClientMessageParser} from '../../common/src/parsers/serverToClientMessageParser';
-import {uuid} from '../../common/src/utils/uuid';
+import {GameConstants} from '@common/game/gameConstants';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
+import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
+import {uuid} from '@common/utils/uuid';
 import {IServerSocket} from '../../server/src/serverSocket';
 import {IClientSocket} from './clientSocket';
 
@@ -72,13 +72,13 @@ export class LocalServerSocket implements IServerSocket {
     const port = parseInt(process.env.PORT || '8081');
     this.wss = new WebSocketServer({port, perMessageDeflate: false});
 
-    this.wss.on('connection', ws => {
+    this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
       const me = {socket: ws, connectionId: uuid()};
       // console.log('new connection', me.connectionId);
       this.connections.push(me);
 
-      ws.onmessage(message => {
+      ws.onmessage((message) => {
         if (GameConstants.binaryTransport) {
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
           onMessage(me.connectionId, ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer));
@@ -88,7 +88,7 @@ export class LocalServerSocket implements IServerSocket {
       });
 
       ws.onclose = () => {
-        const ind = this.connections.findIndex(a => a.connectionId === me.connectionId);
+        const ind = this.connections.findIndex((a) => a.connectionId === me.connectionId);
         if (ind === -1) {
           return;
         }
@@ -100,7 +100,7 @@ export class LocalServerSocket implements IServerSocket {
   }
 
   sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
-    const client = this.connections.find(a => a.connectionId === connectionId);
+    const client = this.connections.find((a) => a.connectionId === connectionId);
     if (!client) {
       return;
     }
@@ -131,12 +131,12 @@ export class LocalClientSocket implements IClientSocket {
     this.socket.onopen = () => {
       options.onOpen();
     };
-    this.socket.onerror = e => {
+    this.socket.onerror = (e) => {
       console.log(e);
       this.socket?.close();
       options.onDisconnect();
     };
-    this.socket.onmessage = e => {
+    this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         options.onMessage(ServerToClientMessageParser.toServerToClientMessages(e.data));
       } else {

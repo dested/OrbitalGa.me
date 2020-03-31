@@ -4,7 +4,7 @@ import './index.css';
 import {GameScreen} from './screens/gameScreen';
 import {stores, useStores} from './store/stores';
 import {observer, Provider} from 'mobx-react';
-import {unreachable} from '../../common/src/utils/unreachable';
+import {unreachable} from '@common/utils/unreachable';
 import {LoadingScreen} from './screens/loadingScreen';
 import {LoginScreen} from './screens/loginScreen';
 import {StarBackground} from './components/starBackground';
