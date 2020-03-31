@@ -2,6 +2,7 @@ import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {unreachable} from '../utils/unreachable';
 import {Entity} from './entity';
+import {GameConstants} from '../game/gameConstants';
 
 export type PendingInput = {
   pressTime: number;
@@ -14,18 +15,7 @@ export type PendingInput = {
 };
 
 export class PlayerEntity extends Entity {
-  createPolygon(): void {
-    const w = 30;
-    const h = 30;
-    this.polygon = new Polygon(this.x, this.y, [
-      [-w / 2, -h / 2],
-      [w / 2, -h / 2],
-      [w / 2, h / 2],
-      [-w / 2, h / 2],
-    ]);
-    this.polygon.entity = this;
-    this.game.collisionEngine.insert(this.polygon);
-  }
+  boundingBox = {width: 99, height: 75};
 
   tick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
@@ -65,6 +55,21 @@ export class PlayerEntity extends Entity {
     }
     if (input.down) {
       this.y += input.pressTime * this.speed;
+    }
+
+    const {x0, x1} = this.game.getPlayerRange(1000, this);
+    if (this.x < x0) {
+      this.x = x0;
+    }
+    if (this.x > x1) {
+      this.x = x1;
+    }
+
+    if (this.y < GameConstants.screenSize.height * 0.1) {
+      this.y = GameConstants.screenSize.height * 0.1;
+    }
+    if (this.y > GameConstants.screenSize.height * 1.1) {
+      this.y = GameConstants.screenSize.height * 1.1;
     }
     this.updatePosition();
   }

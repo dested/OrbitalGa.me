@@ -1,8 +1,8 @@
 import {w3cwebsocket} from 'websocket';
 (global as any).WebSocket = w3cwebsocket;
+import {Utils} from '@common/utils/utils';
 import {ClientSocket} from '../../client/src/clientSocket';
 import {ClientGame} from '../../client/src/game/clientGame';
-import {Utils} from '@common/utils/utils';
 import {BotClientGame} from './botClientGame';
 
 console.log('started');
@@ -13,7 +13,7 @@ async function main() {
     onDied: () => {},
   });
   return;*/
-  for (let i = 0; i < 300; i++) {
+  for (let i = 0; i < 50; i++) {
     const options = {
       onDisconnect: () => {
         new BotClientGame(options, new ClientSocket());
@@ -29,4 +29,4 @@ async function main() {
   }
 }
 
-main().catch(ex => console.error(ex));
+main().catch((ex) => console.error(ex));

@@ -14,6 +14,7 @@ module.exports = env => {
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
       alias: {
+        '@common': path.resolve(__dirname, '..', 'common', 'src'),
       }
     },
     externals: {},

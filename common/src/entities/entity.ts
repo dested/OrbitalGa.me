@@ -13,6 +13,8 @@ export type EntityTypeOptions = {
 export abstract class Entity {
   polygon?: Polygon;
 
+  abstract boundingBox: {width: number; height: number};
+
   x: number = 0;
   y: number = 0;
   positionBuffer: {time: number; x: number; y: number}[] = [];
@@ -24,7 +26,16 @@ export abstract class Entity {
     this.updatePosition();
   }
 
-  abstract createPolygon(): void;
+  createPolygon(): void {
+    this.polygon = new Polygon(this.x, this.y, [
+      [-this.boundingBox.width / 2, -this.boundingBox.height / 2],
+      [this.boundingBox.width / 2, -this.boundingBox.height / 2],
+      [this.boundingBox.width / 2, this.boundingBox.height / 2],
+      [-this.boundingBox.width / 2, this.boundingBox.height / 2],
+    ]);
+    this.polygon.entity = this;
+    this.game.collisionEngine.insert(this.polygon);
+  }
 
   updatePosition() {
     if (!this.polygon) {

@@ -76,12 +76,12 @@ export class ServerGame extends Game {
   }
 
   clientLeave(connectionId: string) {
-    const client = this.users.find((c) => c.connectionId === connectionId);
-    if (!client) {
+    const user = this.users.find((c) => c.connectionId === connectionId);
+    if (!user) {
       return;
     }
-    this.users.splice(this.users.indexOf(client), 1);
-    this.entities.splice(this.entities.indexOf(client.entity), 1);
+    this.users.splice(this.users.indexOf(user), 1);
+    this.entities.splice(this.entities.indexOf(user.entity), 1);
   }
 
   clientJoin(connectionId: string) {
@@ -92,7 +92,7 @@ export class ServerGame extends Game {
     const {x0, x1} = this.getPlayerRange(200);
 
     entity.x = Utils.randomInRange(x0, x1);
-    entity.y = Math.random() * 400 + 600;
+    entity.y = GameConstants.screenSize.height * 0.8;
     this.users.push({connectionId, entity});
     this.entities.push(entity);
     this.sendMessageToClient(connectionId, {
@@ -128,13 +128,14 @@ export class ServerGame extends Game {
           }
           break;
         case 'playerInput': {
-          // if (this.validateInput(q.message)) {
-          const user = this.users.find((a) => a.connectionId === q.connectionId);
-          if (user) {
-            user.entity.applyInput(q.message);
-            this.collisionEngine.update();
-            user.entity.checkCollisions();
-          } // }
+          if (q.message.pressTime < 0.1) {
+            const user = this.users.find((a) => a.connectionId === q.connectionId);
+            if (user) {
+              user.entity.applyInput(q.message);
+              this.collisionEngine.update();
+              user.entity.checkCollisions();
+            }
+          }
 
           break;
         }
@@ -149,16 +150,15 @@ export class ServerGame extends Game {
       console.log(this.queuedMessages.length, 'remaining');
     }
 
-    if (tickIndex % 50 < 4) {
-      if (this.users.length > 0) {
-        for (let i = 0; i < 10; i++) {
-          const {x0, x1} = this.getPlayerRange(200);
-          this.createEntity('swoopingEnemy', {
-            x: Utils.randomInRange(x0, x1),
-            y: -100 + Math.random() * 150,
-            health: 10,
-          });
-        }
+    if (tickIndex % 50 < 2) {
+      const enemyCount = this.users.length;
+      for (let i = 0; i < enemyCount; i++) {
+        const {x0, x1} = this.getPlayerRange(200);
+        this.createEntity('swoopingEnemy', {
+          x: Utils.randomInRange(x0, x1),
+          y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+          health: 10,
+        });
       }
     }
 
@@ -314,20 +314,5 @@ export class ServerGame extends Game {
         unreachable(entityType);
         break;
     }
-  }
-
-  private getPlayerRange(padding: number) {
-    const range = {x0: Number.POSITIVE_INFINITY, x1: Number.NEGATIVE_INFINITY};
-    if (this.users.length === 0) {
-      return {x0: 0, x1: 0};
-    }
-    for (const user of this.users) {
-      if (!user.entity) {
-        continue;
-      }
-      range.x0 = Math.min(range.x0, user.entity.x);
-      range.x1 = Math.max(range.x1, user.entity.x);
-    }
-    return {x0: range.x0 - padding, x1: range.x1 + padding};
   }
 }

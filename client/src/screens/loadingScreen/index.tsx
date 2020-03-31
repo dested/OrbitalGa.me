@@ -24,7 +24,7 @@ export const LoadingScreen: React.FC = observer((props) => {
     async function assets() {
       AssetManager.addAsset('laser.red', laserRed13, {width: 9, height: 57}, {x: 0, y: 0});
       AssetManager.addAsset('laser.blue', laserBlue13, {width: 9, height: 57}, {x: 0, y: 0});
-      AssetManager.addAsset('ship1', ship1, {width: 112, height: 75}, {x: 0, y: 0});
+      AssetManager.addAsset('ship1', ship1, {width: 99, height: 75}, {x: 0, y: 0});
       AssetManager.addAsset('ship2', ship2, {width: 112, height: 75}, {x: 0, y: 0});
       AssetManager.addAsset('stars', stars, {width: 256, height: 256}, {x: 0, y: 0});
       await AssetManager.start();

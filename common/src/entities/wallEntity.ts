@@ -3,6 +3,8 @@ import {Game} from '../game/game';
 import {Entity} from './entity';
 
 export class WallEntity extends Entity {
+  boundingBox = {width: this.width, height: this.height};
+
   createPolygon(): void {
     this.polygon = new Polygon(this.x, this.y, [
       [0, 0],

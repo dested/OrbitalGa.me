@@ -25,4 +25,18 @@ export abstract class Game {
   destroyEntity(entity: Entity) {
     entity.destroy();
   }
+
+  getPlayerRange(padding: number, excludeEntity?: Entity) {
+    const range = {x0: Number.POSITIVE_INFINITY, x1: Number.NEGATIVE_INFINITY};
+    const playerEntities = this.entities.filter((entity) => entity.type === 'player' && excludeEntity !== entity);
+
+    if (playerEntities.length === 0) {
+      return {x0: -padding, x1: padding};
+    }
+    for (const entity of playerEntities) {
+      range.x0 = Math.min(range.x0, entity.x);
+      range.x1 = Math.max(range.x1, entity.x);
+    }
+    return {x0: range.x0 - padding, x1: range.x1 + padding};
+  }
 }

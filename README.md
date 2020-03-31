@@ -15,12 +15,12 @@ Goals
 Todo
 ===
 
- * [ ] determine screen size
-    * [ ] scaling
-    * [ ] cant go off the screen
+ * [x] determine screen size
+    * [x] scaling
+    * [x] cant go off the screen
     * [ ] warning when you go too far left?
     * [ ] keep everyone mostly near each other
- * [ ] better kenney assets
+ * [x] better kenney assets
  * [ ] add death effect
  * [ ] make sure disconnect and kill work
  * [ ] shot explode effect
@@ -33,11 +33,11 @@ Todo
  * [ ] add mouse movement
     * [ ] move rotate code from sonic
  * [x] binary transfer
- * [ ] better background
- * [ ] refactor code
-     * [ ] better separation
+ * [x] better background
+ * [x] refactor code
+     * [x] better separation
      * [ ] proper draw
-     * [ ] add better bounding box for collisions 
+     * [x] add better bounding box for collisions 
  * [ ] add powerups
  * [ ] come up with more enemies
  * [ ] come up with realtime events

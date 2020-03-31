@@ -3,6 +3,7 @@ import './index.css';
 import {ClientGameUI} from '../../game/clientGameUI';
 import {ClientSocket} from '../../clientSocket';
 import {observer} from 'mobx-react';
+import {GameConstants} from '@common/game/gameConstants';
 
 export const GameScreen: React.FC = observer((props) => {
   const client = useRef<ClientGameUI>(null);
@@ -28,7 +29,12 @@ export const GameScreen: React.FC = observer((props) => {
 
   return (
     <div className="App">
-      <canvas id={'game'} width={window.innerWidth} height={window.innerHeight} />
+      <canvas
+        id={'game'}
+        width={GameConstants.screenSize.width}
+        height={GameConstants.screenSize.height}
+        style={{width: '100vw', height: '100vh'}}
+      />
       {disconnected && (
         <div
           style={{

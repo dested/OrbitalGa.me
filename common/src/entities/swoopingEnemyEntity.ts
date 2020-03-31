@@ -4,8 +4,11 @@ import {unreachable} from '../utils/unreachable';
 import {Game} from '../game/game';
 import {Entity} from './entity';
 import {ShotEntity} from './shotEntity';
+import {GameConstants} from '../game/gameConstants';
 
 export class SwoopingEnemyEntity extends Entity {
+  boundingBox = {width: 127, height: 75};
+
   startX?: number;
   startY?: number;
 
@@ -14,32 +17,20 @@ export class SwoopingEnemyEntity extends Entity {
     this.startY = y;
   }
 
-  createPolygon(): void {
-    const w = 30;
-    const h = 30;
-    this.polygon = new Polygon(this.x, this.y, [
-      [-w / 2, -h / 2],
-      [w / 2, -h / 2],
-      [w / 2, h / 2],
-      [-w / 2, h / 2],
-    ]);
-    this.polygon.entity = this;
-    this.game.collisionEngine.insert(this.polygon);
-  }
-
   paths = [
     {x: 0, y: 0},
-    {x: -20, y: 50 * 3},
-    {x: -40, y: 100 * 3},
-    {x: -20, y: 150 * 3},
-    {x: 0, y: 200 * 3},
-    {x: 20, y: 175 * 3},
-    {x: 40, y: 150 * 3},
+    {x: -GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.4},
+    {x: -GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
+    {x: -GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.5},
+    {x: 0, y: GameConstants.screenSize.height * 0.4},
+    {x: GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.6},
+    {x: GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
   ];
+
   swaddle = [
-    {x: 0, y: -50},
-    {x: 0, y: +50},
-    {x: 0, y: -50},
+    {x: 0, y: GameConstants.screenSize.height * 0.1},
+    {x: 0, y: -GameConstants.screenSize.height * 0.1},
+    {x: 0, y: GameConstants.screenSize.height * 0.1},
   ];
 
   pathTick = 0;
@@ -118,8 +109,14 @@ export class SwoopingEnemyEntity extends Entity {
       case 'swoop-off':
         {
           const pathDuration = 15;
-          this.x = Utils.lerp(this.startX!, this.swoopDirection === 'left' ? -100 : 2000, this.pathTick / pathDuration);
-          this.y = Utils.lerp(this.startY!, -100, this.pathTick / pathDuration);
+          this.x = Utils.lerp(
+            this.startX!,
+            this.swoopDirection === 'left'
+              ? this.startX! - GameConstants.screenSize.width * 2
+              : this.startX! + GameConstants.screenSize.width * 2,
+            this.pathTick / pathDuration
+          );
+          this.y = Utils.lerp(this.startY!, -GameConstants.screenSize.height * 0.1, this.pathTick / pathDuration);
 
           this.pathTick++;
           if (this.pathTick % pathDuration === 0) {

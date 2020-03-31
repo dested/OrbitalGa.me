@@ -2,6 +2,7 @@ import React, {useEffect, useRef} from 'react';
 import {useAnimationFrame} from '../hooks/useAnimationFrame';
 import {GameData} from '../game/gameData';
 import {AssetManager} from '../utils/assetManager';
+import {GameConstants} from '@common/game/gameConstants';
 
 export const StarBackground: React.FC = (props) => {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -36,16 +37,15 @@ export const StarBackground: React.FC = (props) => {
       }
     }
 
-    console.log(count);
     context.restore();
   });
 
   return (
     <canvas
-      style={{position: 'absolute', zIndex: -100}}
+      style={{position: 'absolute', zIndex: -100, width: '100vw', height: '100vh'}}
       ref={canvas}
-      width={window.innerWidth}
-      height={window.innerHeight}
+      width={GameConstants.screenSize.width}
+      height={GameConstants.screenSize.height}
     />
   );
 };

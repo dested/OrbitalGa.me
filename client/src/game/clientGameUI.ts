@@ -9,6 +9,7 @@ import {WallEntity} from '@common/entities/wallEntity';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
+import {GameConstants} from '@common/game/gameConstants';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -30,9 +31,9 @@ export class ClientGameUI extends ClientGame {
     window.addEventListener(
       'resize',
       () => {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        GameData.instance.view.setBounds(window.innerWidth, window.innerHeight);
+        this.canvas.width = GameConstants.screenSize.width;
+        this.canvas.height = GameConstants.screenSize.height;
+        GameData.instance.view.setBounds(GameConstants.screenSize.width, GameConstants.screenSize.width);
         this.draw();
       },
       true
@@ -135,8 +136,8 @@ export class ClientGameUI extends ClientGame {
           assert(entity instanceof EnemyShotEntity);
           const laserRed = AssetManager.assets['laser.red'];
           context.save();
-          context.rotate(Math.PI);
           context.translate(entity.x, entity.y);
+          context.rotate(Math.PI);
           context.drawImage(laserRed.image, -laserRed.size.width / 2, -laserRed.size.height / 2);
           context.restore();
           break;

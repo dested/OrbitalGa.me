@@ -22,8 +22,8 @@ export const LoginScreen: React.FC = observer((props) => {
   return (
     <Wrapper>
       <LoginBox>
-        <Logo>Orbital</Logo>
-        <NameBox value={name} onChange={(e: any) => setName(e.target.value)} />
+        <Logo>Orbital Crash</Logo>
+        <NameBox placeholder={'Name'} value={name} onChange={(e: any) => setName(e.target.value)} />
         {(connectStatus === 'none' && <JoinButton onClick={onJoin}>Join</JoinButton>) ||
           (connectStatus === 'connecting' && <Status>Connecting...</Status>) ||
           (connectStatus === 'joining' && <Status>Joining...</Status>)}

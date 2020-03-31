@@ -4,18 +4,7 @@ import {WallEntity} from './wallEntity';
 import {Entity} from './entity';
 
 export class ShotEntity extends Entity {
-  createPolygon(): void {
-    const h = 30;
-    const w = 30;
-    this.polygon = new Polygon(this.x, this.y, [
-      [-w / 2, -h / 2],
-      [w / 2, -h / 2],
-      [w / 2, h / 2],
-      [-w / 2, h / 2],
-    ]);
-    this.polygon.entity = this;
-    this.game.collisionEngine.insert(this.polygon);
-  }
+  boundingBox = {width: 9, height: 57};
 
   constructor(game: Game, entityId: number) {
     super(game, entityId, 'shot');
@@ -30,7 +19,7 @@ export class ShotEntity extends Entity {
     return false;
   }
 
-  shotSpeedPerSecond = 900;
+  shotSpeedPerSecond = 1000;
   aliveDuration = 3000;
 
   tick(duration: number) {

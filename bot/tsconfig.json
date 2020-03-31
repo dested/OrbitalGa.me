@@ -17,6 +17,9 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": "./src",
     "outDir": "./dist",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@common/*": ["../../common/src/*"]
+    }
   }
 }

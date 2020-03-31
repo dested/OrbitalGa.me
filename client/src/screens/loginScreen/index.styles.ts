@@ -14,17 +14,15 @@ export const Wrapper = glamorous.div({
 export const LoginBox = glamorous.div({
   ...flex,
   flexDirection: 'column',
-  borderRadius: 5,
+  borderRadius: 20,
   width: '30vw',
-  height: '40vh',
-  background: '#232746',
+  background: 'rgba(69,84,147,0.5)',
   padding: 40,
 });
 
 export const Logo = glamorous.span({
   ...flex,
   alignSelf: 'center',
-  padding: 20,
   color: 'white',
   fontSize: '39px',
 });
@@ -36,6 +34,8 @@ export const NameBox = glamorous.input({
   type: 'text',
   color: '#312436',
   fontSize: '39px',
+  marginBottom: 20,
+  marginTop: 20,
 });
 
 export const JoinButton = glamorous.button({
