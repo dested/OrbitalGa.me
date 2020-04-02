@@ -1,0 +1,9 @@
+{
+  "loadBalancerArn": "arn",
+  "listenerArn": "arn",
+  "autoScalingGroupName": "name",
+  "vpcId": "vpc",
+  "launchConfigurationName": "launch-config",
+  "targetNameTemplate": "game-server-target-",
+  "websocketPort": 8081
+}
