@@ -6,10 +6,11 @@ type Moving = 'left' | 'right' | 'up' | 'down';
 
 export class BotClientGame extends ClientGame {
   constructor(
+    serverPath: string,
     options: {onDied: (me: ClientGame) => void; onDisconnect: (me: ClientGame) => void},
     socket: IClientSocket
   ) {
-    super(options, socket);
+    super(serverPath, options, socket);
 
     const doAction = () => {
       setTimeout(() => {

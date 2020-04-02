@@ -55,11 +55,11 @@ export class ServerGame extends Game {
           console.log('bad duration', duration);
         }
         time = +new Date();
-        console.time('server tick');
+        // console.time('server tick');
         const newTickTime = +new Date();
         this.serverTick(++serverTick, duration, tickTime);
         tickTime = +new Date() - newTickTime;
-        console.timeEnd('server tick');
+        // console.timeEnd('server tick');
         // console.time('gc');
         // global.gc();
         // console.timeEnd('gc');
@@ -89,7 +89,7 @@ export class ServerGame extends Game {
     // const color = ColorUtils.randomColor();
     const entity = new ServerPlayerEntity(this, nextId());
 
-    const {x0, x1} = this.getPlayerRange(200);
+    const {x0, x1} = this.getPlayerRange(200, (e) => e.type === 'player');
 
     entity.x = Utils.randomInRange(x0, x1);
     entity.y = GameConstants.screenSize.height * 0.8;
@@ -153,7 +153,7 @@ export class ServerGame extends Game {
     if (tickIndex % 50 < 2) {
       const enemyCount = this.users.length;
       for (let i = 0; i < enemyCount; i++) {
-        const {x0, x1} = this.getPlayerRange(200);
+        const {x0, x1} = this.getPlayerRange(200, (entity) => entity.type === 'player');
         this.createEntity('swoopingEnemy', {
           x: Utils.randomInRange(x0, x1),
           y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,

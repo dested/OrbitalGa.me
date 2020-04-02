@@ -19,12 +19,13 @@ export class ClientGame extends Game {
   protected liveEntity?: LivePlayerEntity;
 
   constructor(
+    serverPath: string,
     private options: {onDied: (me: ClientGame) => void; onDisconnect: (me: ClientGame) => void},
     private socket: IClientSocket
   ) {
     super(true);
     this.connectionId = uuid();
-    this.socket.connect({
+    this.socket.connect(serverPath, {
       onOpen: () => {
         this.sendMessageToServer({type: 'join'});
       },
@@ -163,6 +164,7 @@ export class ClientGame extends Game {
               if (message.entities.find((a) => a.entityId === entity.entityId)) {
                 continue;
               }
+              entity.destroy();
               this.entities.splice(i, 1);
             }
             for (const entity of message.entities) {

@@ -5,14 +5,17 @@ import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessage
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
-  connect(options: {
-    onOpen: () => void;
-    onMessage: (messages: ServerToClientMessage[]) => void;
-    onDisconnect: () => void;
-  }) {
+  connect(
+    serverPath: string,
+    options: {
+      onOpen: () => void;
+      onMessage: (messages: ServerToClientMessage[]) => void;
+      onDisconnect: () => void;
+    }
+  ) {
     let totalLength = 0;
-    // this.socket = new WebSocket('wss://game.quickga.me');
-    this.socket = new WebSocket('ws://localhost:8081');
+    // this.socket = new WebSocket('ws://localhost:8081');
+    this.socket = new WebSocket(`wss://game.orbitalga.me/${serverPath}`);
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       options.onOpen();
@@ -59,11 +62,14 @@ export class ClientSocket implements IClientSocket {
 }
 
 export interface IClientSocket {
-  connect(options: {
-    onOpen: () => void;
-    onMessage: (messages: ServerToClientMessage[]) => void;
-    onDisconnect: () => void;
-  }): void;
+  connect(
+    serverPath: string,
+    options: {
+      onOpen: () => void;
+      onMessage: (messages: ServerToClientMessage[]) => void;
+      onDisconnect: () => void;
+    }
+  ): void;
 
   sendMessage(message: ClientToServerMessage): void;
 

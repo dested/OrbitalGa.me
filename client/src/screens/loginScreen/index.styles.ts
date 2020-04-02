@@ -40,6 +40,9 @@ export const NameBox = glamorous.input({
 
 export const JoinButton = glamorous.button({
   ...flex,
+  flex: 1,
+  justifyContent: 'center',
+  margin: 5,
   borderRadius: 5,
   background: '#94c7f4',
   color: '#312436',

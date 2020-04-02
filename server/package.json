@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "", 
+  "description": "",
   "scripts": {
     "build": "rimraf dist && webpack --mode development",
     "watch": "rimraf dist && webpack --mode development --watch",
@@ -30,4 +30,5 @@
     "typescript": "^3.8.3",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
-  }}
+  }
+}

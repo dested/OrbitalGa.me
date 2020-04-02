@@ -120,11 +120,14 @@ export class LocalServerSocket implements IServerSocket {
 
 export class LocalClientSocket implements IClientSocket {
   private socket?: WebSocketClient;
-  connect(options: {
-    onOpen: () => void;
-    onMessage: (messages: ServerToClientMessage[]) => void;
-    onDisconnect: () => void;
-  }) {
+  connect(
+    serverPath: string,
+    options: {
+      onOpen: () => void;
+      onMessage: (messages: ServerToClientMessage[]) => void;
+      onDisconnect: () => void;
+    }
+  ) {
     // this.socket = new WebSocket('wss://game.quickga.me');
     this.socket = new WebSocketClient('ws://localhost:8081');
     this.socket.binaryType = 'arraybuffer';

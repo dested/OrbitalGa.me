@@ -13,20 +13,21 @@ async function main() {
     onDied: () => {},
   });
   return;*/
-  for (let i = 0; i < 50; i++) {
+  const serverPath = 'test1';
+  for (let i = 0; i < 200; i++) {
     const options = {
       onDisconnect: () => {
-        new BotClientGame(options, new ClientSocket());
+        new BotClientGame(serverPath, options, new ClientSocket());
       },
       onDied: (me: ClientGame) => {
         me.disconnect();
-        new BotClientGame(options, new ClientSocket());
+        new BotClientGame(serverPath, options, new ClientSocket());
       },
     };
 
-    new BotClientGame(options, new ClientSocket());
+    new BotClientGame(serverPath, options, new ClientSocket());
     await Utils.timeout(100);
   }
 }
 
-main().catch((ex) => console.error(ex));
+main().catch(ex => console.error(ex));

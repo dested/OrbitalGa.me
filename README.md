@@ -25,6 +25,7 @@ Todo
  * [ ] make sure disconnect and kill work
  * [ ] shot explode effect
  * [ ] watch other shmups
+ * [ ] gun shooting offcenter when youre moving
  * [ ] leaderboard
     * [ ] redis
  * [ ] add momentum to movement
@@ -44,7 +45,8 @@ Todo
     * [ ] big bosses every 5 min?
  * [x] build bots
  * [x] load test
- * [ ] deploy to beanstalk
- * [ ] determine how to scale up servers dynamically
+ * [x] deploy to beanstalk
+ * [x] add analytics to server to see users connected, enemies, etc
+ * [x] determine how to scale up servers dynamically
     * [ ] add lambda for join/etc, checks redis for servers, spins one up?
  

@@ -26,9 +26,9 @@ export abstract class Game {
     entity.destroy();
   }
 
-  getPlayerRange(padding: number, excludeEntity?: Entity) {
+  getPlayerRange(padding: number, filter: (e: Entity) => boolean) {
     const range = {x0: Number.POSITIVE_INFINITY, x1: Number.NEGATIVE_INFINITY};
-    const playerEntities = this.entities.filter((entity) => entity.type === 'player' && excludeEntity !== entity);
+    const playerEntities = this.entities.filter(filter);
 
     if (playerEntities.length === 0) {
       return {x0: -padding, x1: padding};

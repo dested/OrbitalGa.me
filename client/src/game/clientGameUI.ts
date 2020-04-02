@@ -15,8 +15,8 @@ export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
 
-  constructor(options: {onDied: () => void; onDisconnect: () => void}, socket: IClientSocket) {
-    super(options, socket);
+  constructor(serverPath: string, options: {onDied: () => void; onDisconnect: () => void}, socket: IClientSocket) {
+    super(serverPath, options, socket);
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
 

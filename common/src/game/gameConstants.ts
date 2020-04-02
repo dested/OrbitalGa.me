@@ -4,5 +4,5 @@ export class GameConstants {
   static binaryTransport = true;
   static serverTickRate = 150;
   static clientTickRate = 50;
-  static screenSize = {width: 1500, height: 935};
+  static screenSize = {width: 1500, height: 692};
 }

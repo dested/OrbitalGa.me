@@ -57,7 +57,7 @@ export class PlayerEntity extends Entity {
       this.y += input.pressTime * this.speed;
     }
 
-    const {x0, x1} = this.game.getPlayerRange(1000, this);
+    const {x0, x1} = this.game.getPlayerRange(1000, (entity) => this !== entity);
     if (this.x < x0) {
       this.x = x0;
     }

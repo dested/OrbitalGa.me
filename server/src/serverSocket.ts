@@ -5,6 +5,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {uuid} from '@common/utils/uuid';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
+import {createServer} from 'http';
 
 export class ServerSocket implements IServerSocket {
   wss?: WebServer.Server;
@@ -16,7 +17,14 @@ export class ServerSocket implements IServerSocket {
     onMessage: (connectionId: string, message: ClientToServerMessage) => void
   ) {
     const port = parseInt(process.env.PORT || '8081');
-    this.wss = new WebServer.Server({port, perMessageDeflate: false});
+    console.log('port', port);
+    const server = createServer((req, res) => {
+      if (req.method === 'GET') {
+        res.writeHead(200);
+        res.end();
+      }
+    });
+    this.wss = new WebServer.Server({server, perMessageDeflate: false});
     this.wss.on('error', (a: any, b: any) => {
       console.error('error', a, b);
     });
@@ -46,6 +54,7 @@ export class ServerSocket implements IServerSocket {
       };
       onJoin(me.connectionId);
     });
+    server.listen(port);
   }
 
   sendMessage(connectionId: string, messages: ServerToClientMessage[]) {

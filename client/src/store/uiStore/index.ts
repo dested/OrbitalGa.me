@@ -11,12 +11,18 @@ export class UIStore {
   @observable
   screen: Screens = 'loading';
 
+  @observable
+  serverPath?: string;
+
   @action setJwt(jwt: string) {
     this.jwt = jwt;
   }
 
   @action setScreen(newScreen: Screens) {
     this.screen = newScreen;
+  }
+  @action setServerPath(serverPath: string) {
+    this.serverPath = serverPath;
   }
 }
 

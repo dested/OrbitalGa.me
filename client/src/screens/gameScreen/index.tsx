@@ -4,8 +4,10 @@ import {ClientGameUI} from '../../game/clientGameUI';
 import {ClientSocket} from '../../clientSocket';
 import {observer} from 'mobx-react';
 import {GameConstants} from '@common/game/gameConstants';
+import {useStores} from '../../store/stores';
 
 export const GameScreen: React.FC = observer((props) => {
+  const {uiStore} = useStores();
   const client = useRef<ClientGameUI>(null);
   const [died, setDied] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
@@ -15,6 +17,7 @@ export const GameScreen: React.FC = observer((props) => {
 
   function connect() {
     (client as React.MutableRefObject<ClientGameUI>).current = new ClientGameUI(
+      uiStore.serverPath!,
       {
         onDied: () => {
           setDied(true);
