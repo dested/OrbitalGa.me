@@ -1,4 +1,4 @@
-import {ELBv2, AutoScaling, EC2} from 'aws-sdk';
+import {ELBv2, ELB, AutoScaling, EC2} from 'aws-sdk';
 import {Utils} from '@common/utils/utils';
 import * as config from './config.json';
 console.log('started');
@@ -73,16 +73,20 @@ async function spinUp() {
 
     while (true) {
       console.log('getting instance running state');
-      const status = await ec2.describeInstanceStatus({InstanceIds: [newInstanceId]}).promise();
-      if (
-        status.InstanceStatuses.length > 0 &&
-        status.InstanceStatuses[0].InstanceState &&
-        status.InstanceStatuses[0].InstanceState.Name
-      ) {
-        console.log(' instance running state', status.InstanceStatuses[0].InstanceState.Name);
-        if (status.InstanceStatuses[0].InstanceState.Name === 'running') {
-          break;
+      try {
+        const status = await ec2.describeInstanceStatus({InstanceIds: [newInstanceId]}).promise();
+        if (
+          status.InstanceStatuses.length > 0 &&
+          status.InstanceStatuses[0].InstanceState &&
+          status.InstanceStatuses[0].InstanceState.Name
+        ) {
+          console.log(' instance running state', status.InstanceStatuses[0].InstanceState.Name);
+          if (status.InstanceStatuses[0].InstanceState.Name === 'running') {
+            break;
+          }
         }
+      } catch (ex) {
+        console.error(ex);
       }
       console.log('sleeping');
       await Utils.timeout(2000);
@@ -161,6 +165,7 @@ async function spinUp() {
 
 async function spinDown() {
   const elbv2 = new ELBv2({region: 'us-west-2'});
+  const ec2 = new EC2({region: 'us-west-2'});
   const scaling = new AutoScaling({region: 'us-west-2'});
   try {
     const autoScalingGroup = await scaling
@@ -184,28 +189,33 @@ async function spinDown() {
       .promise();
     console.log('size updated', newSize);
 
-    console.log('waiting for load balancer available');
-    await elbv2.waitFor('loadBalancerAvailable');
-    console.log('load balancer available');
+    console.log(`Getting target group for load balancer: ${config.loadBalancerArn}`);
 
     const targetGroups = await elbv2.describeTargetGroups({LoadBalancerArn: config.loadBalancerArn}).promise();
-    const targetGroupArn = targetGroups.TargetGroups.find(
-      (a) => a.TargetGroupName === config.targetNameTemplate + size
-    )!.TargetGroupArn;
+    const targetGroup = targetGroups.TargetGroups.find((a) => a.TargetGroupName === config.targetNameTemplate + size)!;
 
+    console.log(`Got target group: ${targetGroup.TargetGroupArn}`);
+
+    const result = await elbv2.describeTargetHealth({TargetGroupArn: targetGroup.TargetGroupArn}).promise();
+    console.log(`Terminating Instance: ${result.TargetHealthDescriptions[0].Target.Id}`);
+
+    await ec2.terminateInstances({InstanceIds: [result.TargetHealthDescriptions[0].Target.Id]}).promise();
+
+    console.log(`Getting listener rules: ${config.listenerArn}`);
     const rules = await elbv2.describeRules({ListenerArn: config.listenerArn}).promise();
     console.log('got listener rules');
 
-    const ruleArn = rules.Rules.find((r) => r.Conditions.find((c) => c.Values.some((v) => v === '/' + size)));
-    if (!ruleArn) {
+    const rule = rules.Rules.find((r) => r.Conditions.find((c) => c.Values.some((v) => v === '/' + size)));
+    if (!rule) {
       console.log(`ERROR: Could not find Rule for /${size}`);
       return;
     }
-    console.log(`deleting rule: ${ruleArn.RuleArn}`);
-    await elbv2.deleteRule({RuleArn: ruleArn.RuleArn}).promise();
 
-    console.log(`deleting target group: ${targetGroupArn}`);
-    await elbv2.deleteTargetGroup({TargetGroupArn: targetGroupArn}).promise();
+    console.log(`deleting rule: ${rule.RuleArn}`);
+    await elbv2.deleteRule({RuleArn: rule.RuleArn}).promise();
+
+    console.log(`deleting target group: ${targetGroup.TargetGroupArn}`);
+    await elbv2.deleteTargetGroup({TargetGroupArn: targetGroup.TargetGroupArn}).promise();
   } catch (ex) {
     console.error(ex);
   }
@@ -215,6 +225,6 @@ async function setupFresh() {
   // modify the rule, change the default rule to fail to google, add a rule to route to the instance for /1
 }
 
-spinUp()
+spinDown()
   .then((e) => console.log('done'))
   .catch((ex) => console.error(ex));

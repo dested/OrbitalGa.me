@@ -11,7 +11,7 @@ export const LoginScreen: React.FC = observer((props) => {
   const [connectStatus, setConnectingStatus] = useState<'none' | 'fail' | 'connecting' | 'joining' | 'joined'>('none');
   useEffect(() => {}, []);
 
-  const servers = ['1', '2', '3'];
+  const servers = ['1', '2', '3', '4'];
 
   const onJoin = useCallback(async (server: string) => {
     uiStore.setServerPath(server);
