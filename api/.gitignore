@@ -1,0 +1,47 @@
+# dependencies
+/node_modules
+
+# IDE
+/.idea
+/.awcache
+/.vscode
+
+# misc
+npm-debug.log
+
+# example
+/quick-start
+
+# tests
+/test
+/coverage
+/.nyc_output
+
+# dist
+/dist
+/bin
+
+# Elastic Beanstalk Files
+
+.elasticbeanstalk/*
+
+!.elasticbeanstalk/*.cfg.yml
+
+!.elasticbeanstalk/*.global.yml
+
+.webpack
+.serverless
+.env
+.env.production
+.env.dev
+aws-config.bat
+aws-config.sh
+aws.bat
+aws.sh
+creds/doubledates-admin-firebase.json
+creds/doubledates-firebase.json
+creds/doubledates-iap.json
+aws-write-key.txt
+policy-dev.json
+policy-prod.json
+/aws

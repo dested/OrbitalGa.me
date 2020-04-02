@@ -1,0 +1,10 @@
+directive @request(method: Method, path: String) on FIELD_DEFINITION
+directive @controller(path: String) on OBJECT
+directive @model on OBJECT | UNION | ENUM | INTERFACE | INPUT_OBJECT
+scalar Date
+enum Method {
+  POST
+  GET
+  DELETE
+  PUT
+}

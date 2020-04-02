@@ -1,0 +1,35 @@
+service: orbitalgame-api
+
+plugins:
+  - serverless-offline
+  - serverless-domain-manager
+  - serverless-cloudformation-resource-counter
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  timeout: 29
+  memorySize: 128
+  stage: ${opt:stage, 'dev'}
+  region: us-west-2
+  logRetentionInDays: 7
+
+custom:
+  domain:
+    prod: api.orbitalga.me
+  customDomain:
+    domainName: ${self:custom.domain.${self:provider.stage}}
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    packager: 'yarn'
+  serverless-offline:
+    host: 0.0.0.0
+    port: 3116
+
+functions:
+  ${file(./serverless-api.yaml)}
+
