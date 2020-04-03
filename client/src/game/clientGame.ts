@@ -174,7 +174,10 @@ export class ClientGame extends Game {
                 shotExplosionExplosion.updatePosition();
                 this.entities.push(shotExplosionExplosion);
                 break;
-
+              case 'player':
+                break;
+              case 'wall':
+                break;
               default:
                 unreachable(message);
                 break;
@@ -194,7 +197,7 @@ export class ClientGame extends Game {
             for (const entity of message.entities) {
               let foundEntity = this.entities.lookup(entity.entityId);
               if (!foundEntity) {
-                switch (entity.type) {
+                switch (entity.entityType) {
                   case 'player':
                     const playerEntity = new PlayerEntity(this, entity.entityId);
                     playerEntity.x = entity.x;
@@ -255,7 +258,7 @@ export class ClientGame extends Game {
                 foundEntity.x = entity.x;
                 foundEntity.y = entity.y;
 
-                assert(foundEntity instanceof LivePlayerEntity && entity.type === 'player');
+                assert(foundEntity instanceof LivePlayerEntity && entity.entityType === 'player');
 
                 foundEntity.momentum.x = entity.momentumX;
                 foundEntity.momentum.y = entity.momentumY;
@@ -272,7 +275,7 @@ export class ClientGame extends Game {
                 foundEntity.positionBuffer.push({time: +new Date(), x: entity.x, y: entity.y});
               }
 
-              switch (entity.type) {
+              switch (entity.entityType) {
                 case 'player':
                   break;
                 case 'wall':

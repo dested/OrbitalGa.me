@@ -1,3 +1,10 @@
+import {ShotExplosionModel} from '../entities/shotExplosionEntity';
+import {EnemyShotModel} from '../entities/enemyShotEntity';
+import {PlayerModel} from '../entities/playerEntity';
+import {SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
+import {WallModel} from '../entities/wallEntity';
+import {ShotModel} from '../entities/shotEntity';
+
 export type ClientToServerMessage =
   | {
       type: 'join';
@@ -12,51 +19,18 @@ export type ClientToServerMessage =
       down: boolean;
     };
 
-export type WorldStateEntity = {entityId: number; x: number; y: number; realX?: number; realY?: number} & (
-  | {
-      type: 'player';
-      lastProcessedInputSequenceNumber: number;
-      momentumX: number;
-      momentumY: number;
-    }
-  | {
-      type: 'swoopingEnemy';
-      health: number;
-    }
-  | {
-      type: 'wall';
-      width: number;
-      height: number;
-    }
-  | {
-      type: 'shot';
-      markToDestroy: boolean;
-      ownerEntityId: number;
-      shotOffsetX: number;
-      shotOffsetY: number;
-    }
-  | {
-      type: 'shotExplosion';
-      aliveDuration: number;
-      ownerEntityId: number;
-    }
-  | {
-      type: 'enemyShot';
-      markToDestroy: boolean;
-    }
-);
+
+export type WorldStateEntity =
+  | PlayerModel
+  | SwoopingEnemyModel
+  | WallModel
+  | ShotModel
+  | ShotExplosionModel
+  | EnemyShotModel;
 
 export type ServerToClientCreateEntity = {
   type: 'createEntity';
-  entityId: number;
-  x: number;
-  y: number;
-} & (
-  | {entityType: 'shot'; ownerEntityId: number; shotOffsetX: number; shotOffsetY: number}
-  | {entityType: 'shotExplosion'; aliveDuration: number; ownerEntityId: number}
-  | {entityType: 'enemyShot'}
-  | {entityType: 'swoopingEnemy'; health: number}
-);
+} & WorldStateEntity;
 
 export type ServerToClientMessage =
   | {

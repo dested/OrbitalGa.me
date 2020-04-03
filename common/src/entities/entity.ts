@@ -84,4 +84,7 @@ export abstract class Entity {
   }
 
   abstract tick(duration: number): void;
+  abstract serialize(): EntityModel;
 }
+
+export type EntityModel = {entityId: number; x: number; y: number; realX?: number; realY?: number};

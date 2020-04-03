@@ -35,12 +35,15 @@ Todo
  * [ ] add mouse movement
     * [ ] move rotate code from sonic
  * [x] binary transfer
+ * [ ] make collision code better
  * [x] better background
  * [x] refactor code
      * [x] better separation
      * [ ] proper draw
      * [x] add better bounding box for collisions 
  * [ ] add powerups
+ * [x] clean up serialize, worldstate, buffer builder
+ * [ ] make it easier to add things, update worldstate automatically
  * [ ] come up with more enemies
  * [ ] come up with realtime events
     * [ ] big bosses every 5 min?

@@ -231,13 +231,7 @@ export class ServerGame extends Game {
           shotEntity.start(options.x, options.y);
           this.sendMessageToClients({
             type: 'createEntity',
-            entityType,
-            entityId: shotEntity.entityId,
-            ownerEntityId: shotEntity.ownerEntityId,
-            x: shotEntity.x,
-            y: shotEntity.y,
-            shotOffsetX: shotEntity.shotOffsetX,
-            shotOffsetY: shotEntity.shotOffsetY,
+            ...shotEntity.serialize(),
           });
           this.entities.push(shotEntity);
         }
@@ -250,11 +244,7 @@ export class ServerGame extends Game {
         swoopingEnemyEntity.start(options.x, options.y);
         this.sendMessageToClients({
           type: 'createEntity',
-          entityType,
-          health: swoopingEnemyEntity.health,
-          entityId: swoopingEnemyEntity.entityId,
-          x: swoopingEnemyEntity.x,
-          y: swoopingEnemyEntity.y,
+          ...swoopingEnemyEntity.serialize(),
         });
         this.entities.push(swoopingEnemyEntity);
         break;
@@ -266,10 +256,7 @@ export class ServerGame extends Game {
         shotEntity.start(options.x, options.y);
         this.sendMessageToClients({
           type: 'createEntity',
-          entityType,
-          entityId: shotEntity.entityId,
-          x: shotEntity.x,
-          y: shotEntity.y,
+          ...shotEntity.serialize(),
         });
         this.entities.push(shotEntity);
         break;
@@ -281,12 +268,7 @@ export class ServerGame extends Game {
         shotExplosionEntity.start(options.x, options.y);
         this.sendMessageToClients({
           type: 'createEntity',
-          entityType,
-          entityId: shotExplosionEntity.entityId,
-          ownerEntityId: shotExplosionEntity.ownerEntityId,
-          aliveDuration: shotExplosionEntity.aliveDuration,
-          x: shotExplosionEntity.x,
-          y: shotExplosionEntity.y,
+          ...shotExplosionEntity.serialize(),
         });
         this.entities.push(shotExplosionEntity);
         break;
@@ -299,67 +281,22 @@ export class ServerGame extends Game {
       switch (entity.type) {
         case 'player':
           assert(entity instanceof PlayerEntity);
-          return {
-            x: entity.x,
-            y: entity.y,
-            momentumX: entity.momentum.x,
-            momentumY: entity.momentum.y,
-            entityId: entity.entityId,
-            lastProcessedInputSequenceNumber: entity.lastProcessedInputSequenceNumber,
-            type: 'player',
-          };
+          return entity.serialize();
         case 'wall':
           assert(entity instanceof WallEntity);
-          return {
-            x: entity.x,
-            y: entity.y,
-            width: entity.width,
-            height: entity.height,
-            entityId: entity.entityId,
-            type: 'wall',
-          };
+          return entity.serialize();
         case 'swoopingEnemy':
           assert(entity instanceof SwoopingEnemyEntity);
-          return {
-            x: entity.x,
-            y: entity.y,
-            health: entity.health,
-            entityId: entity.entityId,
-            type: 'swoopingEnemy',
-          };
+          return entity.serialize();
         case 'shot':
           assert(entity instanceof ShotEntity);
-          return {
-            x: entity.x,
-            y: entity.y,
-            shotOffsetX: entity.shotOffsetX,
-            shotOffsetY: entity.shotOffsetY,
-            entityId: entity.entityId,
-            ownerEntityId: entity.ownerEntityId,
-            markToDestroy: entity.markToDestroy,
-            type: 'shot',
-          };
+          return entity.serialize();
         case 'enemyShot':
           assert(entity instanceof EnemyShotEntity);
-          return {
-            x: entity.x,
-            y: entity.y,
-            entityId: entity.entityId,
-            markToDestroy: entity.markToDestroy,
-            type: 'enemyShot',
-          };
+          return entity.serialize();
         case 'shotExplosion':
           assert(entity instanceof ShotExplosionEntity);
-          return {
-            x: entity.x,
-            y: entity.y,
-            realX: entity.realX,
-            realY: entity.realY,
-            entityId: entity.entityId,
-            aliveDuration: entity.aliveDuration,
-            ownerEntityId: entity.ownerEntityId,
-            type: 'shotExplosion',
-          };
+          return entity.serialize();
         default:
           throw unreachable(entity.type);
       }

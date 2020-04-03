@@ -1,7 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
-import {Entity} from './entity';
+import {Entity, EntityModel} from './entity';
 
 export class ShotEntity extends Entity {
   boundingBox = {width: 9, height: 57};
@@ -43,4 +43,22 @@ export class ShotEntity extends Entity {
       this.game.destroyEntity(this);
     }
   }
+  serialize(): ShotModel {
+    return {
+      x: this.x,
+      y: this.y,
+      shotOffsetX: this.shotOffsetX,
+      shotOffsetY: this.shotOffsetY,
+      entityId: this.entityId,
+      ownerEntityId: this.ownerEntityId,
+      entityType: 'shot',
+    };
+  }
 }
+
+export type ShotModel = EntityModel & {
+  entityType: 'shot';
+  ownerEntityId: number;
+  shotOffsetX: number;
+  shotOffsetY: number;
+};

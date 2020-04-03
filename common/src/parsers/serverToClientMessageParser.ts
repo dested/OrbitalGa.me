@@ -17,98 +17,13 @@ export class ServerToClientMessageParser {
           break;
         case 'createEntity':
           buff.addUint8(2);
-          switch (message.entityType) {
-            case 'shot':
-              buff.addUint8(1);
-              buff.addFloat32(message.x);
-              buff.addFloat32(message.y);
-              buff.addFloat32(message.shotOffsetX);
-              buff.addFloat32(message.shotOffsetY);
-              buff.addUint32(message.entityId);
-              buff.addUint32(message.ownerEntityId);
-              break;
-            case 'enemyShot':
-              buff.addUint8(2);
-              buff.addFloat32(message.x);
-              buff.addFloat32(message.y);
-              buff.addUint32(message.entityId);
-              break;
-            case 'swoopingEnemy':
-              buff.addUint8(3);
-              buff.addFloat32(message.x);
-              buff.addFloat32(message.y);
-              buff.addUint32(message.entityId);
-              buff.addUint8(message.health);
-              break;
-            case 'shotExplosion':
-              buff.addUint8(4);
-              buff.addFloat32(message.x);
-              buff.addFloat32(message.y);
-              buff.addUint8(message.aliveDuration);
-              buff.addUint32(message.entityId);
-              buff.addUint32(message.ownerEntityId);
-              break;
-            default:
-              unreachable(message);
-          }
+          this.addEntity(buff, message);
           break;
         case 'worldState':
           buff.addUint8(3);
           buff.addUint16(message.entities.length);
           for (const entity of message.entities) {
-            switch (entity.type) {
-              case 'shot':
-                buff.addUint8(1);
-                buff.addFloat32(entity.x);
-                buff.addFloat32(entity.y);
-                buff.addFloat32(entity.shotOffsetX);
-                buff.addFloat32(entity.shotOffsetY);
-                buff.addUint32(entity.entityId);
-                buff.addUint32(entity.ownerEntityId);
-                buff.addBoolean(entity.markToDestroy);
-                break;
-              case 'enemyShot':
-                buff.addUint8(2);
-                buff.addFloat32(entity.x);
-                buff.addFloat32(entity.y);
-                buff.addUint32(entity.entityId);
-                buff.addBoolean(entity.markToDestroy);
-                break;
-              case 'swoopingEnemy':
-                buff.addUint8(3);
-                buff.addFloat32(entity.x);
-                buff.addFloat32(entity.y);
-                buff.addUint32(entity.entityId);
-                buff.addUint8(entity.health);
-                break;
-              case 'player':
-                buff.addUint8(4);
-                buff.addFloat32(entity.x);
-                buff.addFloat32(entity.y);
-                buff.addFloat32(entity.momentumX);
-                buff.addFloat32(entity.momentumY);
-                buff.addUint32(entity.entityId);
-                buff.addUint32(entity.lastProcessedInputSequenceNumber);
-                break;
-              case 'wall':
-                buff.addUint8(5);
-                buff.addFloat32(entity.x);
-                buff.addFloat32(entity.y);
-                buff.addUint32(entity.entityId);
-                buff.addUint16(entity.width);
-                buff.addUint16(entity.height);
-                break;
-              case 'shotExplosion':
-                buff.addUint8(6);
-                buff.addFloat32(entity.x);
-                buff.addFloat32(entity.y);
-                buff.addUint8(entity.aliveDuration);
-                buff.addUint32(entity.entityId);
-                buff.addUint32(entity.ownerEntityId);
-                break;
-              default:
-                unreachable(entity);
-            }
+            this.addEntity(buff, entity);
           }
           break;
         default:
@@ -129,100 +44,121 @@ export class ServerToClientMessageParser {
           entityId: reader.readUint32(),
           clientId: reader.readString(),
         }),
-        2: () =>
-          reader.switch<1 | 2 | 3 | 4, ServerToClientCreateEntity>({
-            1: () => ({
-              type: 'createEntity',
-              entityType: 'shot',
-              x: reader.readFloat32(),
-              y: reader.readFloat32(),
-              shotOffsetX: reader.readFloat32(),
-              shotOffsetY: reader.readFloat32(),
-              entityId: reader.readUint32(),
-              ownerEntityId: reader.readUint32(),
-            }),
-            2: () => ({
-              type: 'createEntity',
-              entityType: 'enemyShot',
-              x: reader.readFloat32(),
-              y: reader.readFloat32(),
-              entityId: reader.readUint32(),
-            }),
-            3: () => ({
-              type: 'createEntity',
-              entityType: 'swoopingEnemy',
-              x: reader.readFloat32(),
-              y: reader.readFloat32(),
-              entityId: reader.readUint32(),
-              health: reader.readUint8(),
-            }),
-            4: () => ({
-              type: 'createEntity',
-              entityType: 'shotExplosion',
-              x: reader.readFloat32(),
-              y: reader.readFloat32(),
-              aliveDuration: reader.readUint8(),
-              entityId: reader.readUint32(),
-              ownerEntityId: reader.readUint32(),
-            }),
-          }),
+        2: () => {
+          const entity = this.readEntity(reader);
+          return {type: 'createEntity', ...entity};
+        },
         3: () => ({
           type: 'worldState',
-          entities: reader.loop(() =>
-            reader.switch<1 | 2 | 3 | 4 | 5 | 6, WorldStateEntity>({
-              1: () => ({
-                type: 'shot',
-                x: reader.readFloat32(),
-                y: reader.readFloat32(),
-                shotOffsetX: reader.readFloat32(),
-                shotOffsetY: reader.readFloat32(),
-                entityId: reader.readUint32(),
-                ownerEntityId: reader.readUint32(),
-                markToDestroy: reader.readBoolean(),
-              }),
-              2: () => ({
-                type: 'enemyShot',
-                x: reader.readFloat32(),
-                y: reader.readFloat32(),
-                entityId: reader.readUint32(),
-                markToDestroy: reader.readBoolean(),
-              }),
-              3: () => ({
-                type: 'swoopingEnemy',
-                x: reader.readFloat32(),
-                y: reader.readFloat32(),
-                entityId: reader.readUint32(),
-                health: reader.readUint8(),
-              }),
-              4: () => ({
-                type: 'player',
-                x: reader.readFloat32(),
-                y: reader.readFloat32(),
-                momentumX: reader.readFloat32(),
-                momentumY: reader.readFloat32(),
-                entityId: reader.readUint32(),
-                lastProcessedInputSequenceNumber: reader.readUint32(),
-              }),
-              5: () => ({
-                type: 'wall',
-                x: reader.readFloat32(),
-                y: reader.readFloat32(),
-                entityId: reader.readUint32(),
-                width: reader.readUint16(),
-                height: reader.readUint16(),
-              }),
-              6: () => ({
-                type: 'shotExplosion',
-                x: reader.readFloat32(),
-                y: reader.readFloat32(),
-                aliveDuration: reader.readUint8(),
-                entityId: reader.readUint32(),
-                ownerEntityId: reader.readUint32(),
-              }),
-            })
-          ),
+          entities: reader.loop(() => this.readEntity(reader)),
         }),
       });
+    });
+  }
+
+  private static addEntity(buff: ArrayBufferBuilder, entity: WorldStateEntity) {
+    switch (entity.entityType) {
+      case 'shot':
+        buff.addUint8(1);
+        buff.addFloat32(entity.x);
+        buff.addFloat32(entity.y);
+        buff.addFloat32(entity.shotOffsetX);
+        buff.addFloat32(entity.shotOffsetY);
+        buff.addUint32(entity.entityId);
+        buff.addUint32(entity.ownerEntityId);
+        break;
+      case 'enemyShot':
+        buff.addUint8(2);
+        buff.addFloat32(entity.x);
+        buff.addFloat32(entity.y);
+        buff.addUint32(entity.entityId);
+        break;
+      case 'swoopingEnemy':
+        buff.addUint8(3);
+        buff.addFloat32(entity.x);
+        buff.addFloat32(entity.y);
+        buff.addUint32(entity.entityId);
+        buff.addUint8(entity.health);
+        break;
+      case 'player':
+        buff.addUint8(4);
+        buff.addFloat32(entity.x);
+        buff.addFloat32(entity.y);
+        buff.addFloat32(entity.momentumX);
+        buff.addFloat32(entity.momentumY);
+        buff.addUint32(entity.entityId);
+        buff.addUint32(entity.lastProcessedInputSequenceNumber);
+        break;
+      case 'wall':
+        buff.addUint8(5);
+        buff.addFloat32(entity.x);
+        buff.addFloat32(entity.y);
+        buff.addUint32(entity.entityId);
+        buff.addUint16(entity.width);
+        buff.addUint16(entity.height);
+        break;
+      case 'shotExplosion':
+        buff.addUint8(6);
+        buff.addFloat32(entity.x);
+        buff.addFloat32(entity.y);
+        buff.addUint8(entity.aliveDuration);
+        buff.addUint32(entity.entityId);
+        buff.addUint32(entity.ownerEntityId);
+        break;
+      default:
+        unreachable(entity);
+    }
+  }
+
+  private static readEntity(reader: ArrayBufferReader) {
+    return reader.switch<1 | 2 | 3 | 4 | 5 | 6, WorldStateEntity>({
+      1: () => ({
+        entityType: 'shot',
+        x: reader.readFloat32(),
+        y: reader.readFloat32(),
+        shotOffsetX: reader.readFloat32(),
+        shotOffsetY: reader.readFloat32(),
+        entityId: reader.readUint32(),
+        ownerEntityId: reader.readUint32(),
+      }),
+      2: () => ({
+        entityType: 'enemyShot',
+        x: reader.readFloat32(),
+        y: reader.readFloat32(),
+        entityId: reader.readUint32(),
+      }),
+      3: () => ({
+        entityType: 'swoopingEnemy',
+        x: reader.readFloat32(),
+        y: reader.readFloat32(),
+        entityId: reader.readUint32(),
+        health: reader.readUint8(),
+      }),
+      4: () => ({
+        entityType: 'player',
+        x: reader.readFloat32(),
+        y: reader.readFloat32(),
+        momentumX: reader.readFloat32(),
+        momentumY: reader.readFloat32(),
+        entityId: reader.readUint32(),
+        lastProcessedInputSequenceNumber: reader.readUint32(),
+      }),
+      5: () => ({
+        entityType: 'wall',
+        x: reader.readFloat32(),
+        y: reader.readFloat32(),
+        entityId: reader.readUint32(),
+        width: reader.readUint16(),
+        height: reader.readUint16(),
+      }),
+      6: () => ({
+        entityType: 'shotExplosion',
+        x: reader.readFloat32(),
+        y: reader.readFloat32(),
+        aliveDuration: reader.readUint8(),
+        entityId: reader.readUint32(),
+        ownerEntityId: reader.readUint32(),
+      }),
     });
   }
 }

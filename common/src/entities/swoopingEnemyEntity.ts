@@ -2,7 +2,7 @@ import {Polygon, Result} from 'collisions';
 import {Utils} from '../utils/utils';
 import {unreachable} from '../utils/unreachable';
 import {Game} from '../game/game';
-import {Entity} from './entity';
+import {Entity, EntityModel} from './entity';
 import {ShotEntity} from './shotEntity';
 import {GameConstants} from '../game/gameConstants';
 
@@ -151,4 +151,18 @@ export class SwoopingEnemyEntity extends Entity {
     }
     return false;
   }
+  serialize(): SwoopingEnemyModel {
+    return {
+      x: this.x,
+      y: this.y,
+      health: this.health,
+      entityId: this.entityId,
+      entityType: 'swoopingEnemy',
+    };
+  }
 }
+
+export type SwoopingEnemyModel = EntityModel & {
+  entityType: 'swoopingEnemy';
+  health: number;
+};

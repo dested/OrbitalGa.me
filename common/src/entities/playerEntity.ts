@@ -1,7 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {unreachable} from '../utils/unreachable';
-import {Entity} from './entity';
+import {Entity, EntityModel} from './entity';
 import {GameConstants} from '../game/gameConstants';
 
 export type PendingInput = {
@@ -162,4 +162,23 @@ export class PlayerEntity extends Entity {
 
     this.updatePosition();
   }
+
+  serialize(): PlayerModel {
+    return {
+      x: this.x,
+      y: this.y,
+      momentumX: this.momentum.x,
+      momentumY: this.momentum.y,
+      entityId: this.entityId,
+      lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
+      entityType: 'player',
+    };
+  }
 }
+
+export type PlayerModel = EntityModel & {
+  entityType: 'player';
+  lastProcessedInputSequenceNumber: number;
+  momentumX: number;
+  momentumY: number;
+};

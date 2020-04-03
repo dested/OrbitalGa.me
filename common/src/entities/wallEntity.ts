@@ -1,6 +1,6 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity} from './entity';
+import {Entity, EntityModel} from './entity';
 
 export class WallEntity extends Entity {
   boundingBox = {width: this.width, height: this.height};
@@ -26,4 +26,19 @@ export class WallEntity extends Entity {
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     return false;
   }
+  serialize(): WallModel {
+    return {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
+      entityId: this.entityId,
+      entityType: 'wall',
+    };
+  }
 }
+export type WallModel = EntityModel & {
+  entityType: 'wall';
+  width: number;
+  height: number;
+};
