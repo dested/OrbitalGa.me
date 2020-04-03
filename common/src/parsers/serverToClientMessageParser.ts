@@ -73,6 +73,8 @@ export class ServerToClientMessageParser {
                 buff.addUint8(4);
                 buff.addFloat32(entity.x);
                 buff.addFloat32(entity.y);
+                buff.addFloat32(entity.momentumX);
+                buff.addFloat32(entity.momentumY);
                 buff.addUint32(entity.entityId);
                 buff.addUint32(entity.lastProcessedInputSequenceNumber);
                 break;
@@ -164,6 +166,8 @@ export class ServerToClientMessageParser {
                 type: 'player',
                 x: reader.readFloat32(),
                 y: reader.readFloat32(),
+                momentumX: reader.readFloat32(),
+                momentumY: reader.readFloat32(),
                 entityId: reader.readUint32(),
                 lastProcessedInputSequenceNumber: reader.readUint32(),
               }),

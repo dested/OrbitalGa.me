@@ -16,7 +16,7 @@ export class ServerSocket implements IServerSocket {
     onLeave: (connectionId: string) => void,
     onMessage: (connectionId: string, message: ClientToServerMessage) => void
   ) {
-    const port = parseInt(process.env.PORT || '8081');
+    const port = parseInt('8081');
     console.log('port', port);
     const server = createServer((req, res) => {
       if (req.method === 'GET') {

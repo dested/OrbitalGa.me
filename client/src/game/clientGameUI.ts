@@ -1,6 +1,6 @@
 import {Manager, Press, Tap} from 'hammerjs';
 import {IClientSocket} from '../clientSocket';
-import {ClientGame, LivePlayerEntity} from './clientGame';
+import {ClientGame} from './clientGame';
 import {assert} from '@common/utils/utils';
 import {unreachable} from '@common/utils/unreachable';
 import {GameData} from './gameData';
@@ -10,6 +10,7 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {GameConstants} from '@common/game/gameConstants';
+import {LivePlayerEntity} from './livePlayerEntity';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -44,9 +45,18 @@ export class ClientGameUI extends ClientGame {
     manager.on('press', (e) => {
       doubleTap = +new Date() - +lastPress < 200;
       lastPress = new Date();
+
+      if (e.center.x < window.innerWidth / 2) {
+        this.liveEntity?.pressLeft();
+      }
+      if (e.center.x >= window.innerWidth / 2) {
+        this.liveEntity?.pressRight();
+      }
     });
     manager.on('pressup', (e) => {
       doubleTap = false;
+      this.liveEntity?.releaseLeft();
+      this.liveEntity?.releaseRight();
     });
 
     const path: {x: number; y: number}[] = [];

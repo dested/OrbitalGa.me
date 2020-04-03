@@ -14,7 +14,6 @@ export class ClientToServerMessageParser {
       case 'playerInput':
         buff.addUint8(2);
         buff.addUint32(message.inputSequenceNumber);
-        buff.addFloat32(message.pressTime);
         buff.addUint8(Utils.bitsToInt(message.up, message.down, message.left, message.right, message.shoot));
         break;
       default:
@@ -35,7 +34,6 @@ export class ClientToServerMessageParser {
         return {
           type: 'playerInput',
           inputSequenceNumber: reader.readUint32(),
-          pressTime: reader.readFloat32(),
           ...(() => {
             const [up, down, left, right, shoot] = Utils.intToBits(reader.readUint8());
             return {up, down, left, right, shoot};

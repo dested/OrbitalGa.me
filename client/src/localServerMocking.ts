@@ -69,7 +69,7 @@ export class LocalServerSocket implements IServerSocket {
     onLeave: (connectionId: string) => void,
     onMessage: (connectionId: string, message: ClientToServerMessage) => void
   ) {
-    const port = parseInt(process.env.PORT || '8081');
+    const port = parseInt('8081');
     this.wss = new WebSocketServer({port, perMessageDeflate: false});
 
     this.wss.on('connection', (ws) => {

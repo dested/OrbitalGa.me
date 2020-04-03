@@ -5,7 +5,6 @@ import {Entity} from './entity';
 import {GameConstants} from '../game/gameConstants';
 
 export type PendingInput = {
-  pressTime: number;
   inputSequenceNumber: number;
   left: boolean;
   shoot: boolean;
@@ -16,9 +15,11 @@ export type PendingInput = {
 
 export class PlayerEntity extends Entity {
   boundingBox = {width: 99, height: 75};
+  inputsThisTick: boolean = false;
 
   tick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
+    this.updatedPositionFromMomentum();
   }
 
   lastProcessedInputSequenceNumber: number = -1;
@@ -31,7 +32,8 @@ export class PlayerEntity extends Entity {
     this.createPolygon();
   }
 
-  speed = 500;
+  maxSpeed = 90;
+  momentum: {x: number; y: number} = {x: 0, y: 0};
 
   shootTimer: number = 1;
 
@@ -44,34 +46,36 @@ export class PlayerEntity extends Entity {
         }
       }
     }
+
+    const ramp = 30;
     if (input.left) {
-      this.x -= input.pressTime * this.speed;
+      this.inputsThisTick = true;
+      this.momentum.x -= ramp;
+      if (this.momentum.x < -this.maxSpeed) {
+        this.momentum.x = -this.maxSpeed;
+      }
     }
     if (input.right) {
-      this.x += input.pressTime * this.speed;
+      this.inputsThisTick = true;
+      this.momentum.x += ramp;
+      if (this.momentum.x > this.maxSpeed) {
+        this.momentum.x = this.maxSpeed;
+      }
     }
     if (input.up) {
-      this.y -= input.pressTime * this.speed;
+      this.inputsThisTick = true;
+      this.momentum.y -= ramp;
+      if (this.momentum.y < -this.maxSpeed) {
+        this.momentum.y = -this.maxSpeed;
+      }
     }
     if (input.down) {
-      this.y += input.pressTime * this.speed;
+      this.inputsThisTick = true;
+      this.momentum.y += ramp;
+      if (this.momentum.y > this.maxSpeed) {
+        this.momentum.y = this.maxSpeed;
+      }
     }
-
-    const {x0, x1} = this.game.getPlayerRange(1000, (entity) => this !== entity);
-    if (this.x < x0) {
-      this.x = x0;
-    }
-    if (this.x > x1) {
-      this.x = x1;
-    }
-
-    if (this.y < GameConstants.screenSize.height * 0.1) {
-      this.y = GameConstants.screenSize.height * 0.1;
-    }
-    if (this.y > GameConstants.screenSize.height * 1.1) {
-      this.y = GameConstants.screenSize.height * 1.1;
-    }
-    this.updatePosition();
   }
 
   destroy(): void {
@@ -105,5 +109,43 @@ export class PlayerEntity extends Entity {
         unreachable(otherEntity.type);
         return false;
     }
+  }
+
+  updatedPositionFromMomentum() {
+    this.x += this.momentum.x;
+    this.y += this.momentum.y;
+
+    if (!this.inputsThisTick) {
+      this.momentum.x = this.momentum.x * 0.5;
+      this.momentum.y = this.momentum.y * 0.5;
+    }
+    if (Math.abs(this.momentum.x) < 3) {
+      this.momentum.x = 0;
+    }
+    if (Math.abs(this.momentum.y) < 3) {
+      this.momentum.y = 0;
+    }
+
+    const {x0, x1} = this.game.getPlayerRange(1000, (entity) => this !== entity);
+    if (this.x < x0) {
+      this.x = x0;
+      this.momentum.x = 0;
+    }
+    if (this.x > x1) {
+      this.x = x1;
+      this.momentum.x = 0;
+    }
+
+    if (this.y < GameConstants.screenSize.height * 0.1) {
+      this.y = GameConstants.screenSize.height * 0.1;
+      this.momentum.y = 0;
+    }
+    if (this.y > GameConstants.screenSize.height * 1.1) {
+      this.y = GameConstants.screenSize.height * 1.1;
+      this.momentum.y = 0;
+    }
+    // console.log(this.momentum.x, this.momentum.y, this.x, this.y);
+
+    this.updatePosition();
   }
 }

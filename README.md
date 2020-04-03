@@ -28,7 +28,7 @@ Todo
  * [ ] gun shooting offcenter when youre moving
  * [ ] leaderboard
     * [ ] redis
- * [ ] add momentum to movement
+ * [x] add momentum to movement
  * [ ] take damage
     * [ ] die
  * [ ] add mouse movement

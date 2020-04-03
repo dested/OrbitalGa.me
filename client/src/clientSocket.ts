@@ -14,15 +14,15 @@ export class ClientSocket implements IClientSocket {
     }
   ) {
     let totalLength = 0;
-    // this.socket = new WebSocket('ws://localhost:8081');
-    this.socket = new WebSocket(`wss://game.orbitalga.me/${serverPath}`);
+    this.socket = new WebSocket('ws://localhost:8081');
+    // this.socket = new WebSocket(`wss://game.orbitalga.me/${serverPath}`);
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       options.onOpen();
       console.count('opened');
     };
     this.socket.onerror = (e) => {
-      console.log(e);
+      console.log(JSON.stringify(e, null, 2));
       this.socket?.close();
       options.onDisconnect();
     };

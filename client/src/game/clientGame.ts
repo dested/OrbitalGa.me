@@ -5,12 +5,13 @@ import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
 import {EntityTypeOptions, EntityTypes} from '@common/entities/entity';
 import {Game} from '@common/game/game';
-import {assert, Utils} from '@common/utils/utils';
+import {assert} from '@common/utils/utils';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {WallEntity} from '@common/entities/wallEntity';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
+import {LivePlayerEntity} from './livePlayerEntity';
 
 export class ClientGame extends Game {
   connectionId: string;
@@ -92,7 +93,7 @@ export class ClientGame extends Game {
       }
       this.gameTick(duration);
       gameTime = +new Date();
-    }, GameConstants.clientTickRate);
+    }, GameConstants.serverTickRate);
   }
 
   sendMessageToServer(message: ClientToServerMessage) {
@@ -221,14 +222,17 @@ export class ClientGame extends Game {
                 foundEntity.y = entity.y;
 
                 assert(foundEntity instanceof LivePlayerEntity && entity.type === 'player');
-                let j = 0;
-                while (j < foundEntity.pendingInputs.length) {
-                  const input = foundEntity.pendingInputs[j];
+
+                foundEntity.momentum.x = entity.momentumX;
+                foundEntity.momentum.y = entity.momentumY;
+                for (let i = foundEntity.pendingInputs.length - 1; i >= 0; i--) {
+                  const input = foundEntity.pendingInputs[i];
                   if (input.inputSequenceNumber <= entity.lastProcessedInputSequenceNumber) {
-                    foundEntity.pendingInputs.splice(j, 1);
+                    foundEntity.pendingInputs.splice(i, 1);
                   } else {
+                    console.log('pending', input);
                     foundEntity.applyInput(input);
-                    j++;
+                    foundEntity.updatedPositionFromMomentum();
                   }
                 }
               } else {
@@ -268,16 +272,14 @@ export class ClientGame extends Game {
   }
 
   gameTick(duration: number) {
-    if (!this.connectionId) {
+    if (!this.connectionId || !this.liveEntity) {
       return;
     }
-
+    this.liveEntity.inputsThisTick = false;
     this.processInputs(duration);
-    for (const entity of this.entities) {
-      // entity.tick(duration);
-    }
+    this.liveEntity.tick();
     this.collisionEngine.update();
-    this.liveEntity?.checkCollisions();
+    this.liveEntity.checkCollisions();
   }
 
   private interpolateEntities() {
@@ -319,7 +321,12 @@ export class ClientGame extends Game {
   private processInputs(duration: number) {
     const liveEntity = this.liveEntity;
     if (!liveEntity) return;
-
+    liveEntity.positionLerp = {
+      x: liveEntity.x,
+      y: liveEntity.y,
+      startTime: +new Date(),
+      duration,
+    };
     if (
       !liveEntity.keys.shoot &&
       !liveEntity.keys.left &&
@@ -330,95 +337,17 @@ export class ClientGame extends Game {
       return;
     }
 
-    // Compute delta time since last update.
-    const durationSeconds = duration / 1000.0;
-
     // Package player's input.
     const input = {
-      pressTime: durationSeconds,
       ...liveEntity.keys,
       inputSequenceNumber: liveEntity.inputSequenceNumber++,
     };
 
     liveEntity.pendingInputs.push(input);
-    liveEntity.positionLerp = {
-      x: liveEntity.x,
-      y: liveEntity.y,
-      startTime: +new Date(),
-      duration,
-    };
+
     liveEntity.applyInput(input);
     this.sendMessageToServer({type: 'playerInput', ...input});
   }
 
   createEntity<T extends EntityTypes>(type: T, options: EntityTypeOptions[T]): void {}
-}
-
-export class LivePlayerEntity extends PlayerEntity {
-  constructor(game: Game, public entityId: number) {
-    super(game, entityId);
-  }
-
-  positionLerp?: {startTime: number; duration: number; x: number; y: number};
-  tick(): void {}
-
-  keys = {up: false, down: false, left: false, right: false, shoot: false};
-
-  pressUp() {
-    this.keys.up = true;
-  }
-  pressShoot() {
-    this.keys.shoot = true;
-  }
-  pressDown() {
-    this.keys.down = true;
-  }
-  pressLeft() {
-    this.keys.left = true;
-  }
-  pressRight() {
-    this.keys.right = true;
-  }
-  releaseUp() {
-    this.keys.up = false;
-  }
-  releaseShoot() {
-    this.keys.shoot = false;
-  }
-  releaseDown() {
-    this.keys.down = false;
-  }
-  releaseLeft() {
-    this.keys.left = false;
-  }
-  releaseRight() {
-    this.keys.right = false;
-  }
-
-  get drawX(): number {
-    if (!this.positionLerp) {
-      return this.x;
-    } else {
-      const {x, y, startTime, duration} = this.positionLerp;
-      const now = +new Date();
-      if (now >= startTime + duration) {
-        return this.x;
-      } else {
-        return Utils.lerp(x, this.x, (now - startTime) / duration);
-      }
-    }
-  }
-  get drawY(): number {
-    if (!this.positionLerp) {
-      return this.y;
-    } else {
-      const {x, y, startTime, duration} = this.positionLerp;
-      const now = +new Date();
-      if (now >= startTime + duration) {
-        return this.y;
-      } else {
-        return Utils.lerp(y, this.y, (now - startTime) / duration);
-      }
-    }
-  }
 }

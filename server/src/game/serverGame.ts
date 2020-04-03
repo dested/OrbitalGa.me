@@ -111,6 +111,10 @@ export class ServerGame extends Game {
     );
 */
 
+    for (const user of this.users) {
+      user.entity.inputsThisTick = false;
+    }
+
     const time = +new Date();
     let stopped = false;
     for (let i = 0; i < this.queuedMessages.length; i++) {
@@ -128,13 +132,11 @@ export class ServerGame extends Game {
           }
           break;
         case 'playerInput': {
-          if (q.message.pressTime < 0.1) {
-            const user = this.users.find((a) => a.connectionId === q.connectionId);
-            if (user) {
-              user.entity.applyInput(q.message);
-              this.collisionEngine.update();
-              user.entity.checkCollisions();
-            }
+          const user = this.users.find((a) => a.connectionId === q.connectionId);
+          if (user) {
+            user.entity.applyInput(q.message);
+            this.collisionEngine.update();
+            user.entity.checkCollisions();
           }
 
           break;
@@ -177,6 +179,8 @@ export class ServerGame extends Game {
             return {
               x: entity.x,
               y: entity.y,
+              momentumX: entity.momentum.x,
+              momentumY: entity.momentum.y,
               entityId: entity.entityId,
               lastProcessedInputSequenceNumber: entity.lastProcessedInputSequenceNumber,
               type: 'player',

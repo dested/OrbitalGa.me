@@ -4,7 +4,6 @@ export type ClientToServerMessage =
     }
   | {
       type: 'playerInput';
-      pressTime: number;
       inputSequenceNumber: number;
       left: boolean;
       shoot: boolean;
@@ -17,6 +16,8 @@ export type WorldStateEntity = {entityId: number; x: number; y: number} & (
   | {
       type: 'player';
       lastProcessedInputSequenceNumber: number;
+      momentumX: number;
+      momentumY: number;
     }
   | {
       type: 'swoopingEnemy';

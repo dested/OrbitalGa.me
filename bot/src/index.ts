@@ -13,15 +13,15 @@ async function main() {
     onDied: () => {},
   });
   return;*/
-  const serverPath = 'test1';
-  for (let i = 0; i < 200; i++) {
+  const serverPath = '1';
+  for (let i = 0; i < 1; i++) {
     const options = {
       onDisconnect: () => {
-        new BotClientGame(serverPath, options, new ClientSocket());
+        // new BotClientGame(serverPath, options, new ClientSocket());
       },
       onDied: (me: ClientGame) => {
-        me.disconnect();
-        new BotClientGame(serverPath, options, new ClientSocket());
+        // me.disconnect();
+        // new BotClientGame(serverPath, options, new ClientSocket());
       },
     };
 
@@ -30,4 +30,4 @@ async function main() {
   }
 }
 
-main().catch(ex => console.error(ex));
+main().catch((ex) => console.error(JSON.stringify(ex, null, 2)));
