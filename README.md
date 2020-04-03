@@ -29,6 +29,7 @@ Todo
  * [ ] leaderboard
     * [ ] redis
  * [x] add momentum to movement
+ * [x] alternate left right on shot
  * [ ] take damage
     * [ ] die
  * [ ] add mouse movement

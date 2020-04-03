@@ -34,6 +34,10 @@ export type WorldStateEntity = {entityId: number; x: number; y: number} & (
       ownerEntityId: number;
     }
   | {
+      type: 'shotExplosion';
+      aliveDuration: number;
+    }
+  | {
       type: 'enemyShot';
       markToDestroy: boolean;
     }
@@ -46,6 +50,7 @@ export type ServerToClientCreateEntity = {
   y: number;
 } & (
   | {entityType: 'shot'; ownerEntityId: number}
+  | {entityType: 'shotExplosion'; aliveDuration: number}
   | {entityType: 'enemyShot'}
   | {entityType: 'swoopingEnemy'; health: number}
 );

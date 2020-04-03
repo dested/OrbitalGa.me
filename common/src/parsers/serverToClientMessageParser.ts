@@ -38,6 +38,13 @@ export class ServerToClientMessageParser {
               buff.addUint32(message.entityId);
               buff.addUint8(message.health);
               break;
+            case 'shotExplosion':
+              buff.addUint8(4);
+              buff.addFloat32(message.x);
+              buff.addFloat32(message.y);
+              buff.addUint8(message.aliveDuration);
+              buff.addUint32(message.entityId);
+              break;
             default:
               unreachable(message);
           }
@@ -86,6 +93,13 @@ export class ServerToClientMessageParser {
                 buff.addUint16(entity.width);
                 buff.addUint16(entity.height);
                 break;
+              case 'shotExplosion':
+                buff.addUint8(6);
+                buff.addFloat32(entity.x);
+                buff.addFloat32(entity.y);
+                buff.addUint8(entity.aliveDuration);
+                buff.addUint32(entity.entityId);
+                break;
               default:
                 unreachable(entity);
             }
@@ -110,7 +124,7 @@ export class ServerToClientMessageParser {
           clientId: reader.readString(),
         }),
         2: () =>
-          reader.switch<1 | 2 | 3, ServerToClientCreateEntity>({
+          reader.switch<1 | 2 | 3 | 4, ServerToClientCreateEntity>({
             1: () => ({
               type: 'createEntity',
               entityType: 'shot',
@@ -135,11 +149,19 @@ export class ServerToClientMessageParser {
               entityId: reader.readUint32(),
               health: reader.readUint8(),
             }),
+            4: () => ({
+              type: 'createEntity',
+              entityType: 'shotExplosion',
+              x: reader.readFloat32(),
+              y: reader.readFloat32(),
+              aliveDuration: reader.readUint8(),
+              entityId: reader.readUint32(),
+            }),
           }),
         3: () => ({
           type: 'worldState',
           entities: reader.loop(() =>
-            reader.switch<1 | 2 | 3 | 4 | 5, WorldStateEntity>({
+            reader.switch<1 | 2 | 3 | 4 | 5 | 6, WorldStateEntity>({
               1: () => ({
                 type: 'shot',
                 x: reader.readFloat32(),
@@ -178,6 +200,13 @@ export class ServerToClientMessageParser {
                 entityId: reader.readUint32(),
                 width: reader.readUint16(),
                 height: reader.readUint16(),
+              }),
+              6: () => ({
+                type: 'shotExplosion',
+                x: reader.readFloat32(),
+                y: reader.readFloat32(),
+                aliveDuration: reader.readUint8(),
+                entityId: reader.readUint32(),
               }),
             })
           ),

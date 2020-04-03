@@ -12,6 +12,7 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
+import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -223,6 +224,15 @@ export class ServerGame extends Game {
               markToDestroy: entity.markToDestroy,
               type: 'enemyShot',
             };
+          case 'shotExplosion':
+            assert(entity instanceof ShotExplosionEntity);
+            return {
+              x: entity.x,
+              y: entity.y,
+              entityId: entity.entityId,
+              aliveDuration: entity.aliveDuration,
+              type: 'shotExplosion',
+            };
           default:
             throw unreachable(entity.type);
         }
@@ -319,6 +329,22 @@ export class ServerGame extends Game {
           y: shotEntity.y,
         });
         this.entities.push(shotEntity);
+        break;
+      }
+      case 'shotExplosion': {
+        assertType<'shotExplosion'>(entityType);
+        assertType<EntityTypeOptions[typeof entityType]>(options);
+        const shotExplosionEntity = new ShotExplosionEntity(this, nextId());
+        shotExplosionEntity.start(options.x, options.y);
+        this.sendMessageToClients({
+          type: 'createEntity',
+          entityType,
+          entityId: shotExplosionEntity.entityId,
+          aliveDuration: shotExplosionEntity.aliveDuration,
+          x: shotExplosionEntity.x,
+          y: shotExplosionEntity.y,
+        });
+        this.entities.push(shotExplosionEntity);
         break;
       }
     }

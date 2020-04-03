@@ -11,6 +11,7 @@ import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {GameConstants} from '@common/game/gameConstants';
 import {LivePlayerEntity} from './livePlayerEntity';
+import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -171,6 +172,16 @@ export class ClientGameUI extends ClientGame {
           context.translate(entity.x, entity.y);
           context.rotate(Math.PI);
           context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
+          context.restore();
+          break;
+        case 'shotExplosion':
+          assert(entity instanceof ShotExplosionEntity);
+          const blueExplosion = AssetManager.assets['laser.blue.explosion'];
+          context.save();
+          context.translate(entity.x, entity.y);
+          console.log(entity.entityId, entity.aliveDuration);
+          context.rotate(Math.PI * 2 * (entity.aliveDuration / ShotExplosionEntity.totalAliveDuration));
+          context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
           context.restore();
           break;
         default:

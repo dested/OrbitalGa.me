@@ -104,7 +104,9 @@ export class PlayerEntity extends Entity {
       case 'swoopingEnemy':
         // console.log('shot');
         return false;
-
+      case 'shotExplosion':
+        // console.log('shot');
+        return false;
       default:
         unreachable(otherEntity.type);
         return false;

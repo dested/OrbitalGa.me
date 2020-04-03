@@ -1,12 +1,13 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 
-export type EntityTypes = 'player' | 'wall' | 'shot' | 'enemyShot' | 'swoopingEnemy';
+export type EntityTypes = 'player' | 'wall' | 'shot' | 'shotExplosion' | 'enemyShot' | 'swoopingEnemy';
 export type EntityTypeOptions = {
   player: {};
   wall: {};
   shot: {x: number; y: number; ownerEntityId: number};
   enemyShot: {x: number; y: number};
+  shotExplosion: {x: number; y: number};
   swoopingEnemy: {x: number; y: number; health: number};
 };
 
@@ -27,6 +28,9 @@ export abstract class Entity {
   }
 
   createPolygon(): void {
+    if (this.boundingBox.width === 0 && this.boundingBox.height === 0) {
+      return;
+    }
     this.polygon = new Polygon(this.x, this.y, [
       [-this.boundingBox.width / 2, -this.boundingBox.height / 2],
       [this.boundingBox.width / 2, -this.boundingBox.height / 2],

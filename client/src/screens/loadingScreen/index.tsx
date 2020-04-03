@@ -8,6 +8,7 @@ import {AssetManager} from '../../utils/assetManager';
 
 import laserRed13 from '../../assets/lasers/laserRed13.png';
 import laserBlue13 from '../../assets/lasers/laserBlue13.png';
+import laserBlueExplosion from '../../assets/lasers/laserBlueExplosion.png';
 import ship1 from '../../assets/ships/playerShip1_blue.png';
 import ship2 from '../../assets/ships/playerShip2_red.png';
 import stars from '../../assets/stars.png';
@@ -24,6 +25,7 @@ export const LoadingScreen: React.FC = observer((props) => {
     async function assets() {
       AssetManager.addAsset('laser.red', laserRed13, {width: 9, height: 57}, {x: 0, y: 0});
       AssetManager.addAsset('laser.blue', laserBlue13, {width: 9, height: 57}, {x: 0, y: 0});
+      AssetManager.addAsset('laser.blue.explosion', laserBlueExplosion, {width: 48, height: 46}, {x: 0, y: 0});
       AssetManager.addAsset('ship1', ship1, {width: 99, height: 75}, {x: 0, y: 0});
       AssetManager.addAsset('ship2', ship2, {width: 112, height: 75}, {x: 0, y: 0});
       AssetManager.addAsset('stars', stars, {width: 256, height: 256}, {x: 0, y: 0});

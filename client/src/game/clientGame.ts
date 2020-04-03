@@ -12,6 +12,7 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {LivePlayerEntity} from './livePlayerEntity';
+import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
 
 export class ClientGame extends Game {
   connectionId: string;
@@ -154,6 +155,20 @@ export class ClientGame extends Game {
                 this.entities.push(swoopingEnemyEntity);
                 break;
 
+              case 'shotExplosion':
+                const shotExplosionExplosion = new ShotExplosionEntity(this, message.entityId);
+                shotExplosionExplosion.x = message.x;
+                shotExplosionExplosion.y = message.y;
+                shotExplosionExplosion.aliveDuration = message.aliveDuration;
+                shotExplosionExplosion.positionBuffer.push({
+                  time: +new Date() - GameConstants.serverTickRate,
+                  x: message.x,
+                  y: message.y,
+                });
+                shotExplosionExplosion.updatePosition();
+                this.entities.push(shotExplosionExplosion);
+                break;
+
               default:
                 unreachable(message);
                 break;
@@ -210,7 +225,14 @@ export class ClientGame extends Game {
                     foundEntity = swoopingEnemy;
                     swoopingEnemy.updatePosition();
                     break;
-
+                  case 'shotExplosion':
+                    const shotExplosion = new ShotExplosionEntity(this, entity.entityId);
+                    shotExplosion.x = entity.x;
+                    shotExplosion.y = entity.y;
+                    shotExplosion.aliveDuration = entity.aliveDuration;
+                    foundEntity = shotExplosion;
+                    shotExplosion.updatePosition();
+                    break;
                   default:
                     throw unreachable(entity);
                 }
@@ -251,6 +273,10 @@ export class ClientGame extends Game {
                 case 'swoopingEnemy':
                   assert(foundEntity instanceof SwoopingEnemyEntity);
                   foundEntity.health = entity.health;
+                  break;
+                case 'shotExplosion':
+                  assert(foundEntity instanceof ShotExplosionEntity);
+                  foundEntity.aliveDuration = entity.aliveDuration;
                   break;
                 default:
                   unreachable(entity);
