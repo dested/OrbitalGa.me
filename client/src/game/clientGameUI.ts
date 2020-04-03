@@ -60,7 +60,7 @@ export class ClientGameUI extends ClientGame {
       this.liveEntity?.releaseRight();
     });
 
-    const path: {x: number; y: number}[] = [];
+    /*const path: {x: number; y: number}[] = [];
     let startPoint: {x: number; y: number};
     manager.on('tap', (e) => {
       if (path.length === 0) {
@@ -70,7 +70,7 @@ export class ClientGameUI extends ClientGame {
         path.push({x: e.center.x - startPoint.x, y: e.center.y - startPoint.y});
       }
       console.log(JSON.stringify(path, null, 2));
-    });
+    });*/
 
     manager.on('doubletap', (e) => {});
     document.onkeydown = (e) => {
@@ -113,7 +113,7 @@ export class ClientGameUI extends ClientGame {
     requestNextFrame();
   }
 
-  draw() {
+  draw() { 
     const context = this.context;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (this.liveEntity) {
@@ -179,7 +179,7 @@ export class ClientGameUI extends ClientGame {
           const blueExplosion = AssetManager.assets['laser.blue.explosion'];
           context.save();
           context.translate(entity.x, entity.y);
-          console.log(entity.entityId, entity.aliveDuration);
+          // console.log(entity.entityId, entity.aliveDuration);
           context.rotate(Math.PI * 2 * (entity.aliveDuration / ShotExplosionEntity.totalAliveDuration));
           context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
           context.restore();

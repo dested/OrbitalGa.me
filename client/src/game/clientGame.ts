@@ -119,9 +119,9 @@ export class ClientGame extends Game {
               case 'shot':
                 const shotEntity = new ShotEntity(this, message.entityId, message.ownerEntityId);
                 shotEntity.x =
-                  shotEntity.ownerEntityId === this.liveEntity!.entityId ? this.liveEntity!.drawX! : message.x;
+                  shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawX! : message.x;
                 shotEntity.y =
-                  shotEntity.ownerEntityId === this.liveEntity!.entityId ? this.liveEntity!.drawY! : message.y;
+                  shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawY! : message.y;
                 shotEntity.positionBuffer.push({
                   time: +new Date() - GameConstants.serverTickRate,
                   x: shotEntity.x,
@@ -252,7 +252,6 @@ export class ClientGame extends Game {
                   if (input.inputSequenceNumber <= entity.lastProcessedInputSequenceNumber) {
                     foundEntity.pendingInputs.splice(i, 1);
                   } else {
-                    console.log('pending', input);
                     foundEntity.applyInput(input);
                     foundEntity.updatedPositionFromMomentum();
                   }

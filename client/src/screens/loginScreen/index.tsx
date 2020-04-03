@@ -11,7 +11,7 @@ export const LoginScreen: React.FC = observer((props) => {
   const [connectStatus, setConnectingStatus] = useState<'none' | 'fail' | 'connecting' | 'joining' | 'joined'>('none');
   useEffect(() => {}, []);
 
-  const servers = ['1', '2', '3', '4', '11'];
+  const servers = ['1' /*, '2', '3', '4', '11'*/];
 
   const onJoin = useCallback(async (server: string) => {
     uiStore.setServerPath(server);
@@ -31,7 +31,7 @@ export const LoginScreen: React.FC = observer((props) => {
           <div style={{display: 'flex', width: '100%'}}>
             {servers.map((s) => (
               <JoinButton key={s} onClick={() => onJoin(s)}>
-                Join Server {s}
+                Join Server
               </JoinButton>
             ))}
           </div>

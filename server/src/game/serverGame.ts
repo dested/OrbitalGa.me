@@ -1,4 +1,4 @@
-import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {ClientToServerMessage, ServerToClientMessage, WorldStateEntity} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {IServerSocket} from '../serverSocket';
 import {nextId} from '@common/utils/uuid';
@@ -171,73 +171,7 @@ export class ServerGame extends Game {
 
     this.checkCollisions();
 
-    this.sendMessageToClients({
-      type: 'worldState',
-      entities: this.entities.map((entity) => {
-        switch (entity.type) {
-          case 'player':
-            assert(entity instanceof PlayerEntity);
-            return {
-              x: entity.x,
-              y: entity.y,
-              momentumX: entity.momentum.x,
-              momentumY: entity.momentum.y,
-              entityId: entity.entityId,
-              lastProcessedInputSequenceNumber: entity.lastProcessedInputSequenceNumber,
-              type: 'player',
-            };
-          case 'wall':
-            assert(entity instanceof WallEntity);
-            return {
-              x: entity.x,
-              y: entity.y,
-              width: entity.width,
-              height: entity.height,
-              entityId: entity.entityId,
-              type: 'wall',
-            };
-          case 'swoopingEnemy':
-            assert(entity instanceof SwoopingEnemyEntity);
-            return {
-              x: entity.x,
-              y: entity.y,
-              health: entity.health,
-              entityId: entity.entityId,
-              type: 'swoopingEnemy',
-            };
-          case 'shot':
-            assert(entity instanceof ShotEntity);
-            return {
-              x: entity.x,
-              y: entity.y,
-              entityId: entity.entityId,
-              ownerEntityId: entity.ownerEntityId,
-              markToDestroy: entity.markToDestroy,
-              type: 'shot',
-            };
-          case 'enemyShot':
-            assert(entity instanceof EnemyShotEntity);
-            return {
-              x: entity.x,
-              y: entity.y,
-              entityId: entity.entityId,
-              markToDestroy: entity.markToDestroy,
-              type: 'enemyShot',
-            };
-          case 'shotExplosion':
-            assert(entity instanceof ShotExplosionEntity);
-            return {
-              x: entity.x,
-              y: entity.y,
-              entityId: entity.entityId,
-              aliveDuration: entity.aliveDuration,
-              type: 'shotExplosion',
-            };
-          default:
-            throw unreachable(entity.type);
-        }
-      }),
-    });
+    this.sendWorldState();
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities[i];
@@ -347,6 +281,96 @@ export class ServerGame extends Game {
         this.entities.push(shotExplosionEntity);
         break;
       }
+    }
+  }
+
+  private sendWorldState() {
+    const entities: WorldStateEntity[] = this.entities.map((entity) => {
+      switch (entity.type) {
+        case 'player':
+          assert(entity instanceof PlayerEntity);
+          return {
+            x: entity.x,
+            y: entity.y,
+            momentumX: entity.momentum.x,
+            momentumY: entity.momentum.y,
+            entityId: entity.entityId,
+            lastProcessedInputSequenceNumber: entity.lastProcessedInputSequenceNumber,
+            type: 'player',
+          };
+        case 'wall':
+          assert(entity instanceof WallEntity);
+          return {
+            x: entity.x,
+            y: entity.y,
+            width: entity.width,
+            height: entity.height,
+            entityId: entity.entityId,
+            type: 'wall',
+          };
+        case 'swoopingEnemy':
+          assert(entity instanceof SwoopingEnemyEntity);
+          return {
+            x: entity.x,
+            y: entity.y,
+            health: entity.health,
+            entityId: entity.entityId,
+            type: 'swoopingEnemy',
+          };
+        case 'shot':
+          assert(entity instanceof ShotEntity);
+          return {
+            x: entity.x,
+            y: entity.y,
+            entityId: entity.entityId,
+            ownerEntityId: entity.ownerEntityId,
+            markToDestroy: entity.markToDestroy,
+            type: 'shot',
+          };
+        case 'enemyShot':
+          assert(entity instanceof EnemyShotEntity);
+          return {
+            x: entity.x,
+            y: entity.y,
+            entityId: entity.entityId,
+            markToDestroy: entity.markToDestroy,
+            type: 'enemyShot',
+          };
+        case 'shotExplosion':
+          assert(entity instanceof ShotExplosionEntity);
+          return {
+            x: entity.x,
+            y: entity.y,
+            entityId: entity.entityId,
+            aliveDuration: entity.aliveDuration,
+            type: 'shotExplosion',
+          };
+        default:
+          throw unreachable(entity.type);
+      }
+    });
+
+    for (const user of this.users) {
+      if (!user.entity) {
+        continue;
+      }
+      const box = {
+        x0: user.entity.x - GameConstants.screenSize.width * 0.7,
+        x1: user.entity.x + GameConstants.screenSize.width * 0.7,
+      };
+
+      const myEntities = [...entities];
+      for (let i = myEntities.length - 1; i >= 0; i--) {
+        const myEntity = myEntities[i];
+        if (myEntity.x < box.x0 || myEntity.x > box.x1) {
+          myEntities.splice(i, 1);
+        }
+      }
+
+      this.sendMessageToClient(user.connectionId, {
+        type: 'worldState',
+        entities: myEntities,
+      });
     }
   }
 }
