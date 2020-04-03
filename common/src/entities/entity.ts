@@ -5,7 +5,7 @@ export type EntityTypes = 'player' | 'wall' | 'shot' | 'enemyShot' | 'swoopingEn
 export type EntityTypeOptions = {
   player: {};
   wall: {};
-  shot: {x: number; y: number};
+  shot: {x: number; y: number; ownerEntityId: number};
   enemyShot: {x: number; y: number};
   swoopingEnemy: {x: number; y: number; health: number};
 };

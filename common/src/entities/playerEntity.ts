@@ -39,7 +39,7 @@ export class PlayerEntity extends Entity {
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          this.game.createEntity('shot', {x: this.x, y: this.y});
+          this.game.createEntity('shot', {x: this.x, y: this.y, ownerEntityId: this.entityId});
           this.shootTimer = 1;
         }
       }

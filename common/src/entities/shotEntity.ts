@@ -6,7 +6,7 @@ import {Entity} from './entity';
 export class ShotEntity extends Entity {
   boundingBox = {width: 9, height: 57};
 
-  constructor(game: Game, entityId: number) {
+  constructor(game: Game, entityId: number, public ownerEntityId: number) {
     super(game, entityId, 'shot');
     this.createPolygon();
   }

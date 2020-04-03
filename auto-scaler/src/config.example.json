@@ -1,5 +1,6 @@
 {
   "loadBalancerArn": "arn",
+  "defaultTargetGroupArn": "",
   "listenerArn": "arn",
   "autoScalingGroupName": "name",
   "vpcId": "vpc",

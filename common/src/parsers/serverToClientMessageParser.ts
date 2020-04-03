@@ -23,6 +23,7 @@ export class ServerToClientMessageParser {
               buff.addFloat32(message.x);
               buff.addFloat32(message.y);
               buff.addUint32(message.entityId);
+              buff.addUint32(message.ownerEntityId);
               break;
             case 'enemyShot':
               buff.addUint8(2);
@@ -51,6 +52,7 @@ export class ServerToClientMessageParser {
                 buff.addFloat32(entity.x);
                 buff.addFloat32(entity.y);
                 buff.addUint32(entity.entityId);
+                buff.addUint32(entity.ownerEntityId);
                 buff.addBoolean(entity.markToDestroy);
                 break;
               case 'enemyShot':
@@ -114,6 +116,7 @@ export class ServerToClientMessageParser {
               x: reader.readFloat32(),
               y: reader.readFloat32(),
               entityId: reader.readUint32(),
+              ownerEntityId: reader.readUint32(),
             }),
             2: () => ({
               type: 'createEntity',
@@ -140,6 +143,7 @@ export class ServerToClientMessageParser {
                 x: reader.readFloat32(),
                 y: reader.readFloat32(),
                 entityId: reader.readUint32(),
+                ownerEntityId: reader.readUint32(),
                 markToDestroy: reader.readBoolean(),
               }),
               2: () => ({

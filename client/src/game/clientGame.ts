@@ -115,13 +115,15 @@ export class ClientGame extends Game {
           {
             switch (message.entityType) {
               case 'shot':
-                const shotEntity = new ShotEntity(this, message.entityId);
-                shotEntity.x = message.x;
-                shotEntity.y = message.y;
+                const shotEntity = new ShotEntity(this, message.entityId, message.ownerEntityId);
+                shotEntity.x =
+                  shotEntity.ownerEntityId === this.liveEntity!.entityId ? this.liveEntity!.drawX! : message.x;
+                shotEntity.y =
+                  shotEntity.ownerEntityId === this.liveEntity!.entityId ? this.liveEntity!.drawY! : message.y;
                 shotEntity.positionBuffer.push({
                   time: +new Date() - GameConstants.serverTickRate,
-                  x: message.x,
-                  y: message.y,
+                  x: shotEntity.x,
+                  y: shotEntity.y,
                 });
                 shotEntity.updatePosition();
                 this.entities.push(shotEntity);
@@ -186,7 +188,7 @@ export class ClientGame extends Game {
                     wallEntity.updatePosition();
                     break;
                   case 'shot':
-                    const shotEntity = new ShotEntity(this, entity.entityId);
+                    const shotEntity = new ShotEntity(this, entity.entityId, entity.ownerEntityId);
                     shotEntity.x = entity.x;
                     shotEntity.y = entity.y;
                     foundEntity = shotEntity;

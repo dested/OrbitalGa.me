@@ -30,6 +30,7 @@ export type WorldStateEntity = {entityId: number; x: number; y: number} & (
   | {
       type: 'shot';
       markToDestroy: boolean;
+      ownerEntityId: number;
     }
   | {
       type: 'enemyShot';
@@ -42,7 +43,11 @@ export type ServerToClientCreateEntity = {
   entityId: number;
   x: number;
   y: number;
-} & ({entityType: 'shot'} | {entityType: 'enemyShot'} | {entityType: 'swoopingEnemy'; health: number});
+} & (
+  | {entityType: 'shot'; ownerEntityId: number}
+  | {entityType: 'enemyShot'}
+  | {entityType: 'swoopingEnemy'; health: number}
+);
 
 export type ServerToClientMessage =
   | {

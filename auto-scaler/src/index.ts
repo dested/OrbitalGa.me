@@ -1,4 +1,4 @@
-import {ELBv2, ELB, AutoScaling, EC2} from 'aws-sdk';
+import {ELBv2, AutoScaling, EC2} from 'aws-sdk';
 import {Utils} from '@common/utils/utils';
 import * as config from './config.json';
 console.log('started');
@@ -75,11 +75,7 @@ async function spinUp() {
       console.log('getting instance running state');
       try {
         const status = await ec2.describeInstanceStatus({InstanceIds: [newInstanceId]}).promise();
-        if (
-          status.InstanceStatuses.length > 0 &&
-          status.InstanceStatuses[0].InstanceState &&
-          status.InstanceStatuses[0].InstanceState.Name
-        ) {
+        if (status.InstanceStatuses.length > 0 && status.InstanceStatuses[0].InstanceState) {
           console.log(' instance running state', status.InstanceStatuses[0].InstanceState.Name);
           if (status.InstanceStatuses[0].InstanceState.Name === 'running') {
             break;
@@ -126,7 +122,7 @@ async function spinUp() {
     console.log('got listener rules');
 
     const ruleArns = rules.Rules.map((a) => a.RuleArn);
-    const newRuleArn = await elbv2
+    await elbv2
       .createRule({
         ListenerArn: config.listenerArn,
         Priority: ruleArns.length,
@@ -165,7 +161,6 @@ async function spinUp() {
 
 async function spinDown() {
   const elbv2 = new ELBv2({region: 'us-west-2'});
-  const ec2 = new EC2({region: 'us-west-2'});
   const scaling = new AutoScaling({region: 'us-west-2'});
   try {
     const autoScalingGroup = await scaling
@@ -173,6 +168,7 @@ async function spinDown() {
       .promise();
 
     const size = autoScalingGroup.AutoScalingGroups[0].MinSize;
+
     console.log('current autoscaling size', size);
     const newSize = size - 1;
     if (newSize < 1) {
@@ -196,10 +192,33 @@ async function spinDown() {
 
     console.log(`Got target group: ${targetGroup.TargetGroupArn}`);
 
-    const result = await elbv2.describeTargetHealth({TargetGroupArn: targetGroup.TargetGroupArn}).promise();
-    console.log(`Terminating Instance: ${result.TargetHealthDescriptions[0].Target.Id}`);
+    /*const result = await elbv2.describeTargetHealth({TargetGroupArn: targetGroup.TargetGroupArn}).promise();
+    const terminatingInstanceId = result.TargetHealthDescriptions[0].Target.Id;
+    console.log(`Terminating Instance: ${terminatingInstanceId}`);
 
-    await ec2.terminateInstances({InstanceIds: [result.TargetHealthDescriptions[0].Target.Id]}).promise();
+    await ec2.terminateInstances({InstanceIds: [terminatingInstanceId]}).promise();
+
+
+    while (true) {
+      console.log('getting instance running state');
+      try {
+        const status = await ec2.describeInstanceStatus({InstanceIds: [terminatingInstanceId]}).promise();
+        if (status.InstanceStatuses.length > 0 && status.InstanceStatuses[0].InstanceState) {
+          console.log(' instance running state', status.InstanceStatuses[0].InstanceState.Name);
+          if (status.InstanceStatuses[0].InstanceState.Name === 'terminated') {
+            break;
+          }
+        } else {
+          console.log('status:', JSON.stringify(status, null, 2));
+          break;
+        }
+      } catch (ex) {
+        console.error(ex);
+      }
+      console.log('sleeping');
+      await Utils.timeout(2000);
+    }
+*/
 
     console.log(`Getting listener rules: ${config.listenerArn}`);
     const rules = await elbv2.describeRules({ListenerArn: config.listenerArn}).promise();
@@ -221,10 +240,41 @@ async function spinDown() {
   }
 }
 
-async function setupFresh() {
-  // modify the rule, change the default rule to fail to google, add a rule to route to the instance for /1
+async function postDeploy() {
+  const ec2 = new EC2({region: 'us-west-2'});
+  const elbv2 = new ELBv2({region: 'us-west-2'});
+  const scaling = new AutoScaling({region: 'us-west-2'});
+
+  const targetGroups = await elbv2.describeTargetGroups({LoadBalancerArn: config.loadBalancerArn}).promise();
+
+  const removeTargets: string[] = [];
+  for (const targetGroup of targetGroups.TargetGroups) {
+    if (targetGroup.TargetGroupArn === config.defaultTargetGroupArn) continue;
+    const result = await elbv2.describeTargetHealth({TargetGroupArn: targetGroup.TargetGroupArn}).promise();
+    if (result.TargetHealthDescriptions.length !== 1) {
+      throw new Error(`Bad target group: ${targetGroup.TargetGroupArn}`);
+    }
+    removeTargets.push(result.TargetHealthDescriptions[0].Target.Id);
+  }
+
+  await elbv2
+    .deregisterTargets({
+      TargetGroupArn: config.defaultTargetGroupArn,
+      Targets: removeTargets.map((t) => ({Id: t, Port: config.websocketPort})),
+    })
+    .promise();
 }
 
-spinDown()
+async function setupFresh() {
+  // modify the rule, change the default rule to fail to google, add a rule to route to the instance for /1
+  // maybe delete all scaling policies out of the autoscalinggroup
+  // autoscalinggroup termination policy to new instances
+}
+
+async function main() {
+  await postDeploy();
+}
+
+main()
   .then((e) => console.log('done'))
   .catch((ex) => console.error(ex));

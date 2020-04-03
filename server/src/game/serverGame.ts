@@ -206,6 +206,7 @@ export class ServerGame extends Game {
               x: entity.x,
               y: entity.y,
               entityId: entity.entityId,
+              ownerEntityId: entity.ownerEntityId,
               markToDestroy: entity.markToDestroy,
               type: 'shot',
             };
@@ -259,21 +260,25 @@ export class ServerGame extends Game {
     this.queuedMessages.push({connectionId, message});
   }
 
-  createEntity(entityType: EntityTypes, options: EntityTypeOptions[typeof entityType]) {
+  createEntity<T extends EntityTypes>(entityType: T, options: EntityTypeOptions[T]) {
     switch (entityType) {
       case 'player':
+        assertType<'player'>(entityType);
         break;
       case 'wall':
+        assertType<'wall'>(entityType);
         break;
       case 'shot':
         {
+          assertType<'shot'>(entityType);
           assertType<EntityTypeOptions[typeof entityType]>(options);
-          const shotEntity = new ShotEntity(this, nextId());
+          const shotEntity = new ShotEntity(this, nextId(), options.ownerEntityId);
           shotEntity.start(options.x, options.y);
           this.sendMessageToClients({
             type: 'createEntity',
             entityType,
             entityId: shotEntity.entityId,
+            ownerEntityId: shotEntity.ownerEntityId,
             x: shotEntity.x,
             y: shotEntity.y,
           });
@@ -281,6 +286,7 @@ export class ServerGame extends Game {
         }
         break;
       case 'swoopingEnemy': {
+        assertType<'swoopingEnemy'>(entityType);
         assertType<EntityTypeOptions[typeof entityType]>(options);
         const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), options.health);
         swoopingEnemyEntity.setStartPosition(options.x, options.y);
@@ -297,6 +303,7 @@ export class ServerGame extends Game {
         break;
       }
       case 'enemyShot': {
+        assertType<'enemyShot'>(entityType);
         assertType<EntityTypeOptions[typeof entityType]>(options);
         const shotEntity = new EnemyShotEntity(this, nextId());
         shotEntity.start(options.x, options.y);
@@ -310,9 +317,6 @@ export class ServerGame extends Game {
         this.entities.push(shotEntity);
         break;
       }
-      default:
-        unreachable(entityType);
-        break;
     }
   }
 }

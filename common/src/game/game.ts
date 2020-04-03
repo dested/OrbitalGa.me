@@ -20,7 +20,7 @@ export abstract class Game {
     }
   }
 
-  abstract createEntity(entityType: EntityTypes, options: EntityTypeOptions[typeof entityType]): void;
+  abstract createEntity<T extends EntityTypes>(entityType: T, options: EntityTypeOptions[T]): void;
 
   destroyEntity(entity: Entity) {
     entity.destroy();
