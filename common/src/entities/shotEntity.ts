@@ -6,9 +6,22 @@ import {Entity} from './entity';
 export class ShotEntity extends Entity {
   boundingBox = {width: 9, height: 57};
 
-  constructor(game: Game, entityId: number, public ownerEntityId: number) {
+  get realX() {
+    return this.x + this.shotOffsetX;
+  }
+  get realY() {
+    return this.y + this.shotOffsetY;
+  }
+
+  constructor(
+    game: Game,
+    entityId: number,
+    public ownerEntityId: number,
+    public shotOffsetX: number,
+    public shotOffsetY: number
+  ) {
     super(game, entityId, 'shot');
-    this.createPolygon();
+    this.createPolygon(this.x + this.shotOffsetX, this.y + this.shotOffsetY);
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -25,7 +38,7 @@ export class ShotEntity extends Entity {
   tick(duration: number) {
     this.y -= this.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
-    this.updatePosition();
+    this.updatePosition(this.x + this.shotOffsetX, this.y + this.shotOffsetY);
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);
     }

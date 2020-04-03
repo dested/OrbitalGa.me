@@ -1,8 +1,9 @@
 import {Collisions, Result} from 'collisions';
 import {Entity, EntityTypeOptions, EntityTypes} from '../entities/entity';
+import {ArrayHash} from '../utils/arrayHash';
 
 export abstract class Game {
-  entities: Entity[] = [];
+  entities = new ArrayHash<Entity>('entityId');
   collisionEngine: Collisions;
   readonly collisionResult: Result;
 
@@ -15,7 +16,7 @@ export abstract class Game {
     this.collisionEngine.update();
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities[i];
+      const entity = this.entities.getIndex(i);
       entity.checkCollisions();
     }
   }

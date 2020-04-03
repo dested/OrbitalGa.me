@@ -113,7 +113,7 @@ export class ClientGameUI extends ClientGame {
     requestNextFrame();
   }
 
-  draw() { 
+  draw() {
     const context = this.context;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (this.liveEntity) {
@@ -136,7 +136,7 @@ export class ClientGameUI extends ClientGame {
     context.translate(-box.x, -box.y);
 
     context.font = '25px bold';
-    for (const entity of this.entities) {
+    for (const entity of this.entities.array) {
       if (!GameData.instance.view.contains(entity)) {
         continue;
       }
@@ -161,7 +161,7 @@ export class ClientGameUI extends ClientGame {
           assert(entity instanceof ShotEntity);
           const laserBlue = AssetManager.assets['laser.blue'];
           context.save();
-          context.translate(entity.x, entity.y);
+          context.translate(entity.x + entity.shotOffsetX, entity.y + entity.shotOffsetY);
           context.drawImage(laserBlue.image, -laserBlue.size.width / 2, -laserBlue.size.height / 2);
           context.restore();
           break;
@@ -176,9 +176,15 @@ export class ClientGameUI extends ClientGame {
           break;
         case 'shotExplosion':
           assert(entity instanceof ShotExplosionEntity);
+          const owner = this.entities.lookup(entity.ownerEntityId);
+          if (!owner) {
+            continue;
+          }
+
           const blueExplosion = AssetManager.assets['laser.blue.explosion'];
           context.save();
-          context.translate(entity.x, entity.y);
+
+          context.translate(owner.x + entity.x, owner.y + entity.y);
           // console.log(entity.entityId, entity.aliveDuration);
           context.rotate(Math.PI * 2 * (entity.aliveDuration / ShotExplosionEntity.totalAliveDuration));
           context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
@@ -190,7 +196,7 @@ export class ClientGameUI extends ClientGame {
       }
     }
 
-    for (const entity of this.entities) {
+    for (const entity of this.entities.array) {
       switch (entity.type) {
         case 'player':
           if (entity instanceof LivePlayerEntity) {

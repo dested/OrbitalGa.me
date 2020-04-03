@@ -164,10 +164,12 @@ export class GameView {
     this.setPosition(x - this.width / 2, y - this.height / 2);
   }
 
-  contains(entity: {x: number; y: number}) {
+  contains(entity: {x: number; y: number; realX?: number; realY?: number}) {
     const outer = this.outerViewBox;
-    return (
-      outer.x < entity.x && outer.x + outer.width > entity.x && outer.y < entity.y && outer.y + outer.height > entity.y
-    );
+
+    const x = entity.realX ?? entity.x;
+    const y = entity.realY ?? entity.y;
+
+    return outer.x < x && outer.x + outer.width > x && outer.y < y && outer.y + outer.height > y;
   }
 }

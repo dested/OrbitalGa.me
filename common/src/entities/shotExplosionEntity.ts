@@ -6,7 +6,14 @@ import {Entity} from './entity';
 export class ShotExplosionEntity extends Entity {
   boundingBox = {width: 0, height: 0};
 
-  constructor(game: Game, entityId: number) {
+  get realX() {
+    return this.x + (this.game.entities.lookup(this.ownerEntityId)?.x ?? 0);
+  }
+  get realY() {
+    return this.y + (this.game.entities.lookup(this.ownerEntityId)?.y ?? 0);
+  }
+
+  constructor(game: Game, entityId: number, public ownerEntityId: number) {
     super(game, entityId, 'shotExplosion');
     this.createPolygon();
   }

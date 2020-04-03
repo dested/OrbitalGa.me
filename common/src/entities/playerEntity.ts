@@ -15,7 +15,8 @@ export type PendingInput = {
 
 export class PlayerEntity extends Entity {
   boundingBox = {width: 99, height: 75};
-  inputsThisTick: boolean = false;
+  xInputsThisTick: boolean = false;
+  yInputsThisTick: boolean = false;
 
   tick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
@@ -37,11 +38,20 @@ export class PlayerEntity extends Entity {
 
   shootTimer: number = 1;
 
+  shotSide: 'left' | 'right' = 'left';
+
   applyInput(input: PendingInput) {
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          this.game.createEntity('shot', {x: this.x, y: this.y, ownerEntityId: this.entityId});
+          this.game.createEntity('shot', {
+            x: this.x,
+            y: this.y,
+            ownerEntityId: this.entityId,
+            shotOffsetX: this.shotSide === 'left' ? -42 : 42,
+            shotOffsetY: -6,
+          });
+          this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           this.shootTimer = 1;
         }
       }
@@ -49,28 +59,28 @@ export class PlayerEntity extends Entity {
 
     const ramp = 30;
     if (input.left) {
-      this.inputsThisTick = true;
+      this.xInputsThisTick = true;
       this.momentum.x -= ramp;
       if (this.momentum.x < -this.maxSpeed) {
         this.momentum.x = -this.maxSpeed;
       }
     }
     if (input.right) {
-      this.inputsThisTick = true;
+      this.xInputsThisTick = true;
       this.momentum.x += ramp;
       if (this.momentum.x > this.maxSpeed) {
         this.momentum.x = this.maxSpeed;
       }
     }
     if (input.up) {
-      this.inputsThisTick = true;
+      this.yInputsThisTick = true;
       this.momentum.y -= ramp;
       if (this.momentum.y < -this.maxSpeed) {
         this.momentum.y = -this.maxSpeed;
       }
     }
     if (input.down) {
-      this.inputsThisTick = true;
+      this.yInputsThisTick = true;
       this.momentum.y += ramp;
       if (this.momentum.y > this.maxSpeed) {
         this.momentum.y = this.maxSpeed;
@@ -117,8 +127,10 @@ export class PlayerEntity extends Entity {
     this.x += this.momentum.x;
     this.y += this.momentum.y;
 
-    if (!this.inputsThisTick) {
+    if (!this.xInputsThisTick) {
       this.momentum.x = this.momentum.x * 0.5;
+    }
+    if (!this.yInputsThisTick) {
       this.momentum.y = this.momentum.y * 0.5;
     }
     if (Math.abs(this.momentum.x) < 3) {

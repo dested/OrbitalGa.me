@@ -82,7 +82,7 @@ export class ServerGame extends Game {
       return;
     }
     this.users.splice(this.users.indexOf(user), 1);
-    this.entities.splice(this.entities.indexOf(user.entity), 1);
+    this.entities.remove(user.entity);
   }
 
   clientJoin(connectionId: string) {
@@ -113,7 +113,8 @@ export class ServerGame extends Game {
 */
 
     for (const user of this.users) {
-      user.entity.inputsThisTick = false;
+      user.entity.xInputsThisTick = false;
+      user.entity.yInputsThisTick = false;
     }
 
     const time = +new Date();
@@ -165,7 +166,7 @@ export class ServerGame extends Game {
       }
     }
 
-    for (const entity of this.entities) {
+    for (const entity of this.entities.array) {
       entity.tick(duration);
     }
 
@@ -174,9 +175,9 @@ export class ServerGame extends Game {
     this.sendWorldState();
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities[i];
+      const entity = this.entities.getIndex(i);
       if (entity.markToDestroy) {
-        this.entities.splice(i, 1);
+        this.entities.remove(entity);
       }
     }
 
@@ -220,7 +221,13 @@ export class ServerGame extends Game {
         {
           assertType<'shot'>(entityType);
           assertType<EntityTypeOptions[typeof entityType]>(options);
-          const shotEntity = new ShotEntity(this, nextId(), options.ownerEntityId);
+          const shotEntity = new ShotEntity(
+            this,
+            nextId(),
+            options.ownerEntityId,
+            options.shotOffsetX,
+            options.shotOffsetY
+          );
           shotEntity.start(options.x, options.y);
           this.sendMessageToClients({
             type: 'createEntity',
@@ -229,6 +236,8 @@ export class ServerGame extends Game {
             ownerEntityId: shotEntity.ownerEntityId,
             x: shotEntity.x,
             y: shotEntity.y,
+            shotOffsetX: shotEntity.shotOffsetX,
+            shotOffsetY: shotEntity.shotOffsetY,
           });
           this.entities.push(shotEntity);
         }
@@ -268,12 +277,13 @@ export class ServerGame extends Game {
       case 'shotExplosion': {
         assertType<'shotExplosion'>(entityType);
         assertType<EntityTypeOptions[typeof entityType]>(options);
-        const shotExplosionEntity = new ShotExplosionEntity(this, nextId());
+        const shotExplosionEntity = new ShotExplosionEntity(this, nextId(), options.ownerEntityId);
         shotExplosionEntity.start(options.x, options.y);
         this.sendMessageToClients({
           type: 'createEntity',
           entityType,
           entityId: shotExplosionEntity.entityId,
+          ownerEntityId: shotExplosionEntity.ownerEntityId,
           aliveDuration: shotExplosionEntity.aliveDuration,
           x: shotExplosionEntity.x,
           y: shotExplosionEntity.y,
@@ -322,6 +332,8 @@ export class ServerGame extends Game {
           return {
             x: entity.x,
             y: entity.y,
+            shotOffsetX: entity.shotOffsetX,
+            shotOffsetY: entity.shotOffsetY,
             entityId: entity.entityId,
             ownerEntityId: entity.ownerEntityId,
             markToDestroy: entity.markToDestroy,
@@ -341,8 +353,11 @@ export class ServerGame extends Game {
           return {
             x: entity.x,
             y: entity.y,
+            realX: entity.realX,
+            realY: entity.realY,
             entityId: entity.entityId,
             aliveDuration: entity.aliveDuration,
+            ownerEntityId: entity.ownerEntityId,
             type: 'shotExplosion',
           };
         default:
@@ -355,14 +370,15 @@ export class ServerGame extends Game {
         continue;
       }
       const box = {
-        x0: user.entity.x - GameConstants.screenSize.width * 0.7,
-        x1: user.entity.x + GameConstants.screenSize.width * 0.7,
+        x0: user.entity.realX - GameConstants.screenSize.width * 0.7,
+        x1: user.entity.realX + GameConstants.screenSize.width * 0.7,
       };
 
       const myEntities = [...entities];
       for (let i = myEntities.length - 1; i >= 0; i--) {
         const myEntity = myEntities[i];
-        if (myEntity.x < box.x0 || myEntity.x > box.x1) {
+        const x = myEntity.realX ?? myEntity.x;
+        if (x < box.x0 || x > box.x1) {
           myEntities.splice(i, 1);
         }
       }

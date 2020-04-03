@@ -12,7 +12,7 @@ export type ClientToServerMessage =
       down: boolean;
     };
 
-export type WorldStateEntity = {entityId: number; x: number; y: number} & (
+export type WorldStateEntity = {entityId: number; x: number; y: number; realX?: number; realY?: number} & (
   | {
       type: 'player';
       lastProcessedInputSequenceNumber: number;
@@ -32,10 +32,13 @@ export type WorldStateEntity = {entityId: number; x: number; y: number} & (
       type: 'shot';
       markToDestroy: boolean;
       ownerEntityId: number;
+      shotOffsetX: number;
+      shotOffsetY: number;
     }
   | {
       type: 'shotExplosion';
       aliveDuration: number;
+      ownerEntityId: number;
     }
   | {
       type: 'enemyShot';
@@ -49,8 +52,8 @@ export type ServerToClientCreateEntity = {
   x: number;
   y: number;
 } & (
-  | {entityType: 'shot'; ownerEntityId: number}
-  | {entityType: 'shotExplosion'; aliveDuration: number}
+  | {entityType: 'shot'; ownerEntityId: number; shotOffsetX: number; shotOffsetY: number}
+  | {entityType: 'shotExplosion'; aliveDuration: number; ownerEntityId: number}
   | {entityType: 'enemyShot'}
   | {entityType: 'swoopingEnemy'; health: number}
 );

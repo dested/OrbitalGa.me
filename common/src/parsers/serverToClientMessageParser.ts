@@ -22,6 +22,8 @@ export class ServerToClientMessageParser {
               buff.addUint8(1);
               buff.addFloat32(message.x);
               buff.addFloat32(message.y);
+              buff.addFloat32(message.shotOffsetX);
+              buff.addFloat32(message.shotOffsetY);
               buff.addUint32(message.entityId);
               buff.addUint32(message.ownerEntityId);
               break;
@@ -44,6 +46,7 @@ export class ServerToClientMessageParser {
               buff.addFloat32(message.y);
               buff.addUint8(message.aliveDuration);
               buff.addUint32(message.entityId);
+              buff.addUint32(message.ownerEntityId);
               break;
             default:
               unreachable(message);
@@ -58,6 +61,8 @@ export class ServerToClientMessageParser {
                 buff.addUint8(1);
                 buff.addFloat32(entity.x);
                 buff.addFloat32(entity.y);
+                buff.addFloat32(entity.shotOffsetX);
+                buff.addFloat32(entity.shotOffsetY);
                 buff.addUint32(entity.entityId);
                 buff.addUint32(entity.ownerEntityId);
                 buff.addBoolean(entity.markToDestroy);
@@ -99,6 +104,7 @@ export class ServerToClientMessageParser {
                 buff.addFloat32(entity.y);
                 buff.addUint8(entity.aliveDuration);
                 buff.addUint32(entity.entityId);
+                buff.addUint32(entity.ownerEntityId);
                 break;
               default:
                 unreachable(entity);
@@ -128,9 +134,10 @@ export class ServerToClientMessageParser {
             1: () => ({
               type: 'createEntity',
               entityType: 'shot',
-
               x: reader.readFloat32(),
               y: reader.readFloat32(),
+              shotOffsetX: reader.readFloat32(),
+              shotOffsetY: reader.readFloat32(),
               entityId: reader.readUint32(),
               ownerEntityId: reader.readUint32(),
             }),
@@ -156,6 +163,7 @@ export class ServerToClientMessageParser {
               y: reader.readFloat32(),
               aliveDuration: reader.readUint8(),
               entityId: reader.readUint32(),
+              ownerEntityId: reader.readUint32(),
             }),
           }),
         3: () => ({
@@ -166,6 +174,8 @@ export class ServerToClientMessageParser {
                 type: 'shot',
                 x: reader.readFloat32(),
                 y: reader.readFloat32(),
+                shotOffsetX: reader.readFloat32(),
+                shotOffsetY: reader.readFloat32(),
                 entityId: reader.readUint32(),
                 ownerEntityId: reader.readUint32(),
                 markToDestroy: reader.readBoolean(),
@@ -207,6 +217,7 @@ export class ServerToClientMessageParser {
                 y: reader.readFloat32(),
                 aliveDuration: reader.readUint8(),
                 entityId: reader.readUint32(),
+                ownerEntityId: reader.readUint32(),
               }),
             })
           ),

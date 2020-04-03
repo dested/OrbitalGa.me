@@ -23,9 +23,9 @@ Todo
  * [x] better kenney assets
  * [ ] add death effect
  * [ ] make sure disconnect and kill work
- * [ ] shot explode effect
+ * [x] shot explode effect
  * [ ] watch other shmups
- * [ ] gun shooting offcenter when youre moving
+ * [x] gun shooting offcenter when youre moving
  * [ ] leaderboard
     * [ ] redis
  * [x] add momentum to movement
@@ -44,6 +44,7 @@ Todo
  * [ ] come up with more enemies
  * [ ] come up with realtime events
     * [ ] big bosses every 5 min?
+ * [x] add worldstate filtering
  * [x] build bots
  * [x] load test
  * [x] deploy to beanstalk

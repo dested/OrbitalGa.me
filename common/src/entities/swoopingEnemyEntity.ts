@@ -141,7 +141,12 @@ export class SwoopingEnemyEntity extends Entity {
     if (otherEntity instanceof ShotEntity) {
       this.health -= 1;
       this.game.destroyEntity(otherEntity);
-      this.game.createEntity('shotExplosion', {x: this.x, y: this.y});
+
+      this.game.createEntity('shotExplosion', {
+        x: this.x - (otherEntity.x + otherEntity.shotOffsetX),
+        y: this.y - (otherEntity.y + otherEntity.shotOffsetY),
+        ownerEntityId: this.entityId,
+      });
       return true;
     }
     return false;

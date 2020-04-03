@@ -117,7 +117,13 @@ export class ClientGame extends Game {
           {
             switch (message.entityType) {
               case 'shot':
-                const shotEntity = new ShotEntity(this, message.entityId, message.ownerEntityId);
+                const shotEntity = new ShotEntity(
+                  this,
+                  message.entityId,
+                  message.ownerEntityId,
+                  message.shotOffsetX,
+                  message.shotOffsetY
+                );
                 shotEntity.x =
                   shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawX! : message.x;
                 shotEntity.y =
@@ -156,7 +162,7 @@ export class ClientGame extends Game {
                 break;
 
               case 'shotExplosion':
-                const shotExplosionExplosion = new ShotExplosionEntity(this, message.entityId);
+                const shotExplosionExplosion = new ShotExplosionEntity(this, message.entityId, message.ownerEntityId);
                 shotExplosionExplosion.x = message.x;
                 shotExplosionExplosion.y = message.y;
                 shotExplosionExplosion.aliveDuration = message.aliveDuration;
@@ -178,15 +184,15 @@ export class ClientGame extends Game {
         case 'worldState':
           {
             for (let i = this.entities.length - 1; i >= 0; i--) {
-              const entity = this.entities[i];
+              const entity = this.entities.getIndex(i);
               if (message.entities.find((a) => a.entityId === entity.entityId)) {
                 continue;
               }
               entity.destroy();
-              this.entities.splice(i, 1);
+              this.entities.remove(entity);
             }
             for (const entity of message.entities) {
-              let foundEntity = this.entities.find((a) => a.entityId === entity.entityId);
+              let foundEntity = this.entities.lookup(entity.entityId);
               if (!foundEntity) {
                 switch (entity.type) {
                   case 'player':
@@ -204,7 +210,13 @@ export class ClientGame extends Game {
                     wallEntity.updatePosition();
                     break;
                   case 'shot':
-                    const shotEntity = new ShotEntity(this, entity.entityId, entity.ownerEntityId);
+                    const shotEntity = new ShotEntity(
+                      this,
+                      entity.entityId,
+                      entity.ownerEntityId,
+                      entity.shotOffsetX,
+                      entity.shotOffsetY
+                    );
                     shotEntity.x = entity.x;
                     shotEntity.y = entity.y;
                     foundEntity = shotEntity;
@@ -226,7 +238,7 @@ export class ClientGame extends Game {
                     swoopingEnemy.updatePosition();
                     break;
                   case 'shotExplosion':
-                    const shotExplosion = new ShotExplosionEntity(this, entity.entityId);
+                    const shotExplosion = new ShotExplosionEntity(this, entity.entityId, entity.ownerEntityId);
                     shotExplosion.x = entity.x;
                     shotExplosion.y = entity.y;
                     shotExplosion.aliveDuration = entity.aliveDuration;
@@ -276,6 +288,7 @@ export class ClientGame extends Game {
                 case 'shotExplosion':
                   assert(foundEntity instanceof ShotExplosionEntity);
                   foundEntity.aliveDuration = entity.aliveDuration;
+                  foundEntity.ownerEntityId = entity.ownerEntityId;
                   break;
                 default:
                   unreachable(entity);
@@ -300,7 +313,8 @@ export class ClientGame extends Game {
     if (!this.connectionId || !this.liveEntity) {
       return;
     }
-    this.liveEntity.inputsThisTick = false;
+    this.liveEntity.xInputsThisTick = false;
+    this.liveEntity.yInputsThisTick = false;
     this.processInputs(duration);
     this.liveEntity.tick();
     this.collisionEngine.update();
@@ -311,9 +325,7 @@ export class ClientGame extends Game {
     const now = +new Date();
     const renderTimestamp = now - GameConstants.serverTickRate;
 
-    for (const i in this.entities) {
-      const entity = this.entities[i];
-
+    for (const entity of this.entities.array) {
       if (entity === this.liveEntity) continue;
 
       // Find the two authoritative positions surrounding the rendering timestamp.

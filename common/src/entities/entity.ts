@@ -5,9 +5,9 @@ export type EntityTypes = 'player' | 'wall' | 'shot' | 'shotExplosion' | 'enemyS
 export type EntityTypeOptions = {
   player: {};
   wall: {};
-  shot: {x: number; y: number; ownerEntityId: number};
+  shot: {x: number; y: number; ownerEntityId: number; shotOffsetX: number; shotOffsetY: number};
   enemyShot: {x: number; y: number};
-  shotExplosion: {x: number; y: number};
+  shotExplosion: {x: number; y: number; ownerEntityId: number};
   swoopingEnemy: {x: number; y: number; health: number};
 };
 
@@ -15,6 +15,13 @@ export abstract class Entity {
   polygon?: Polygon;
 
   abstract boundingBox: {width: number; height: number};
+
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
+  }
 
   x: number = 0;
   y: number = 0;
@@ -27,11 +34,11 @@ export abstract class Entity {
     this.updatePosition();
   }
 
-  createPolygon(): void {
+  createPolygon(x: number = this.x, y: number = this.y): void {
     if (this.boundingBox.width === 0 && this.boundingBox.height === 0) {
       return;
     }
-    this.polygon = new Polygon(this.x, this.y, [
+    this.polygon = new Polygon(x, y, [
       [-this.boundingBox.width / 2, -this.boundingBox.height / 2],
       [this.boundingBox.width / 2, -this.boundingBox.height / 2],
       [this.boundingBox.width / 2, this.boundingBox.height / 2],
@@ -41,12 +48,12 @@ export abstract class Entity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  updatePosition() {
+  updatePosition(x: number = this.x, y: number = this.y) {
     if (!this.polygon) {
       return;
     }
-    this.polygon.x = this.x;
-    this.polygon.y = this.y;
+    this.polygon.x = x;
+    this.polygon.y = y;
   }
 
   markToDestroy: boolean = false;

@@ -272,6 +272,7 @@ async function setupFresh() {
 }
 
 async function main() {
+  await postDeploy();
 }
 
 main()
