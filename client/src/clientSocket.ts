@@ -14,7 +14,7 @@ export class ClientSocket implements IClientSocket {
     }
   ) {
     let totalLength = 0;
-    this.socket = new WebSocket('ws://localhost:8081');
+    this.socket = new WebSocket('ws://192.168.86.21:8081');
     // this.socket = new WebSocket(`wss://game.orbitalga.me/${serverPath}`);
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
@@ -22,6 +22,7 @@ export class ClientSocket implements IClientSocket {
       console.count('opened');
     };
     this.socket.onerror = (e) => {
+      // console.log(e.toString());
       console.log(JSON.stringify(e, null, 2));
       this.socket?.close();
       options.onDisconnect();
