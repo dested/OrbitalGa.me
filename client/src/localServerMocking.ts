@@ -32,6 +32,10 @@ export class WebSocketServerSocket {
     };
   }
 
+  close() {
+    this.wsClient.close();
+  }
+
   binaryType: string = '';
   onmessage(callback: (message: {}) => void) {
     this.onMessageCallback = callback;
@@ -82,7 +86,13 @@ export class LocalServerSocket implements IServerSocket {
       ws.onmessage((message) => {
         if (GameConstants.binaryTransport) {
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
-          onMessage(me.connectionId, ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer));
+          const messageData = ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer);
+          if (messageData === null) {
+            ws.close();
+            return;
+          }
+
+          onMessage(me.connectionId, messageData);
         } else {
           onMessage(me.connectionId, JSON.parse(message as string));
         }

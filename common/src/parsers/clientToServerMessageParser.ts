@@ -22,25 +22,35 @@ export class ClientToServerMessageParser {
     return buff.buildBuffer();
   }
 
-  static toClientToServerMessage(buffer: ArrayBuffer): ClientToServerMessage {
+  static toClientToServerMessage(buffer: ArrayBuffer): ClientToServerMessage | null {
     const reader = new ArrayBufferReader(buffer);
-    const type = reader.readUint8();
-    switch (type) {
-      case 1:
-        return {
-          type: 'join',
-        };
-      case 2:
-        return {
-          type: 'playerInput',
-          inputSequenceNumber: reader.readUint32(),
-          ...(() => {
-            const [up, down, left, right, shoot] = Utils.intToBits(reader.readUint8());
-            return {up, down, left, right, shoot};
-          })(),
-        };
-      default:
-        throw new Error('Missing buffer enum');
+    try {
+      let result: ClientToServerMessage;
+      const type = reader.readUint8();
+      switch (type) {
+        case 1:
+          result = {
+            type: 'join',
+          };
+          break;
+        case 2:
+          result = {
+            type: 'playerInput',
+            inputSequenceNumber: reader.readUint32(),
+            ...(() => {
+              const [up, down, left, right, shoot] = Utils.intToBits(reader.readUint8());
+              return {up, down, left, right, shoot};
+            })(),
+          };
+          break;
+        default:
+          throw new Error('Missing buffer enum');
+      }
+      reader.done();
+      return result;
+    } catch (ex) {
+      console.error(ex);
+      return null;
     }
   }
 }

@@ -177,6 +177,12 @@ export class ArrayBufferReader {
   readBoolean() {
     return this.readUint8() === 1;
   }
+
+  done() {
+    if (this.index !== this.dv.byteLength) {
+      throw new Error('Bad input size');
+    }
+  }
 }
 
 const transfer =

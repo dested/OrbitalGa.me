@@ -39,7 +39,7 @@ export class ServerToClientMessageParser {
 
   static toServerToClientMessages(buffer: ArrayBuffer): ServerToClientMessage[] {
     const reader = new ArrayBufferReader(buffer);
-    return reader.loop(() => {
+    const result: ServerToClientMessage[] = reader.loop(() => {
       return reader.switch<1 | 2, ServerToClientMessage>({
         1: () => ({
           type: 'joined',
@@ -56,6 +56,8 @@ export class ServerToClientMessageParser {
         }),
       });
     });
+    reader.done();
+    return result;
   }
 }
 

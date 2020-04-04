@@ -25,7 +25,7 @@
 - [ ] come up with more enemies
 - [ ] come up with realtime events
   - [ ] big bosses every 5 min?
-  - [ ] build big enemy like in top left of Kenney expansion  
+  - [ ] build big enemy like in top left of Kenney expansion
 - [ ] add lambda for join/etc, checks redis for servers, spins one up?
 - [ ] add login register
 - [ ] add leaderboard
@@ -40,7 +40,6 @@
 - [ ] drop powerups from enemy
 - [ ] drop powerups from debris
 - [ ] drop bombs
-- [ ] move byte buffer code into individual entity
 - [ ] figure out collision position for explosion
 - [ ] make keyboard wasd
 - [ ] connect on login screen??
@@ -51,7 +50,6 @@
 - [ ] test what happens if server crashes
 - [ ] i think interpolateEntities can be cleaner simplier
 - [ ] validate input sequence number so they can't send garbage negative, etc
-- [ ] validate buffer so client get send garbage, try catch and boot user
 - [ ] 3 lives before you die and reset???
 - [ ] add audio
 - [ ] hard to go straight left with nipplejs
@@ -67,6 +65,8 @@
 - [ ] let streamers create their own server and send their own waves of enemies until everyone dies?????????
 - [ ] for huge streamers 500 people play across 10 servers, same script tho
 - [ ] add license to repo
+- [x] validate buffer so client get send garbage, try catch and boot user
+- [x] move byte buffer code into individual entity
 - [x] refactor clientGame to be more dynamic and support adding entities easier
 - [x] determine screen size
   - [x] scaling
@@ -92,4 +92,3 @@
 - [x] load test
 - [x] deploy to beanstalk
 - [x] determine how to scale up servers dynamically
-

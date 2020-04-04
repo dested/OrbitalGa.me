@@ -38,7 +38,12 @@ export class ServerSocket implements IServerSocket {
       ws.on('message', (message) => {
         if (GameConstants.binaryTransport) {
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
-          onMessage(me.connectionId, ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer));
+          const messageData = ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer);
+          if (messageData === null) {
+            ws.close();
+            return;
+          }
+          onMessage(me.connectionId, messageData);
         } else {
           onMessage(me.connectionId, JSON.parse(message as string));
         }
