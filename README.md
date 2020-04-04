@@ -43,7 +43,7 @@ Todo
      * [x] add better bounding box for collisions 
  * [ ] add powerups
  * [x] clean up serialize, worldstate, buffer builder
- * [ ] make it easier to add things, update worldstate automatically
+ * [x] make it easier to add things add entities and sync fields
  * [ ] come up with more enemies
  * [ ] come up with realtime events
     * [ ] big bosses every 5 min?
