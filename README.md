@@ -39,7 +39,7 @@ Todo
  * [x] better background
  * [x] refactor code
      * [x] better separation
-     * [ ] proper draw
+     * [x] proper draw
      * [x] add better bounding box for collisions 
  * [ ] add powerups
  * [x] clean up serialize, worldstate, buffer builder

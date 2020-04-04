@@ -1,8 +1,11 @@
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
+import {ClientEntity, DrawZIndex} from './clientEntity';
+import {AssetManager} from '../../utils/assetManager';
 
-export class LivePlayerEntity extends PlayerEntity {
+export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
+  zIndex = DrawZIndex.Player;
   constructor(game: Game, public entityId: number) {
     super(game, entityId);
   }
@@ -81,5 +84,10 @@ export class LivePlayerEntity extends PlayerEntity {
         return Utils.lerp(y, this.y, (now - startTime) / duration);
       }
     }
+  }
+
+  draw(context: CanvasRenderingContext2D): void {
+    const ship = AssetManager.assets.ship1;
+    context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
   }
 }

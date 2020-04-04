@@ -1,7 +1,7 @@
 import {Manager, Press, Tap} from 'hammerjs';
 import {IClientSocket} from '../clientSocket';
 import {ClientGame} from './clientGame';
-import {assert} from '@common/utils/utils';
+import {assert, assertType} from '@common/utils/utils';
 import {unreachable} from '@common/utils/unreachable';
 import {GameData} from './gameData';
 import {AssetManager} from '../utils/assetManager';
@@ -10,8 +10,11 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {GameConstants} from '@common/game/gameConstants';
-import {LivePlayerEntity} from './livePlayerEntity';
+import {LivePlayerEntity} from './entities/livePlayerEntity';
 import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
+import {ClientEntity} from './entities/clientEntity';
+import {Entity} from '@common/entities/entity';
+import {ArrayHash} from '@common/utils/arrayHash';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -136,78 +139,13 @@ export class ClientGameUI extends ClientGame {
     context.translate(-box.x, -box.y);
 
     context.font = '25px bold';
-    for (const entity of this.entities.array) {
+    const entities = this.entities.array;
+    assertType<(Entity & ClientEntity)[]>(entities);
+    for (const entity of entities.sort((a, b) => a.zIndex - b.zIndex)) {
       if (!GameData.instance.view.contains(entity)) {
         continue;
       }
-      switch (entity.type) {
-        case 'player':
-          break;
-        case 'enemyShot':
-          assert(entity instanceof EnemyShotEntity);
-          const laserRed = AssetManager.assets['laser.red'];
-          context.save();
-          context.translate(entity.x, entity.y);
-          context.rotate(Math.PI);
-          context.drawImage(laserRed.image, -laserRed.size.width / 2, -laserRed.size.height / 2);
-          context.restore();
-          break;
-        case 'wall':
-          assert(entity instanceof WallEntity);
-          context.fillStyle = 'white';
-          context.fillRect(entity.x, entity.y, entity.width, entity.height);
-          break;
-        case 'shot':
-          assert(entity instanceof ShotEntity);
-          const laserBlue = AssetManager.assets['laser.blue'];
-          context.save();
-          context.translate(entity.x + entity.shotOffsetX, entity.y + entity.shotOffsetY);
-          context.drawImage(laserBlue.image, -laserBlue.size.width / 2, -laserBlue.size.height / 2);
-          context.restore();
-          break;
-        case 'swoopingEnemy':
-          assert(entity instanceof SwoopingEnemyEntity);
-          const ship = AssetManager.assets.ship2;
-          context.save();
-          context.translate(entity.x, entity.y);
-          context.rotate(Math.PI);
-          context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
-          context.restore();
-          break;
-        case 'shotExplosion':
-          assert(entity instanceof ShotExplosionEntity);
-          const owner = this.entities.lookup(entity.ownerEntityId);
-          if (!owner) {
-            continue;
-          }
-
-          const blueExplosion = AssetManager.assets['laser.blue.explosion'];
-          context.save();
-
-          context.translate(owner.x + entity.x, owner.y + entity.y);
-          // console.log(entity.entityId, entity.aliveDuration);
-          context.rotate(Math.PI * 2 * (entity.aliveDuration / ShotExplosionEntity.totalAliveDuration));
-          context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
-          context.restore();
-          break;
-        default:
-          unreachable(entity.type);
-          break;
-      }
-    }
-
-    for (const entity of this.entities.array) {
-      switch (entity.type) {
-        case 'player':
-          if (entity instanceof LivePlayerEntity) {
-            const ship = AssetManager.assets.ship1;
-            context.drawImage(ship.image, entity.drawX - ship.size.width / 2, entity.drawY - ship.size.height / 2);
-          } else {
-            const ship = AssetManager.assets.ship1;
-            context.drawImage(ship.image, entity.x - ship.size.width / 2, entity.y - ship.size.height / 2);
-          }
-          break;
-      }
+      entity.draw(context);
     }
 
     context.restore();

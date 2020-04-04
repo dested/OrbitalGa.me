@@ -10,13 +10,21 @@ import {WallEntity} from '@common/entities/wallEntity';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ShotEntity} from '@common/entities/shotEntity';
 import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
-import {LivePlayerEntity} from './livePlayerEntity';
+import {LivePlayerEntity} from './entities/livePlayerEntity';
 import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
+import {ArrayHash} from '@common/utils/arrayHash';
+import {Entity} from '@common/entities/entity';
+import {ClientEntity} from './entities/clientEntity';
+import {ClientPlayerEntity} from './entities/clientPlayerEntity';
+import {ClientWallEntity} from './entities/clientWallEntity';
+import {ClientShotEntity} from './entities/clientShotEntity';
+import {ClientEnemyShotEntity} from './entities/clientEnemyShotEntity';
+import {ClientSwoopingEnemyEntity} from './entities/clientSwoopingEnemyEntity';
+import {ClientShotExplosionEntity} from './entities/clientShotExplosionEntity';
 
 export class ClientGame extends Game {
   connectionId: string;
   protected isDead: boolean = false;
-
   protected liveEntity?: LivePlayerEntity;
 
   constructor(
@@ -127,21 +135,21 @@ export class ClientGame extends Game {
               if (!foundEntity) {
                 switch (entity.entityType) {
                   case 'player':
-                    const playerEntity = new PlayerEntity(this, entity.entityId);
+                    const playerEntity = new ClientPlayerEntity(this, entity.entityId);
                     playerEntity.x = entity.x;
                     playerEntity.y = entity.y;
                     playerEntity.lastProcessedInputSequenceNumber = entity.lastProcessedInputSequenceNumber;
                     foundEntity = playerEntity;
                     break;
                   case 'wall':
-                    const wallEntity = new WallEntity(this, entity.entityId, entity.width, entity.height);
+                    const wallEntity = new ClientWallEntity(this, entity.entityId, entity.width, entity.height);
                     wallEntity.x = entity.x;
                     wallEntity.y = entity.y;
                     foundEntity = wallEntity;
                     wallEntity.updatePosition();
                     break;
                   case 'shot':
-                    const shotEntity = new ShotEntity(
+                    const shotEntity = new ClientShotEntity(
                       this,
                       entity.entityId,
                       entity.ownerEntityId,
@@ -165,7 +173,7 @@ export class ClientGame extends Game {
                     shotEntity.updatePosition();
                     break;
                   case 'enemyShot':
-                    const enemyShotEntity = new EnemyShotEntity(this, entity.entityId, entity.startY);
+                    const enemyShotEntity = new ClientEnemyShotEntity(this, entity.entityId, entity.startY);
                     enemyShotEntity.x = entity.x;
                     enemyShotEntity.y = entity.y;
                     foundEntity = enemyShotEntity;
@@ -180,7 +188,7 @@ export class ClientGame extends Game {
                     enemyShotEntity.updatePosition();
                     break;
                   case 'swoopingEnemy':
-                    const swoopingEnemy = new SwoopingEnemyEntity(this, entity.entityId, entity.health);
+                    const swoopingEnemy = new ClientSwoopingEnemyEntity(this, entity.entityId, entity.health);
                     swoopingEnemy.x = entity.x;
                     swoopingEnemy.y = entity.y;
                     swoopingEnemy.health = entity.health;
@@ -197,7 +205,7 @@ export class ClientGame extends Game {
                     swoopingEnemy.updatePosition();
                     break;
                   case 'shotExplosion':
-                    const shotExplosion = new ShotExplosionEntity(this, entity.entityId, entity.ownerEntityId);
+                    const shotExplosion = new ClientShotExplosionEntity(this, entity.entityId, entity.ownerEntityId);
                     shotExplosion.x = entity.x;
                     shotExplosion.y = entity.y;
                     shotExplosion.aliveDuration = entity.aliveDuration;
@@ -215,6 +223,28 @@ export class ClientGame extends Game {
                     throw unreachable(entity);
                 }
                 this.entities.push(foundEntity);
+              } else {
+                switch (entity.entityType) {
+                  case 'player':
+                    break;
+                  case 'wall':
+                    break;
+                  case 'shot':
+                    break;
+                  case 'enemyShot':
+                    break;
+                  case 'swoopingEnemy':
+                    assert(foundEntity instanceof SwoopingEnemyEntity);
+                    foundEntity.health = entity.health;
+                    break;
+                  case 'shotExplosion':
+                    assert(foundEntity instanceof ShotExplosionEntity);
+                    foundEntity.aliveDuration = entity.aliveDuration;
+                    foundEntity.ownerEntityId = entity.ownerEntityId;
+                    break;
+                  default:
+                    unreachable(entity);
+                }
               }
 
               if (foundEntity.entityId === this.liveEntity?.entityId) {
@@ -236,28 +266,6 @@ export class ClientGame extends Game {
                 }
               } else {
                 foundEntity.positionBuffer.push({time: +new Date(), x: entity.x, y: entity.y});
-              }
-
-              switch (entity.entityType) {
-                case 'player':
-                  break;
-                case 'wall':
-                  break;
-                case 'shot':
-                  break;
-                case 'enemyShot':
-                  break;
-                case 'swoopingEnemy':
-                  assert(foundEntity instanceof SwoopingEnemyEntity);
-                  foundEntity.health = entity.health;
-                  break;
-                case 'shotExplosion':
-                  assert(foundEntity instanceof ShotExplosionEntity);
-                  foundEntity.aliveDuration = entity.aliveDuration;
-                  foundEntity.ownerEntityId = entity.ownerEntityId;
-                  break;
-                default:
-                  unreachable(entity);
               }
             }
           }
