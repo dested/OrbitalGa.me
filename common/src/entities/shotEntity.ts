@@ -45,11 +45,9 @@ export class ShotEntity extends Entity {
   }
   serialize(): ShotModel {
     return {
-      x: this.x,
-      y: this.y,
+      ...super.serialize(),
       shotOffsetX: this.shotOffsetX,
       shotOffsetY: this.shotOffsetY,
-      entityId: this.entityId,
       ownerEntityId: this.ownerEntityId,
       entityType: 'shot',
     };

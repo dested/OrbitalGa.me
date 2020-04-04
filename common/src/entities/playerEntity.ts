@@ -3,6 +3,8 @@ import {Game} from '../game/game';
 import {unreachable} from '../utils/unreachable';
 import {Entity, EntityModel} from './entity';
 import {GameConstants} from '../game/gameConstants';
+import {ShotEntity} from './shotEntity';
+import {nextId} from '../utils/uuid';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -44,13 +46,15 @@ export class PlayerEntity extends Entity {
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          this.game.createEntity('shot', {
-            x: this.x,
-            y: this.y,
-            ownerEntityId: this.entityId,
-            shotOffsetX: this.shotSide === 'left' ? -42 : 42,
-            shotOffsetY: -6,
-          });
+          const shotEntity = new ShotEntity(
+            this.game,
+            nextId(),
+            this.entityId,
+            this.shotSide === 'left' ? -42 : 42,
+            -6
+          );
+          shotEntity.start(this.x, this.y);
+          this.game.entities.push(shotEntity);
           this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           this.shootTimer = 1;
         }
@@ -165,13 +169,12 @@ export class PlayerEntity extends Entity {
 
   serialize(): PlayerModel {
     return {
-      x: this.x,
-      y: this.y,
+      ...super.serialize(),
       momentumX: this.momentum.x,
       momentumY: this.momentum.y,
-      entityId: this.entityId,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       entityType: 'player',
+      create: this.create,
     };
   }
 }

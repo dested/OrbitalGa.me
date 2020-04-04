@@ -19,7 +19,6 @@ export type ClientToServerMessage =
       down: boolean;
     };
 
-
 export type WorldStateEntity =
   | PlayerModel
   | SwoopingEnemyModel
@@ -27,10 +26,6 @@ export type WorldStateEntity =
   | ShotModel
   | ShotExplosionModel
   | EnemyShotModel;
-
-export type ServerToClientCreateEntity = {
-  type: 'createEntity';
-} & WorldStateEntity;
 
 export type ServerToClientMessage =
   | {
@@ -40,7 +35,6 @@ export type ServerToClientMessage =
       x: number;
       y: number;
     }
-  | ServerToClientCreateEntity
   | {
       type: 'worldState';
       entities: WorldStateEntity[];

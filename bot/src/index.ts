@@ -14,7 +14,7 @@ async function main() {
   });
   return;*/
   const serverPath = '1';
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 2; i++) {
     const options = {
       onDisconnect: () => {
         // new BotClientGame(serverPath, options, new ClientSocket());

@@ -1,4 +1,4 @@
-import {ServerToClientCreateEntity, ServerToClientMessage, WorldStateEntity} from '../models/messages';
+import {ServerToClientMessage, WorldStateEntity} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 
@@ -15,12 +15,8 @@ export class ServerToClientMessageParser {
           buff.addUint32(message.entityId);
           buff.addString(message.clientId);
           break;
-        case 'createEntity':
-          buff.addUint8(2);
-          this.addEntity(buff, message);
-          break;
         case 'worldState':
-          buff.addUint8(3);
+          buff.addUint8(2);
           buff.addUint16(message.entities.length);
           for (const entity of message.entities) {
             this.addEntity(buff, entity);
@@ -36,7 +32,7 @@ export class ServerToClientMessageParser {
   static toServerToClientMessages(buffer: ArrayBuffer): ServerToClientMessage[] {
     const reader = new ArrayBufferReader(buffer);
     return reader.loop(() => {
-      return reader.switch<1 | 2 | 3, ServerToClientMessage>({
+      return reader.switch<1 | 2, ServerToClientMessage>({
         1: () => ({
           type: 'joined',
           x: reader.readFloat32(),
@@ -44,11 +40,7 @@ export class ServerToClientMessageParser {
           entityId: reader.readUint32(),
           clientId: reader.readString(),
         }),
-        2: () => {
-          const entity = this.readEntity(reader);
-          return {type: 'createEntity', ...entity};
-        },
-        3: () => ({
+        2: () => ({
           type: 'worldState',
           entities: reader.loop(() => this.readEntity(reader)),
         }),
@@ -71,6 +63,7 @@ export class ServerToClientMessageParser {
         buff.addUint8(2);
         buff.addFloat32(entity.x);
         buff.addFloat32(entity.y);
+        buff.addFloat32(entity.startY);
         buff.addUint32(entity.entityId);
         break;
       case 'swoopingEnemy':
@@ -108,6 +101,7 @@ export class ServerToClientMessageParser {
       default:
         unreachable(entity);
     }
+    buff.addBoolean(entity.create);
   }
 
   private static readEntity(reader: ArrayBufferReader) {
@@ -120,12 +114,15 @@ export class ServerToClientMessageParser {
         shotOffsetY: reader.readFloat32(),
         entityId: reader.readUint32(),
         ownerEntityId: reader.readUint32(),
+        create: reader.readBoolean(),
       }),
       2: () => ({
         entityType: 'enemyShot',
         x: reader.readFloat32(),
         y: reader.readFloat32(),
+        startY: reader.readFloat32(),
         entityId: reader.readUint32(),
+        create: reader.readBoolean(),
       }),
       3: () => ({
         entityType: 'swoopingEnemy',
@@ -133,6 +130,7 @@ export class ServerToClientMessageParser {
         y: reader.readFloat32(),
         entityId: reader.readUint32(),
         health: reader.readUint8(),
+        create: reader.readBoolean(),
       }),
       4: () => ({
         entityType: 'player',
@@ -142,6 +140,7 @@ export class ServerToClientMessageParser {
         momentumY: reader.readFloat32(),
         entityId: reader.readUint32(),
         lastProcessedInputSequenceNumber: reader.readUint32(),
+        create: reader.readBoolean(),
       }),
       5: () => ({
         entityType: 'wall',
@@ -150,6 +149,7 @@ export class ServerToClientMessageParser {
         entityId: reader.readUint32(),
         width: reader.readUint16(),
         height: reader.readUint16(),
+        create: reader.readBoolean(),
       }),
       6: () => ({
         entityType: 'shotExplosion',
@@ -158,6 +158,7 @@ export class ServerToClientMessageParser {
         aliveDuration: reader.readUint8(),
         entityId: reader.readUint32(),
         ownerEntityId: reader.readUint32(),
+        create: reader.readBoolean(),
       }),
     });
   }

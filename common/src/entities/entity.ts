@@ -1,15 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-
-export type EntityTypes = 'player' | 'wall' | 'shot' | 'shotExplosion' | 'enemyShot' | 'swoopingEnemy';
-export type EntityTypeOptions = {
-  player: {};
-  wall: {};
-  shot: {x: number; y: number; ownerEntityId: number; shotOffsetX: number; shotOffsetY: number};
-  enemyShot: {x: number; y: number};
-  shotExplosion: {x: number; y: number; ownerEntityId: number};
-  swoopingEnemy: {x: number; y: number; health: number};
-};
+import {WorldStateEntity} from '../models/messages';
+import {dataSerialize} from '../parsers/dataSerialize';
 
 export abstract class Entity {
   polygon?: Polygon;
@@ -23,10 +15,15 @@ export abstract class Entity {
     return this.y;
   }
 
-  x: number = 0;
-  y: number = 0;
+  @dataSerialize('float32') x: number = 0;
+  @dataSerialize('float32') y: number = 0;
+  @dataSerialize('uint32') entityId: number;
+  @dataSerialize('boolean') create: boolean = true;
+
   positionBuffer: {time: number; x: number; y: number}[] = [];
-  constructor(protected game: Game, public entityId: number, public type: EntityTypes) {}
+  constructor(protected game: Game, entityId: number, public type: WorldStateEntity['entityType']) {
+    this.entityId = entityId;
+  }
 
   start(x: number, y: number) {
     this.x = x;
@@ -84,7 +81,18 @@ export abstract class Entity {
   }
 
   abstract tick(duration: number): void;
-  abstract serialize(): EntityModel;
+  serialize(): EntityModel {
+    return {
+      entityId: this.entityId,
+      x: this.x,
+      y: this.y,
+      create: this.create,
+    };
+  }
+
+  postTick() {
+    this.create = false;
+  }
 }
 
-export type EntityModel = {entityId: number; x: number; y: number; realX?: number; realY?: number};
+export type EntityModel = {create: boolean; entityId: number; x: number; y: number; realX?: number; realY?: number};

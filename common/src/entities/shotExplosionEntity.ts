@@ -31,11 +31,9 @@ export class ShotExplosionEntity extends Entity {
   }
   serialize(): ShotExplosionModel {
     return {
-      x: this.x,
-      y: this.y,
+      ...super.serialize(),
       realX: this.realX,
       realY: this.realY,
-      entityId: this.entityId,
       aliveDuration: this.aliveDuration,
       ownerEntityId: this.ownerEntityId,
       entityType: 'shotExplosion',

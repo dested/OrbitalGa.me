@@ -5,6 +5,9 @@ import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ShotEntity} from './shotEntity';
 import {GameConstants} from '../game/gameConstants';
+import {ShotExplosionEntity} from './shotExplosionEntity';
+import {nextId} from '../utils/uuid';
+import {EnemyShotEntity} from './enemyShotEntity';
 
 export class SwoopingEnemyEntity extends Entity {
   boundingBox = {width: 127, height: 75};
@@ -40,7 +43,7 @@ export class SwoopingEnemyEntity extends Entity {
   aliveTick = 0;
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
 
-  tick(): void {
+  tick(duration: number): void {
     this.aliveTick++;
     if (this.health <= 0) {
       this.game.destroyEntity(this);
@@ -53,7 +56,10 @@ export class SwoopingEnemyEntity extends Entity {
     }
 
     if (this.aliveTick % 4 === 0) {
-      this.game.createEntity('enemyShot', {x: this.x, y: this.y});
+      const shotEntity = new EnemyShotEntity(this.game, nextId(), this.y);
+      shotEntity.start(this.x, this.y);
+      shotEntity.tick(duration);
+      this.game.entities.push(shotEntity);
     }
 
     switch (this.step) {
@@ -142,21 +148,21 @@ export class SwoopingEnemyEntity extends Entity {
       this.health -= 1;
       this.game.destroyEntity(otherEntity);
 
-      this.game.createEntity('shotExplosion', {
-        x: this.x - (otherEntity.x + otherEntity.shotOffsetX),
-        y: this.y - (otherEntity.y + otherEntity.shotOffsetY),
-        ownerEntityId: this.entityId,
-      });
+      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+      shotExplosionEntity.start(
+        this.x - (otherEntity.x + otherEntity.shotOffsetX),
+        this.y - (otherEntity.y + otherEntity.shotOffsetY)
+      );
+      this.game.entities.push(shotExplosionEntity);
+
       return true;
     }
     return false;
   }
   serialize(): SwoopingEnemyModel {
     return {
-      x: this.x,
-      y: this.y,
+      ...super.serialize(),
       health: this.health,
-      entityId: this.entityId,
       entityType: 'swoopingEnemy',
     };
   }

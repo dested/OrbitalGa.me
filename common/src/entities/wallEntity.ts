@@ -1,9 +1,10 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
+import {dataSerialize} from '../parsers/dataSerialize';
 
 export class WallEntity extends Entity {
-  boundingBox = {width: this.width, height: this.height};
+  boundingBox: {width: number; height: number};
 
   createPolygon(): void {
     this.polygon = new Polygon(this.x, this.y, [
@@ -18,8 +19,14 @@ export class WallEntity extends Entity {
 
   tick(): void {}
 
-  constructor(game: Game, entityId: number, public width: number, public height: number) {
+  @dataSerialize('float32') width: number;
+  @dataSerialize('float32') height: number;
+
+  constructor(game: Game, entityId: number, width: number, height: number) {
     super(game, entityId, 'wall');
+    this.width = width;
+    this.height = height;
+    this.boundingBox = {width: this.width, height: this.height};
     this.createPolygon();
   }
 
@@ -28,11 +35,9 @@ export class WallEntity extends Entity {
   }
   serialize(): WallModel {
     return {
-      x: this.x,
-      y: this.y,
+      ...super.serialize(),
       width: this.width,
       height: this.height,
-      entityId: this.entityId,
       entityType: 'wall',
     };
   }

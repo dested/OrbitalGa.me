@@ -3,7 +3,6 @@ import {unreachable} from '@common/utils/unreachable';
 import {IServerSocket} from '../serverSocket';
 import {nextId} from '@common/utils/uuid';
 import {GameConstants} from '@common/game/gameConstants';
-import {EntityTypeOptions, EntityTypes} from '@common/entities/entity';
 import {Game} from '@common/game/game';
 import {assert, assertType, Utils} from '@common/utils/utils';
 import {PlayerEntity} from '@common/entities/playerEntity';
@@ -158,15 +157,19 @@ export class ServerGame extends Game {
       const enemyCount = this.users.length;
       for (let i = 0; i < enemyCount; i++) {
         const {x0, x1} = this.getPlayerRange(200, (entity) => entity.type === 'player');
-        this.createEntity('swoopingEnemy', {
-          x: Utils.randomInRange(x0, x1),
-          y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
-          health: 10,
-        });
+
+        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), 10);
+        swoopingEnemyEntity.start(
+          Utils.randomInRange(x0, x1),
+          -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+        );
+        swoopingEnemyEntity.setStartPosition(swoopingEnemyEntity.x, swoopingEnemyEntity.y);
+        this.entities.push(swoopingEnemyEntity);
       }
     }
 
-    for (const entity of this.entities.array) {
+    for (let i = this.entities.array.length - 1; i >= 0; i--) {
+      const entity = this.entities.array[i];
       entity.tick(duration);
     }
 
@@ -178,6 +181,8 @@ export class ServerGame extends Game {
       const entity = this.entities.getIndex(i);
       if (entity.markToDestroy) {
         this.entities.remove(entity);
+      } else {
+        entity.postTick();
       }
     }
 
@@ -207,73 +212,6 @@ export class ServerGame extends Game {
 
   processMessage(connectionId: string, message: ClientToServerMessage) {
     this.queuedMessages.push({connectionId, message});
-  }
-
-  createEntity<T extends EntityTypes>(entityType: T, options: EntityTypeOptions[T]) {
-    switch (entityType) {
-      case 'player':
-        assertType<'player'>(entityType);
-        break;
-      case 'wall':
-        assertType<'wall'>(entityType);
-        break;
-      case 'shot':
-        {
-          assertType<'shot'>(entityType);
-          assertType<EntityTypeOptions[typeof entityType]>(options);
-          const shotEntity = new ShotEntity(
-            this,
-            nextId(),
-            options.ownerEntityId,
-            options.shotOffsetX,
-            options.shotOffsetY
-          );
-          shotEntity.start(options.x, options.y);
-          this.sendMessageToClients({
-            type: 'createEntity',
-            ...shotEntity.serialize(),
-          });
-          this.entities.push(shotEntity);
-        }
-        break;
-      case 'swoopingEnemy': {
-        assertType<'swoopingEnemy'>(entityType);
-        assertType<EntityTypeOptions[typeof entityType]>(options);
-        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), options.health);
-        swoopingEnemyEntity.setStartPosition(options.x, options.y);
-        swoopingEnemyEntity.start(options.x, options.y);
-        this.sendMessageToClients({
-          type: 'createEntity',
-          ...swoopingEnemyEntity.serialize(),
-        });
-        this.entities.push(swoopingEnemyEntity);
-        break;
-      }
-      case 'enemyShot': {
-        assertType<'enemyShot'>(entityType);
-        assertType<EntityTypeOptions[typeof entityType]>(options);
-        const shotEntity = new EnemyShotEntity(this, nextId());
-        shotEntity.start(options.x, options.y);
-        this.sendMessageToClients({
-          type: 'createEntity',
-          ...shotEntity.serialize(),
-        });
-        this.entities.push(shotEntity);
-        break;
-      }
-      case 'shotExplosion': {
-        assertType<'shotExplosion'>(entityType);
-        assertType<EntityTypeOptions[typeof entityType]>(options);
-        const shotExplosionEntity = new ShotExplosionEntity(this, nextId(), options.ownerEntityId);
-        shotExplosionEntity.start(options.x, options.y);
-        this.sendMessageToClients({
-          type: 'createEntity',
-          ...shotExplosionEntity.serialize(),
-        });
-        this.entities.push(shotExplosionEntity);
-        break;
-      }
-    }
   }
 
   private sendWorldState() {

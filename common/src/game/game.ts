@@ -1,5 +1,5 @@
 import {Collisions, Result} from 'collisions';
-import {Entity, EntityTypeOptions, EntityTypes} from '../entities/entity';
+import {Entity} from '../entities/entity';
 import {ArrayHash} from '../utils/arrayHash';
 
 export abstract class Game {
@@ -20,8 +20,6 @@ export abstract class Game {
       entity.checkCollisions();
     }
   }
-
-  abstract createEntity<T extends EntityTypes>(entityType: T, options: EntityTypeOptions[T]): void;
 
   destroyEntity(entity: Entity) {
     entity.destroy();

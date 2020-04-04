@@ -3,7 +3,6 @@ import {unreachable} from '@common/utils/unreachable';
 import {uuid} from '@common/utils/uuid';
 import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
-import {EntityTypeOptions, EntityTypes} from '@common/entities/entity';
 import {Game} from '@common/game/game';
 import {assert} from '@common/utils/utils';
 import {PlayerEntity} from '@common/entities/playerEntity';
@@ -113,77 +112,6 @@ export class ClientGame extends Game {
             this.entities.push(clientEntity);
           }
           break;
-        case 'createEntity':
-          {
-            switch (message.entityType) {
-              case 'shot':
-                const shotEntity = new ShotEntity(
-                  this,
-                  message.entityId,
-                  message.ownerEntityId,
-                  message.shotOffsetX,
-                  message.shotOffsetY
-                );
-                shotEntity.x =
-                  shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawX! : message.x;
-                shotEntity.y =
-                  shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawY! : message.y;
-                shotEntity.positionBuffer.push({
-                  time: +new Date() - GameConstants.serverTickRate,
-                  x: shotEntity.x,
-                  y: shotEntity.y,
-                });
-                shotEntity.updatePosition();
-                this.entities.push(shotEntity);
-                break;
-              case 'enemyShot':
-                const enemyShotEntity = new EnemyShotEntity(this, message.entityId);
-                enemyShotEntity.x = message.x;
-                enemyShotEntity.y = message.y;
-                enemyShotEntity.positionBuffer.push({
-                  time: +new Date() - GameConstants.serverTickRate,
-                  x: message.x,
-                  y: message.y,
-                });
-                enemyShotEntity.updatePosition();
-                this.entities.push(enemyShotEntity);
-                break;
-              case 'swoopingEnemy':
-                const swoopingEnemyEntity = new SwoopingEnemyEntity(this, message.entityId, message.health);
-                swoopingEnemyEntity.x = message.x;
-                swoopingEnemyEntity.y = message.y;
-                swoopingEnemyEntity.positionBuffer.push({
-                  time: +new Date() - GameConstants.serverTickRate,
-                  x: message.x,
-                  y: message.y,
-                });
-                swoopingEnemyEntity.updatePosition();
-                this.entities.push(swoopingEnemyEntity);
-                break;
-
-              case 'shotExplosion':
-                const shotExplosionExplosion = new ShotExplosionEntity(this, message.entityId, message.ownerEntityId);
-                shotExplosionExplosion.x = message.x;
-                shotExplosionExplosion.y = message.y;
-                shotExplosionExplosion.aliveDuration = message.aliveDuration;
-                shotExplosionExplosion.positionBuffer.push({
-                  time: +new Date() - GameConstants.serverTickRate,
-                  x: message.x,
-                  y: message.y,
-                });
-                shotExplosionExplosion.updatePosition();
-                this.entities.push(shotExplosionExplosion);
-                break;
-              case 'player':
-                break;
-              case 'wall':
-                break;
-              default:
-                unreachable(message);
-                break;
-            }
-          }
-          break;
         case 'worldState':
           {
             for (let i = this.entities.length - 1; i >= 0; i--) {
@@ -223,13 +151,32 @@ export class ClientGame extends Game {
                     shotEntity.x = entity.x;
                     shotEntity.y = entity.y;
                     foundEntity = shotEntity;
+                    if (entity.create) {
+                      shotEntity.x =
+                        shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawX! : entity.x;
+                      shotEntity.y =
+                        shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawY! : entity.y;
+                      shotEntity.positionBuffer.push({
+                        time: +new Date() - GameConstants.serverTickRate,
+                        x: shotEntity.x,
+                        y: shotEntity.y,
+                      });
+                    }
                     shotEntity.updatePosition();
                     break;
                   case 'enemyShot':
-                    const enemyShotEntity = new EnemyShotEntity(this, entity.entityId);
+                    const enemyShotEntity = new EnemyShotEntity(this, entity.entityId, entity.startY);
                     enemyShotEntity.x = entity.x;
                     enemyShotEntity.y = entity.y;
                     foundEntity = enemyShotEntity;
+                    if (entity.create) {
+                      enemyShotEntity.y = entity.startY;
+                      enemyShotEntity.positionBuffer.push({
+                        time: +new Date() - GameConstants.serverTickRate,
+                        x: enemyShotEntity.x,
+                        y: entity.startY,
+                      });
+                    }
                     enemyShotEntity.updatePosition();
                     break;
                   case 'swoopingEnemy':
@@ -238,6 +185,15 @@ export class ClientGame extends Game {
                     swoopingEnemy.y = entity.y;
                     swoopingEnemy.health = entity.health;
                     foundEntity = swoopingEnemy;
+
+                    if (entity.create) {
+                      swoopingEnemy.positionBuffer.push({
+                        time: +new Date() - GameConstants.serverTickRate,
+                        x: entity.x,
+                        y: entity.y,
+                      });
+                    }
+
                     swoopingEnemy.updatePosition();
                     break;
                   case 'shotExplosion':
@@ -246,6 +202,13 @@ export class ClientGame extends Game {
                     shotExplosion.y = entity.y;
                     shotExplosion.aliveDuration = entity.aliveDuration;
                     foundEntity = shotExplosion;
+                    if (entity.create) {
+                      shotExplosion.positionBuffer.push({
+                        time: +new Date() - GameConstants.serverTickRate,
+                        x: shotExplosion.x,
+                        y: shotExplosion.y,
+                      });
+                    }
                     shotExplosion.updatePosition();
                     break;
                   default:
@@ -388,6 +351,4 @@ export class ClientGame extends Game {
     liveEntity.applyInput(input);
     this.sendMessageToServer({type: 'playerInput', ...input});
   }
-
-  createEntity<T extends EntityTypes>(type: T, options: EntityTypeOptions[T]): void {}
 }

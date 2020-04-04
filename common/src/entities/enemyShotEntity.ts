@@ -6,9 +6,10 @@ import {Entity, EntityModel} from './entity';
 export class EnemyShotEntity extends Entity {
   boundingBox = {width: 9, height: 57};
 
-  constructor(game: Game, entityId: number) {
+  constructor(game: Game, entityId: number, startY: number) {
     super(game, entityId, 'enemyShot');
     this.createPolygon();
+    this.startY = startY;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -20,6 +21,7 @@ export class EnemyShotEntity extends Entity {
   }
 
   shotSpeedPerSecond = 900;
+  startY: number;
   aliveDuration = 3000;
 
   tick(duration: number) {
@@ -32,9 +34,8 @@ export class EnemyShotEntity extends Entity {
   }
   serialize(): EnemyShotModel {
     return {
-      x: this.x,
-      y: this.y,
-      entityId: this.entityId,
+      ...super.serialize(),
+      startY: this.startY,
       entityType: 'enemyShot',
     };
   }
@@ -42,4 +43,5 @@ export class EnemyShotEntity extends Entity {
 
 export type EnemyShotModel = EntityModel & {
   entityType: 'enemyShot';
+  startY: number;
 };
