@@ -4,6 +4,7 @@ import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
 import {Utils} from '@common/utils/utils';
+import {GoFullScreen} from '../../components/goFullScreen';
 
 export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
@@ -39,6 +40,7 @@ export const LoginScreen: React.FC = observer((props) => {
           (connectStatus === 'connecting' && <Status>Connecting...</Status>) ||
           (connectStatus === 'joining' && <Status>Joining...</Status>)}
       </LoginBox>
+      <GoFullScreen />
     </Wrapper>
   );
 });

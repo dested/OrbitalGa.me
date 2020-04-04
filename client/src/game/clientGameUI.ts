@@ -2,19 +2,10 @@ import {Manager, Press, Tap} from 'hammerjs';
 import {IClientSocket} from '../clientSocket';
 import {ClientGame} from './clientGame';
 import {assert, assertType} from '@common/utils/utils';
-import {unreachable} from '@common/utils/unreachable';
 import {GameData} from './gameData';
-import {AssetManager} from '../utils/assetManager';
-import {WallEntity} from '@common/entities/wallEntity';
-import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
-import {ShotEntity} from '@common/entities/shotEntity';
-import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {GameConstants} from '@common/game/gameConstants';
-import {LivePlayerEntity} from './entities/livePlayerEntity';
-import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
-import {ArrayHash} from '@common/utils/arrayHash';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -49,13 +40,6 @@ export class ClientGameUI extends ClientGame {
     manager.on('press', (e) => {
       doubleTap = +new Date() - +lastPress < 200;
       lastPress = new Date();
-
-      if (e.center.x < window.innerWidth / 2) {
-        this.liveEntity?.pressLeft();
-      }
-      if (e.center.x >= window.innerWidth / 2) {
-        this.liveEntity?.pressRight();
-      }
     });
     manager.on('pressup', (e) => {
       doubleTap = false;

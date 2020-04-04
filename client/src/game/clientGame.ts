@@ -24,8 +24,8 @@ import {ClientShotExplosionEntity} from './entities/clientShotExplosionEntity';
 
 export class ClientGame extends Game {
   connectionId: string;
-  protected isDead: boolean = false;
-  protected liveEntity?: LivePlayerEntity;
+   isDead: boolean = false;
+  liveEntity?: LivePlayerEntity;
 
   constructor(
     serverPath: string,

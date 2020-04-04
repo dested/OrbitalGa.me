@@ -1,7 +1,6 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {WorldStateEntity} from '../models/messages';
-import {dataSerialize} from '../parsers/dataSerialize';
 
 export abstract class Entity {
   polygon?: Polygon;
@@ -15,10 +14,10 @@ export abstract class Entity {
     return this.y;
   }
 
-  @dataSerialize('float32') x: number = 0;
-  @dataSerialize('float32') y: number = 0;
-  @dataSerialize('uint32') entityId: number;
-  @dataSerialize('boolean') create: boolean = true;
+  x: number = 0;
+  y: number = 0;
+  entityId: number;
+  create: boolean = true;
 
   positionBuffer: {time: number; x: number; y: number}[] = [];
   constructor(protected game: Game, entityId: number, public type: WorldStateEntity['entityType']) {

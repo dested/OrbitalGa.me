@@ -2,6 +2,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
+import {ClientConfig} from './clientConfig';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
@@ -14,8 +15,7 @@ export class ClientSocket implements IClientSocket {
     }
   ) {
     let totalLength = 0;
-    this.socket = new WebSocket('ws://192.168.86.21:8081');
-    // this.socket = new WebSocket(`wss://game.orbitalga.me/${serverPath}`);
+    this.socket = new WebSocket(ClientConfig.websocketUrl(serverPath));
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       options.onOpen();

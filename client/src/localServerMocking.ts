@@ -5,6 +5,7 @@ import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessage
 import {uuid} from '@common/utils/uuid';
 import {IServerSocket} from '../../server/src/serverSocket';
 import {IClientSocket} from './clientSocket';
+import {ClientConfig} from './clientConfig';
 
 export class WebSocketServer {
   static singleton: WebSocketServer;
@@ -128,8 +129,7 @@ export class LocalClientSocket implements IClientSocket {
       onDisconnect: () => void;
     }
   ) {
-    // this.socket = new WebSocket('wss://game.quickga.me');
-    this.socket = new WebSocketClient('ws://localhost:8081');
+    this.socket = new WebSocketClient(ClientConfig.websocketUrl(serverPath));
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       options.onOpen();

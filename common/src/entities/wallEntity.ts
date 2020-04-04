@@ -1,7 +1,6 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
-import {dataSerialize} from '../parsers/dataSerialize';
 
 export class WallEntity extends Entity {
   boundingBox: {width: number; height: number};
@@ -19,8 +18,8 @@ export class WallEntity extends Entity {
 
   tick(): void {}
 
-  @dataSerialize('float32') width: number;
-  @dataSerialize('float32') height: number;
+  width: number;
+  height: number;
 
   constructor(game: Game, entityId: number, width: number, height: number) {
     super(game, entityId, 'wall');
