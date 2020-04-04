@@ -1,13 +1,12 @@
-import {ClientToServerMessage, ServerToClientMessage, WorldStateEntity} from '@common/models/messages';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {uuid} from '@common/utils/uuid';
 import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
-import {assertType, Utils} from '@common/utils/utils';
+import {Utils} from '@common/utils/utils';
 import {LivePlayerEntity} from './entities/livePlayerEntity';
-import {EntityModelType, EntityTypes, WorldEntityModelCastToEntityModel} from './entities/entityTypeModels';
-import {EntityModel} from '@common/entities/entity';
+import {EntityTypes, WorldEntityModelCastToEntityModel} from './entities/entityTypeModels';
 
 export class ClientGame extends Game {
   connectionId: string;

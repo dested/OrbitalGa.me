@@ -8,6 +8,7 @@ import {GameConstants} from '../game/gameConstants';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
+import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class SwoopingEnemyEntity extends Entity {
   boundingBox = {width: 127, height: 75};
@@ -170,6 +171,25 @@ export class SwoopingEnemyEntity extends Entity {
   reconcileFromServer(messageEntity: SwoopingEnemyModel) {
     super.reconcileFromServer(messageEntity);
     this.health = messageEntity.health;
+  }
+
+  static readBuffer(reader: ArrayBufferReader) {
+    return {
+      entityType: 'swoopingEnemy' as const,
+      x: reader.readFloat32(),
+      y: reader.readFloat32(),
+      entityId: reader.readUint32(),
+      health: reader.readUint8(),
+      create: reader.readBoolean(),
+    };
+  }
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {
+    buff.addFloat32(entity.x);
+    buff.addFloat32(entity.y);
+    buff.addUint32(entity.entityId);
+    buff.addUint8(entity.health);
+    buff.addBoolean(entity.create);
   }
 }
 

@@ -1,6 +1,13 @@
 import {ServerToClientMessage, WorldStateEntity} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
+import {ShotEntity} from '../entities/shotEntity';
+import {EnemyShotEntity} from '../entities/enemyShotEntity';
+import {SwoopingEnemyEntity} from '../entities/swoopingEnemyEntity';
+import {PlayerEntity} from '../entities/playerEntity';
+import {WallEntity} from '../entities/wallEntity';
+import {ShotExplosionEntity} from '../entities/shotExplosionEntity';
+import {EntityModelType} from '../../../client/src/game/entities/entityTypeModels';
 
 export class ServerToClientMessageParser {
   static fromServerToClientMessages(messages: ServerToClientMessage[]) {
@@ -18,7 +25,9 @@ export class ServerToClientMessageParser {
           buff.addUint8(2);
           buff.addUint16(message.entities.length);
           for (const entity of message.entities) {
-            this.addEntity(buff, entity);
+            const type = EntityBufferType[entity.entityType];
+            buff.addUint8(type.value);
+            type.addBuffer(buff, entity as any);
           }
           break;
         default:
@@ -40,124 +49,38 @@ export class ServerToClientMessageParser {
         }),
         2: () => ({
           type: 'worldState',
-          entities: reader.loop(() => this.readEntity(reader)),
+          entities: reader.loop(() => {
+            const option = reader.readUint8();
+            return EntityBufferType[EntityBufferValue[option]].readBuffer(reader);
+          }),
         }),
       });
     });
   }
-
-  private static addEntity(buff: ArrayBufferBuilder, entity: WorldStateEntity) {
-    switch (entity.entityType) {
-      case 'shot':
-        buff.addUint8(1);
-        buff.addFloat32(entity.x);
-        buff.addFloat32(entity.y);
-        buff.addFloat32(entity.shotOffsetX);
-        buff.addFloat32(entity.shotOffsetY);
-        buff.addUint32(entity.entityId);
-        buff.addUint32(entity.ownerEntityId);
-        break;
-      case 'enemyShot':
-        buff.addUint8(2);
-        buff.addFloat32(entity.x);
-        buff.addFloat32(entity.y);
-        buff.addFloat32(entity.startY);
-        buff.addUint32(entity.entityId);
-        break;
-      case 'swoopingEnemy':
-        buff.addUint8(3);
-        buff.addFloat32(entity.x);
-        buff.addFloat32(entity.y);
-        buff.addUint32(entity.entityId);
-        buff.addUint8(entity.health);
-        break;
-      case 'player':
-        buff.addUint8(4);
-        buff.addFloat32(entity.x);
-        buff.addFloat32(entity.y);
-        buff.addFloat32(entity.momentumX);
-        buff.addFloat32(entity.momentumY);
-        buff.addUint32(entity.entityId);
-        buff.addUint32(entity.lastProcessedInputSequenceNumber);
-        break;
-      case 'wall':
-        buff.addUint8(5);
-        buff.addFloat32(entity.x);
-        buff.addFloat32(entity.y);
-        buff.addUint32(entity.entityId);
-        buff.addUint16(entity.width);
-        buff.addUint16(entity.height);
-        break;
-      case 'shotExplosion':
-        buff.addUint8(6);
-        buff.addFloat32(entity.x);
-        buff.addFloat32(entity.y);
-        buff.addUint8(entity.aliveDuration);
-        buff.addUint32(entity.entityId);
-        buff.addUint32(entity.ownerEntityId);
-        break;
-      default:
-        unreachable(entity);
-    }
-    buff.addBoolean(entity.create);
-  }
-
-  private static readEntity(reader: ArrayBufferReader) {
-    return reader.switch<1 | 2 | 3 | 4 | 5 | 6, WorldStateEntity>({
-      1: () => ({
-        entityType: 'shot',
-        x: reader.readFloat32(),
-        y: reader.readFloat32(),
-        shotOffsetX: reader.readFloat32(),
-        shotOffsetY: reader.readFloat32(),
-        entityId: reader.readUint32(),
-        ownerEntityId: reader.readUint32(),
-        create: reader.readBoolean(),
-      }),
-      2: () => ({
-        entityType: 'enemyShot',
-        x: reader.readFloat32(),
-        y: reader.readFloat32(),
-        startY: reader.readFloat32(),
-        entityId: reader.readUint32(),
-        create: reader.readBoolean(),
-      }),
-      3: () => ({
-        entityType: 'swoopingEnemy',
-        x: reader.readFloat32(),
-        y: reader.readFloat32(),
-        entityId: reader.readUint32(),
-        health: reader.readUint8(),
-        create: reader.readBoolean(),
-      }),
-      4: () => ({
-        entityType: 'player',
-        x: reader.readFloat32(),
-        y: reader.readFloat32(),
-        momentumX: reader.readFloat32(),
-        momentumY: reader.readFloat32(),
-        entityId: reader.readUint32(),
-        lastProcessedInputSequenceNumber: reader.readUint32(),
-        create: reader.readBoolean(),
-      }),
-      5: () => ({
-        entityType: 'wall',
-        x: reader.readFloat32(),
-        y: reader.readFloat32(),
-        entityId: reader.readUint32(),
-        width: reader.readUint16(),
-        height: reader.readUint16(),
-        create: reader.readBoolean(),
-      }),
-      6: () => ({
-        entityType: 'shotExplosion',
-        x: reader.readFloat32(),
-        y: reader.readFloat32(),
-        aliveDuration: reader.readUint8(),
-        entityId: reader.readUint32(),
-        ownerEntityId: reader.readUint32(),
-        create: reader.readBoolean(),
-      }),
-    });
-  }
 }
+
+const EntityBufferType: {
+  [key in WorldStateEntity['entityType']]: {
+    value: number;
+    addBuffer: (buff: ArrayBufferBuilder, entityModel: EntityModelType[key]) => void;
+    readBuffer: (reader: ArrayBufferReader) => EntityModelType[key];
+  };
+} = {
+  player: {value: 1, addBuffer: PlayerEntity.addBuffer, readBuffer: PlayerEntity.readBuffer},
+  enemyShot: {value: 2, addBuffer: EnemyShotEntity.addBuffer, readBuffer: EnemyShotEntity.readBuffer},
+  shot: {value: 3, addBuffer: ShotEntity.addBuffer, readBuffer: ShotEntity.readBuffer},
+  shotExplosion: {value: 4, addBuffer: ShotExplosionEntity.addBuffer, readBuffer: ShotExplosionEntity.readBuffer},
+  swoopingEnemy: {value: 5, addBuffer: SwoopingEnemyEntity.addBuffer, readBuffer: SwoopingEnemyEntity.readBuffer},
+  wall: {value: 6, addBuffer: WallEntity.addBuffer, readBuffer: WallEntity.readBuffer},
+};
+
+const EntityBufferValue: {
+  [key: number]: WorldStateEntity['entityType'];
+} = {
+  1: 'player',
+  2: 'enemyShot',
+  3: 'shot',
+  4: 'shotExplosion',
+  5: 'swoopingEnemy',
+  6: 'wall',
+};

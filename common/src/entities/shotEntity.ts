@@ -2,6 +2,7 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
+import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class ShotEntity extends Entity {
   boundingBox = {width: 9, height: 57};
@@ -51,6 +52,29 @@ export class ShotEntity extends Entity {
       ownerEntityId: this.ownerEntityId,
       entityType: 'shot',
     };
+  }
+
+  static readBuffer(reader: ArrayBufferReader) {
+    return {
+      entityType: 'shot' as const,
+      x: reader.readFloat32(),
+      y: reader.readFloat32(),
+      shotOffsetX: reader.readFloat32(),
+      shotOffsetY: reader.readFloat32(),
+      entityId: reader.readUint32(),
+      ownerEntityId: reader.readUint32(),
+      create: reader.readBoolean(),
+    };
+  }
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: ShotModel) {
+    buff.addFloat32(entity.x);
+    buff.addFloat32(entity.y);
+    buff.addFloat32(entity.shotOffsetX);
+    buff.addFloat32(entity.shotOffsetY);
+    buff.addUint32(entity.entityId);
+    buff.addUint32(entity.ownerEntityId);
+    buff.addBoolean(entity.create);
   }
 }
 

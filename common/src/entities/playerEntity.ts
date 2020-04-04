@@ -5,6 +5,7 @@ import {Entity, EntityModel} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
+import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -175,6 +176,29 @@ export class PlayerEntity extends Entity {
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       entityType: 'player',
     };
+  }
+
+  static readBuffer(reader: ArrayBufferReader) {
+    return {
+      entityType: 'player' as const,
+      x: reader.readFloat32(),
+      y: reader.readFloat32(),
+      momentumX: reader.readFloat32(),
+      momentumY: reader.readFloat32(),
+      entityId: reader.readUint32(),
+      lastProcessedInputSequenceNumber: reader.readUint32(),
+      create: reader.readBoolean(),
+    };
+  }
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel) {
+    buff.addFloat32(entity.x);
+    buff.addFloat32(entity.y);
+    buff.addFloat32(entity.momentumX);
+    buff.addFloat32(entity.momentumY);
+    buff.addUint32(entity.entityId);
+    buff.addUint32(entity.lastProcessedInputSequenceNumber);
+    buff.addBoolean(entity.create);
   }
 }
 
