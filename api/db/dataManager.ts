@@ -1,13 +1,9 @@
 import * as esprima from 'esprima';
 import {
   ArrowFunctionExpression,
-  BaseExpression,
-  BinaryExpression,
-  CallExpression,
   ExpressionStatement,
   Identifier,
   Literal,
-  LogicalExpression,
   MemberExpression,
   UnaryExpression,
 } from 'estree';

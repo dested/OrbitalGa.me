@@ -1,4 +1,4 @@
-import {Polygon, Result} from 'collisions';
+import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 
@@ -23,7 +23,7 @@ export class ShotExplosionEntity extends Entity {
 
   static totalAliveDuration = 5;
   aliveDuration = ShotExplosionEntity.totalAliveDuration;
-  tick(duration: number) {
+  gameTick(duration: number) {
     this.aliveDuration -= 1;
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);
@@ -38,6 +38,11 @@ export class ShotExplosionEntity extends Entity {
       ownerEntityId: this.ownerEntityId,
       entityType: 'shotExplosion',
     };
+  }
+  reconcileFromServer(messageEntity: ShotExplosionModel) {
+    super.reconcileFromServer(messageEntity);
+    this.aliveDuration = messageEntity.aliveDuration;
+    this.ownerEntityId = messageEntity.ownerEntityId;
   }
 }
 

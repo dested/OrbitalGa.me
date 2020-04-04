@@ -30,7 +30,6 @@ export type WorldStateEntity =
 export type ServerToClientMessage =
   | {
       type: 'joined';
-      clientId: string;
       entityId: number;
       x: number;
       y: number;

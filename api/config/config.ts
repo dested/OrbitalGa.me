@@ -14,4 +14,3 @@ export class Config {
 
   static env: 'DEV' | 'PROD' | 'LOCAL';
 }
-

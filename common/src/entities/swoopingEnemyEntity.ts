@@ -1,4 +1,4 @@
-import {Polygon, Result} from 'collisions';
+import {Result} from 'collisions';
 import {Utils} from '../utils/utils';
 import {unreachable} from '../utils/unreachable';
 import {Game} from '../game/game';
@@ -43,7 +43,7 @@ export class SwoopingEnemyEntity extends Entity {
   aliveTick = 0;
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
 
-  tick(duration: number): void {
+  gameTick(duration: number): void {
     this.aliveTick++;
     if (this.health <= 0) {
       this.game.destroyEntity(this);
@@ -58,7 +58,7 @@ export class SwoopingEnemyEntity extends Entity {
     if (this.aliveTick % 4 === 0) {
       const shotEntity = new EnemyShotEntity(this.game, nextId(), this.y);
       shotEntity.start(this.x, this.y);
-      shotEntity.tick(duration);
+      shotEntity.gameTick(duration);
       this.game.entities.push(shotEntity);
     }
 
@@ -165,6 +165,11 @@ export class SwoopingEnemyEntity extends Entity {
       health: this.health,
       entityType: 'swoopingEnemy',
     };
+  }
+
+  reconcileFromServer(messageEntity: SwoopingEnemyModel) {
+    super.reconcileFromServer(messageEntity);
+    this.health = messageEntity.health;
   }
 }
 

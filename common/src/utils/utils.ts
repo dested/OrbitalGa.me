@@ -3,8 +3,8 @@ export class Utils {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
   }
 
-  static toDictionary<T>(items: T[], getKey: (t: T) => string): {[key: string]: T} {
-    const dictionary: {[key: string]: T} = {};
+  static toDictionary<T>(items: T[], getKey: (t: T) => number): {[key: number]: T} {
+    const dictionary: {[key: number]: T} = {};
     for (const item of items) {
       dictionary[getKey(item)] = item;
     }
@@ -203,6 +203,10 @@ export class Utils {
       .split('')
       .map((a) => a === '1')
       .slice(1);
+  }
+
+  static safeKeys<T>(obj: T): (keyof T)[] {
+    return Object.keys(obj) as (keyof T)[];
   }
 }
 

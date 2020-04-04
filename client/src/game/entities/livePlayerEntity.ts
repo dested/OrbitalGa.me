@@ -1,4 +1,4 @@
-import {PlayerEntity} from '@common/entities/playerEntity';
+import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
@@ -12,50 +12,24 @@ export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
 
   positionLerp?: {startTime: number; duration: number; x: number; y: number};
 
-  tick(): void {
-    super.tick();
+  gameTick(): void {
+    super.gameTick();
   }
 
   keys = {up: false, down: false, left: false, right: false, shoot: false};
 
-  pressUp() {
-    this.keys.up = true;
+  pressKey(input: keyof LivePlayerEntity['keys']) {
+    this.keys[input] = true;
   }
 
-  pressShoot() {
-    this.keys.shoot = true;
+  releaseKey(input: keyof LivePlayerEntity['keys']) {
+    this.keys[input] = false;
   }
 
-  pressDown() {
-    this.keys.down = true;
-  }
-
-  pressLeft() {
-    this.keys.left = true;
-  }
-
-  pressRight() {
-    this.keys.right = true;
-  }
-
-  releaseUp() {
-    this.keys.up = false;
-  }
-
-  releaseShoot() {
-    this.keys.shoot = false;
-  }
-
-  releaseDown() {
-    this.keys.down = false;
-  }
-
-  releaseLeft() {
-    this.keys.left = false;
-  }
-
-  releaseRight() {
-    this.keys.right = false;
+  clearKeys() {
+    for (const key of Utils.safeKeys(this.keys)) {
+      this.keys[key] = false;
+    }
   }
 
   get drawX(): number {
@@ -89,5 +63,21 @@ export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
   draw(context: CanvasRenderingContext2D): void {
     const ship = AssetManager.assets.ship1;
     context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
+  }
+
+  reconcileFromServer(messageEntity: PlayerModel) {
+    this.x = messageEntity.x;
+    this.y = messageEntity.y;
+    this.momentum.x = messageEntity.momentumX;
+    this.momentum.y = messageEntity.momentumY;
+    for (let i = this.pendingInputs.length - 1; i >= 0; i--) {
+      const input = this.pendingInputs[i];
+      if (input.inputSequenceNumber <= messageEntity.lastProcessedInputSequenceNumber) {
+        this.pendingInputs.splice(i, 1);
+      } else {
+        this.applyInput(input);
+        this.updatedPositionFromMomentum();
+      }
+    }
   }
 }

@@ -13,7 +13,6 @@ export class ServerToClientMessageParser {
           buff.addFloat32(message.x);
           buff.addFloat32(message.y);
           buff.addUint32(message.entityId);
-          buff.addString(message.clientId);
           break;
         case 'worldState':
           buff.addUint8(2);
@@ -38,7 +37,6 @@ export class ServerToClientMessageParser {
           x: reader.readFloat32(),
           y: reader.readFloat32(),
           entityId: reader.readUint32(),
-          clientId: reader.readString(),
         }),
         2: () => ({
           type: 'worldState',

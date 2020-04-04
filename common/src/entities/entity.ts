@@ -20,7 +20,7 @@ export abstract class Entity {
   create: boolean = true;
 
   positionBuffer: {time: number; x: number; y: number}[] = [];
-  constructor(protected game: Game, entityId: number, public type: WorldStateEntity['entityType']) {
+  constructor(protected game: Game, entityId: number, public entityType: WorldStateEntity['entityType']) {
     this.entityId = entityId;
   }
 
@@ -79,7 +79,7 @@ export abstract class Entity {
     return false;
   }
 
-  abstract tick(duration: number): void;
+  abstract gameTick(duration: number): void;
   serialize(): EntityModel {
     return {
       entityId: this.entityId,
@@ -92,6 +92,17 @@ export abstract class Entity {
   postTick() {
     this.create = false;
   }
+
+  reconcileFromServer(messageEntity: EntityModel) {
+    this.positionBuffer.push({time: +new Date(), x: messageEntity.x, y: messageEntity.y});
+  }
 }
 
-export type EntityModel = {create: boolean; entityId: number; x: number; y: number; realX?: number; realY?: number};
+export type EntityModel = {
+  create: boolean;
+  entityId: number;
+  x: number;
+  y: number;
+  realX?: number;
+  realY?: number;
+};

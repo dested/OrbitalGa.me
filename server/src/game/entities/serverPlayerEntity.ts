@@ -1,8 +1,8 @@
 import {PendingInput, PlayerEntity} from '@common/entities/playerEntity';
 
 export class ServerPlayerEntity extends PlayerEntity {
-  tick(): void {
-    super.tick();
+  gameTick(): void {
+    super.gameTick();
   }
 
   applyInput(input: PendingInput) {

@@ -1,8 +1,25 @@
-import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
+import {ShotExplosionEntity, ShotExplosionModel} from '@common/entities/shotExplosionEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
+import {ClientGame} from '../clientGame';
+import {GameConstants} from '@common/game/gameConstants';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
+  constructor(game: ClientGame, messageEntity: ShotExplosionModel) {
+    super(game, messageEntity.entityId, messageEntity.ownerEntityId);
+    this.x = messageEntity.x;
+    this.y = messageEntity.y;
+    this.aliveDuration = messageEntity.aliveDuration;
+    if (messageEntity.create) {
+      this.positionBuffer.push({
+        time: +new Date() - GameConstants.serverTickRate,
+        x: this.x,
+        y: this.y,
+      });
+    }
+    this.updatePosition();
+  }
+
   zIndex = DrawZIndex.Effect;
   draw(context: CanvasRenderingContext2D): void {
     const owner = this.game.entities.lookup(this.ownerEntityId);

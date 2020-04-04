@@ -1,4 +1,4 @@
-import {Polygon, Result} from 'collisions';
+import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
@@ -24,7 +24,7 @@ export class EnemyShotEntity extends Entity {
   startY: number;
   aliveDuration = 3000;
 
-  tick(duration: number) {
+  gameTick(duration: number) {
     this.y += this.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     this.updatePosition();

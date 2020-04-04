@@ -1,4 +1,4 @@
-import {Polygon, Result} from 'collisions';
+import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {unreachable} from '../utils/unreachable';
 import {Entity, EntityModel} from './entity';
@@ -20,7 +20,12 @@ export class PlayerEntity extends Entity {
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
 
-  tick(): void {
+  constructor(game: Game, entityId: number) {
+    super(game, entityId, 'player');
+    this.createPolygon();
+  }
+
+  gameTick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
     this.updatedPositionFromMomentum();
   }
@@ -29,11 +34,6 @@ export class PlayerEntity extends Entity {
 
   pendingInputs: PendingInput[] = [];
   inputSequenceNumber: number = 0;
-
-  constructor(game: Game, entityId: number) {
-    super(game, entityId, 'player');
-    this.createPolygon();
-  }
 
   maxSpeed = 90;
   momentum: {x: number; y: number} = {x: 0, y: 0};
@@ -97,7 +97,7 @@ export class PlayerEntity extends Entity {
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
-    switch (otherEntity.type) {
+    switch (otherEntity.entityType) {
       case 'player':
         /*this.x -= collisionResult.overlap * collisionResult.overlap_x;
         this.y -= collisionResult.overlap * collisionResult.overlap_y;
@@ -122,7 +122,7 @@ export class PlayerEntity extends Entity {
         // console.log('shot');
         return false;
       default:
-        unreachable(otherEntity.type);
+        unreachable(otherEntity.entityType);
         return false;
     }
   }
@@ -174,7 +174,6 @@ export class PlayerEntity extends Entity {
       momentumY: this.momentum.y,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       entityType: 'player',
-      create: this.create,
     };
   }
 }

@@ -1,7 +1,6 @@
-import {Manager, Press, Tap} from 'hammerjs';
 import {IClientSocket} from '../clientSocket';
 import {ClientGame} from './clientGame';
-import {assert, assertType} from '@common/utils/utils';
+import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
@@ -16,14 +15,6 @@ export class ClientGameUI extends ClientGame {
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
 
-    const manager = new Manager(this.canvas);
-    manager.add(new Press({time: 0}));
-    manager.add(new Tap({event: 'doubletap', taps: 2, interval: 500})).recognizeWith(manager.get('press'));
-    manager
-      .add(new Tap({taps: 1}))
-      .requireFailure('doubletap')
-      .recognizeWith(manager.get('press'));
-
     window.addEventListener(
       'resize',
       () => {
@@ -35,59 +26,34 @@ export class ClientGameUI extends ClientGame {
       true
     );
 
-    let lastPress: Date = new Date();
-    let doubleTap = false;
-    manager.on('press', (e) => {
-      doubleTap = +new Date() - +lastPress < 200;
-      lastPress = new Date();
-    });
-    manager.on('pressup', (e) => {
-      doubleTap = false;
-      this.liveEntity?.releaseLeft();
-      this.liveEntity?.releaseRight();
-    });
-
-    /*const path: {x: number; y: number}[] = [];
-    let startPoint: {x: number; y: number};
-    manager.on('tap', (e) => {
-      if (path.length === 0) {
-        path.push({x: 0, y: 0});
-        startPoint = e.center;
-      } else {
-        path.push({x: e.center.x - startPoint.x, y: e.center.y - startPoint.y});
-      }
-      console.log(JSON.stringify(path, null, 2));
-    });*/
-
-    manager.on('doubletap', (e) => {});
     document.onkeydown = (e) => {
       if (e.keyCode === 65) {
-        this.liveEntity?.pressShoot();
+        this.liveEntity?.pressKey('shoot');
       }
       if (e.keyCode === 38) {
-        this.liveEntity?.pressUp();
+        this.liveEntity?.pressKey('up');
       } else if (e.keyCode === 40) {
-        this.liveEntity?.pressDown();
+        this.liveEntity?.pressKey('down');
       } else if (e.keyCode === 37) {
-        this.liveEntity?.pressLeft();
+        this.liveEntity?.pressKey('left');
       } else if (e.keyCode === 39) {
-        this.liveEntity?.pressRight();
+        this.liveEntity?.pressKey('right');
       }
       // e.preventDefault();
     };
     document.onkeyup = (e) => {
       if (e.keyCode === 65) {
-        this.liveEntity?.releaseShoot();
+        this.liveEntity?.releaseKey('shoot');
       }
 
       if (e.keyCode === 38) {
-        this.liveEntity?.releaseUp();
+        this.liveEntity?.releaseKey('up');
       } else if (e.keyCode === 40) {
-        this.liveEntity?.releaseDown();
+        this.liveEntity?.releaseKey('down');
       } else if (e.keyCode === 37) {
-        this.liveEntity?.releaseLeft();
+        this.liveEntity?.releaseKey('left');
       } else if (e.keyCode === 39) {
-        this.liveEntity?.releaseRight();
+        this.liveEntity?.releaseKey('right');
       }
     };
 

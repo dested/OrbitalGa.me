@@ -16,7 +16,7 @@ export class WallEntity extends Entity {
     this.game.collisionEngine.insert(this.polygon);
   }
 
-  tick(): void {}
+  gameTick(): void {}
 
   width: number;
   height: number;

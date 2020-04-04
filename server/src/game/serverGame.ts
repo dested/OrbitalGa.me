@@ -4,14 +4,9 @@ import {IServerSocket} from '../serverSocket';
 import {nextId} from '@common/utils/uuid';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
-import {assert, assertType, Utils} from '@common/utils/utils';
-import {PlayerEntity} from '@common/entities/playerEntity';
-import {WallEntity} from '@common/entities/wallEntity';
+import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
-import {ShotEntity} from '@common/entities/shotEntity';
-import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
-import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -89,7 +84,7 @@ export class ServerGame extends Game {
     // const color = ColorUtils.randomColor();
     const entity = new ServerPlayerEntity(this, nextId());
 
-    const {x0, x1} = this.getPlayerRange(200, (e) => e.type === 'player');
+    const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
 
     entity.x = Utils.randomInRange(x0, x1);
     entity.y = GameConstants.screenSize.height * 0.8;
@@ -100,7 +95,6 @@ export class ServerGame extends Game {
       entityId: entity.entityId,
       x: entity.x,
       y: entity.y,
-      clientId: connectionId,
     });
   }
 
@@ -156,7 +150,7 @@ export class ServerGame extends Game {
     if (tickIndex % 50 < 2) {
       const enemyCount = this.users.length;
       for (let i = 0; i < enemyCount; i++) {
-        const {x0, x1} = this.getPlayerRange(200, (entity) => entity.type === 'player');
+        const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
 
         const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), 10);
         swoopingEnemyEntity.start(
@@ -170,7 +164,7 @@ export class ServerGame extends Game {
 
     for (let i = this.entities.array.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
-      entity.tick(duration);
+      entity.gameTick(duration);
     }
 
     this.checkCollisions();
@@ -215,38 +209,15 @@ export class ServerGame extends Game {
   }
 
   private sendWorldState() {
-    const entities: WorldStateEntity[] = this.entities.map((entity) => {
-      switch (entity.type) {
-        case 'player':
-          assert(entity instanceof PlayerEntity);
-          return entity.serialize();
-        case 'wall':
-          assert(entity instanceof WallEntity);
-          return entity.serialize();
-        case 'swoopingEnemy':
-          assert(entity instanceof SwoopingEnemyEntity);
-          return entity.serialize();
-        case 'shot':
-          assert(entity instanceof ShotEntity);
-          return entity.serialize();
-        case 'enemyShot':
-          assert(entity instanceof EnemyShotEntity);
-          return entity.serialize();
-        case 'shotExplosion':
-          assert(entity instanceof ShotExplosionEntity);
-          return entity.serialize();
-        default:
-          throw unreachable(entity.type);
-      }
-    });
+    const entities = this.entities.map((entity) => entity.serialize() as WorldStateEntity);
 
     for (const user of this.users) {
       if (!user.entity) {
         continue;
       }
       const box = {
-        x0: user.entity.realX - GameConstants.screenSize.width * 0.7,
-        x1: user.entity.realX + GameConstants.screenSize.width * 0.7,
+        x0: user.entity.realX - GameConstants.screenRange / 2,
+        x1: user.entity.realX + GameConstants.screenRange / 2,
       };
 
       const myEntities = [...entities];

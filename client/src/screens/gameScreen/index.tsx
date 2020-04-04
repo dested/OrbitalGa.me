@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './index.css';
 import {ClientGameUI} from '../../game/clientGameUI';
 import {ClientSocket} from '../../clientSocket';
@@ -8,6 +8,7 @@ import {useStores} from '../../store/stores';
 import {Utils} from '@common/utils/utils';
 import {JoyStick} from '../../components/joystick';
 import {GoFullScreen} from '../../components/goFullScreen';
+import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
 
 export const GameScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
@@ -35,35 +36,35 @@ export const GameScreen: React.FC = observer((props) => {
   }
 
   const managerListenerMove = useCallback(
-    (manager: any) => {
-      const onMove = (e: any, stick: any) => {
-        client.current?.liveEntity?.releaseLeft();
-        client.current?.liveEntity?.releaseDown();
-        client.current?.liveEntity?.releaseRight();
-        client.current?.liveEntity?.releaseUp();
+    (manager: JoystickManager) => {
+      const onMove = (evt: EventData, stick: JoystickOutputData) => {
+        client.current?.liveEntity?.releaseKey('left');
+        client.current?.liveEntity?.releaseKey('down');
+        client.current?.liveEntity?.releaseKey('right');
+        client.current?.liveEntity?.releaseKey('up');
         switch (stick.direction?.x) {
           case 'left':
-            client.current?.liveEntity?.pressLeft();
+            client.current?.liveEntity?.pressKey('left');
             break;
           case 'right':
-            client.current?.liveEntity?.pressRight();
+            client.current?.liveEntity?.pressKey('right');
             break;
         }
         switch (stick.direction?.y) {
           case 'up':
-            client.current?.liveEntity?.pressUp();
+            client.current?.liveEntity?.pressKey('up');
             break;
           case 'down':
-            client.current?.liveEntity?.pressDown();
+            client.current?.liveEntity?.pressKey('down');
             break;
         }
       };
 
       const onEnd = () => {
-        client.current?.liveEntity?.releaseLeft();
-        client.current?.liveEntity?.releaseDown();
-        client.current?.liveEntity?.releaseRight();
-        client.current?.liveEntity?.releaseUp();
+        client.current?.liveEntity?.releaseKey('left');
+        client.current?.liveEntity?.releaseKey('down');
+        client.current?.liveEntity?.releaseKey('right');
+        client.current?.liveEntity?.releaseKey('up');
       };
 
       manager.on('move', onMove);
@@ -78,11 +79,11 @@ export const GameScreen: React.FC = observer((props) => {
   const managerListenerShoot = useCallback(
     (manager: any) => {
       const onMove = (e: any, stick: any) => {
-        client.current?.liveEntity?.pressShoot();
+        client.current?.liveEntity?.pressKey('shoot');
       };
 
       const onEnd = () => {
-        client.current?.liveEntity?.releaseShoot();
+        client.current?.liveEntity?.releaseKey('shoot');
       };
 
       manager.on('move', onMove);
@@ -135,6 +136,7 @@ export const GameScreen: React.FC = observer((props) => {
             options={{
               mode: 'static',
               color: 'white',
+              size: 70,
               position: {
                 top: '50%',
                 left: '50%',

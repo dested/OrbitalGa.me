@@ -1,30 +1,17 @@
-import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {ClientToServerMessage, ServerToClientMessage, WorldStateEntity} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {uuid} from '@common/utils/uuid';
 import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
-import {assert} from '@common/utils/utils';
-import {PlayerEntity} from '@common/entities/playerEntity';
-import {WallEntity} from '@common/entities/wallEntity';
-import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
-import {ShotEntity} from '@common/entities/shotEntity';
-import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
+import {assertType, Utils} from '@common/utils/utils';
 import {LivePlayerEntity} from './entities/livePlayerEntity';
-import {ShotExplosionEntity} from '@common/entities/shotExplosionEntity';
-import {ArrayHash} from '@common/utils/arrayHash';
-import {Entity} from '@common/entities/entity';
-import {ClientEntity} from './entities/clientEntity';
-import {ClientPlayerEntity} from './entities/clientPlayerEntity';
-import {ClientWallEntity} from './entities/clientWallEntity';
-import {ClientShotEntity} from './entities/clientShotEntity';
-import {ClientEnemyShotEntity} from './entities/clientEnemyShotEntity';
-import {ClientSwoopingEnemyEntity} from './entities/clientSwoopingEnemyEntity';
-import {ClientShotExplosionEntity} from './entities/clientShotExplosionEntity';
+import {EntityModelType, EntityTypes, WorldEntityModelCastToEntityModel} from './entities/entityTypeModels';
+import {EntityModel} from '@common/entities/entity';
 
 export class ClientGame extends Game {
   connectionId: string;
-   isDead: boolean = false;
+  isDead: boolean = false;
   liveEntity?: LivePlayerEntity;
 
   constructor(
@@ -65,12 +52,6 @@ export class ClientGame extends Game {
       } else {
         if (paused > 3) {
           paused = 0;
-          /*
-           console.log('resync');
-          this.sendMessageToServer({
-            type: 'resync',
-          });
-*/
         }
       }
       this.tick(duration);
@@ -91,12 +72,6 @@ export class ClientGame extends Game {
       } else {
         if (gamePaused > 3) {
           gamePaused = 0;
-          /*
-           console.log('resync');
-          this.sendMessageToServer({
-            type: 'resync',
-          });
-*/
         }
       }
       this.gameTick(duration);
@@ -112,162 +87,33 @@ export class ClientGame extends Game {
     for (const message of messages) {
       switch (message.type) {
         case 'joined':
-          {
-            const clientEntity = new LivePlayerEntity(this, message.entityId);
-            clientEntity.x = message.x;
-            clientEntity.y = message.y;
-            this.liveEntity = clientEntity;
-            this.entities.push(clientEntity);
-          }
+          const clientEntity = new LivePlayerEntity(this, message.entityId);
+          clientEntity.x = message.x;
+          clientEntity.y = message.y;
+          this.liveEntity = clientEntity;
+          this.entities.push(clientEntity);
           break;
         case 'worldState':
-          {
-            for (let i = this.entities.length - 1; i >= 0; i--) {
-              const entity = this.entities.getIndex(i);
-              if (message.entities.find((a) => a.entityId === entity.entityId)) {
-                continue;
-              }
-              entity.destroy();
-              this.entities.remove(entity);
+          const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
+          for (let i = this.entities.length - 1; i >= 0; i--) {
+            const entity = this.entities.getIndex(i);
+            if (entityMap[entity.entityId]) {
+              continue;
             }
-            for (const entity of message.entities) {
-              let foundEntity = this.entities.lookup(entity.entityId);
-              if (!foundEntity) {
-                switch (entity.entityType) {
-                  case 'player':
-                    const playerEntity = new ClientPlayerEntity(this, entity.entityId);
-                    playerEntity.x = entity.x;
-                    playerEntity.y = entity.y;
-                    playerEntity.lastProcessedInputSequenceNumber = entity.lastProcessedInputSequenceNumber;
-                    foundEntity = playerEntity;
-                    break;
-                  case 'wall':
-                    const wallEntity = new ClientWallEntity(this, entity.entityId, entity.width, entity.height);
-                    wallEntity.x = entity.x;
-                    wallEntity.y = entity.y;
-                    foundEntity = wallEntity;
-                    wallEntity.updatePosition();
-                    break;
-                  case 'shot':
-                    const shotEntity = new ClientShotEntity(
-                      this,
-                      entity.entityId,
-                      entity.ownerEntityId,
-                      entity.shotOffsetX,
-                      entity.shotOffsetY
-                    );
-                    shotEntity.x = entity.x;
-                    shotEntity.y = entity.y;
-                    foundEntity = shotEntity;
-                    if (entity.create) {
-                      shotEntity.x =
-                        shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawX! : entity.x;
-                      shotEntity.y =
-                        shotEntity.ownerEntityId === this.liveEntity?.entityId ? this.liveEntity.drawY! : entity.y;
-                      shotEntity.positionBuffer.push({
-                        time: +new Date() - GameConstants.serverTickRate,
-                        x: shotEntity.x,
-                        y: shotEntity.y,
-                      });
-                    }
-                    shotEntity.updatePosition();
-                    break;
-                  case 'enemyShot':
-                    const enemyShotEntity = new ClientEnemyShotEntity(this, entity.entityId, entity.startY);
-                    enemyShotEntity.x = entity.x;
-                    enemyShotEntity.y = entity.y;
-                    foundEntity = enemyShotEntity;
-                    if (entity.create) {
-                      enemyShotEntity.y = entity.startY;
-                      enemyShotEntity.positionBuffer.push({
-                        time: +new Date() - GameConstants.serverTickRate,
-                        x: enemyShotEntity.x,
-                        y: entity.startY,
-                      });
-                    }
-                    enemyShotEntity.updatePosition();
-                    break;
-                  case 'swoopingEnemy':
-                    const swoopingEnemy = new ClientSwoopingEnemyEntity(this, entity.entityId, entity.health);
-                    swoopingEnemy.x = entity.x;
-                    swoopingEnemy.y = entity.y;
-                    swoopingEnemy.health = entity.health;
-                    foundEntity = swoopingEnemy;
-
-                    if (entity.create) {
-                      swoopingEnemy.positionBuffer.push({
-                        time: +new Date() - GameConstants.serverTickRate,
-                        x: entity.x,
-                        y: entity.y,
-                      });
-                    }
-
-                    swoopingEnemy.updatePosition();
-                    break;
-                  case 'shotExplosion':
-                    const shotExplosion = new ClientShotExplosionEntity(this, entity.entityId, entity.ownerEntityId);
-                    shotExplosion.x = entity.x;
-                    shotExplosion.y = entity.y;
-                    shotExplosion.aliveDuration = entity.aliveDuration;
-                    foundEntity = shotExplosion;
-                    if (entity.create) {
-                      shotExplosion.positionBuffer.push({
-                        time: +new Date() - GameConstants.serverTickRate,
-                        x: shotExplosion.x,
-                        y: shotExplosion.y,
-                      });
-                    }
-                    shotExplosion.updatePosition();
-                    break;
-                  default:
-                    throw unreachable(entity);
-                }
-                this.entities.push(foundEntity);
-              } else {
-                switch (entity.entityType) {
-                  case 'player':
-                    break;
-                  case 'wall':
-                    break;
-                  case 'shot':
-                    break;
-                  case 'enemyShot':
-                    break;
-                  case 'swoopingEnemy':
-                    assert(foundEntity instanceof SwoopingEnemyEntity);
-                    foundEntity.health = entity.health;
-                    break;
-                  case 'shotExplosion':
-                    assert(foundEntity instanceof ShotExplosionEntity);
-                    foundEntity.aliveDuration = entity.aliveDuration;
-                    foundEntity.ownerEntityId = entity.ownerEntityId;
-                    break;
-                  default:
-                    unreachable(entity);
-                }
-              }
-
-              if (foundEntity.entityId === this.liveEntity?.entityId) {
-                foundEntity.x = entity.x;
-                foundEntity.y = entity.y;
-
-                assert(foundEntity instanceof LivePlayerEntity && entity.entityType === 'player');
-
-                foundEntity.momentum.x = entity.momentumX;
-                foundEntity.momentum.y = entity.momentumY;
-                for (let i = foundEntity.pendingInputs.length - 1; i >= 0; i--) {
-                  const input = foundEntity.pendingInputs[i];
-                  if (input.inputSequenceNumber <= entity.lastProcessedInputSequenceNumber) {
-                    foundEntity.pendingInputs.splice(i, 1);
-                  } else {
-                    foundEntity.applyInput(input);
-                    foundEntity.updatedPositionFromMomentum();
-                  }
-                }
-              } else {
-                foundEntity.positionBuffer.push({time: +new Date(), x: entity.x, y: entity.y});
-              }
+            entity.destroy();
+            this.entities.remove(entity);
+          }
+          for (const messageEntity of message.entities) {
+            let foundEntity = this.entities.lookup(messageEntity.entityId);
+            if (!foundEntity) {
+              foundEntity = new EntityTypes[messageEntity.entityType](
+                this,
+                messageEntity as WorldEntityModelCastToEntityModel
+              );
+              this.entities.push(foundEntity);
             }
+
+            foundEntity.reconcileFromServer(messageEntity);
           }
           break;
         default:
@@ -290,7 +136,7 @@ export class ClientGame extends Game {
     this.liveEntity.xInputsThisTick = false;
     this.liveEntity.yInputsThisTick = false;
     this.processInputs(duration);
-    this.liveEntity.tick();
+    this.liveEntity.gameTick();
     this.collisionEngine.update();
     this.liveEntity.checkCollisions();
   }

@@ -1,8 +1,4 @@
-import React, {useEffect, useRef} from 'react';
-import {useAnimationFrame} from '../hooks/useAnimationFrame';
-import {GameData} from '../game/gameData';
-import {AssetManager} from '../utils/assetManager';
-import {GameConstants} from '@common/game/gameConstants';
+import React from 'react';
 import {useShowGoFullScreen} from '../hooks/useWindowSize';
 
 export const GoFullScreen: React.FC = (props) => {
