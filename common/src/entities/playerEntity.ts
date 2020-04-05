@@ -56,7 +56,8 @@ export class PlayerEntity extends Entity {
             nextId(),
             this.entityId,
             this.shotSide === 'left' ? -42 : 42,
-            -6
+            -6,
+            this.y
           );
           shotEntity.start(this.x, this.y);
           this.game.entities.push(shotEntity);

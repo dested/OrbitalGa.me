@@ -33,6 +33,7 @@ export class EnemyShotEntity extends Entity {
       this.game.destroyEntity(this);
     }
   }
+
   serialize(): EnemyShotModel {
     return {
       ...super.serialize(),

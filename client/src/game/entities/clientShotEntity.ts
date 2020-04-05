@@ -11,18 +11,20 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
       messageEntity.entityId,
       messageEntity.ownerEntityId,
       messageEntity.shotOffsetX,
-      messageEntity.shotOffsetY
+      messageEntity.shotOffsetY,
+      messageEntity.startY
     );
 
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     if (messageEntity.create) {
-      this.x = this.ownerEntityId === game.liveEntity?.entityId ? game.liveEntity.drawX! : messageEntity.x;
-      this.y = this.ownerEntityId === game.liveEntity?.entityId ? game.liveEntity.drawY! : messageEntity.y;
+      const isLiveEntityShot = this.ownerEntityId === game.liveEntity?.entityId;
+      this.x = isLiveEntityShot ? game.liveEntity!.drawX! : messageEntity.x;
+      this.y = isLiveEntityShot ? game.liveEntity!.drawY! : messageEntity.startY;
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,
-        y: this.y,
+        y: isLiveEntityShot ? this.y : messageEntity.startY,
       });
     }
     this.updatePosition();

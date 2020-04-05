@@ -19,7 +19,8 @@ export class ShotEntity extends Entity {
     entityId: number,
     public ownerEntityId: number,
     public shotOffsetX: number,
-    public shotOffsetY: number
+    public shotOffsetY: number,
+    public startY: number
   ) {
     super(game, entityId, 'shot');
     this.createPolygon(this.x + this.shotOffsetX, this.y + this.shotOffsetY);
@@ -44,12 +45,14 @@ export class ShotEntity extends Entity {
       this.game.destroyEntity(this);
     }
   }
+
   serialize(): ShotModel {
     return {
       ...super.serialize(),
       shotOffsetX: this.shotOffsetX,
       shotOffsetY: this.shotOffsetY,
       ownerEntityId: this.ownerEntityId,
+      startY: this.startY,
       entityType: 'shot',
     };
   }
@@ -61,6 +64,7 @@ export class ShotEntity extends Entity {
       y: reader.readFloat32(),
       shotOffsetX: reader.readFloat32(),
       shotOffsetY: reader.readFloat32(),
+      startY: reader.readFloat32(),
       entityId: reader.readUint32(),
       ownerEntityId: reader.readUint32(),
       create: reader.readBoolean(),
@@ -72,6 +76,7 @@ export class ShotEntity extends Entity {
     buff.addFloat32(entity.y);
     buff.addFloat32(entity.shotOffsetX);
     buff.addFloat32(entity.shotOffsetY);
+    buff.addFloat32(entity.startY);
     buff.addUint32(entity.entityId);
     buff.addUint32(entity.ownerEntityId);
     buff.addBoolean(entity.create);
@@ -83,4 +88,5 @@ export type ShotModel = EntityModel & {
   ownerEntityId: number;
   shotOffsetX: number;
   shotOffsetY: number;
+  startY: number;
 };
