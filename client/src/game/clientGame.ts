@@ -12,6 +12,7 @@ export class ClientGame extends Game {
   connectionId: string;
   isDead: boolean = false;
   liveEntity?: LivePlayerEntity;
+  private messagesToProcess: ServerToClientMessage[] = [];
 
   constructor(
     serverPath: string,
@@ -29,7 +30,7 @@ export class ClientGame extends Game {
       },
 
       onMessage: (messages) => {
-        this.processMessages(messages);
+        this.messagesToProcess.push(...messages);
       },
     });
 
@@ -129,15 +130,15 @@ export class ClientGame extends Game {
   }
 
   gameTick(duration: number) {
-    if (!this.connectionId || !this.liveEntity) {
+    if (!this.connectionId) {
       return;
     }
-    this.liveEntity.xInputsThisTick = false;
-    this.liveEntity.yInputsThisTick = false;
+    this.processMessages(this.messagesToProcess);
+    this.messagesToProcess.length = 0;
     this.processInputs(duration);
-    this.liveEntity.gameTick();
+    this.liveEntity?.gameTick();
     this.collisionEngine.update();
-    this.liveEntity.checkCollisions();
+    this.liveEntity?.checkCollisions();
   }
 
   private interpolateEntities() {
@@ -175,33 +176,14 @@ export class ClientGame extends Game {
   }
 
   private processInputs(duration: number) {
-    const liveEntity = this.liveEntity;
-    if (!liveEntity) return;
-    liveEntity.positionLerp = {
-      x: liveEntity.x,
-      y: liveEntity.y,
-      startTime: +new Date(),
-      duration,
-    };
-    if (
-      !liveEntity.keys.shoot &&
-      !liveEntity.keys.left &&
-      !liveEntity.keys.right &&
-      !liveEntity.keys.up &&
-      !liveEntity.keys.down
-    ) {
-      return;
-    }
+    this.liveEntity?.processInput(duration);
+  }
 
-    // Package player's input.
-    const input = {
-      ...liveEntity.keys,
-      inputSequenceNumber: liveEntity.inputSequenceNumber++,
-    };
-
-    liveEntity.pendingInputs.push(input);
-
-    liveEntity.applyInput(input);
-    this.sendMessageToServer({type: 'playerInput', ...input});
+  debugValues: {[key: string]: number | string} = {};
+  setDebug(key: string, value: number | string) {
+    this.debugValues[key] = value;
+  }
+  clearDebug(key: string) {
+    delete this.debugValues[key];
   }
 }

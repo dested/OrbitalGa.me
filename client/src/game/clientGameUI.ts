@@ -99,5 +99,18 @@ export class ClientGameUI extends ClientGame {
     }
 
     context.restore();
+
+    if (GameConstants.debugClient) {
+      context.save();
+      context.font = '30px bold';
+      context.fillStyle = 'white';
+      context.textBaseline = 'top';
+      let debugY = 0;
+      for (const key of Object.keys(this.debugValues)) {
+        context.fillText(`${key}: ${this.debugValues[key]}`, this.canvas.width * 0.8, debugY);
+        debugY += 30;
+      }
+      context.save();
+    }
   }
 }

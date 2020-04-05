@@ -105,13 +105,11 @@ export class ServerGame extends Game {
     );
 */
 
-    for (const user of this.users) {
-      user.entity.xInputsThisTick = false;
-      user.entity.yInputsThisTick = false;
-    }
+    const inputThisTick = Utils.toDictionary(this.users, (a) => a.entity.entityId);
 
     const time = +new Date();
     let stopped = false;
+
     for (let i = 0; i < this.queuedMessages.length; i++) {
       if (time + 100 < +new Date()) {
         console.log('stopped');
@@ -129,6 +127,7 @@ export class ServerGame extends Game {
         case 'playerInput': {
           const user = this.users.find((a) => a.connectionId === q.connectionId);
           if (user) {
+            delete inputThisTick[user.entity.entityId];
             user.entity.applyInput(q.message);
             this.collisionEngine.update();
             user.entity.checkCollisions();
@@ -139,6 +138,16 @@ export class ServerGame extends Game {
         default:
           unreachable(q.message);
       }
+    }
+    for (const key in inputThisTick) {
+      inputThisTick[key].entity.applyInput({
+        down: false,
+        up: false,
+        right: false,
+        left: false,
+        shoot: false,
+        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber,
+      });
     }
 
     if (!stopped) {

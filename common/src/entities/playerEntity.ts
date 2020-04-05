@@ -6,6 +6,7 @@ import {GameConstants} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {ClientGame} from '../../../client/src/game/clientGame';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -31,10 +32,10 @@ export class PlayerEntity extends Entity {
     this.updatedPositionFromMomentum();
   }
 
-  lastProcessedInputSequenceNumber: number = -1;
+  lastProcessedInputSequenceNumber: number = 0;
 
   pendingInputs: PendingInput[] = [];
-  inputSequenceNumber: number = 0;
+  inputSequenceNumber: number = 1;
 
   maxSpeed = 90;
   momentum: {x: number; y: number} = {x: 0, y: 0};
@@ -44,6 +45,9 @@ export class PlayerEntity extends Entity {
   shotSide: 'left' | 'right' = 'left';
 
   applyInput(input: PendingInput) {
+    this.xInputsThisTick = false;
+    this.yInputsThisTick = false;
+
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {

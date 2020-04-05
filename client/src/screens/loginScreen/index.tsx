@@ -10,7 +10,9 @@ export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
   const [name, setName] = useState('');
   const [connectStatus, setConnectingStatus] = useState<'none' | 'fail' | 'connecting' | 'joining' | 'joined'>('none');
-  useEffect(() => {}, []);
+  useEffect(() => {
+    onJoin('1')
+  }, []);
 
   const servers = ['1' /*, '2', '3', '4', '11'*/];
 

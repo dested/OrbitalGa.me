@@ -210,5 +210,9 @@ export class Utils {
   }
 }
 
+export function objectSafeKeys<T>(obj: T): (keyof T)[] {
+  return Object.keys(obj) as (keyof T)[];
+}
+
 export function assert(assertion: boolean): asserts assertion {}
 export function assertType<T>(assertion: any): asserts assertion is T {}

@@ -43,14 +43,23 @@ export class ClientSocket implements IClientSocket {
   }
 
   sendMessage(message: ClientToServerMessage) {
+    if (GameConstants.binaryTransport) {
+      this.socketSend(ClientToServerMessageParser.fromClientToServerMessage(message));
+    } else {
+      this.socketSend(JSON.stringify(message));
+    }
+  }
+  private socketSend(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
     if (!this.socket) {
       throw new Error('Not connected');
     }
     try {
-      if (GameConstants.binaryTransport) {
-        this.socket.send(ClientToServerMessageParser.fromClientToServerMessage(message));
+      if (GameConstants.throttleClient) {
+        setTimeout(() => {
+          this.socket!.send(data);
+        }, 400);
       } else {
-        this.socket.send(JSON.stringify(message));
+        this.socket.send(data);
       }
     } catch (ex) {
       console.error('disconnected??');
