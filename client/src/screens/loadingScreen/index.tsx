@@ -6,6 +6,9 @@ import {Utils} from '@common/utils/utils';
 import {observer} from 'mobx-react-lite';
 import {AssetManager} from '../../utils/assetManager';
 
+import shield1 from '../../assets/shields/shield1.png';
+import shield2 from '../../assets/shields/shield2.png';
+import shield3 from '../../assets/shields/shield3.png';
 import laserRed13 from '../../assets/lasers/laserRed13.png';
 import laserBlue13 from '../../assets/lasers/laserBlue13.png';
 import laserBlueExplosion from '../../assets/lasers/laserBlueExplosion.png';
@@ -30,6 +33,9 @@ export const LoadingScreen: React.FC = observer((props) => {
       AssetManager.addAsset('laser.red', laserRed13, {width: 9, height: 57}, {x: 0, y: 0});
       AssetManager.addAsset('laser.blue', laserBlue13, {width: 9, height: 57}, {x: 0, y: 0});
       AssetManager.addAsset('laser.blue.explosion', laserBlueExplosion, {width: 48, height: 46}, {x: 0, y: 0});
+      AssetManager.addAsset('shield.1', shield1, {width: 133, height: 108}, {x: 0, y: 0});
+      AssetManager.addAsset('shield.2', shield2, {width: 143, height: 119}, {x: 0, y: 0});
+      AssetManager.addAsset('shield.3', shield3, {width: 144, height: 137}, {x: 0, y: 0});
       AssetManager.addAsset('ship1', ship1, {width: 99, height: 75}, {x: 0, y: 0});
       AssetManager.addAsset('ship2', ship2, {width: 112, height: 75}, {x: 0, y: 0});
       AssetManager.addAsset('stars', stars, {width: 256, height: 256}, {x: 0, y: 0});
