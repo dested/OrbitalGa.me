@@ -1,6 +1,5 @@
 import {Result} from 'collisions';
 import {Utils} from '../utils/utils';
-import {unreachable} from '../utils/unreachable';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ShotEntity} from './shotEntity';
@@ -9,6 +8,7 @@ import {ShotExplosionEntity} from './shotExplosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {PathRunner} from '../utils/pathRunner';
 
 export class SwoopingEnemyEntity extends Entity {
   // width = 112;
@@ -17,136 +17,93 @@ export class SwoopingEnemyEntity extends Entity {
     {width: 112, height: 34, offsetY: 41},
     {width: 57, height: 41, offsetX: 35},
   ];
+  swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
+  private path = new PathRunner(
+    [
+      {
+        phase: 'swoop' as const,
+        type: 'linear',
+        duration: 5,
+        points: [
+          {x: 0, y: 0},
+          {
+            x: -GameConstants.screenSize.width * 0.1,
+            y: GameConstants.screenSize.height * 0.4,
+          },
+          {x: -GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
+          {x: -GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.5},
+          {x: 0, y: GameConstants.screenSize.height * 0.4},
+          {x: GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.6},
+          {x: GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
+        ],
+      },
+      {
+        phase: 'bounce' as const,
+        type: 'loop',
+        loopCount: 3,
+        duration: 5,
+        points: [
+          {x: 0, y: GameConstants.screenSize.height * 0.1},
+          {x: 0, y: -GameConstants.screenSize.height * 0.1},
+          {x: 0, y: GameConstants.screenSize.height * 0.1},
+        ],
+      },
+      {
+        phase: 'exit' as const,
+        type: 'linear',
+        duration: 10,
+        points: [
+          {
+            x: 0,
+            y: 0,
+          },
+          {
+            x:
+              this.swoopDirection === 'left'
+                ? -GameConstants.screenSize.width * 1.2
+                : +GameConstants.screenSize.width * 1.2,
+            y: -GameConstants.screenSize.height * 0.1,
+            offset: 'staticY',
+          },
+        ],
+      },
+    ],
+    this
+  );
 
-  startX?: number;
-  startY?: number;
-
-  setStartPosition(x: number, y: number) {
-    this.startX = x;
-    this.startY = y;
+  constructor(game: Game, entityId: number, public health: number) {
+    super(game, entityId, 'swoopingEnemy');
+    this.createPolygon();
   }
 
-  paths = [
-    {x: 0, y: 0},
-    {x: -GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.4},
-    {x: -GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
-    {x: -GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.5},
-    {x: 0, y: GameConstants.screenSize.height * 0.4},
-    {x: GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.6},
-    {x: GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
-  ];
+  start(x: number, y: number) {
+    super.start(x, y);
+    this.path.setStartPosition(x, y);
+  }
 
-  swaddle = [
-    {x: 0, y: GameConstants.screenSize.height * 0.1},
-    {x: 0, y: -GameConstants.screenSize.height * 0.1},
-    {x: 0, y: GameConstants.screenSize.height * 0.1},
-  ];
-
-  pathTick = 0;
-  pathIndex = 1;
-
-  step: 'path' | 'swaddle' | 'swoop-off' = 'path';
-  aliveTick = 0;
-  swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
-
+  aliveTick: number = 0;
   gameTick(duration: number): void {
-    this.aliveTick++;
     if (this.health <= 0) {
       this.game.destroyEntity(this);
-    }
-    if (this.aliveTick === 70) {
-      this.step = 'swoop-off';
-      this.startX = this.x;
-      this.startY = this.y;
-      this.pathTick = 0;
+      return;
     }
 
-    if (this.aliveTick % 4 === 0) {
+    if (
+      this.aliveTick % 4 === 0 &&
+      (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
+    ) {
       const shotEntity = new EnemyShotEntity(this.game, nextId(), this.y);
       shotEntity.start(this.x, this.y);
       shotEntity.gameTick(duration);
       this.game.entities.push(shotEntity);
     }
 
-    switch (this.step) {
-      case 'path':
-        {
-          const pathDuration = 5;
-          this.x =
-            Utils.lerp(this.paths[this.pathIndex - 1].x, this.paths[this.pathIndex].x, this.pathTick / pathDuration) +
-            this.startX!;
-          this.y =
-            Utils.lerp(this.paths[this.pathIndex - 1].y, this.paths[this.pathIndex].y, this.pathTick / pathDuration) +
-            this.startY!;
-
-          this.pathTick++;
-          if (this.pathTick % pathDuration === 0) {
-            this.pathIndex++;
-            this.pathTick = 0;
-            if (this.pathIndex >= this.paths.length) {
-              this.pathIndex = 1;
-              this.step = 'swaddle';
-              this.startX = this.x;
-              this.startY = this.y;
-            }
-          }
-        }
-        break;
-      case 'swaddle':
-        {
-          const pathDuration = 5;
-          this.x =
-            Utils.lerp(
-              this.swaddle[this.pathIndex - 1].x,
-              this.swaddle[this.pathIndex].x,
-              this.pathTick / pathDuration
-            ) + this.startX!;
-          this.y =
-            Utils.lerp(
-              this.swaddle[this.pathIndex - 1].y,
-              this.swaddle[this.pathIndex].y,
-              this.pathTick / pathDuration
-            ) + this.startY!;
-
-          this.pathTick++;
-          if (this.pathTick % pathDuration === 0) {
-            this.pathIndex++;
-            this.pathTick = 0;
-            if (this.pathIndex >= this.swaddle.length) {
-              this.pathIndex = 1;
-            }
-          }
-        }
-        break;
-      case 'swoop-off':
-        {
-          const pathDuration = 15;
-          this.x = Utils.lerp(
-            this.startX!,
-            this.swoopDirection === 'left'
-              ? this.startX! - GameConstants.screenSize.width * 2
-              : this.startX! + GameConstants.screenSize.width * 2,
-            this.pathTick / pathDuration
-          );
-          this.y = Utils.lerp(this.startY!, -GameConstants.screenSize.height * 0.1, this.pathTick / pathDuration);
-
-          this.pathTick++;
-          if (this.pathTick % pathDuration === 0) {
-            this.game.destroyEntity(this);
-          }
-        }
-        break;
-
-      default:
-        unreachable(this.step);
-    }
-
+    const result = this.path.progress();
     this.updatePosition();
-  }
-
-  constructor(game: Game, entityId: number, public health: number) {
-    super(game, entityId, 'swoopingEnemy');
-    this.createPolygon();
+    if (result === 'done') {
+      this.game.destroyEntity(this);
+    }
+    this.aliveTick++;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

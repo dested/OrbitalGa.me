@@ -1,15 +1,15 @@
-///<reference path="./types/ws.d.ts"/>
-import * as WebServer from 'ws';
+import {IServerSocket} from '../../../server/src/serverSocket';
+import {WebSocketServer} from './webSocketServer';
+import {WebSocketServerSocket} from './webSocketServerSocket';
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
-import {GameConstants} from '@common/game/gameConstants';
 import {uuid} from '@common/utils/uuid';
+import {GameConstants} from '@common/game/gameConstants';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
-import {createServer} from 'http';
 
-export class ServerSocket implements IServerSocket {
-  wss?: WebServer.Server;
-  connections: {connectionId: string; socket: WebServer.WebSocket}[] = [];
+export class LocalServerSocket implements IServerSocket {
+  wss?: WebSocketServer;
+  connections: {connectionId: string; socket: WebSocketServerSocket}[] = [];
 
   start(
     onJoin: (connectionId: string) => void,
@@ -17,46 +17,28 @@ export class ServerSocket implements IServerSocket {
     onMessage: (connectionId: string, message: ClientToServerMessage) => void
   ) {
     const port = parseInt('8081');
-    console.log('port', port);
-    const server = createServer((req, res) => {
-      if (req.method === 'GET') {
-        res.writeHead(200);
-        res.end();
-      }
-    });
-    this.wss = new WebServer.Server({server, perMessageDeflate: false});
-    this.wss.on('error', (a: any, b: any) => {
-      console.error('error', a, b);
-    });
+    this.wss = new WebSocketServer({port, perMessageDeflate: false});
 
     this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
       const me = {socket: ws, connectionId: uuid()};
+      // console.log('new connection', me.connectionId);
       this.connections.push(me);
-      console.log('opened: connections', this.connections.length);
-      ws.on('error', (a: any, b: any) => {
-        console.error('ws error', a, b);
-      });
-      ws.on('message', (message) => {
+
+      ws.onmessage((message) => {
         if (GameConstants.binaryTransport) {
-          // console.log('got message', (message as ArrayBuffer).byteLength);
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
-          if (!(message instanceof ArrayBuffer)) {
-            console.log('bad connection');
-            ws.close();
-            return;
-          }
           const messageData = ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer);
           if (messageData === null) {
             ws.close();
             return;
           }
+
           onMessage(me.connectionId, messageData);
         } else {
           onMessage(me.connectionId, JSON.parse(message as string));
         }
       });
-      ws.on('error', (e) => console.log('errored', e));
 
       ws.onclose = () => {
         const ind = this.connections.findIndex((a) => a.connectionId === me.connectionId);
@@ -64,12 +46,10 @@ export class ServerSocket implements IServerSocket {
           return;
         }
         this.connections.splice(ind, 1);
-        console.log('closed: connections', this.connections.length);
         onLeave(me.connectionId);
       };
       onJoin(me.connectionId);
     });
-    server.listen(port);
   }
 
   sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
@@ -87,19 +67,7 @@ export class ServerSocket implements IServerSocket {
       client.socket.send(body);
     }
   }
+
   totalBytesSent = 0;
   totalBytesReceived = 0;
-}
-
-export interface IServerSocket {
-  start(
-    onJoin: (connectionId: string) => void,
-    onLeave: (connectionId: string) => void,
-    onMessage: (connectionId: string, message: ClientToServerMessage) => void
-  ): void;
-
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]): void;
-
-  totalBytesSent: number;
-  totalBytesReceived: number;
 }

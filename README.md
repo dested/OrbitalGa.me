@@ -18,7 +18,6 @@
   - [ ] die
 - [ ] make collision code better
 - [ ] improve bot logic
-- [ ] figure out collision position for explosion
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
 - [ ] add ping -> latency
@@ -32,8 +31,10 @@
 - [ ] maybe remove momentum
 - [ ] garbageless server tick
 - [ ] add server kill switch to boot everyone out
-- [ ] fix boundingbox not being from center
 - [ ] support multiple bounding boxes
+  - [ ] fix boundingbox not being from center
+  - [ ] add rotate to bounding box
+  - [ ] figure out collision position for explosion
 - [x] connect on login screen
 - [x] show game in background of login, add spectator mode to server
 - [x] support drawing bounding boxes in debug
@@ -44,6 +45,7 @@
 
 ## Game Rules
 
+- [ ] add concept of enemy types, better abstraction
 - [ ] add death effect
 - [ ] watch other shmups
 - [ ] add powerups
@@ -74,6 +76,7 @@
 - [ ] add license to repo
 - [ ] test what happens if server crashes on aws
 - [ ] add analytics to server to see users connected, enemies, etc
+- [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation 
 
 ## Money
 
@@ -81,6 +84,9 @@
   - [ ] how do other guys do it itch.io
 - [ ] let streamers create their own server and send their own waves of enemies until everyone dies?????????
 - [ ] for huge streamers 500 people play across 10 servers, same script tho
+
+
+### old
 
 * [x] figure out multiplayer jumpiness on move
 * [x] validate buffer so client get send garbage, try catch and boot user

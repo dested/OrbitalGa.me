@@ -82,7 +82,7 @@ export class ClientGameUI extends ClientGame {
     if (this.spectatorMode && this.spectatorEntity) {
       gameData.view.setCenterPosition(
         gameData.view.transformPoint(this.spectatorEntity.x),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY/5)
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
       );
     }
 

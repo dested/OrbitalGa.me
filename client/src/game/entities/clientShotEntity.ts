@@ -17,6 +17,7 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
 
     this.x = messageEntity.x;
     this.y = messageEntity.y;
+
     if (messageEntity.create) {
       const isLiveEntityShot = this.ownerEntityId === game.liveEntity?.entityId;
       this.x = isLiveEntityShot ? game.liveEntity!.drawX! : messageEntity.x;

@@ -9,6 +9,7 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {Cluster} from '@common/utils/pointCluster';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
+import {WebSocketServer} from '../../../client/src/serverMocking/webSocketServer';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -111,11 +112,13 @@ export class ServerGame extends Game {
   }
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
-    /*
     console.log(
-      `tick: ${tickIndex}, Users: ${this.users.length}, Entities: ${this.entities.length}, Messages:${this.queuedMessages.length}, Duration: ${tickTime}`
+      `tick: ${tickIndex}, Users: ${this.users.length}, Entities: ${this.entities.length}, Messages:${
+        this.queuedMessages.length
+      }, Duration: ${tickTime}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, <- ${Utils.formatBytes(
+        this.serverSocket.totalBytesReceived
+      )}`
     );
-*/
 
     const inputThisTick = Utils.toDictionary(this.users, (a) => a.entity.entityId);
 
@@ -183,7 +186,6 @@ export class ServerGame extends Game {
           Utils.randomInRange(x0, x1),
           -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
         );
-        swoopingEnemyEntity.setStartPosition(swoopingEnemyEntity.x, swoopingEnemyEntity.y);
         this.entities.push(swoopingEnemyEntity);
       }
     }
@@ -197,23 +199,7 @@ export class ServerGame extends Game {
 
     this.sendWorldState();
 
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities.getIndex(i);
-      if (entity.markToDestroy) {
-        this.entities.remove(entity);
-      } else {
-        entity.postTick();
-      }
-    }
-
     for (const c of this.users) {
-      const messages = this.queuedMessagesToSend[c.connectionId];
-      if (messages && messages.length > 0) {
-        this.serverSocket.sendMessage(c.connectionId, messages);
-        messages.length = 0;
-      }
-    }
-    for (const c of this.spectators) {
       const messages = this.queuedMessagesToSend[c.connectionId];
       if (messages && messages.length > 0) {
         this.serverSocket.sendMessage(c.connectionId, messages);
@@ -222,6 +208,23 @@ export class ServerGame extends Game {
     }
 
     this.sendSpectatorWorldState();
+
+    for (const c of this.spectators) {
+      const messages = this.queuedMessagesToSend[c.connectionId];
+      if (messages && messages.length > 0) {
+        this.serverSocket.sendMessage(c.connectionId, messages);
+        messages.length = 0;
+      }
+    }
+
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities.getIndex(i);
+      if (entity.markToDestroy) {
+        this.entities.remove(entity);
+      } else {
+        entity.postTick();
+      }
+    }
   }
 
   queuedMessages: {connectionId: string; message: ClientToServerMessage}[] = [];
@@ -299,17 +302,13 @@ export class ServerGame extends Game {
 
   private updateSpectatorPosition() {
     console.time('updating spectator');
-    const cluster = Cluster.cluster(this.entities.map((a) => [a.x, a.y]));
-    if (!cluster || cluster[0].elements.length === 0) {
-      return;
-    }
-    const {centroid} = cluster.sort((a, b) => b.elements.length - a.elements.length)[0];
+    const range = this.getPlayerRange(0, (e) => e.y > 30);
     const spectator = this.entities.array.find((a) => a instanceof SpectatorEntity);
     if (!spectator) {
       return;
     }
-    spectator.x = centroid[0];
-    spectator.y = centroid[1];
+    spectator.x = range.x0 + Math.random() * (range.x1 - range.x0);
+    spectator.y = 0;
     console.timeEnd('updating spectator');
   }
 }

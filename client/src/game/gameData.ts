@@ -1,8 +1,10 @@
 import {GameView} from './gameView';
 import {GameConstants} from '@common/game/gameConstants';
-import React from 'react';
 import {ClientGameUI} from './clientGameUI';
 import {ClientSocket} from '../clientSocket';
+import {ServerGame} from '../../../server/src/game/serverGame';
+import {LocalClientSocket} from '../serverMocking/localClientSocket';
+import {LocalServerSocket} from '../serverMocking/localServerSocket';
 
 export class GameData {
   static instance = new GameData();
@@ -21,6 +23,12 @@ export class GameData {
       },
       true
     );
+
+    if (GameConstants.fullLocalServer) {
+      const serverSocket = new LocalServerSocket();
+      const serverGame = new ServerGame(serverSocket);
+      serverGame.init();
+    }
   }
 
   spectateGame(serverPath: string) {
@@ -34,8 +42,16 @@ export class GameData {
         },
         onDisconnect: () => {},
       },
-      new ClientSocket()
+      this.getClientSocket()
     );
+  }
+
+  getClientSocket() {
+    if (GameConstants.fullLocalServer) {
+      return new LocalClientSocket();
+    } else {
+      return new ClientSocket();
+    }
   }
 
   joinGame(serverPath: string) {
@@ -50,7 +66,7 @@ export class GameData {
           },
           onDisconnect: () => {},
         },
-        new ClientSocket()
+        this.getClientSocket()
       );
     } else {
       this.client!.sendMessageToServer({type: 'join'});
