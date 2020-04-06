@@ -1,15 +1,11 @@
 import {Utils} from '@common/utils/utils';
 import {IClientSocket} from '../../client/src/clientSocket';
-import {ClientGame} from '../../client/src/game/clientGame';
+import {ClientGame, ClientGameOptions} from '../../client/src/game/clientGame';
 
 type Moving = 'left' | 'right' | 'up' | 'down';
 
 export class BotClientGame extends ClientGame {
-  constructor(
-    serverPath: string,
-    options: {onDied: (me: ClientGame) => void; onDisconnect: (me: ClientGame) => void},
-    socket: IClientSocket
-  ) {
+  constructor(serverPath: string, options: ClientGameOptions, socket: IClientSocket) {
     super(serverPath, options, socket);
 
     const doAction = () => {

@@ -7,14 +7,19 @@ import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
+import {Cluster} from '@common/utils/pointCluster';
+import {SpectatorEntity} from '@common/entities/spectatorEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
+  spectators: {connectionId: string}[] = [];
 
   constructor(private serverSocket: IServerSocket) {
     super(false);
     serverSocket.start(
-      (connectionId) => {},
+      (connectionId) => {
+        this.queuedMessagesToSend[connectionId] = [];
+      },
       (connectionId) => {
         this.clientLeave(connectionId);
       },
@@ -29,18 +34,7 @@ export class ServerGame extends Game {
     let time = +new Date();
     let tickTime = 0;
 
-    /*
-    const wallEntity1 = new WallEntity(this, uuid(), 100, 1000);
-    wallEntity1.x = 50;
-    wallEntity1.y = 50;
-    wallEntity1.updatePosition();
-    this.entities.push(wallEntity1);
-*/
-    /*const wallEntity2 = new WallEntity(this, uuid(), 1000, 100);
-    wallEntity2.x = 50;
-    wallEntity2.y = 600;
-    wallEntity2.updatePosition();
-    this.entities.push(wallEntity2);*/
+    this.initGame();
 
     const processTick = () => {
       try {
@@ -58,6 +52,11 @@ export class ServerGame extends Game {
         // console.time('gc');
         // global.gc();
         // console.timeEnd('gc');
+
+        if (serverTick % 15 === 0) {
+          this.updateSpectatorPosition();
+        }
+
         setTimeout(() => {
           processTick();
         }, Math.max(Math.min(GameConstants.serverTickRate, GameConstants.serverTickRate - tickTime), 1));
@@ -71,6 +70,7 @@ export class ServerGame extends Game {
   }
 
   clientLeave(connectionId: string) {
+    delete this.queuedMessagesToSend[connectionId];
     const user = this.users.find((c) => c.connectionId === connectionId);
     if (!user) {
       return;
@@ -80,14 +80,17 @@ export class ServerGame extends Game {
   }
 
   clientJoin(connectionId: string) {
-    // const teamId = uuid();
-    // const color = ColorUtils.randomColor();
+    const spectatorIndex = this.spectators.findIndex((a) => a.connectionId === connectionId);
+    if (spectatorIndex >= 0) {
+      this.spectators.splice(spectatorIndex, 1);
+    }
+
     const entity = new ServerPlayerEntity(this, nextId());
 
     const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
 
     entity.x = Utils.randomInRange(x0, x1);
-    entity.y = GameConstants.screenSize.height * 0.8;
+    entity.y = GameConstants.playerStartingY;
     this.users.push({connectionId, entity});
     this.entities.push(entity);
     this.sendMessageToClient(connectionId, {
@@ -95,6 +98,15 @@ export class ServerGame extends Game {
       entityId: entity.entityId,
       x: entity.x,
       y: entity.y,
+      serverVersion: GameConstants.serverVersion,
+    });
+  }
+
+  spectatorJoin(connectionId: string) {
+    this.spectators.push({connectionId});
+    this.sendMessageToClient(connectionId, {
+      type: 'spectating',
+      serverVersion: GameConstants.serverVersion,
     });
   }
 
@@ -124,6 +136,11 @@ export class ServerGame extends Game {
             this.clientJoin(q.connectionId);
           }
           break;
+        case 'spectate':
+          {
+            this.spectatorJoin(q.connectionId);
+          }
+          break;
         case 'playerInput': {
           const user = this.users.find((a) => a.connectionId === q.connectionId);
           if (user) {
@@ -146,7 +163,7 @@ export class ServerGame extends Game {
         right: false,
         left: false,
         shoot: false,
-        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber,
+        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
       });
     }
 
@@ -157,7 +174,7 @@ export class ServerGame extends Game {
     }
 
     if (tickIndex % 50 < 2) {
-      const enemyCount = this.users.length;
+      const enemyCount = this.users.length + 1;
       for (let i = 0; i < enemyCount; i++) {
         const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
 
@@ -171,8 +188,8 @@ export class ServerGame extends Game {
       }
     }
 
-    for (let i = this.entities.array.length - 1; i >= 0; i--) {
-      const entity = this.entities.array[i];
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities.getIndex(i);
       entity.gameTick(duration);
     }
 
@@ -190,27 +207,28 @@ export class ServerGame extends Game {
     }
 
     for (const c of this.users) {
-      const messages: ServerToClientMessage[] = [];
-      for (const q of this.queuedMessagesToSend) {
-        if (q.connectionId === null || q.connectionId === c.connectionId) {
-          messages.push(q.message);
-        }
-      }
-      if (messages.length > 0) {
+      const messages = this.queuedMessagesToSend[c.connectionId];
+      if (messages && messages.length > 0) {
         this.serverSocket.sendMessage(c.connectionId, messages);
+        messages.length = 0;
       }
     }
-    this.queuedMessagesToSend.length = 0;
+    for (const c of this.spectators) {
+      const messages = this.queuedMessagesToSend[c.connectionId];
+      if (messages && messages.length > 0) {
+        this.serverSocket.sendMessage(c.connectionId, messages);
+        messages.length = 0;
+      }
+    }
+
+    this.sendSpectatorWorldState();
   }
 
   queuedMessages: {connectionId: string; message: ClientToServerMessage}[] = [];
-  queuedMessagesToSend: {connectionId: string | null; message: ServerToClientMessage}[] = [];
+  queuedMessagesToSend: {[connectionId: string]: ServerToClientMessage[]} = {};
 
   sendMessageToClient(connectionId: string, message: ServerToClientMessage) {
-    this.queuedMessagesToSend.push({connectionId, message});
-  }
-  sendMessageToClients(message: ServerToClientMessage) {
-    this.queuedMessagesToSend.push({connectionId: null, message});
+    this.queuedMessagesToSend[connectionId].push(message);
   }
 
   processMessage(connectionId: string, message: ClientToServerMessage) {
@@ -243,5 +261,55 @@ export class ServerGame extends Game {
         entities: myEntities,
       });
     }
+  }
+
+  private sendSpectatorWorldState() {
+    const spectator = this.entities.array.find((a) => a instanceof SpectatorEntity);
+    if (!spectator) {
+      return;
+    }
+    const box = {
+      x0: spectator.x - GameConstants.screenRange / 2,
+      x1: spectator.x + GameConstants.screenRange / 2,
+    };
+
+    const myEntities = this.entities.map((entity) => entity.serialize() as WorldStateEntity);
+    for (let i = myEntities.length - 1; i >= 0; i--) {
+      const myEntity = myEntities[i];
+      const x = myEntity.realX ?? myEntity.x;
+      if (x < box.x0 || x > box.x1) {
+        myEntities.splice(i, 1);
+      }
+    }
+
+    for (const c of this.spectators) {
+      this.serverSocket.sendMessage(c.connectionId, [
+        {
+          type: 'worldState',
+          entities: myEntities,
+        },
+      ]);
+    }
+  }
+
+  private initGame() {
+    this.entities.push(new SpectatorEntity(this, nextId()));
+    this.updateSpectatorPosition();
+  }
+
+  private updateSpectatorPosition() {
+    console.time('updating spectator');
+    const cluster = Cluster.cluster(this.entities.map((a) => [a.x, a.y]));
+    if (!cluster || cluster[0].elements.length === 0) {
+      return;
+    }
+    const {centroid} = cluster.sort((a, b) => b.elements.length - a.elements.length)[0];
+    const spectator = this.entities.array.find((a) => a instanceof SpectatorEntity);
+    if (!spectator) {
+      return;
+    }
+    spectator.x = centroid[0];
+    spectator.y = centroid[1];
+    console.timeEnd('updating spectator');
   }
 }

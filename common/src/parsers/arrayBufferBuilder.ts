@@ -1,6 +1,11 @@
 export class ArrayBufferBuilder {
-  buffer = new ArrayBuffer(50000);
-  view = new DataView(this.buffer);
+  constructor(initialBufferSize: number = 50) {
+    this.buffer = new ArrayBuffer(initialBufferSize);
+    this.view = new DataView(this.buffer);
+  }
+
+  buffer: ArrayBuffer;
+  view: DataView;
   curPosition = 0;
 
   testSize(added: number) {

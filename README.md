@@ -10,20 +10,19 @@
 
 # Todo
 
-## Game Features
+## Features/Bugs
+
 - [ ] warning when you go too far left?
 - [ ] keep everyone mostly near each other
 - [ ] take damage
   - [ ] die
 - [ ] make collision code better
-- [ ] support multiple bounding boxes
 - [ ] improve bot logic
-- [ ] figure out multiplayer jumpiness on move
-- [ ] add collisionless entities
 - [ ] figure out collision position for explosion
 - [ ] make keyboard wasd
-- [ ] connect on login screen??
 - [ ] fix explosion animation
+- [ ] add ping -> latency
+- [ ] test server version
 - [ ] i think interpolateEntities can be cleaner simpler
 - [ ] validate input sequence number so they can't send garbage negative, etc
 - [ ] add audio
@@ -31,9 +30,20 @@
 - [ ] rename or remove lastProcessedInputSequenceNumber
 - [ ] server is offline, play with bots
 - [ ] maybe remove momentum
-- [ ] show game in background of login, add spectator mode to server
-- [ ] add shake screen effects when bomb
+- [ ] garbageless server tick
+- [ ] add server kill switch to boot everyone out
+- [ ] fix boundingbox not being from center
+- [ ] support multiple bounding boxes
+- [x] connect on login screen
+- [x] show game in background of login, add spectator mode to server
+- [x] support drawing bounding boxes in debug
+- [x] garbageless client tick
+- [x] add server version
+- [x] add collisionless entities
+- [x] add shake screen effects when bomb
+
 ## Game Rules
+
 - [ ] add death effect
 - [ ] watch other shmups
 - [ ] add powerups
@@ -53,7 +63,9 @@
   - [ ] you always have shield that regens but also upgradable
 - [ ] 3 lives before you die and reset???
 - [ ] add 5 second sustained laser
+
 ## Infrastructure
+
 - [ ] make sure disconnect and kill work
 - [ ] leaderboard
   - [ ] redis
@@ -62,38 +74,39 @@
 - [ ] add license to repo
 - [ ] test what happens if server crashes on aws
 - [ ] add analytics to server to see users connected, enemies, etc
+
 ## Money
-- [ ] watch ad to get upgrade, or micro-transaction or donate cup of coffee
+
+- [ ] watch ad to get upgrade, or micro-transaction or donate cup of coffee https://www.buymeacoffee.com/
   - [ ] how do other guys do it itch.io
 - [ ] let streamers create their own server and send their own waves of enemies until everyone dies?????????
 - [ ] for huge streamers 500 people play across 10 servers, same script tho
 
-
-
-- [x] validate buffer so client get send garbage, try catch and boot user
-- [x] move byte buffer code into individual entity
-- [x] refactor clientGame to be more dynamic and support adding entities easier
-- [x] determine screen size
+* [x] figure out multiplayer jumpiness on move
+* [x] validate buffer so client get send garbage, try catch and boot user
+* [x] move byte buffer code into individual entity
+* [x] refactor clientGame to be more dynamic and support adding entities easier
+* [x] determine screen size
   - [x] scaling
   - [x] cant go off the screen
-- [x] better kenney assets
-- [x] shot explode effect
-- [x] gun shooting offcenter when youre moving
-- [x] add momentum to movement
-- [x] alternate left right on shot
-- [x] better mobile support
+* [x] better kenney assets
+* [x] shot explode effect
+* [x] gun shooting offcenter when youre moving
+* [x] add momentum to movement
+* [x] alternate left right on shot
+* [x] better mobile support
   - [x] add mouse movement
   - [x] add full screen rotate code
-- [x] binary transfer
-- [x] better background
-- [x] refactor code
+* [x] binary transfer
+* [x] better background
+* [x] refactor code
   - [x] better separation
   - [x] proper draw
   - [x] add better bounding box for collisions
-- [x] clean up serialize, worldstate, buffer builder
-- [x] make it easier to add things add entities and sync fields
-- [x] add worldstate filtering
-- [x] build bots
-- [x] load test
-- [x] deploy to beanstalk
-- [x] determine how to scale up servers dynamically
+* [x] clean up serialize, worldstate, buffer builder
+* [x] make it easier to add things add entities and sync fields
+* [x] add worldstate filtering
+* [x] build bots
+* [x] load test
+* [x] deploy to beanstalk
+* [x] determine how to scale up servers dynamically

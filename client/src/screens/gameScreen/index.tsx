@@ -9,10 +9,10 @@ import {Utils} from '@common/utils/utils';
 import {JoyStick} from '../../components/joystick';
 import {GoFullScreen} from '../../components/goFullScreen';
 import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
+import {GameData} from '../../game/gameData';
 
 export const GameScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
-  const client = useRef<ClientGameUI>(null);
   const [died, setDied] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
 
@@ -21,80 +21,64 @@ export const GameScreen: React.FC = observer((props) => {
   }, []);
 
   function connect() {
-    (client as React.MutableRefObject<ClientGameUI>).current = new ClientGameUI(
-      uiStore.serverPath!,
-      {
-        onDied: () => {
-          setDied(true);
-        },
-        onDisconnect: () => {
-          setDisconnected(true);
-        },
-      },
-      new ClientSocket()
-    );
+    GameData.instance.joinGame(uiStore.serverPath!);
   }
 
-  const managerListenerMove = useCallback(
-    (manager: JoystickManager) => {
-      const onMove = (evt: EventData, stick: JoystickOutputData) => {
-        client.current?.liveEntity?.releaseKey('left');
-        client.current?.liveEntity?.releaseKey('down');
-        client.current?.liveEntity?.releaseKey('right');
-        client.current?.liveEntity?.releaseKey('up');
-        switch (stick.direction?.x) {
-          case 'left':
-            client.current?.liveEntity?.pressKey('left');
-            break;
-          case 'right':
-            client.current?.liveEntity?.pressKey('right');
-            break;
-        }
-        switch (stick.direction?.y) {
-          case 'up':
-            client.current?.liveEntity?.pressKey('up');
-            break;
-          case 'down':
-            client.current?.liveEntity?.pressKey('down');
-            break;
-        }
-      };
+  const managerListenerMove = useCallback((manager: JoystickManager) => {
+    const onMove = (evt: EventData, stick: JoystickOutputData) => {
+      GameData.instance.client?.liveEntity?.releaseKey('left');
+      GameData.instance.client?.liveEntity?.releaseKey('down');
+      GameData.instance.client?.liveEntity?.releaseKey('right');
+      GameData.instance.client?.liveEntity?.releaseKey('up');
+      switch (stick.direction?.x) {
+        case 'left':
+          GameData.instance.client?.liveEntity?.pressKey('left');
+          break;
+        case 'right':
+          GameData.instance.client?.liveEntity?.pressKey('right');
+          break;
+      }
+      switch (stick.direction?.y) {
+        case 'up':
+          GameData.instance.client?.liveEntity?.pressKey('up');
+          break;
+        case 'down':
+          GameData.instance.client?.liveEntity?.pressKey('down');
+          break;
+      }
+    };
 
-      const onEnd = () => {
-        client.current?.liveEntity?.releaseKey('left');
-        client.current?.liveEntity?.releaseKey('down');
-        client.current?.liveEntity?.releaseKey('right');
-        client.current?.liveEntity?.releaseKey('up');
-      };
+    const onEnd = () => {
+      GameData.instance.client?.liveEntity?.releaseKey('left');
+      GameData.instance.client?.liveEntity?.releaseKey('down');
+      GameData.instance.client?.liveEntity?.releaseKey('right');
+      GameData.instance.client?.liveEntity?.releaseKey('up');
+    };
 
-      manager.on('move', onMove);
-      manager.on('end', onEnd);
-      return () => {
-        manager.off('move', onMove);
-        manager.off('end', onEnd);
-      };
-    },
-    [client.current]
-  );
-  const managerListenerShoot = useCallback(
-    (manager: any) => {
-      const onMove = (e: any, stick: any) => {
-        client.current?.liveEntity?.pressKey('shoot');
-      };
+    manager.on('move', onMove);
+    manager.on('end', onEnd);
+    return () => {
+      manager.off('move', onMove);
+      manager.off('end', onEnd);
+    };
+  }, []);
 
-      const onEnd = () => {
-        client.current?.liveEntity?.releaseKey('shoot');
-      };
+  const managerListenerShoot = useCallback((manager: any) => {
+    const onMove = (e: any, stick: any) => {
+      GameData.instance.client?.liveEntity?.pressKey('shoot');
+    };
 
-      manager.on('move', onMove);
-      manager.on('end', onEnd);
-      return () => {
-        manager.off('move', onMove);
-        manager.off('end', onEnd);
-      };
-    },
-    [client.current]
-  );
+    const onEnd = () => {
+      GameData.instance.client?.liveEntity?.releaseKey('shoot');
+    };
+
+    manager.on('move', onMove);
+    manager.on('end', onEnd);
+    return () => {
+      manager.off('move', onMove);
+      manager.off('end', onEnd);
+    };
+  }, []);
 
   return (
     <div className="App">
@@ -102,7 +86,7 @@ export const GameScreen: React.FC = observer((props) => {
         id={'game'}
         width={GameConstants.screenSize.width}
         height={GameConstants.screenSize.height}
-        style={{width: '100vw', height: '100vh'}}
+        style={{width: '100vw', height: '100vh', position: 'absolute', zIndex: -99}}
       />
       {disconnected && (
         <div
@@ -156,6 +140,7 @@ export const GameScreen: React.FC = observer((props) => {
             options={{
               mode: 'static',
               color: 'white',
+              size: 70,
               position: {
                 top: '50%',
                 left: '50%',

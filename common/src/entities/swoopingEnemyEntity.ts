@@ -11,7 +11,12 @@ import {EnemyShotEntity} from './enemyShotEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class SwoopingEnemyEntity extends Entity {
-  boundingBox = {width: 127, height: 75};
+  // width = 112;
+  // height = 75;
+  boundingBoxes = [
+    {width: 112, height: 34, offsetY: 41},
+    {width: 57, height: 41, offsetX: 35},
+  ];
 
   startX?: number;
   startY?: number;
@@ -173,23 +178,17 @@ export class SwoopingEnemyEntity extends Entity {
     this.health = messageEntity.health;
   }
 
-  static readBuffer(reader: ArrayBufferReader) {
+  static readBuffer(reader: ArrayBufferReader): SwoopingEnemyModel {
     return {
+      ...Entity.readBuffer(reader),
       entityType: 'swoopingEnemy' as const,
-      x: reader.readFloat32(),
-      y: reader.readFloat32(),
-      entityId: reader.readUint32(),
       health: reader.readUint8(),
-      create: reader.readBoolean(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {
-    buff.addFloat32(entity.x);
-    buff.addFloat32(entity.y);
-    buff.addUint32(entity.entityId);
+    Entity.addBuffer(buff, entity);
     buff.addUint8(entity.health);
-    buff.addBoolean(entity.create);
   }
 }
 

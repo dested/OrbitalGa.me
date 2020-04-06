@@ -62,12 +62,19 @@ export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
   }
 
   processInput(duration: number) {
-    this.positionLerp = {
-      x: this.x,
-      y: this.y,
-      startTime: +new Date(),
-      duration,
-    };
+    if (!this.positionLerp) {
+      this.positionLerp = {
+        x: this.x,
+        y: this.y,
+        startTime: +new Date(),
+        duration,
+      };
+    } else {
+      this.positionLerp.x = this.x;
+      this.positionLerp.y = this.y;
+      this.positionLerp.startTime = +new Date();
+      this.positionLerp.duration = duration;
+    }
 
     const input = {
       ...this.keys,

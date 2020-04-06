@@ -1,11 +1,19 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {WorldStateEntity} from '../models/messages';
+import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export abstract class Entity {
-  polygon?: Polygon;
+  width: number = 0;
+  height: number = 0;
 
-  abstract boundingBox: {width: number; height: number};
+  boundingBoxes: {
+    polygon?: Polygon;
+    offsetX?: number;
+    offsetY?: number;
+    width: number;
+    height: number;
+  }[] = [];
 
   get realX() {
     return this.x;
@@ -31,32 +39,56 @@ export abstract class Entity {
   }
 
   createPolygon(x: number = this.x, y: number = this.y): void {
-    if (this.boundingBox.width === 0 && this.boundingBox.height === 0) {
-      return;
+    if (this.width !== 0 && this.height !== 0) {
+      for (const boundingBox of this.boundingBoxes) {
+        const polygon = new Polygon(
+          x - this.width / 2 + (boundingBox.offsetX ?? 0),
+          y - this.height / 2 + (boundingBox.offsetY ?? 0),
+          [
+            [0, 0],
+            [boundingBox.width, 0],
+            [boundingBox.width, boundingBox.height],
+            [0, boundingBox.height],
+          ]
+        );
+        polygon.entity = this;
+        boundingBox.polygon = polygon;
+        this.game.collisionEngine.insert(polygon);
+      }
+    } else {
+      for (const boundingBox of this.boundingBoxes) {
+        const polygon = new Polygon(x + (boundingBox.offsetX ?? 0), y + (boundingBox.offsetY ?? 0), [
+          [-boundingBox.width / 2, -boundingBox.height / 2],
+          [boundingBox.width / 2, -boundingBox.height / 2],
+          [boundingBox.width / 2, boundingBox.height / 2],
+          [-boundingBox.width / 2, boundingBox.height / 2],
+        ]);
+        polygon.entity = this;
+        boundingBox.polygon = polygon;
+        this.game.collisionEngine.insert(polygon);
+      }
     }
-    this.polygon = new Polygon(x, y, [
-      [-this.boundingBox.width / 2, -this.boundingBox.height / 2],
-      [this.boundingBox.width / 2, -this.boundingBox.height / 2],
-      [this.boundingBox.width / 2, this.boundingBox.height / 2],
-      [-this.boundingBox.width / 2, this.boundingBox.height / 2],
-    ]);
-    this.polygon.entity = this;
-    this.game.collisionEngine.insert(this.polygon);
   }
 
   updatePosition(x: number = this.x, y: number = this.y) {
-    if (!this.polygon) {
+    if (this.boundingBoxes.length === 0) {
       return;
     }
-    this.polygon.x = x;
-    this.polygon.y = y;
+    for (const boundingBox of this.boundingBoxes) {
+      if (boundingBox.polygon) {
+        boundingBox.polygon.x = x;
+        boundingBox.polygon.y = y;
+      }
+    }
   }
 
   markToDestroy: boolean = false;
   destroy() {
-    if (this.polygon) {
-      this.game.collisionEngine.remove(this.polygon!);
-      this.polygon = undefined;
+    for (const boundingBox of this.boundingBoxes) {
+      if (boundingBox.polygon) {
+        this.game.collisionEngine.remove(boundingBox.polygon);
+        boundingBox.polygon = undefined;
+      }
     }
     this.markToDestroy = true;
   }
@@ -64,18 +96,26 @@ export abstract class Entity {
   abstract collide(otherEntity: Entity, collisionResult: Result): boolean;
 
   checkCollisions() {
-    if (!this.polygon) {
+    if (this.boundingBoxes.length === 0) {
       return;
     }
-    const potentials = this.polygon.potentials();
-    for (const body of potentials) {
-      if (this.polygon && this.polygon.collides(body, this.game.collisionResult)) {
-        const collided = this.collide(body.entity, this.game.collisionResult);
-        if (collided) {
-          return true;
+
+    for (const boundingBox of this.boundingBoxes) {
+      const polygon = boundingBox.polygon;
+      if (!polygon) {
+        continue;
+      }
+      const potentials = polygon.potentials();
+      for (const body of potentials) {
+        if (polygon && polygon.collides(body, this.game.collisionResult)) {
+          const collided = this.collide(body.entity, this.game.collisionResult);
+          if (collided) {
+            return true;
+          }
         }
       }
     }
+
     return false;
   }
 
@@ -95,6 +135,22 @@ export abstract class Entity {
 
   reconcileFromServer(messageEntity: EntityModel) {
     this.positionBuffer.push({time: +new Date(), x: messageEntity.x, y: messageEntity.y});
+  }
+
+  static readBuffer(reader: ArrayBufferReader): EntityModel {
+    return {
+      x: reader.readFloat32(),
+      y: reader.readFloat32(),
+      entityId: reader.readUint32(),
+      create: reader.readBoolean(),
+    };
+  }
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: EntityModel) {
+    buff.addFloat32(entity.x);
+    buff.addFloat32(entity.y);
+    buff.addUint32(entity.entityId);
+    buff.addBoolean(entity.create);
   }
 }
 

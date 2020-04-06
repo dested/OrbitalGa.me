@@ -10,12 +10,9 @@ export const StarBackground: React.FC = (props) => {
   useEffect(() => {
     if (!canvas.current) return;
   }, [canvas]);
-
   useAnimationFrame(() => {
     if (!canvas.current) return;
     const context = canvas.current.getContext('2d')!;
-    context.fillStyle = '#000022';
-    context.fillRect(0, 0, canvas.current.width, canvas.current.height);
     frame.current++;
     context.save();
 

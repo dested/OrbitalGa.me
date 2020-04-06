@@ -4,8 +4,6 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class ShotExplosionEntity extends Entity {
-  boundingBox = {width: 0, height: 0};
-
   get realX() {
     return this.x + (this.game.entities.lookup(this.ownerEntityId)?.x ?? 0);
   }
@@ -46,25 +44,19 @@ export class ShotExplosionEntity extends Entity {
     this.ownerEntityId = messageEntity.ownerEntityId;
   }
 
-  static readBuffer(reader: ArrayBufferReader) {
+  static readBuffer(reader: ArrayBufferReader): ShotExplosionModel {
     return {
-      entityType: 'shotExplosion' as const,
-      x: reader.readFloat32(),
-      y: reader.readFloat32(),
+      ...Entity.readBuffer(reader),
+      entityType: 'shotExplosion',
       aliveDuration: reader.readUint8(),
-      entityId: reader.readUint32(),
       ownerEntityId: reader.readUint32(),
-      create: reader.readBoolean(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
-    buff.addFloat32(entity.x);
-    buff.addFloat32(entity.y);
+    Entity.addBuffer(buff, entity);
     buff.addUint8(entity.aliveDuration);
-    buff.addUint32(entity.entityId);
     buff.addUint32(entity.ownerEntityId);
-    buff.addBoolean(entity.create);
   }
 }
 

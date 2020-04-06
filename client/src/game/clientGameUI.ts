@@ -1,5 +1,5 @@
 import {IClientSocket} from '../clientSocket';
-import {ClientGame} from './clientGame';
+import {ClientGame, ClientGameOptions} from './clientGame';
 import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
@@ -10,7 +10,7 @@ export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
 
-  constructor(serverPath: string, options: {onDied: () => void; onDisconnect: () => void}, socket: IClientSocket) {
+  constructor(serverPath: string, options: ClientGameOptions, socket: IClientSocket) {
     super(serverPath, options, socket);
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
@@ -67,12 +67,22 @@ export class ClientGameUI extends ClientGame {
   }
 
   draw() {
+    this.canvas = document.getElementById('game') as HTMLCanvasElement;
+    this.context = this.canvas.getContext('2d')!;
+
     const context = this.context;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const gameData = GameData.instance;
     if (this.liveEntity) {
-      GameData.instance.view.setCenterPosition(
-        GameData.instance.view.transformPoint(this.liveEntity.drawX),
-        GameData.instance.view.viewHeight / 2 + this.liveEntity.drawY / 5
+      gameData.view.setCenterPosition(
+        gameData.view.transformPoint(this.liveEntity.drawX),
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.liveEntity.drawY / 5 /*todo this isnt good*/)
+      );
+    }
+    if (this.spectatorMode && this.spectatorEntity) {
+      gameData.view.setCenterPosition(
+        gameData.view.transformPoint(this.spectatorEntity.x),
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY/5)
       );
     }
 
@@ -83,16 +93,16 @@ export class ClientGameUI extends ClientGame {
     }
     context.save();
 
-    const outerBox = GameData.instance.view.outerViewBox;
-    const box = GameData.instance.view.viewBox;
-    context.scale(GameData.instance.view.scale, GameData.instance.view.scale);
+    const outerBox = gameData.view.outerViewBox;
+    const box = gameData.view.viewBox;
+    context.scale(gameData.view.scale, gameData.view.scale);
     context.translate(-box.x, -box.y);
 
     context.font = '25px bold';
     const entities = this.entities.array;
     assertType<(Entity & ClientEntity)[]>(entities);
     for (const entity of entities.sort((a, b) => a.zIndex - b.zIndex)) {
-      if (!GameData.instance.view.contains(entity)) {
+      if (!gameData.view.contains(entity)) {
         continue;
       }
       entity.draw(context);
@@ -110,7 +120,16 @@ export class ClientGameUI extends ClientGame {
         context.fillText(`${key}: ${this.debugValues[key]}`, this.canvas.width * 0.8, debugY);
         debugY += 30;
       }
+      context.restore();
+
       context.save();
+      context.beginPath();
+      context.scale(gameData.view.scale, gameData.view.scale);
+      context.translate(-box.x, -box.y);
+      this.collisionEngine.draw(context);
+      context.fillStyle = 'rgba(255,0,85,0.4)';
+      context.fill();
+      context.restore();
     }
   }
 }

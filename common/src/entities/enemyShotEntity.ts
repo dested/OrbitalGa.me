@@ -5,7 +5,7 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class EnemyShotEntity extends Entity {
-  boundingBox = {width: 9, height: 57};
+  boundingBoxes = [{width: 9, height: 57}];
 
   constructor(game: Game, entityId: number, startY: number) {
     super(game, entityId, 'enemyShot');
@@ -42,23 +42,17 @@ export class EnemyShotEntity extends Entity {
     };
   }
 
-  static readBuffer(reader: ArrayBufferReader) {
+  static readBuffer(reader: ArrayBufferReader): EnemyShotModel {
     return {
-      entityType: 'enemyShot' as const,
-      x: reader.readFloat32(),
-      y: reader.readFloat32(),
+      ...Entity.readBuffer(reader),
+      entityType: 'enemyShot',
       startY: reader.readFloat32(),
-      entityId: reader.readUint32(),
-      create: reader.readBoolean(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: EnemyShotModel) {
-    buff.addFloat32(entity.x);
-    buff.addFloat32(entity.y);
+    Entity.addBuffer(buff, entity);
     buff.addFloat32(entity.startY);
-    buff.addUint32(entity.entityId);
-    buff.addBoolean(entity.create);
   }
 }
 

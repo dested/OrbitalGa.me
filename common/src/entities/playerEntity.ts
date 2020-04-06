@@ -18,7 +18,7 @@ export type PendingInput = {
 };
 
 export class PlayerEntity extends Entity {
-  boundingBox = {width: 99, height: 75};
+  boundingBoxes = [{width: 99, height: 75}];
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
 
@@ -127,6 +127,9 @@ export class PlayerEntity extends Entity {
       case 'shotExplosion':
         // console.log('shot');
         return false;
+      case 'spectator':
+        // console.log('shot');
+        return false;
       default:
         unreachable(otherEntity.entityType);
         return false;
@@ -183,27 +186,21 @@ export class PlayerEntity extends Entity {
     };
   }
 
-  static readBuffer(reader: ArrayBufferReader) {
+  static readBuffer(reader: ArrayBufferReader): PlayerModel {
     return {
-      entityType: 'player' as const,
-      x: reader.readFloat32(),
-      y: reader.readFloat32(),
+      ...Entity.readBuffer(reader),
+      entityType: 'player',
       momentumX: reader.readFloat32(),
       momentumY: reader.readFloat32(),
-      entityId: reader.readUint32(),
       lastProcessedInputSequenceNumber: reader.readUint32(),
-      create: reader.readBoolean(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel) {
-    buff.addFloat32(entity.x);
-    buff.addFloat32(entity.y);
+    Entity.addBuffer(buff, entity);
     buff.addFloat32(entity.momentumX);
     buff.addFloat32(entity.momentumY);
-    buff.addUint32(entity.entityId);
     buff.addUint32(entity.lastProcessedInputSequenceNumber);
-    buff.addBoolean(entity.create);
   }
 }
 

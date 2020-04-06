@@ -12,6 +12,9 @@ import laserBlueExplosion from '../../assets/lasers/laserBlueExplosion.png';
 import ship1 from '../../assets/ships/playerShip1_blue.png';
 import ship2 from '../../assets/ships/playerShip2_red.png';
 import stars from '../../assets/stars.png';
+import {GameData} from '../../game/gameData';
+import {GameConstants} from '@common/game/gameConstants';
+import {Wrapper} from '../loginScreen/index.styles';
 
 export const LoadingScreen: React.FC = observer((props) => {
   useEffect(() => {
@@ -20,6 +23,7 @@ export const LoadingScreen: React.FC = observer((props) => {
         jsonify: true,
       });
       await hydrate('uiStore', uiStore);
+      GameData.instance.spectateGame('1' /*todo current specate server*/);
     }
 
     async function assets() {
@@ -39,6 +43,12 @@ export const LoadingScreen: React.FC = observer((props) => {
 
   return (
     <div className="App">
+      <canvas
+        id={'game'}
+        width={GameConstants.screenSize.width}
+        height={GameConstants.screenSize.height}
+        style={{width: '100vw', height: '100vh', position: 'absolute', zIndex: -99}}
+      />
       <div
         style={{
           position: 'absolute',

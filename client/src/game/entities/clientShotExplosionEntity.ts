@@ -3,6 +3,7 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
+import {ShakeGame} from '../../utils/shakeUtils';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
   constructor(game: ClientGame, messageEntity: ShotExplosionModel) {
@@ -16,6 +17,7 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
         x: this.x,
         y: this.y,
       });
+      ShakeGame(5);
     }
     this.updatePosition();
   }

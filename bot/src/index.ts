@@ -14,10 +14,13 @@ async function main() {
   });
   return;*/
   const serverPath = '1';
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 20; i++) {
     const options = {
       onDisconnect: () => {
         // new BotClientGame(serverPath, options, new ClientSocket());
+      },
+      onOpen: (me: ClientGame) => {
+        me.sendMessageToServer({type: 'join'});
       },
       onDied: (me: ClientGame) => {
         // me.disconnect();

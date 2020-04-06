@@ -7,29 +7,36 @@ import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {LivePlayerEntity} from './entities/livePlayerEntity';
 import {EntityTypes, WorldEntityModelCastToEntityModel} from './entities/entityTypeModels';
+import {SpectatorEntity} from '@common/entities/spectatorEntity';
+
+export type ClientGameOptions = {
+  onDied: (me: ClientGame) => void;
+  onOpen: (me: ClientGame) => void;
+  onDisconnect: (me: ClientGame) => void;
+};
 
 export class ClientGame extends Game {
   connectionId: string;
   isDead: boolean = false;
   liveEntity?: LivePlayerEntity;
   private messagesToProcess: ServerToClientMessage[] = [];
+  private serverVersion: number = -1;
+  protected spectatorMode: boolean = false;
+  spectatorEntity?: SpectatorEntity;
 
-  constructor(
-    serverPath: string,
-    private options: {onDied: (me: ClientGame) => void; onDisconnect: (me: ClientGame) => void},
-    private socket: IClientSocket
-  ) {
+  constructor(serverPath: string, private options: ClientGameOptions, private socket: IClientSocket) {
     super(true);
     this.connectionId = uuid();
     this.socket.connect(serverPath, {
       onOpen: () => {
-        this.sendMessageToServer({type: 'join'});
+        options.onOpen(this);
       },
       onDisconnect: () => {
         options.onDisconnect(this);
       },
 
       onMessage: (messages) => {
+        this.processMessages(messages);
         this.messagesToProcess.push(...messages);
       },
     });
@@ -74,8 +81,12 @@ export class ClientGame extends Game {
           gamePaused = 0;
         }
       }
-      this.gameTick(duration);
+      this.gameTick(GameConstants.serverTickRate);
       gameTime = +new Date();
+      if (gameTime - now > 20) {
+        console.log('bad duratione', duration);
+      }
+      this.messagesToProcess.length = 0;
     }, GameConstants.serverTickRate);
   }
 
@@ -90,8 +101,16 @@ export class ClientGame extends Game {
           const clientEntity = new LivePlayerEntity(this, message.entityId);
           clientEntity.x = message.x;
           clientEntity.y = message.y;
+          this.serverVersion = message.serverVersion;
+          console.log('Server version', this.serverVersion);
+          this.spectatorMode = false;
           this.liveEntity = clientEntity;
           this.entities.push(clientEntity);
+          break;
+        case 'spectating':
+          this.serverVersion = message.serverVersion;
+          this.spectatorMode = true;
+          console.log('Server version', this.serverVersion);
           break;
         case 'worldState':
           const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
@@ -133,10 +152,11 @@ export class ClientGame extends Game {
     if (!this.connectionId) {
       return;
     }
-    this.processMessages(this.messagesToProcess);
-    this.messagesToProcess.length = 0;
     this.processInputs(duration);
     this.liveEntity?.gameTick();
+    for (const entity of this.entities.array) {
+      entity.updatePosition();
+    }
     this.collisionEngine.update();
     this.liveEntity?.checkCollisions();
   }
@@ -157,7 +177,8 @@ export class ClientGame extends Game {
       }
 
       // Interpolate between the two surrounding authoritative positions.
-      if (buffer.length >= 2 && buffer[0].time <= renderTimestamp && renderTimestamp <= buffer[1].time) {
+      if (buffer.length >= 2 && buffer[0].time <= renderTimestamp) {
+        // exterpolate out x and y
         const x0 = buffer[0].x;
         const x1 = buffer[1].x;
         const y0 = buffer[0].y;

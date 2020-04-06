@@ -9,11 +9,11 @@ export class GameView {
   gameWidth: number = 0;
   gameHeight: number = 0;
 
+  private _center: {x: number; y: number} = {x: 0, y: 0};
   get center() {
-    return {
-      x: this.viewX + this.viewWidth / 2,
-      y: this.viewY + this.viewHeight / 2,
-    };
+    this._center.x = this.viewX + this.viewWidth / 2;
+    this._center.y = this.viewY + this.viewHeight / 2;
+    return this._center;
   }
 
   constructor(private width: number, private height: number) {
@@ -54,29 +54,22 @@ export class GameView {
     return this.height / this.scale;
   }
 
+  private _viewBox: {x: number; y: number; width: number; height: number} = {x: 0, y: 0, width: 0, height: 0};
+  private _outerViewBox: {x: number; y: number; width: number; height: number} = {x: 0, y: 0, width: 0, height: 0};
   get viewBox() {
-    const vx = this.viewX;
-    const vy = this.viewY;
-    const vwidth = this.viewWidth;
-    const vheight = this.viewHeight;
-    return {
-      x: vx,
-      y: vy,
-      width: vwidth,
-      height: vheight,
-    };
+    this._viewBox.x = this.viewX;
+    this._viewBox.y = this.viewY;
+    this._viewBox.width = this.viewWidth;
+    this._viewBox.height = this.viewHeight;
+    return this._viewBox;
   }
+
   get outerViewBox() {
-    const vx = this.viewXSlop;
-    const vy = this.viewYSlop;
-    const vwidth = this.viewWidthSlop;
-    const vheight = this.viewHeightSlop;
-    return {
-      x: vx,
-      y: vy,
-      width: vwidth,
-      height: vheight,
-    };
+    this._outerViewBox.x = this.viewXSlop;
+    this._outerViewBox.y = this.viewYSlop;
+    this._outerViewBox.width = this.viewWidthSlop;
+    this._outerViewBox.height = this.viewHeightSlop;
+    return this._outerViewBox;
   }
 
   private viewSlop = 100;

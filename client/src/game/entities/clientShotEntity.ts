@@ -30,6 +30,10 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
     this.updatePosition();
   }
 
+  updatePosition() {
+    super.updatePosition(this.x + this.shotOffsetX, this.y + this.shotOffsetY);
+  }
+
   zIndex = DrawZIndex.Ordinance;
   draw(context: CanvasRenderingContext2D): void {
     const laserBlue = AssetManager.assets['laser.blue'];

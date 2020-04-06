@@ -5,13 +5,14 @@ import {useStores} from '../../store/stores';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
 import {Utils} from '@common/utils/utils';
 import {GoFullScreen} from '../../components/goFullScreen';
+import {GameConstants} from '@common/game/gameConstants';
 
 export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
   const [name, setName] = useState('');
   const [connectStatus, setConnectingStatus] = useState<'none' | 'fail' | 'connecting' | 'joining' | 'joined'>('none');
   useEffect(() => {
-    onJoin('1')
+    // onJoin('1')
   }, []);
 
   const servers = ['1' /*, '2', '3', '4', '11'*/];
@@ -27,6 +28,12 @@ export const LoginScreen: React.FC = observer((props) => {
 
   return (
     <Wrapper>
+      <canvas
+        id={'game'}
+        width={GameConstants.screenSize.width}
+        height={GameConstants.screenSize.height}
+        style={{width: '100vw', height: '100vh', position: 'absolute', zIndex: -99}}
+      />
       <LoginBox>
         <Logo>Orbital</Logo>
         <NameBox placeholder={'Name'} value={name} onChange={(e: any) => setName(e.target.value)} />

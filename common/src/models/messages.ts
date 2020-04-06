@@ -4,10 +4,14 @@ import {PlayerModel} from '../entities/playerEntity';
 import {SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
 import {WallModel} from '../entities/wallEntity';
 import {ShotModel} from '../entities/shotEntity';
+import {SpectatorModel} from '../entities/spectatorEntity';
 
 export type ClientToServerMessage =
   | {
       type: 'join';
+    }
+  | {
+      type: 'spectate';
     }
   | {
       type: 'playerInput';
@@ -21,6 +25,7 @@ export type ClientToServerMessage =
 
 export type WorldStateEntity =
   | PlayerModel
+  | SpectatorModel
   | SwoopingEnemyModel
   | WallModel
   | ShotModel
@@ -33,6 +38,11 @@ export type ServerToClientMessage =
       entityId: number;
       x: number;
       y: number;
+      serverVersion: number;
+    }
+  | {
+      type: 'spectating';
+      serverVersion: number;
     }
   | {
       type: 'worldState';
