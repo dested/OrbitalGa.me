@@ -1,4 +1,4 @@
-import {ClientToServerMessage, ServerToClientMessage, WorldStateEntity} from '@common/models/messages';
+import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {IServerSocket} from '../serverSocket';
 import {nextId} from '@common/utils/uuid';
@@ -7,9 +7,9 @@ import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
-import {Cluster} from '@common/utils/pointCluster';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {WebSocketServer} from '../../../client/src/serverMocking/webSocketServer';
+import {WorldStateEntity} from '@common/models/entityTypeModels';
+import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -87,13 +87,14 @@ export class ServerGame extends Game {
     }
 
     const entity = new ServerPlayerEntity(this, nextId());
-
     const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
-
     entity.x = Utils.randomInRange(x0, x1);
     entity.y = GameConstants.playerStartingY;
     this.users.push({connectionId, entity});
     this.entities.push(entity);
+
+    this.entities.push(new PlayerShieldEntity(this, nextId(), entity.entityId));
+
     this.sendMessageToClient(connectionId, {
       type: 'joined',
       entityId: entity.entityId,

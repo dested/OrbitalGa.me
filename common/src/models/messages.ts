@@ -5,6 +5,8 @@ import {SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
 import {WallModel} from '../entities/wallEntity';
 import {ShotModel} from '../entities/shotEntity';
 import {SpectatorModel} from '../entities/spectatorEntity';
+import {PlayerShieldModel} from '../entities/playerShieldEntity';
+import {WorldStateEntity} from './entityTypeModels';
 
 export type ClientToServerMessage =
   | {
@@ -22,15 +24,6 @@ export type ClientToServerMessage =
       up: boolean;
       down: boolean;
     };
-
-export type WorldStateEntity =
-  | PlayerModel
-  | SpectatorModel
-  | SwoopingEnemyModel
-  | WallModel
-  | ShotModel
-  | ShotExplosionModel
-  | EnemyShotModel;
 
 export type ServerToClientMessage =
   | {

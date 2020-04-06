@@ -1,14 +1,7 @@
-import {ServerToClientMessage, WorldStateEntity} from '../models/messages';
+import {ServerToClientMessage} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
-import {ShotEntity} from '../entities/shotEntity';
-import {EnemyShotEntity} from '../entities/enemyShotEntity';
-import {SwoopingEnemyEntity} from '../entities/swoopingEnemyEntity';
-import {PlayerEntity} from '../entities/playerEntity';
-import {WallEntity} from '../entities/wallEntity';
-import {ShotExplosionEntity} from '../entities/shotExplosionEntity';
-import {EntityBufferType, EntityBufferValue, EntityModelType} from '../../../client/src/game/entities/entityTypeModels';
-import {SpectatorEntity} from '../entities/spectatorEntity';
+import {EntityBufferType, EntityBufferValue} from '../models/entityTypeModels';
 
 export class ServerToClientMessageParser {
   static fromServerToClientMessages(messages: ServerToClientMessage[]) {

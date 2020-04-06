@@ -6,8 +6,9 @@ import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {LivePlayerEntity} from './entities/livePlayerEntity';
-import {EntityTypes, WorldEntityModelCastToEntityModel} from './entities/entityTypeModels';
+import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
+import {WorldEntityModelCastToEntityModel} from '@common/models/entityTypeModels';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -125,7 +126,7 @@ export class ClientGame extends Game {
           for (const messageEntity of message.entities) {
             let foundEntity = this.entities.lookup(messageEntity.entityId);
             if (!foundEntity) {
-              foundEntity = new EntityTypes[messageEntity.entityType](
+              foundEntity = new ClientEntityTypes[messageEntity.entityType](
                 this,
                 messageEntity as WorldEntityModelCastToEntityModel
               );

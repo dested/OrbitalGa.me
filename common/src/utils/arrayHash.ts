@@ -17,8 +17,8 @@ export class ArrayHash<T> {
     return this.array.map(callback);
   }
 
-  lookup(key: number) {
-    return this.hash[key];
+  lookup<TLookup extends T>(key: number): TLookup {
+    return this.hash[key] as TLookup;
   }
 
   remove(item: T) {

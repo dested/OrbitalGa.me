@@ -1,12 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {unreachable} from '../utils/unreachable';
 import {Entity, EntityModel} from './entity';
-import {GameConstants} from '../game/gameConstants';
-import {ShotEntity} from './shotEntity';
-import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {ClientGame} from '../../../client/src/game/clientGame';
 
 export class SpectatorEntity extends Entity {
   constructor(game: Game, entityId: number) {

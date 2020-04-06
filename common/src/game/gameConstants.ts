@@ -1,6 +1,6 @@
 export class GameConstants {
   static debugClient = false;
-  static fullLocalServer = false;
+  static fullLocalServer = true;
   static debugDraw = false;
   static binaryTransport = true;
   static serverTickRate = 150;

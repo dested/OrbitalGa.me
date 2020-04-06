@@ -6,7 +6,6 @@ import {GameConstants} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {ClientGame} from '../../../client/src/game/clientGame';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -128,6 +127,9 @@ export class PlayerEntity extends Entity {
         // console.log('shot');
         return false;
       case 'spectator':
+        // console.log('shot');
+        return false;
+      case 'playerShield':
         // console.log('shot');
         return false;
       default:

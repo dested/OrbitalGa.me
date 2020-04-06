@@ -1,7 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-import {WorldStateEntity} from '../models/messages';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {WorldStateEntity} from '../models/entityTypeModels';
 
 export abstract class Entity {
   width: number = 0;
