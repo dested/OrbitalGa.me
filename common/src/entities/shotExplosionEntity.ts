@@ -5,21 +5,21 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 
 export class ShotExplosionEntity extends Entity {
   get realX() {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
+    const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
       return this.x;
     }
     return this.x + owner.realX;
   }
   get realY() {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
+    const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
       return this.y;
     }
     return this.y + owner.realY;
   }
 
-  constructor(game: Game, entityId: number, public ownerEntityId: number) {
+  constructor(game: Game, entityId: number, public ownerEntityId?: number) {
     super(game, entityId, 'shotExplosion');
     this.createPolygon();
   }
@@ -55,19 +55,19 @@ export class ShotExplosionEntity extends Entity {
       ...Entity.readBuffer(reader),
       entityType: 'shotExplosion',
       aliveDuration: reader.readUint8(),
-      ownerEntityId: reader.readUint32(),
+      ownerEntityId: reader.readOptionalInt32(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.aliveDuration);
-    buff.addUint32(entity.ownerEntityId);
+    buff.addOptionalInt32(entity.ownerEntityId);
   }
 }
 
 export type ShotExplosionModel = EntityModel & {
   entityType: 'shotExplosion';
   aliveDuration: number;
-  ownerEntityId: number;
+  ownerEntityId?: number;
 };

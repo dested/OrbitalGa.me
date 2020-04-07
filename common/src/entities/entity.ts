@@ -72,16 +72,6 @@ export abstract class Entity {
     if (this.boundingBoxes.length === 0) {
       return;
     }
-    /*
-    if (this.game.isClient) {
-      if (this.entityType === 'player') {
-        console.log('player', this.realX);
-      }
-      if (this.entityType === 'playerShield') {
-        console.log('shield', this.realX);
-      }
-    }
-*/
     for (const boundingBox of this.boundingBoxes) {
       if (boundingBox.polygon) {
         boundingBox.polygon.x = this.realX;

@@ -6,7 +6,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {ClientPlayerEntity} from './clientPlayerEntity';
-import {LivePlayerEntity} from './livePlayerEntity';
+import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 import {Entity} from '@common/entities/entity';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {

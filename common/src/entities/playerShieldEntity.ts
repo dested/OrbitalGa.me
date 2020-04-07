@@ -9,6 +9,10 @@ import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 
 export class PlayerShieldEntity extends Entity {
+  static startingHealth = 2;
+  static depletedRegenTimeout = 30;
+  static regenRate = 3;
+
   boundingBoxes = [{width: 133, height: 108}];
 
   get realX() {
@@ -39,10 +43,7 @@ export class PlayerShieldEntity extends Entity {
       this.lastHit = 10;
       this.game.destroyEntity(otherEntity);
       const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-      shotExplosionEntity.start(
-        this.realX - otherEntity.realX /* + otherEntity.shotOffsetX*/,
-        this.realY - otherEntity.realY /* + otherEntity.shotOffsetY*/
-      );
+      shotExplosionEntity.start(this.realX - otherEntity.realX, this.realY - otherEntity.realY);
       this.game.entities.push(shotExplosionEntity);
 
       return true;
@@ -51,7 +52,6 @@ export class PlayerShieldEntity extends Entity {
     return false;
   }
 
-  static startingHealth = 10;
   health = PlayerShieldEntity.startingHealth;
   tick = 0;
 
@@ -59,7 +59,7 @@ export class PlayerShieldEntity extends Entity {
   gameTick(duration: number) {
     this.tick++;
     if (!this.depleted && this.health <= 0) {
-      this.lastHit = 50;
+      this.lastHit = PlayerShieldEntity.depletedRegenTimeout;
       this.depleted = true;
     }
     this.lastHit--;
@@ -67,7 +67,7 @@ export class PlayerShieldEntity extends Entity {
       if (this.depleted) {
         this.depleted = false;
         this.health++;
-      } else if (this.tick % 3 === 0) {
+      } else if (this.tick % PlayerShieldEntity.regenRate === 0) {
         this.health++;
       }
     }

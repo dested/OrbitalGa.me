@@ -5,11 +5,12 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
+import {ClientPlayerEntity} from './clientPlayerEntity';
 
-export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
+export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
-  constructor(private clientGame: ClientGame, public entityId: number) {
-    super(clientGame, entityId);
+  constructor(private clientGame: ClientGame, public messageEntity: PlayerModel) {
+    super(clientGame, messageEntity);
   }
 
   positionLerp?: {startTime: number; duration: number; x: number; y: number};
@@ -20,11 +21,11 @@ export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
 
   keys = {up: false, down: false, left: false, right: false, shoot: false};
 
-  pressKey(input: keyof LivePlayerEntity['keys']) {
+  pressKey(input: keyof ClientLivePlayerEntity['keys']) {
     this.keys[input] = true;
   }
 
-  releaseKey(input: keyof LivePlayerEntity['keys']) {
+  releaseKey(input: keyof ClientLivePlayerEntity['keys']) {
     this.keys[input] = false;
   }
 
@@ -56,11 +57,6 @@ export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
     }
   }
 
-  draw(context: CanvasRenderingContext2D): void {
-    const ship = AssetManager.assets.ship1;
-    context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
-  }
-
   processInput(duration: number) {
     if (!this.positionLerp) {
       this.positionLerp = {
@@ -86,15 +82,15 @@ export class LivePlayerEntity extends PlayerEntity implements ClientEntity {
     this.applyInput(input);
 
     if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down) {
-      this.clientGame.sendMessageToServer({type: 'playerInput', ...input});
+      this.clientGame.sendInput(input);
     }
   }
 
   reconcileFromServer(messageEntity: PlayerModel) {
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    this.momentum.x = messageEntity.momentumX;
-    this.momentum.y = messageEntity.momentumY;
+    super.reconcileDataFromServer(messageEntity);
+    if (this.dead) {
+      this.clientGame.died();
+    }
     let spliceIndex = -1;
     for (let i = 0; i < this.pendingInputs.length; i++) {
       const input = this.pendingInputs[i];

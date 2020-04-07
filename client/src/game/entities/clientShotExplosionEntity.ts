@@ -9,14 +9,14 @@ import {Entity} from '@common/entities/entity';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
   get drawX() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
     if (!owner) {
       return this.x;
     }
     return this.x + owner.drawX;
   }
   get drawY() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
     if (!owner) {
       return this.y;
     }

@@ -5,7 +5,7 @@ import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
-import {LivePlayerEntity} from './entities/livePlayerEntity';
+import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {WorldEntityModelCastToEntityModel} from '@common/models/entityTypeModels';
@@ -20,11 +20,12 @@ export type ClientGameOptions = {
 export class ClientGame extends Game {
   connectionId: string;
   isDead: boolean = false;
-  liveEntity?: LivePlayerEntity;
+  liveEntity?: ClientLivePlayerEntity;
   private messagesToProcess: ServerToClientMessage[] = [];
   private serverVersion: number = -1;
   protected spectatorMode: boolean = false;
   spectatorEntity?: SpectatorEntity;
+  lastXY?: {x: number; y: number};
 
   constructor(serverPath: string, private options: ClientGameOptions, private socket: IClientSocket) {
     super(true);
@@ -45,15 +46,23 @@ export class ClientGame extends Game {
 
     this.startTick();
   }
+  setOptions(options: ClientGameOptions) {
+    this.options = options;
+  }
+
+  joinGame() {
+    this.lastXY = undefined;
+    this.sendMessageToServer({type: 'join'});
+  }
+  spectateGame() {
+    this.lastXY = undefined;
+    this.sendMessageToServer({type: 'spectate'});
+  }
 
   private startTick() {
     let time = +new Date();
     let paused = 0;
     const int = setInterval(() => {
-      if (this.isDead) {
-        clearInterval(int);
-        return;
-      }
       const now = +new Date();
       const duration = now - time;
       if (duration > 900 || duration < 4) {
@@ -70,10 +79,6 @@ export class ClientGame extends Game {
     let gameTime = +new Date();
     let gamePaused = 0;
     const gameInt = setInterval(() => {
-      if (this.isDead) {
-        clearInterval(gameInt);
-        return;
-      }
       const now = +new Date();
       const duration = now - gameTime;
       if (duration > 900 || duration < 4) {
@@ -86,7 +91,7 @@ export class ClientGame extends Game {
       this.gameTick(GameConstants.serverTickRate);
       gameTime = +new Date();
       if (gameTime - now > 20) {
-        console.log('bad duratione', duration);
+        console.log('bad duration', duration);
       }
       this.messagesToProcess.length = 0;
     }, GameConstants.serverTickRate);
@@ -96,21 +101,23 @@ export class ClientGame extends Game {
     this.socket.sendMessage(message);
   }
 
-  processMessages(messages: ServerToClientMessage[]) {
+  private processMessages(messages: ServerToClientMessage[]) {
     for (const message of messages) {
       switch (message.type) {
         case 'joined':
-          const clientEntity = new LivePlayerEntity(this, message.entityId);
-          clientEntity.x = message.x;
-          clientEntity.y = message.y;
+          debugger;
+          const clientEntity = new ClientLivePlayerEntity(this, message);
           this.serverVersion = message.serverVersion;
           console.log('Server version', this.serverVersion);
+          this.isDead = false;
+          this.lastXY = undefined;
           this.spectatorMode = false;
           this.liveEntity = clientEntity;
           this.entities.push(clientEntity);
           break;
         case 'spectating':
           this.serverVersion = message.serverVersion;
+          this.lastXY = undefined;
           this.spectatorMode = true;
           console.log('Server version', this.serverVersion);
           break;
@@ -208,5 +215,16 @@ export class ClientGame extends Game {
   }
   clearDebug(key: string) {
     delete this.debugValues[key];
+  }
+
+  died() {
+    this.isDead = true;
+    this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
+    this.liveEntity = undefined;
+    this.options.onDied(this);
+  }
+
+  sendInput(input: ClientLivePlayerEntity['keys'] & {inputSequenceNumber: number}) {
+    this.sendMessageToServer({type: 'playerInput', ...input});
   }
 }

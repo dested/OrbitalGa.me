@@ -26,13 +26,10 @@ export type ClientToServerMessage =
     };
 
 export type ServerToClientMessage =
-  | {
+  | ({
       type: 'joined';
-      entityId: number;
-      x: number;
-      y: number;
       serverVersion: number;
-    }
+    } & PlayerModel)
   | {
       type: 'spectating';
       serverVersion: number;

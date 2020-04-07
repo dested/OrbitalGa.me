@@ -16,16 +16,11 @@ async function main() {
   const serverPath = '1';
   for (let i = 0; i < 20; i++) {
     const options = {
-      onDisconnect: () => {
-        // new BotClientGame(serverPath, options, new ClientSocket());
-      },
+      onDisconnect: () => {},
       onOpen: (me: ClientGame) => {
         me.sendMessageToServer({type: 'join'});
       },
-      onDied: (me: ClientGame) => {
-        // me.disconnect();
-        // new BotClientGame(serverPath, options, new ClientSocket());
-      },
+      onDied: (me: ClientGame) => {},
     };
 
     new BotClientGame(serverPath, options, new ClientSocket());

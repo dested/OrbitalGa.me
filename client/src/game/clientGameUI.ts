@@ -86,6 +86,12 @@ export class ClientGameUI extends ClientGame {
         gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
       );
     }
+    if (this.lastXY) {
+      gameData.view.setCenterPosition(
+        gameData.view.transformPoint(this.lastXY.x),
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.lastXY.y / 5)
+      );
+    }
 
     if (!this.connectionId) {
       context.fillStyle = 'white';
@@ -102,7 +108,9 @@ export class ClientGameUI extends ClientGame {
     context.font = '25px bold';
     const entities = this.entities.array;
     assertType<(Entity & ClientEntity)[]>(entities);
-    for (const entity of entities.sort((a, b) => a.zIndex - b.zIndex)) {
+    const sortedEntities = entities.sort((a, b) => a.zIndex - b.zIndex);
+
+    for (const entity of sortedEntities) {
       if (!gameData.view.contains(entity.realX, entity.realY)) {
         continue;
       }

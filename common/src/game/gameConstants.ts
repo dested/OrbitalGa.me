@@ -10,7 +10,7 @@ export class GameConstants {
   static screenSize = {width: 1500 * 1.3, height: 692 * 1.3};
   static screenRange = GameConstants.screenSize.width * 1.4;
   static throttleClient = false;
-  static serverVersion = 4;
+  static serverVersion = 5;
   static playerStartingY = GameConstants.screenSize.height * 0.8;
-  static numberOfSinglePlayerBots = 3;
+  static numberOfSinglePlayerBots = 0;
 }

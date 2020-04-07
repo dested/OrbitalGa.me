@@ -10,6 +10,7 @@ import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {WorldStateEntity} from '@common/models/entityTypeModels';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
+import {PlayerEntity} from '@common/entities/playerEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -86,20 +87,19 @@ export class ServerGame extends Game {
       this.spectators.splice(spectatorIndex, 1);
     }
 
-    const entity = new ServerPlayerEntity(this, nextId());
+    const playerEntity = new ServerPlayerEntity(this, nextId());
     const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
-    entity.x = Utils.randomInRange(x0, x1);
-    entity.y = GameConstants.playerStartingY;
-    this.users.push({connectionId, entity});
-    this.entities.push(entity);
+    playerEntity.x = Utils.randomInRange(x0, x1);
+    playerEntity.y = GameConstants.playerStartingY;
+    this.users.push({connectionId, entity: playerEntity});
+    this.entities.push(playerEntity);
 
-    this.entities.push(new PlayerShieldEntity(this, nextId(), entity.entityId));
-
+    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId);
+    this.entities.push(playerShieldEntity);
+    playerEntity.setShieldEntity(playerShieldEntity.entityId);
     this.sendMessageToClient(connectionId, {
       type: 'joined',
-      entityId: entity.entityId,
-      x: entity.x,
-      y: entity.y,
+      ...playerEntity.serialize(),
       serverVersion: GameConstants.serverVersion,
     });
   }

@@ -11,9 +11,7 @@ export class ServerToClientMessageParser {
       switch (message.type) {
         case 'joined':
           buff.addUint8(1);
-          buff.addFloat32(message.x);
-          buff.addFloat32(message.y);
-          buff.addUint32(message.entityId);
+          EntityBufferType.player.addBuffer(buff, message);
           buff.addUint16(message.serverVersion);
           break;
         case 'spectating':
@@ -42,9 +40,7 @@ export class ServerToClientMessageParser {
       return reader.switch<1 | 2 | 3, ServerToClientMessage>({
         1: () => ({
           type: 'joined',
-          x: reader.readFloat32(),
-          y: reader.readFloat32(),
-          entityId: reader.readUint32(),
+          ...EntityBufferType.player.readBuffer(reader),
           serverVersion: reader.readUint16(),
         }),
         2: () => ({

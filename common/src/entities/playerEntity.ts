@@ -1,6 +1,5 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {unreachable} from '../utils/unreachable';
 import {Entity, EntityModel} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
@@ -9,6 +8,7 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {WallEntity} from './wallEntity';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ShotExplosionEntity} from './shotExplosionEntity';
+import {PlayerShieldEntity} from './playerShieldEntity';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -20,6 +20,8 @@ export type PendingInput = {
 };
 
 export class PlayerEntity extends Entity {
+  static startingHealth = 3;
+
   get realX() {
     return this.x;
   }
@@ -36,9 +38,9 @@ export class PlayerEntity extends Entity {
     this.createPolygon();
   }
 
-  gameTick(): void {
-    this.shootTimer = Math.max(this.shootTimer - 1, 0);
-    this.updatedPositionFromMomentum();
+  private shieldEntityId?: number;
+  setShieldEntity(shieldEntityId: number) {
+    this.shieldEntityId = shieldEntityId;
   }
 
   lastProcessedInputSequenceNumber: number = 0;
@@ -50,7 +52,7 @@ export class PlayerEntity extends Entity {
   momentum: {x: number; y: number} = {x: 0, y: 0};
 
   shootTimer: number = 1;
-
+  dead: boolean = false;
   shotSide: 'left' | 'right' = 'left';
 
   applyInput(input: PendingInput) {
@@ -104,8 +106,30 @@ export class PlayerEntity extends Entity {
     super.destroy();
   }
 
-  static startingHealth = 50;
   health = PlayerEntity.startingHealth;
+
+  gameTick(): void {
+    this.shootTimer = Math.max(this.shootTimer - 1, 0);
+    this.updatedPositionFromMomentum();
+
+    if (!this.game.isClient) {
+      if (this.health <= 0) {
+        this.dead = true;
+
+        for (let i = 0; i < 15; i++) {
+          const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId());
+          shotExplosionEntity.start(
+            this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
+            this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
+          );
+          this.game.entities.push(shotExplosionEntity);
+        }
+
+        if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId).destroy();
+        this.destroy();
+      }
+    }
+  }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
@@ -114,20 +138,22 @@ export class PlayerEntity extends Entity {
       this.updatePolygon();
       return true;
     }
-    /*
-    if (otherEntity instanceof EnemyShotEntity) {
-      this.health -= 1;
-      this.game.destroyEntity(otherEntity);
-      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-      shotExplosionEntity.start(
-        this.realX - otherEntity.realX /!* + otherEntity.shotOffsetX*!/,
-        this.realY - otherEntity.realY /!* + otherEntity.shotOffsetY*!/
-      );
-      this.game.entities.push(shotExplosionEntity);
+    if (!this.game.isClient) {
+      if (otherEntity instanceof EnemyShotEntity) {
+        const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
+        if (!shield.depleted) {
+          return false;
+        }
 
-      return true;
+        this.health -= 1;
+        this.game.destroyEntity(otherEntity);
+        const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+        shotExplosionEntity.start(this.realX - otherEntity.realX, this.realY - otherEntity.realY);
+        this.game.entities.push(shotExplosionEntity);
+
+        return true;
+      }
     }
-*/
     return false;
   }
 
@@ -168,12 +194,28 @@ export class PlayerEntity extends Entity {
     }
   }
 
+  reconcileFromServer(messageEntity: PlayerModel) {
+    super.reconcileFromServer(messageEntity);
+    this.reconcileDataFromServer(messageEntity);
+  }
+
+  reconcileDataFromServer(messageEntity: PlayerModel) {
+    // needed because LivePlayerEntity does not need the pending inputs from super.reconcile
+    this.health = messageEntity.health;
+    this.dead = messageEntity.dead;
+    this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
+    this.momentum.x = messageEntity.momentumX;
+    this.momentum.y = messageEntity.momentumY;
+  }
+
   serialize(): PlayerModel {
     return {
       ...super.serialize(),
       momentumX: this.momentum.x,
       momentumY: this.momentum.y,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
+      health: this.health,
+      dead: this.dead,
       entityType: 'player',
     };
   }
@@ -184,6 +226,8 @@ export class PlayerEntity extends Entity {
       entityType: 'player',
       momentumX: reader.readFloat32(),
       momentumY: reader.readFloat32(),
+      health: reader.readUint8(),
+      dead: reader.readBoolean(),
       lastProcessedInputSequenceNumber: reader.readUint32(),
     };
   }
@@ -192,6 +236,8 @@ export class PlayerEntity extends Entity {
     Entity.addBuffer(buff, entity);
     buff.addFloat32(entity.momentumX);
     buff.addFloat32(entity.momentumY);
+    buff.addUint8(entity.health);
+    buff.addBoolean(entity.dead);
     buff.addUint32(entity.lastProcessedInputSequenceNumber);
   }
 }
@@ -201,4 +247,6 @@ export type PlayerModel = EntityModel & {
   lastProcessedInputSequenceNumber: number;
   momentumX: number;
   momentumY: number;
+  health: number;
+  dead: boolean;
 };

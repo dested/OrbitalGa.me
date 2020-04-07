@@ -6,6 +6,7 @@ import {ServerGame} from '../../../server/src/game/serverGame';
 import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
 import {BotClientGame} from './botClientGame';
+import {ClientGameOptions} from './clientGame';
 
 export class GameData {
   static instance = new GameData();
@@ -33,9 +34,11 @@ export class GameData {
         new BotClientGame(
           '1',
           {
-            onDied: () => {},
+            onDied: (client) => {
+              client.joinGame();
+            },
             onOpen: (client) => {
-              client.sendMessageToServer({type: 'join'});
+              client.joinGame();
             },
             onDisconnect: () => {},
           },
@@ -52,7 +55,7 @@ export class GameData {
       {
         onDied: () => {},
         onOpen: () => {
-          this.client!.sendMessageToServer({type: 'spectate'});
+          this.client!.spectateGame();
         },
         onDisconnect: () => {},
       },
@@ -68,22 +71,13 @@ export class GameData {
     }
   }
 
-  joinGame(serverPath: string) {
+  joinGame(serverPath: string, options: ClientGameOptions) {
     if (this.serverPath !== serverPath) {
       this.serverPath = serverPath;
-      this.client = new ClientGameUI(
-        this.serverPath,
-        {
-          onDied: () => {},
-          onOpen: () => {
-            this.client!.sendMessageToServer({type: 'join'});
-          },
-          onDisconnect: () => {},
-        },
-        this.getClientSocket()
-      );
+      this.client = new ClientGameUI(this.serverPath, options, this.getClientSocket());
     } else {
-      this.client!.sendMessageToServer({type: 'join'});
+      this.client!.setOptions(options);
+      this.client!.joinGame();
     }
   }
 }

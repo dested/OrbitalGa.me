@@ -21,8 +21,22 @@ export const GameScreen: React.FC = observer((props) => {
   }, []);
 
   function connect() {
-    GameData.instance.joinGame(uiStore.serverPath!);
+    GameData.instance.joinGame(uiStore.serverPath!, {
+      onDied: () => {
+        setDied(true);
+      },
+      onOpen: (client) => {
+        client.joinGame();
+      },
+      onDisconnect: () => {
+        setDisconnected(true);
+      },
+    });
   }
+  const revive = () => {
+    setDied(false);
+    connect();
+  };
 
   const managerListenerMove = useCallback((manager: JoystickManager) => {
     const onMove = (evt: EventData, stick: JoystickOutputData) => {
@@ -111,6 +125,24 @@ export const GameScreen: React.FC = observer((props) => {
           >
             Reconnect
           </button>
+        </div>
+      )}
+      {died && (
+        <div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            top: 0,
+            color: 'white',
+          }}
+        >
+          <span style={{fontSize: '3rem'}}>You died</span>
+          <button onClick={revive}>Reconnect</button>
         </div>
       )}
       <GoFullScreen />

@@ -28,10 +28,11 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
     this.y = messageEntity.y;
 
     if (messageEntity.create) {
+      this.y = 6;
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,
-        y: 0,
+        y: 6,
       });
     }
     this.updatePolygon();
