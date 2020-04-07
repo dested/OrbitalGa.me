@@ -12,7 +12,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     return this.y;
   }
   constructor(game: ClientGame, messageEntity: SwoopingEnemyModel) {
-    super(game, messageEntity.entityId, messageEntity.health);
+    super(game, messageEntity.entityId);
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     this.health = messageEntity.health;

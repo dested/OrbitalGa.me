@@ -105,7 +105,6 @@ export class ClientGame extends Game {
     for (const message of messages) {
       switch (message.type) {
         case 'joined':
-          debugger;
           const clientEntity = new ClientLivePlayerEntity(this, message);
           this.serverVersion = message.serverVersion;
           console.log('Server version', this.serverVersion);

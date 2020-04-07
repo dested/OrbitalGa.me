@@ -21,7 +21,7 @@ export class ClientGameUI extends ClientGame {
       () => {
         this.canvas.width = GameConstants.screenSize.width;
         this.canvas.height = GameConstants.screenSize.height;
-        GameData.instance.view.setBounds(GameConstants.screenSize.width, GameConstants.screenSize.width);
+        GameData.instance.view.setBounds(GameConstants.screenSize.width, GameConstants.screenSize.height);
         this.draw();
       },
       true

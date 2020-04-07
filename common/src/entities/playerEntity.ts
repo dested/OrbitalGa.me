@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
-import {GameConstants} from '../game/gameConstants';
+import {GameConstants, GameRules} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
@@ -20,8 +20,6 @@ export type PendingInput = {
 };
 
 export class PlayerEntity extends Entity {
-  static startingHealth = 3;
-
   get realX() {
     return this.x;
   }
@@ -48,7 +46,6 @@ export class PlayerEntity extends Entity {
   pendingInputs: PendingInput[] = [];
   inputSequenceNumber: number = 1;
 
-  maxSpeed = 90;
   momentum: {x: number; y: number} = {x: 0, y: 0};
 
   shootTimer: number = 1;
@@ -75,29 +72,29 @@ export class PlayerEntity extends Entity {
     if (input.left) {
       this.xInputsThisTick = true;
       this.momentum.x -= ramp;
-      if (this.momentum.x < -this.maxSpeed) {
-        this.momentum.x = -this.maxSpeed;
+      if (this.momentum.x < -GameRules.player.base.maxSpeed) {
+        this.momentum.x = -GameRules.player.base.maxSpeed;
       }
     }
     if (input.right) {
       this.xInputsThisTick = true;
       this.momentum.x += ramp;
-      if (this.momentum.x > this.maxSpeed) {
-        this.momentum.x = this.maxSpeed;
+      if (this.momentum.x > GameRules.player.base.maxSpeed) {
+        this.momentum.x = GameRules.player.base.maxSpeed;
       }
     }
     if (input.up) {
       this.yInputsThisTick = true;
       this.momentum.y -= ramp;
-      if (this.momentum.y < -this.maxSpeed) {
-        this.momentum.y = -this.maxSpeed;
+      if (this.momentum.y < -GameRules.player.base.maxSpeed) {
+        this.momentum.y = -GameRules.player.base.maxSpeed;
       }
     }
     if (input.down) {
       this.yInputsThisTick = true;
       this.momentum.y += ramp;
-      if (this.momentum.y > this.maxSpeed) {
-        this.momentum.y = this.maxSpeed;
+      if (this.momentum.y > GameRules.player.base.maxSpeed) {
+        this.momentum.y = GameRules.player.base.maxSpeed;
       }
     }
   }
@@ -106,7 +103,7 @@ export class PlayerEntity extends Entity {
     super.destroy();
   }
 
-  health = PlayerEntity.startingHealth;
+  health = GameRules.player.base.startingHealth;
 
   gameTick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
@@ -148,7 +145,10 @@ export class PlayerEntity extends Entity {
         this.health -= 1;
         this.game.destroyEntity(otherEntity);
         const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-        shotExplosionEntity.start(this.realX - otherEntity.realX, this.realY - otherEntity.realY);
+        shotExplosionEntity.start(
+          this.realX - collisionResult.overlap * collisionResult.overlap_x,
+          this.realY - collisionResult.overlap * collisionResult.overlap_y
+        );
         this.game.entities.push(shotExplosionEntity);
 
         return true;
@@ -162,10 +162,10 @@ export class PlayerEntity extends Entity {
     this.y += this.momentum.y;
 
     if (!this.xInputsThisTick) {
-      this.momentum.x = this.momentum.x * 0.5;
+      this.momentum.x = this.momentum.x * GameRules.player.base.momentumDeceleration;
     }
     if (!this.yInputsThisTick) {
-      this.momentum.y = this.momentum.y * 0.5;
+      this.momentum.y = this.momentum.y * GameRules.player.base.momentumDeceleration;
     }
     if (Math.abs(this.momentum.x) < 3) {
       this.momentum.x = 0;

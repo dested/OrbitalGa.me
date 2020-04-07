@@ -184,7 +184,7 @@ export class ServerGame extends Game {
       for (let i = 0; i < enemyCount; i++) {
         const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
 
-        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), 10);
+        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId());
         swoopingEnemyEntity.start(
           Utils.randomInRange(x0, x1),
           -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15

@@ -3,7 +3,7 @@ import {Utils} from '../utils/utils';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ShotEntity} from './shotEntity';
-import {GameConstants} from '../game/gameConstants';
+import {GameConstants, GameRules} from '../game/gameConstants';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
@@ -78,7 +78,7 @@ export class SwoopingEnemyEntity extends Entity {
     this
   );
 
-  constructor(game: Game, entityId: number, public health: number) {
+  constructor(game: Game, entityId: number) {
     super(game, entityId, 'swoopingEnemy');
     this.createPolygon();
   }
@@ -88,6 +88,7 @@ export class SwoopingEnemyEntity extends Entity {
     this.path.setStartPosition(x, y);
   }
 
+  health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   aliveTick: number = 0;
   gameTick(duration: number): void {
     if (this.health <= 0) {

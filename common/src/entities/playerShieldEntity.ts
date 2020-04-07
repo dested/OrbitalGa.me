@@ -7,12 +7,9 @@ import {ShotEntity} from './shotEntity';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
+import {GameConstants, GameRules} from '../game/gameConstants';
 
 export class PlayerShieldEntity extends Entity {
-  static startingHealth = 2;
-  static depletedRegenTimeout = 30;
-  static regenRate = 3;
-
   boundingBoxes = [{width: 133, height: 108}];
 
   get realX() {
@@ -52,22 +49,22 @@ export class PlayerShieldEntity extends Entity {
     return false;
   }
 
-  health = PlayerShieldEntity.startingHealth;
+  health = GameRules.playerShield.base.startingHealth;
   tick = 0;
 
   depleted = false;
   gameTick(duration: number) {
     this.tick++;
     if (!this.depleted && this.health <= 0) {
-      this.lastHit = PlayerShieldEntity.depletedRegenTimeout;
+      this.lastHit = GameRules.playerShield.base.depletedRegenTimeout;
       this.depleted = true;
     }
     this.lastHit--;
-    if (this.lastHit <= 0 && this.health < PlayerShieldEntity.startingHealth) {
+    if (this.lastHit <= 0 && this.health < GameRules.playerShield.base.startingHealth) {
       if (this.depleted) {
         this.depleted = false;
         this.health++;
-      } else if (this.tick % PlayerShieldEntity.regenRate === 0) {
+      } else if (this.tick % GameRules.playerShield.base.regenRate === 0) {
         this.health++;
       }
     }

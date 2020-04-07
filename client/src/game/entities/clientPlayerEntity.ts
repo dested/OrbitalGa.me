@@ -2,6 +2,7 @@ import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
+import {GameRules} from '@common/game/gameConstants';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   get drawX() {
@@ -33,7 +34,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     context.fillRect(
       this.drawX - ship.size.width / 2 + 1,
       this.drawY + ship.size.height / 2 + 1,
-      (ship.size.width - 2) * (this.health / PlayerEntity.startingHealth),
+      (ship.size.width - 2) * (this.health / GameRules.player.base.startingHealth),
       3
     );
   }

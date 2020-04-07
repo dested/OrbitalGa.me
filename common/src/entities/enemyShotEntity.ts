@@ -3,6 +3,7 @@ import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {GameRules} from '../game/gameConstants';
 
 export class EnemyShotEntity extends Entity {
   get realX() {
@@ -35,11 +36,10 @@ export class EnemyShotEntity extends Entity {
     return false;
   }
 
-  shotSpeedPerSecond = 900;
   aliveDuration = 3000;
 
   gameTick(duration: number) {
-    this.y += this.shotSpeedPerSecond * (duration / 1000);
+    this.y += GameRules.enemyShots.base.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);

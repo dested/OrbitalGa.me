@@ -2,7 +2,7 @@ import {PlayerShieldEntity, PlayerShieldModel} from '@common/entities/playerShie
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameRules} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {ClientPlayerEntity} from './clientPlayerEntity';
@@ -50,7 +50,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     const shield = AssetManager.assets['shield.1'];
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.globalAlpha = this.health / ClientPlayerShieldEntity.startingHealth;
+    context.globalAlpha = this.health / GameRules.playerShield.base.startingHealth;
 
     context.drawImage(shield.image, -shield.size.width / 2, -shield.size.height / 2);
     context.restore();
