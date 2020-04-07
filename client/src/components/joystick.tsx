@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
-import nipplejs, {JoystickManager} from 'nipplejs';
+import nipplejs from '../nipplejs/index';
+import {JoystickManager, JoystickManagerOptions} from 'nipplejs';
 
 type Props = {
-  options: nipplejs.JoystickManagerOptions;
+  options: JoystickManagerOptions;
   containerStyle: any;
   managerListener: (manager: JoystickManager) => void;
 };
@@ -30,7 +31,10 @@ export class JoyStick extends Component<Props> {
   }
 
   componentDidMount() {
-    this.manager = nipplejs.create({...this.props.options, zone: this.joyRef.current!});
+    // delete window.PointerEvent;
+    // delete (window as any).isMSPointer;
+    this.manager = (nipplejs.create({...this.props.options, zone: this.joyRef.current!}) as unknown) as JoystickManager;
+    this.joyRef.current!.style.touchAction = 'initial';
     this.props.managerListener(this.manager);
   }
 
