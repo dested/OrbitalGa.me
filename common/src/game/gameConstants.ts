@@ -1,7 +1,10 @@
 export class GameConstants {
   static debugClient = false;
-  static fullLocalServer = true;
+  static debugCollisions = false;
+  static debugDontFilterEntities = false;
   static debugDraw = false;
+
+  static singlePlayer = false || (typeof window === 'object' && window.location.pathname.indexOf('single') >= 0);
   static binaryTransport = true;
   static serverTickRate = 150;
   static screenSize = {width: 1500 * 1.3, height: 692 * 1.3};

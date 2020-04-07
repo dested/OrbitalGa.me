@@ -5,10 +5,18 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 
 export class ShotExplosionEntity extends Entity {
   get realX() {
-    return this.x + (this.game.entities.lookup(this.ownerEntityId)?.x ?? 0);
+    const owner = this.game.entities.lookup(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.realX;
   }
   get realY() {
-    return this.y + (this.game.entities.lookup(this.ownerEntityId)?.y ?? 0);
+    const owner = this.game.entities.lookup(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.realY;
   }
 
   constructor(game: Game, entityId: number, public ownerEntityId: number) {
@@ -31,8 +39,6 @@ export class ShotExplosionEntity extends Entity {
   serialize(): ShotExplosionModel {
     return {
       ...super.serialize(),
-      realX: this.realX,
-      realY: this.realY,
       aliveDuration: this.aliveDuration,
       ownerEntityId: this.ownerEntityId,
       entityType: 'shotExplosion',

@@ -23,7 +23,7 @@ export class ShotEntity extends Entity {
     public startY: number
   ) {
     super(game, entityId, 'shot');
-    this.createPolygon(this.x + this.shotOffsetX, this.y + this.shotOffsetY);
+    this.createPolygon();
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -40,11 +40,11 @@ export class ShotEntity extends Entity {
   gameTick(duration: number) {
     this.y -= this.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
-    this.updatePosition(this.x + this.shotOffsetX, this.y + this.shotOffsetY);
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);
     }
   }
+
 
   serialize(): ShotModel {
     return {

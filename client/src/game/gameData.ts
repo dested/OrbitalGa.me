@@ -24,7 +24,7 @@ export class GameData {
       true
     );
 
-    if (GameConstants.fullLocalServer) {
+    if (GameConstants.singlePlayer) {
       const serverSocket = new LocalServerSocket();
       const serverGame = new ServerGame(serverSocket);
       serverGame.init();
@@ -47,7 +47,7 @@ export class GameData {
   }
 
   getClientSocket() {
-    if (GameConstants.fullLocalServer) {
+    if (GameConstants.singlePlayer) {
       return new LocalClientSocket();
     } else {
       return new ClientSocket();

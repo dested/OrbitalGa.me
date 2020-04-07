@@ -5,6 +5,12 @@ import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 
 export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
+  get drawX() {
+    return this.realX;
+  }
+  get drawY() {
+    return this.realY;
+  }
   constructor(game: ClientGame, messageEntity: EnemyShotModel) {
     super(game, messageEntity.entityId, messageEntity.startY);
 
@@ -18,14 +24,14 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
         y: messageEntity.startY,
       });
     }
-    this.updatePosition();
+    this.updatePolygon();
   }
 
   zIndex = DrawZIndex.Ordinance;
   draw(context: CanvasRenderingContext2D): void {
     const laserRed = AssetManager.assets['laser.red'];
     context.save();
-    context.translate(this.x, this.y);
+    context.translate(this.realX, this.realY);
     context.rotate(Math.PI);
     context.drawImage(laserRed.image, -laserRed.size.width / 2, -laserRed.size.height / 2);
     context.restore();

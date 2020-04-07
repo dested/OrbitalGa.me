@@ -4,8 +4,25 @@ import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
+import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
+import {Entity} from '@common/entities/entity';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
+  get drawX() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.drawX;
+  }
+  get drawY() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.drawY;
+  }
+
   constructor(game: ClientGame, messageEntity: ShotExplosionModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);
     this.x = messageEntity.x;
@@ -19,20 +36,15 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
       });
       ShakeGame(5);
     }
-    this.updatePosition();
+    this.updatePolygon();
   }
 
   zIndex = DrawZIndex.Effect;
   draw(context: CanvasRenderingContext2D): void {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
-    if (!owner) {
-      return;
-    }
-
     const blueExplosion = AssetManager.assets['laser.blue.explosion'];
     context.save();
 
-    context.translate(owner.x + this.x, owner.y + this.y);
+    context.translate(this.drawX, this.drawY);
     // console.log(this.entityId, this.aliveDuration);
     context.rotate(Math.PI * 2 * (this.aliveDuration / ShotExplosionEntity.totalAliveDuration));
     context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);

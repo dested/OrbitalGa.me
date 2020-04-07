@@ -7,8 +7,24 @@ import {ShakeGame} from '../../utils/shakeUtils';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {LivePlayerEntity} from './livePlayerEntity';
+import {Entity} from '@common/entities/entity';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
+  get drawX() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.drawX;
+  }
+  get drawY() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.drawY;
+  }
+
   constructor(game: ClientGame, messageEntity: PlayerShieldModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);
     this.x = messageEntity.x;
@@ -20,23 +36,22 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
         x: this.x,
         y: this.y,
       });
-      ShakeGame(5);
     }
-    this.updatePosition();
+    this.updatePolygon();
   }
 
   zIndex = DrawZIndex.Effect;
   draw(context: CanvasRenderingContext2D): void {
-    const owner = this.game.entities.lookup<LivePlayerEntity>(this.ownerEntityId);
+    const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
       return;
     }
 
     const shield = AssetManager.assets['shield.1'];
     context.save();
+    context.translate(this.drawX, this.drawY);
+    context.globalAlpha = this.health / ClientPlayerShieldEntity.startingHealth;
 
-    context.translate(owner.drawX + this.x, owner.drawY + this.y);
-    // console.log(this.entityId, this.aliveDuration);
     context.drawImage(shield.image, -shield.size.width / 2, -shield.size.height / 2);
     context.restore();
   }

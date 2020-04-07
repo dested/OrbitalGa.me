@@ -5,6 +5,7 @@ import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
+import {ClientShotExplosionEntity} from './entities/clientShotExplosionEntity';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -102,7 +103,7 @@ export class ClientGameUI extends ClientGame {
     const entities = this.entities.array;
     assertType<(Entity & ClientEntity)[]>(entities);
     for (const entity of entities.sort((a, b) => a.zIndex - b.zIndex)) {
-      if (!gameData.view.contains(entity)) {
+      if (!gameData.view.contains(entity.realX, entity.realY)) {
         continue;
       }
       entity.draw(context);
@@ -121,7 +122,9 @@ export class ClientGameUI extends ClientGame {
         debugY += 30;
       }
       context.restore();
+    }
 
+    if (GameConstants.debugCollisions) {
       context.save();
       context.beginPath();
       context.scale(gameData.view.scale, gameData.view.scale);

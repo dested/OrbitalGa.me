@@ -4,6 +4,13 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class SpectatorEntity extends Entity {
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
+  }
+
   constructor(game: Game, entityId: number) {
     super(game, entityId, 'spectator');
     this.createPolygon();

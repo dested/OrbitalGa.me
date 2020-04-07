@@ -10,7 +10,6 @@ export class ArrayBufferBuilder {
 
   testSize(added: number) {
     if (this.buffer.byteLength < this.curPosition + added) {
-      // console.log('resized', this.buffer.byteLength);
       this.buffer = transfer(this.buffer, this.buffer.byteLength * 4);
       this.view = new DataView(this.buffer);
     }
@@ -78,7 +77,6 @@ export class ArrayBufferBuilder {
   }
 
   buildBuffer(): ArrayBuffer {
-    // console.log('buffer', this.curPosition);
     return this.buffer.slice(0, this.curPosition);
   }
 

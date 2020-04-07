@@ -4,6 +4,13 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class WallEntity extends Entity {
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
+  }
+
   gameTick(): void {}
 
   constructor(game: Game, entityId: number, width: number, height: number) {

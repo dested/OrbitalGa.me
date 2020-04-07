@@ -5,6 +5,13 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class EnemyShotEntity extends Entity {
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
+  }
+
   boundingBoxes = [{width: 9, height: 57}];
 
   constructor(game: Game, entityId: number, startY: number) {
@@ -28,7 +35,6 @@ export class EnemyShotEntity extends Entity {
   gameTick(duration: number) {
     this.y += this.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
-    this.updatePosition();
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);
     }

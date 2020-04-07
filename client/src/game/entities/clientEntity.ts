@@ -1,4 +1,6 @@
 export interface ClientEntity {
+  drawX: number;
+  drawY: number;
   zIndex: DrawZIndex;
   draw(context: CanvasRenderingContext2D): void;
 }

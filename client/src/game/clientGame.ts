@@ -9,6 +9,7 @@ import {LivePlayerEntity} from './entities/livePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {WorldEntityModelCastToEntityModel} from '@common/models/entityTypeModels';
+import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -156,7 +157,7 @@ export class ClientGame extends Game {
     this.processInputs(duration);
     this.liveEntity?.gameTick();
     for (const entity of this.entities.array) {
-      entity.updatePosition();
+      entity.updatePolygon();
     }
     this.collisionEngine.update();
     this.liveEntity?.checkCollisions();

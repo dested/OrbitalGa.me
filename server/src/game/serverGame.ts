@@ -113,13 +113,15 @@ export class ServerGame extends Game {
   }
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
-    console.log(
-      `tick: ${tickIndex}, Users: ${this.users.length}, Entities: ${this.entities.length}, Messages:${
-        this.queuedMessages.length
-      }, Duration: ${tickTime}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, <- ${Utils.formatBytes(
-        this.serverSocket.totalBytesReceived
-      )}`
-    );
+    if (!GameConstants.singlePlayer) {
+      console.log(
+        `tick: ${tickIndex}, Users: ${this.users.length}, Entities: ${this.entities.length}, Messages:${
+          this.queuedMessages.length
+        }, Duration: ${tickTime}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, <- ${Utils.formatBytes(
+          this.serverSocket.totalBytesReceived
+        )}`
+      );
+    }
 
     const inputThisTick = Utils.toDictionary(this.users, (a) => a.entity.entityId);
 
@@ -192,8 +194,12 @@ export class ServerGame extends Game {
     }
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities.getIndex(i);
+      const entity = this.entities.array[i];
       entity.gameTick(duration);
+    }
+    for (let i = this.entities.array.length - 1; i >= 0; i--) {
+      const entity = this.entities.array[i];
+      entity.updatePolygon();
     }
 
     this.checkCollisions();
@@ -240,7 +246,10 @@ export class ServerGame extends Game {
   }
 
   private sendWorldState() {
-    const entities = this.entities.map((entity) => entity.serialize() as WorldStateEntity);
+    const entities = this.entities.map((entity) => ({
+      entity,
+      serializedEntity: entity.serialize() as WorldStateEntity,
+    }));
 
     for (const user of this.users) {
       if (!user.entity) {
@@ -252,17 +261,20 @@ export class ServerGame extends Game {
       };
 
       const myEntities = [...entities];
-      for (let i = myEntities.length - 1; i >= 0; i--) {
-        const myEntity = myEntities[i];
-        const x = myEntity.realX ?? myEntity.x;
-        if (x < box.x0 || x > box.x1) {
-          myEntities.splice(i, 1);
+
+      if (!GameConstants.debugDontFilterEntities) {
+        for (let i = myEntities.length - 1; i >= 0; i--) {
+          const myEntity = myEntities[i];
+          const x = myEntity.entity.realX;
+          if (x < box.x0 || x > box.x1) {
+            myEntities.splice(i, 1);
+          }
         }
       }
 
       this.sendMessageToClient(user.connectionId, {
         type: 'worldState',
-        entities: myEntities,
+        entities: myEntities.map((a) => a.serializedEntity),
       });
     }
   }
@@ -277,12 +289,18 @@ export class ServerGame extends Game {
       x1: spectator.x + GameConstants.screenRange / 2,
     };
 
-    const myEntities = this.entities.map((entity) => entity.serialize() as WorldStateEntity);
-    for (let i = myEntities.length - 1; i >= 0; i--) {
-      const myEntity = myEntities[i];
-      const x = myEntity.realX ?? myEntity.x;
-      if (x < box.x0 || x > box.x1) {
-        myEntities.splice(i, 1);
+    const myEntities = this.entities.map((entity) => ({
+      entity,
+      serializedEntity: entity.serialize() as WorldStateEntity,
+    }));
+
+    if (!GameConstants.debugDontFilterEntities) {
+      for (let i = myEntities.length - 1; i >= 0; i--) {
+        const myEntity = myEntities[i];
+        const x = myEntity.entity.realX;
+        if (x < box.x0 || x > box.x1) {
+          myEntities.splice(i, 1);
+        }
       }
     }
 
@@ -290,7 +308,7 @@ export class ServerGame extends Game {
       this.serverSocket.sendMessage(c.connectionId, [
         {
           type: 'worldState',
-          entities: myEntities,
+          entities: myEntities.map((a) => a.serializedEntity),
         },
       ]);
     }
@@ -302,7 +320,6 @@ export class ServerGame extends Game {
   }
 
   private updateSpectatorPosition() {
-    console.time('updating spectator');
     const range = this.getPlayerRange(0, (e) => e.y > 30);
     const spectator = this.entities.array.find((a) => a instanceof SpectatorEntity);
     if (!spectator) {
@@ -310,6 +327,5 @@ export class ServerGame extends Game {
     }
     spectator.x = range.x0 + Math.random() * (range.x1 - range.x0);
     spectator.y = 0;
-    console.timeEnd('updating spectator');
   }
 }

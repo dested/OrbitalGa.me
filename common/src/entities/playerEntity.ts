@@ -6,6 +6,7 @@ import {GameConstants} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {WallEntity} from './wallEntity';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -17,6 +18,13 @@ export type PendingInput = {
 };
 
 export class PlayerEntity extends Entity {
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
+  }
+
   boundingBoxes = [{width: 99, height: 75}];
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
@@ -102,40 +110,13 @@ export class PlayerEntity extends Entity {
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
-    switch (otherEntity.entityType) {
-      case 'player':
-        /*this.x -= collisionResult.overlap * collisionResult.overlap_x;
-        this.y -= collisionResult.overlap * collisionResult.overlap_y;
-        this.updatePosition();
-        return true;*/
-        return false;
-      case 'wall':
-        this.x -= collisionResult.overlap * collisionResult.overlap_x;
-        this.y -= collisionResult.overlap * collisionResult.overlap_y;
-        this.updatePosition();
-        return true;
-      case 'shot':
-        // console.log('shot');
-        return false;
-      case 'enemyShot':
-        // console.log('hurt');
-        return false;
-      case 'swoopingEnemy':
-        // console.log('shot');
-        return false;
-      case 'shotExplosion':
-        // console.log('shot');
-        return false;
-      case 'spectator':
-        // console.log('shot');
-        return false;
-      case 'playerShield':
-        // console.log('shot');
-        return false;
-      default:
-        unreachable(otherEntity.entityType);
-        return false;
+    if (otherEntity instanceof WallEntity) {
+      this.x -= collisionResult.overlap * collisionResult.overlap_x;
+      this.y -= collisionResult.overlap * collisionResult.overlap_y;
+      this.updatePolygon();
+      return true;
     }
+    return false;
   }
 
   updatedPositionFromMomentum() {
@@ -173,9 +154,6 @@ export class PlayerEntity extends Entity {
       this.y = GameConstants.screenSize.height * 1.1;
       this.momentum.y = 0;
     }
-    // console.log(this.momentum.x, this.momentum.y, this.x, this.y);
-
-    this.updatePosition();
   }
 
   serialize(): PlayerModel {

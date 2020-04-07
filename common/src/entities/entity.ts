@@ -15,12 +15,8 @@ export abstract class Entity {
     height: number;
   }[] = [];
 
-  get realX() {
-    return this.x;
-  }
-  get realY() {
-    return this.y;
-  }
+  abstract get realX(): number;
+  abstract get realY(): number;
 
   x: number = 0;
   y: number = 0;
@@ -35,10 +31,12 @@ export abstract class Entity {
   start(x: number, y: number) {
     this.x = x;
     this.y = y;
-    this.updatePosition();
+    this.updatePolygon();
   }
 
-  createPolygon(x: number = this.x, y: number = this.y): void {
+  createPolygon(): void {
+    const x = this.realX;
+    const y = this.realY;
     if (this.width !== 0 && this.height !== 0) {
       for (const boundingBox of this.boundingBoxes) {
         const polygon = new Polygon(
@@ -70,17 +68,27 @@ export abstract class Entity {
     }
   }
 
-  updatePosition(x: number = this.x, y: number = this.y) {
-    if (this.boundingBoxes.length === 0) {
-      return;
-    }
-    for (const boundingBox of this.boundingBoxes) {
-      if (boundingBox.polygon) {
-        boundingBox.polygon.x = x;
-        boundingBox.polygon.y = y;
+  updatePolygon() {
+                    if (this.boundingBoxes.length === 0) {
+                      return;
+                    }
+                    /*
+    if (this.game.isClient) {
+      if (this.entityType === 'player') {
+        console.log('player', this.realX);
+      }
+      if (this.entityType === 'playerShield') {
+        console.log('shield', this.realX);
       }
     }
-  }
+*/
+                    for (const boundingBox of this.boundingBoxes) {
+                      if (boundingBox.polygon) {
+                        boundingBox.polygon.x = this.realX;
+                        boundingBox.polygon.y = this.realY;
+                      }
+                    }
+                  }
 
   markToDestroy: boolean = false;
   destroy() {
@@ -159,6 +167,4 @@ export type EntityModel = {
   entityId: number;
   x: number;
   y: number;
-  realX?: number;
-  realY?: number;
 };

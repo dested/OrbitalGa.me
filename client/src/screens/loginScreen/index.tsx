@@ -41,7 +41,7 @@ export const LoginScreen: React.FC = observer((props) => {
           <div style={{display: 'flex', width: '100%'}}>
             {servers.map((s) => (
               <JoinButton key={s} onClick={() => onJoin(s)}>
-                Join Server
+                Join {GameConstants.singlePlayer ? 'Single Player' : 'Server'}
               </JoinButton>
             ))}
           </div>

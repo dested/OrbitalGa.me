@@ -11,6 +11,13 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {PathRunner} from '../utils/pathRunner';
 
 export class SwoopingEnemyEntity extends Entity {
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
+  }
+
   // width = 112;
   // height = 75;
   boundingBoxes = [
@@ -99,7 +106,6 @@ export class SwoopingEnemyEntity extends Entity {
     }
 
     const result = this.path.progress();
-    this.updatePosition();
     if (result === 'done') {
       this.game.destroyEntity(this);
     }
@@ -112,10 +118,7 @@ export class SwoopingEnemyEntity extends Entity {
       this.game.destroyEntity(otherEntity);
 
       const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-      shotExplosionEntity.start(
-        this.x - (otherEntity.x + otherEntity.shotOffsetX),
-        this.y - (otherEntity.y + otherEntity.shotOffsetY)
-      );
+      shotExplosionEntity.start(this.x - otherEntity.realX, this.y - otherEntity.realY);
       this.game.entities.push(shotExplosionEntity);
 
       return true;
