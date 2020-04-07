@@ -8,20 +8,21 @@ export class ShotEntity extends Entity {
   boundingBoxes = [{width: 9, height: 57}];
 
   get realX() {
-    return this.x + this.shotOffsetX;
+    const owner = this.game.entities.lookup(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.realX;
   }
   get realY() {
-    return this.y + this.shotOffsetY;
+    const owner = this.game.entities.lookup(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.realY;
   }
 
-  constructor(
-    game: Game,
-    entityId: number,
-    public ownerEntityId: number,
-    public shotOffsetX: number,
-    public shotOffsetY: number,
-    public startY: number
-  ) {
+  constructor(game: Game, entityId: number, public ownerEntityId: number) {
     super(game, entityId, 'shot');
     this.createPolygon();
   }
@@ -45,14 +46,10 @@ export class ShotEntity extends Entity {
     }
   }
 
-
   serialize(): ShotModel {
     return {
       ...super.serialize(),
-      shotOffsetX: this.shotOffsetX,
-      shotOffsetY: this.shotOffsetY,
       ownerEntityId: this.ownerEntityId,
-      startY: this.startY,
       entityType: 'shot',
     };
   }
@@ -61,18 +58,12 @@ export class ShotEntity extends Entity {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'shot',
-      shotOffsetX: reader.readFloat32(),
-      shotOffsetY: reader.readFloat32(),
-      startY: reader.readFloat32(),
       ownerEntityId: reader.readUint32(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: ShotModel) {
     Entity.addBuffer(buff, entity);
-    buff.addFloat32(entity.shotOffsetX);
-    buff.addFloat32(entity.shotOffsetY);
-    buff.addFloat32(entity.startY);
     buff.addUint32(entity.ownerEntityId);
   }
 }
@@ -80,7 +71,4 @@ export class ShotEntity extends Entity {
 export type ShotModel = EntityModel & {
   entityType: 'shot';
   ownerEntityId: number;
-  shotOffsetX: number;
-  shotOffsetY: number;
-  startY: number;
 };

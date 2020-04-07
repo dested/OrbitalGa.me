@@ -27,14 +27,16 @@
 - [ ] add audio
 - [ ] hard to go straight left with nipplejs
 - [ ] rename or remove lastProcessedInputSequenceNumber
-- [ ] server is offline, play with bots
 - [ ] maybe remove momentum
 - [ ] garbageless server tick
 - [ ] add server kill switch to boot everyone out
+- [ ] fix shot offset in shot to be x,y and owner 
 - [ ] support multiple bounding boxes
   - [ ] fix boundingbox not being from center
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
+- [ ] server is offline, play with bots locally
+- [x] deploy singleplayer support
 - [x] connect on login screen
 - [x] show game in background of login, add spectator mode to server
 - [x] support drawing bounding boxes in debug

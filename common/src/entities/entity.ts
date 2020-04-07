@@ -69,10 +69,10 @@ export abstract class Entity {
   }
 
   updatePolygon() {
-                    if (this.boundingBoxes.length === 0) {
-                      return;
-                    }
-                    /*
+    if (this.boundingBoxes.length === 0) {
+      return;
+    }
+    /*
     if (this.game.isClient) {
       if (this.entityType === 'player') {
         console.log('player', this.realX);
@@ -82,13 +82,13 @@ export abstract class Entity {
       }
     }
 */
-                    for (const boundingBox of this.boundingBoxes) {
-                      if (boundingBox.polygon) {
-                        boundingBox.polygon.x = this.realX;
-                        boundingBox.polygon.y = this.realY;
-                      }
-                    }
-                  }
+    for (const boundingBox of this.boundingBoxes) {
+      if (boundingBox.polygon) {
+        boundingBox.polygon.x = this.realX;
+        boundingBox.polygon.y = this.realY;
+      }
+    }
+  }
 
   markToDestroy: boolean = false;
   destroy() {

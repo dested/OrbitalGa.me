@@ -4,7 +4,7 @@ export class GameConstants {
   static debugDontFilterEntities = false;
   static debugDraw = false;
 
-  static singlePlayer = false || (typeof window === 'object' && window.location.pathname.indexOf('single') >= 0);
+  static singlePlayer = typeof window === 'object' && window.location.pathname.indexOf('single') >= 0;
   static binaryTransport = true;
   static serverTickRate = 150;
   static screenSize = {width: 1500 * 1.3, height: 692 * 1.3};
@@ -12,4 +12,5 @@ export class GameConstants {
   static throttleClient = false;
   static serverVersion = 4;
   static playerStartingY = GameConstants.screenSize.height * 0.8;
+  static numberOfSinglePlayerBots = 3;
 }

@@ -45,7 +45,6 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
     context.save();
 
     context.translate(this.drawX, this.drawY);
-    // console.log(this.entityId, this.aliveDuration);
     context.rotate(Math.PI * 2 * (this.aliveDuration / ShotExplosionEntity.totalAliveDuration));
     context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
     context.restore();

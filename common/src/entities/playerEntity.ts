@@ -7,6 +7,8 @@ import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {WallEntity} from './wallEntity';
+import {EnemyShotEntity} from './enemyShotEntity';
+import {ShotExplosionEntity} from './shotExplosionEntity';
 
 export type PendingInput = {
   inputSequenceNumber: number;
@@ -58,15 +60,8 @@ export class PlayerEntity extends Entity {
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          const shotEntity = new ShotEntity(
-            this.game,
-            nextId(),
-            this.entityId,
-            this.shotSide === 'left' ? -42 : 42,
-            -6,
-            this.y
-          );
-          shotEntity.start(this.x, this.y);
+          const shotEntity = new ShotEntity(this.game, nextId(), this.entityId);
+          shotEntity.start(this.shotSide === 'left' ? -42 : 42, -6);
           this.game.entities.push(shotEntity);
           this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           this.shootTimer = 1;
@@ -109,6 +104,9 @@ export class PlayerEntity extends Entity {
     super.destroy();
   }
 
+  static startingHealth = 50;
+  health = PlayerEntity.startingHealth;
+
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
       this.x -= collisionResult.overlap * collisionResult.overlap_x;
@@ -116,6 +114,20 @@ export class PlayerEntity extends Entity {
       this.updatePolygon();
       return true;
     }
+    /*
+    if (otherEntity instanceof EnemyShotEntity) {
+      this.health -= 1;
+      this.game.destroyEntity(otherEntity);
+      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+      shotExplosionEntity.start(
+        this.realX - otherEntity.realX /!* + otherEntity.shotOffsetX*!/,
+        this.realY - otherEntity.realY /!* + otherEntity.shotOffsetY*!/
+      );
+      this.game.entities.push(shotExplosionEntity);
+
+      return true;
+    }
+*/
     return false;
   }
 

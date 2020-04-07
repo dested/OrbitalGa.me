@@ -5,6 +5,7 @@ import {ClientSocket} from '../clientSocket';
 import {ServerGame} from '../../../server/src/game/serverGame';
 import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
+import {BotClientGame} from './botClientGame';
 
 export class GameData {
   static instance = new GameData();
@@ -28,6 +29,19 @@ export class GameData {
       const serverSocket = new LocalServerSocket();
       const serverGame = new ServerGame(serverSocket);
       serverGame.init();
+      for (let i = 0; i < GameConstants.numberOfSinglePlayerBots; i++) {
+        new BotClientGame(
+          '1',
+          {
+            onDied: () => {},
+            onOpen: (client) => {
+              client.sendMessageToServer({type: 'join'});
+            },
+            onDisconnect: () => {},
+          },
+          this.getClientSocket()
+        );
+      }
     }
   }
 

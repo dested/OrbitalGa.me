@@ -6,18 +6,25 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 
 export class EnemyShotEntity extends Entity {
   get realX() {
-    return this.x;
+    const owner = this.game.entities.lookup(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.realX;
   }
   get realY() {
-    return this.y;
+    const owner = this.game.entities.lookup(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.realY;
   }
 
   boundingBoxes = [{width: 9, height: 57}];
 
-  constructor(game: Game, entityId: number, startY: number) {
+  constructor(game: Game, entityId: number, public ownerEntityId: number) {
     super(game, entityId, 'enemyShot');
     this.createPolygon();
-    this.startY = startY;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -29,7 +36,6 @@ export class EnemyShotEntity extends Entity {
   }
 
   shotSpeedPerSecond = 900;
-  startY: number;
   aliveDuration = 3000;
 
   gameTick(duration: number) {
@@ -43,8 +49,8 @@ export class EnemyShotEntity extends Entity {
   serialize(): EnemyShotModel {
     return {
       ...super.serialize(),
-      startY: this.startY,
       entityType: 'enemyShot',
+      ownerEntityId: this.ownerEntityId,
     };
   }
 
@@ -52,17 +58,17 @@ export class EnemyShotEntity extends Entity {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'enemyShot',
-      startY: reader.readFloat32(),
+      ownerEntityId: reader.readUint32(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: EnemyShotModel) {
     Entity.addBuffer(buff, entity);
-    buff.addFloat32(entity.startY);
+    buff.addUint32(entity.ownerEntityId);
   }
 }
 
 export type EnemyShotModel = EntityModel & {
   entityType: 'enemyShot';
-  startY: number;
+  ownerEntityId: number;
 };

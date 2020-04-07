@@ -3,35 +3,35 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
+import {Entity} from '@common/entities/entity';
 
 export class ClientShotEntity extends ShotEntity implements ClientEntity {
   get drawX() {
-    return this.realX;
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.drawX;
   }
   get drawY() {
-    return this.realY;
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.drawY;
   }
+
   constructor(game: ClientGame, messageEntity: ShotModel) {
-    super(
-      game,
-      messageEntity.entityId,
-      messageEntity.ownerEntityId,
-      messageEntity.shotOffsetX,
-      messageEntity.shotOffsetY,
-      messageEntity.startY
-    );
+    super(game, messageEntity.entityId, messageEntity.ownerEntityId);
 
     this.x = messageEntity.x;
     this.y = messageEntity.y;
 
     if (messageEntity.create) {
-      const isLiveEntityShot = this.ownerEntityId === game.liveEntity?.entityId;
-      this.x = isLiveEntityShot ? game.liveEntity!.drawX! : messageEntity.x;
-      this.y = isLiveEntityShot ? game.liveEntity!.drawY! : messageEntity.startY;
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,
-        y: isLiveEntityShot ? this.y : messageEntity.startY,
+        y: 0,
       });
     }
     this.updatePolygon();
@@ -41,7 +41,7 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
   draw(context: CanvasRenderingContext2D): void {
     const laserBlue = AssetManager.assets['laser.blue'];
     context.save();
-    context.translate(this.realX, this.realY);
+    context.translate(this.drawX, this.drawY);
     context.drawImage(laserBlue.image, -laserBlue.size.width / 2, -laserBlue.size.height / 2);
     context.restore();
   }

@@ -3,7 +3,7 @@ import {w3cwebsocket} from 'websocket';
 import {Utils} from '@common/utils/utils';
 import {ClientSocket} from '../../client/src/clientSocket';
 import {ClientGame} from '../../client/src/game/clientGame';
-import {BotClientGame} from './botClientGame';
+import {BotClientGame} from '../../client/src/game/botClientGame';
 
 console.log('started');
 
