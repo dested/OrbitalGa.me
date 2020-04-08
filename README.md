@@ -37,7 +37,7 @@
 - [ ] server is offline, play with bots locally
 - [ ] revive does not work 
 - [ ] better death animation
-- [ ] moving goes out of sync on mobile, i think its moving faster
+- [x] moving goes out of sync on mobile, i think its moving faster
 - [x] figure out mobile jitter, https://bugs.chromium.org/p/chromium/issues/detail?id=1068769 
 - [x] add death animation 
 - [x] fix shot offset in shot to be x,y and owner 

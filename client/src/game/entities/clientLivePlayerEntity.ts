@@ -87,6 +87,8 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
 
   reconcileFromServer(messageEntity: PlayerModel) {
+    this.x = messageEntity.x;
+    this.y = messageEntity.y;
     super.reconcileDataFromServer(messageEntity);
     if (this.dead) {
       this.clientGame.died();
