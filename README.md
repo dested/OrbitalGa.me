@@ -77,6 +77,7 @@
   - [x] you always have shield that regens but also upgradable
   - [x] add shield power up
 - [ ] add 5 second sustained lazer
+- [x] support for player color
 - [x] add multiple enemy colors
 - [x] better rock debris
 - [x] add rock debris

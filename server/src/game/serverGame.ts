@@ -44,7 +44,7 @@ export class ServerGame extends Game {
       this.users.splice(userIndex, 1);
     }
 
-    const playerEntity = new ServerPlayerEntity(this, nextId());
+    const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
     const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
     playerEntity.x = Utils.randomInRange(x0, x1);
     playerEntity.y = GameConstants.playerStartingY;

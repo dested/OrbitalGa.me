@@ -29,25 +29,25 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
   get drawY() {
     return this.y;
   }
-  draw(context: CanvasRenderingContext2D): void {
-    let enemyShip: Asset<AssetKeys>;
+
+  get ship() {
     switch (this.enemyColor) {
       case 'black':
-        enemyShip = OrbitalAssets.assets['Enemies.enemyBlack1'];
-        break;
+        return OrbitalAssets.assets['Enemies.enemyBlack1'];
       case 'blue':
-        enemyShip = OrbitalAssets.assets['Enemies.enemyBlue1'];
-        break;
+        return OrbitalAssets.assets['Enemies.enemyBlue1'];
       case 'green':
-        enemyShip = OrbitalAssets.assets['Enemies.enemyGreen1'];
-        break;
+        return OrbitalAssets.assets['Enemies.enemyGreen1'];
       case 'red':
-        enemyShip = OrbitalAssets.assets['Enemies.enemyRed1'];
-        break;
+        return OrbitalAssets.assets['Enemies.enemyRed1'];
     }
+  }
+
+  draw(context: CanvasRenderingContext2D): void {
+    const ship = this.ship;
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.drawImage(enemyShip.image, -enemyShip.size.width / 2, -enemyShip.size.height / 2);
+    context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
     context.restore();
   }
   tick() {}

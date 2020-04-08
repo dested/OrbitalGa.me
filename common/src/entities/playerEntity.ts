@@ -10,6 +10,7 @@ import {EnemyShotEntity} from './enemyShotEntity';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules} from '../game/gameRules';
+import {Utils} from '../utils/utils';
 
 export type PendingInput = {
   down: boolean;
@@ -20,6 +21,7 @@ export type PendingInput = {
   up: boolean;
 };
 
+export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
 export class PlayerEntity extends Entity {
   boundingBoxes = [{width: 99, height: 75}];
   dead: boolean = false;
@@ -40,7 +42,7 @@ export class PlayerEntity extends Entity {
 
   private shieldEntityId?: number;
 
-  constructor(game: Game, entityId: number) {
+  constructor(game: Game, entityId: number, public playerColor: PlayerColor) {
     super(game, entityId, 'player');
     this.createPolygon();
   }
@@ -166,6 +168,7 @@ export class PlayerEntity extends Entity {
     // needed because LivePlayerEntity does not need the pending inputs from super.reconcile
     this.health = messageEntity.health;
     this.dead = messageEntity.dead;
+    this.playerColor = messageEntity.playerColor;
     this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
     this.momentum.x = messageEntity.momentumX;
     this.momentum.y = messageEntity.momentumY;
@@ -184,6 +187,7 @@ export class PlayerEntity extends Entity {
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       health: this.health,
       dead: this.dead,
+      playerColor: this.playerColor,
       entityType: 'player',
     };
   }
@@ -235,8 +239,18 @@ export class PlayerEntity extends Entity {
     buff.addUint8(entity.health);
     buff.addBoolean(entity.dead);
     buff.addUint32(entity.lastProcessedInputSequenceNumber);
+    buff.addUint8(
+      Utils.switchType(entity.playerColor, {
+        blue: 1,
+        green: 2,
+        orange: 3,
+        red: 4,
+      })
+    );
   }
-
+  static randomEnemyColor() {
+    return Utils.randomElement(['blue' as const, 'green' as const, 'orange' as const, 'red' as const]);
+  }
   static readBuffer(reader: ArrayBufferReader): PlayerModel {
     return {
       ...Entity.readBuffer(reader),
@@ -246,6 +260,12 @@ export class PlayerEntity extends Entity {
       health: reader.readUint8(),
       dead: reader.readBoolean(),
       lastProcessedInputSequenceNumber: reader.readUint32(),
+      playerColor: Utils.switchNumber(reader.readUint8(), {
+        1: 'blue' as const,
+        2: 'green' as const,
+        3: 'orange' as const,
+        4: 'red' as const,
+      }),
     };
   }
 }
@@ -257,4 +277,5 @@ export type PlayerModel = EntityModel & {
   lastProcessedInputSequenceNumber: number;
   momentumX: number;
   momentumY: number;
+  playerColor: PlayerColor;
 };
