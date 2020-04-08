@@ -71,7 +71,7 @@ export class PlayerShieldEntity extends Entity {
     this.health -= damage;
     this.lastHit = 10;
     this.game.destroyEntity(otherEntity);
-    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 3, this.entityId);
     shotExplosionEntity.start(x, y);
     this.game.entities.push(shotExplosionEntity);
 

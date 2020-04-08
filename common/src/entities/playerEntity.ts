@@ -131,7 +131,7 @@ export class PlayerEntity extends Entity {
         this.dead = true;
 
         for (let i = 0; i < 15; i++) {
-          const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId());
+          const shotExplosionEntity = new ShotExplosionEntity(this.game, 10, nextId());
           shotExplosionEntity.start(
             this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
             this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
@@ -153,7 +153,7 @@ export class PlayerEntity extends Entity {
 
     this.health -= damage;
     this.game.destroyEntity(otherEntity);
-    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 5, this.entityId);
     shotExplosionEntity.start(x, y);
     this.game.entities.push(shotExplosionEntity);
     return true;

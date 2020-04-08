@@ -92,7 +92,7 @@ export class SwoopingEnemyEntity extends Entity {
       this.health -= 1;
       this.game.destroyEntity(otherEntity);
 
-      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 3, this.entityId);
       shotExplosionEntity.start(this.x - otherEntity.realX, this.y - otherEntity.realY);
       this.game.entities.push(shotExplosionEntity);
 

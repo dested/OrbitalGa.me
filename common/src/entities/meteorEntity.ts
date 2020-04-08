@@ -101,7 +101,7 @@ export class MeteorEntity extends Entity {
       if (otherEntity instanceof ShotEntity) {
         this.health -= 1;
         this.game.destroyEntity(otherEntity);
-        const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+        const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 1, this.entityId);
         shotExplosionEntity.start(
           collisionResult.overlap * collisionResult.overlap_x,
           collisionResult.overlap * collisionResult.overlap_y
@@ -109,16 +109,7 @@ export class MeteorEntity extends Entity {
         this.game.entities.push(shotExplosionEntity);
 
         if (this.health <= 0) {
-          this.game.destroyEntity(this);
-
-          for (let i = 0; i < 5; i++) {
-            const deathExplosion = new ShotExplosionEntity(this.game, nextId());
-            deathExplosion.start(
-              this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
-              this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
-            );
-            this.game.entities.push(deathExplosion);
-          }
+          this.die();
         }
 
         return true;
@@ -224,7 +215,7 @@ export class MeteorEntity extends Entity {
     this.game.destroyEntity(this);
 
     for (let i = 0; i < 5; i++) {
-      const deathExplosion = new ShotExplosionEntity(this.game, nextId());
+      const deathExplosion = new ShotExplosionEntity(this.game, nextId(), 2);
       deathExplosion.start(
         this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
         this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height

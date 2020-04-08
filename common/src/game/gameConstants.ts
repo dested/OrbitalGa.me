@@ -1,4 +1,4 @@
-let screenSize = {width: 1500 * 1.3, height: 692 * 1.3};
+const screenSize = {width: 1500 * 1.3, height: 692 * 1.3};
 
 export class GameConstants {
   static binaryTransport = true;
@@ -11,7 +11,7 @@ export class GameConstants {
   static screenRange = screenSize.width * 1.4;
   static screenSize = screenSize;
   static serverTickRate = 150;
-  static serverVersion = 5;
+  static serverVersion = 6;
 
   static singlePlayer = typeof window === 'object' && window.location.pathname.indexOf('single') >= 0;
   static throttleClient = false;

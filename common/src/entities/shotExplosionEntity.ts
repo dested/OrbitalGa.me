@@ -7,7 +7,7 @@ export class ShotExplosionEntity extends Entity {
   static totalAliveDuration = 5;
   aliveDuration = ShotExplosionEntity.totalAliveDuration;
 
-  constructor(game: Game, entityId: number, public ownerEntityId?: number) {
+  constructor(game: Game, entityId: number, public intensity: number, public ownerEntityId?: number) {
     super(game, entityId, 'shotExplosion');
     this.createPolygon();
   }
@@ -38,17 +38,21 @@ export class ShotExplosionEntity extends Entity {
   reconcileFromServer(messageEntity: ShotExplosionModel) {
     super.reconcileFromServer(messageEntity);
     this.ownerEntityId = messageEntity.ownerEntityId;
+    this.intensity = messageEntity.intensity;
   }
+
   serialize(): ShotExplosionModel {
     return {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
+      intensity: this.intensity,
       entityType: 'shotExplosion',
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
     Entity.addBuffer(buff, entity);
+    buff.addUint8(entity.intensity);
     buff.addOptionalInt32(entity.ownerEntityId);
   }
 
@@ -56,6 +60,7 @@ export class ShotExplosionEntity extends Entity {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'shotExplosion',
+      intensity: reader.readUint8(),
       ownerEntityId: reader.readOptionalInt32(),
     };
   }
@@ -63,5 +68,6 @@ export class ShotExplosionEntity extends Entity {
 
 export type ShotExplosionModel = EntityModel & {
   entityType: 'shotExplosion';
+  intensity: number;
   ownerEntityId?: number;
 };

@@ -14,7 +14,7 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
   zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageEntity: ShotExplosionModel) {
-    super(game, messageEntity.entityId, messageEntity.ownerEntityId);
+    super(game, messageEntity.entityId, messageEntity.intensity, messageEntity.ownerEntityId);
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     if (messageEntity.create) {
@@ -23,7 +23,7 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
         x: this.x,
         y: this.y,
       });
-      ShakeGame(5);
+      ShakeGame(messageEntity.intensity);
     }
     this.updatePolygon();
   }
