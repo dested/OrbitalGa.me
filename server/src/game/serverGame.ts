@@ -39,6 +39,10 @@ export class ServerGame extends Game {
     if (spectatorIndex >= 0) {
       this.spectators.splice(spectatorIndex, 1);
     }
+    const userIndex = this.users.findIndex((a) => a.connectionId === connectionId);
+    if (userIndex >= 0) {
+      this.users.splice(userIndex, 1);
+    }
 
     const playerEntity = new ServerPlayerEntity(this, nextId());
     const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
@@ -118,11 +122,11 @@ export class ServerGame extends Game {
   serverTick(tickIndex: number, duration: number, tickTime: number) {
     if (!GameConstants.singlePlayer) {
       console.log(
-        `tick: ${tickIndex}, Users: ${this.users.length}, Entities: ${this.entities.length}, Messages:${
-          this.queuedMessages.length
-        }, Duration: ${tickTime}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, <- ${Utils.formatBytes(
-          this.serverSocket.totalBytesReceived
-        )}`
+        `#${tickIndex}, Users: ${this.users.length}, Spectators: ${this.spectators.length}, Entities: ${
+          this.entities.length
+        }, Messages:${this.queuedMessages.length}, Duration: ${tickTime}ms, -> ${Utils.formatBytes(
+          this.serverSocket.totalBytesSent
+        )}, <- ${Utils.formatBytes(this.serverSocket.totalBytesReceived)}`
       );
     }
 

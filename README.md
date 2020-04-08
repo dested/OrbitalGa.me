@@ -22,9 +22,9 @@
 - [ ] disconnect player for prolonged inactivity 
 - [ ] disconnect player for delayed pingpong 
 - [ ] test server version
-- [ ] validate input sequence number so they can't send garbage negative, etc
+- [ ] validate input sequence number, assure they can't send garbage negative, etc
 - [ ] add audio
-- [ ] add asset loading progress 
+- [ ] add asset loading progress
 - [ ] hard to go straight left with nipplejs
 - [ ] maybe remove momentum
 - [ ] garbageless server tick
@@ -34,7 +34,7 @@
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
-- [ ] revive does not work 
+- [x] revive does not work 
 - [x] abstract interpolate entities
 - [x] better death animation
 - [x] moving goes out of sync on mobile, i think its moving faster

@@ -9,7 +9,6 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
 
   constructor(game: ClientGame, messageEntity: MeteorModel) {
     super(game, messageEntity.entityId, messageEntity.meteorColor, messageEntity.size, messageEntity.type);
-
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     this.updatePolygon();

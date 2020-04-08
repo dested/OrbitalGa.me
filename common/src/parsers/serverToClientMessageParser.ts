@@ -1,7 +1,7 @@
 import {ServerToClientMessage} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
-import {EntityBufferType, EntityBufferValue} from '../models/entityTypeModels';
+import {EntityBufferType, EntityBufferValue, EntityBufferValueLookup} from '../models/entityTypeModels';
 
 export class ServerToClientMessageParser {
   static fromServerToClientMessages(messages: ServerToClientMessage[]) {
@@ -51,7 +51,7 @@ export class ServerToClientMessageParser {
           type: 'worldState',
           entities: reader.loop(() => {
             const option = reader.readUint8();
-            const entityBufferTypeElement = EntityBufferType[EntityBufferValue[option]];
+            const entityBufferTypeElement = EntityBufferType[EntityBufferValueLookup[option]];
             if (!entityBufferTypeElement) {
               throw new Error(`Buffer option not found: ${option}`);
             }

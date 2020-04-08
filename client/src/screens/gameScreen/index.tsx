@@ -142,7 +142,9 @@ export const GameScreen: React.FC = observer((props) => {
           }}
         >
           <span style={{fontSize: '3rem'}}>You died</span>
-          <button onClick={revive}>Reconnect</button>
+          <button style={{fontSize: '3rem'}} onClick={revive}>
+            Revive
+          </button>
         </div>
       )}
       <GoFullScreen />
