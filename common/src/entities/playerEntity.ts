@@ -58,8 +58,8 @@ export class PlayerEntity extends Entity {
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          const shotEntity = new ShotEntity(this.game, nextId(), this.entityId);
-          shotEntity.start(this.shotSide === 'left' ? -42 : 42, -6);
+          const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, this.y - 6);
+          shotEntity.start(this.x + (this.shotSide === 'left' ? -42 : 42), this.y - 6);
           this.game.entities.push(shotEntity);
           this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           this.shootTimer = 1;

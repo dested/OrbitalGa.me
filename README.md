@@ -36,6 +36,7 @@
 - [ ] server is offline, play with bots locally
 - [ ] add momentum to rocks, maybe everything
 - [ ] import all assets
+- [x] fix shots being tied to entity xy
 - [x] revive does not work 
 - [x] abstract interpolate entities
 - [x] better death animation

@@ -154,8 +154,8 @@ export class SwoopingEnemyEntity extends Entity {
       this.aliveTick % 4 === 0 &&
       (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
     ) {
-      const shotEntity = new EnemyShotEntity(this.game, nextId(), this.entityId);
-      shotEntity.start(0, -6);
+      const shotEntity = new EnemyShotEntity(this.game, nextId());
+      shotEntity.start(this.x, this.y - 6);
       this.game.entities.push(shotEntity);
     }
 

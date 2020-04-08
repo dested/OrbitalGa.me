@@ -9,34 +9,27 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
   constructor(game: ClientGame, messageEntity: ShotModel) {
-    super(game, messageEntity.entityId, messageEntity.ownerEntityId);
+    super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.startY);
 
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     if (messageEntity.create) {
-      this.y = -6;
+      this.y = messageEntity.startY;
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,
-        y: -6,
+        y: messageEntity.startY,
       });
     }
     this.updatePolygon();
   }
   get drawX() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.x;
-    }
-    return this.x + owner.drawX;
+    return this.x;
   }
   get drawY() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.y;
-    }
-    return this.y + owner.drawY;
+    return this.y;
   }
+
   draw(context: CanvasRenderingContext2D): void {
     const laserBlue = OrbitalAssets.assets['Lasers.laserBlue02'];
     context.save();

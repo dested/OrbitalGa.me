@@ -4,29 +4,22 @@ import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameRules} from '../game/gameRules';
+import {MeteorModel} from './meteorEntity';
 
 export class ShotEntity extends Entity {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
 
-  constructor(game: Game, entityId: number, public ownerEntityId: number) {
+  constructor(game: Game, entityId: number, public ownerEntityId: number, public startY: number) {
     super(game, entityId, 'shot');
     this.createPolygon();
   }
 
   get realX() {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
-    if (!owner) {
-      return this.x;
-    }
-    return this.x + owner.realX;
+    return this.x;
   }
   get realY() {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
-    if (!owner) {
-      return this.y;
-    }
-    return this.y + owner.realY;
+    return this.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -45,10 +38,17 @@ export class ShotEntity extends Entity {
     }
   }
 
+  reconcileFromServer(messageEntity: ShotEntity) {
+    super.reconcileFromServer(messageEntity);
+    this.ownerEntityId = messageEntity.ownerEntityId;
+    this.startY = messageEntity.startY;
+  }
+
   serialize(): ShotModel {
     return {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
+      startY: this.startY,
       entityType: 'shot',
     };
   }
@@ -56,6 +56,7 @@ export class ShotEntity extends Entity {
   static addBuffer(buff: ArrayBufferBuilder, entity: ShotModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint32(entity.ownerEntityId);
+    buff.addInt32(entity.startY);
   }
 
   static readBuffer(reader: ArrayBufferReader): ShotModel {
@@ -63,6 +64,7 @@ export class ShotEntity extends Entity {
       ...Entity.readBuffer(reader),
       entityType: 'shot',
       ownerEntityId: reader.readUint32(),
+      startY: reader.readInt32(),
     };
   }
 }
@@ -70,4 +72,5 @@ export class ShotEntity extends Entity {
 export type ShotModel = EntityModel & {
   entityType: 'shot';
   ownerEntityId: number;
+  startY: number;
 };
