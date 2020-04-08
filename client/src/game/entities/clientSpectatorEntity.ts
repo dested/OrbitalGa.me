@@ -1,6 +1,5 @@
 import {EnemyShotEntity, EnemyShotModel} from '@common/entities/enemyShotEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';

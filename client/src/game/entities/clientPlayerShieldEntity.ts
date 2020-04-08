@@ -1,14 +1,10 @@
 import {PlayerShieldEntity, PlayerShieldModel} from '@common/entities/playerShieldEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
-import {ShakeGame} from '../../utils/shakeUtils';
-import {PlayerEntity} from '@common/entities/playerEntity';
-import {ClientPlayerEntity} from './clientPlayerEntity';
-import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 import {Entity} from '@common/entities/entity';
 import {GameRules} from '@common/game/gameRules';
+import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
   zIndex = DrawZIndex.Effect;
@@ -47,7 +43,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
       return;
     }
 
-    const shield = AssetManager.assets['shield.1'];
+    const shield = OrbitalAssets.assets['Effects.shield1'];
     context.save();
     context.translate(this.drawX, this.drawY);
     context.globalAlpha = this.health / GameRules.playerShield.base.startingHealth;

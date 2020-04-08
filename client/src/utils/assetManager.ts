@@ -1,47 +1,39 @@
-export interface Asset {
+import {AssetKeys} from '../assets';
+
+export interface Asset<TKeys> {
   animated: boolean;
   base: {x: number; y: number};
   image: HTMLImageElement;
   images: HTMLImageElement[];
-  name: string;
+  name: TKeys;
   size: {height: number; width: number};
 }
 
-export interface AssetItem {
+export interface AssetItem<TKeys> {
   base: {x: number; y: number};
   frameIndex?: number;
-  realName: string;
+  realName: TKeys;
   size: {height: number; width: number};
-  url: string;
+  url: typeof import('*.png');
 }
 
-export class AssetManager {
-  static $assetsLoaded = 0;
-  static $assetsRequested = 0;
-  static assetQueue: {[key: string]: AssetItem} = {};
-  static assets: {[key: string]: Asset} = {};
-  static completed: () => void;
+class AssetManager<TKeys extends string> {
+  assetQueue: {[key in TKeys]: AssetItem<TKeys>} = {} as any;
+  assets: {[key in TKeys]: Asset<TKeys>} = {} as any;
 
-  static addAsset(name: string, url: string, size: {height: number; width: number}, base: {x: number; y: number}) {
-    this.assetQueue[name] = {base, size, url, realName: name};
-    this.$assetsRequested++;
-  }
-
-  static addAssetFrame(
-    name: string,
-    frameIndex: number,
-    url: string,
+  addAsset(
+    name: TKeys,
+    url: typeof import('*.png'),
     size: {height: number; width: number},
-    base: {x: number; y: number}
+    base: {x: number; y: number} = {x: 0, y: 0}
   ) {
-    this.assetQueue[name + frameIndex] = {base, size, url, frameIndex, realName: name};
-    this.$assetsRequested++;
+    this.assetQueue[name] = {base, size, url, realName: name};
   }
 
-  static imageLoaded(img: HTMLImageElement, name: string) {
+  imageLoaded(img: HTMLImageElement, name: TKeys) {
     const assetQueue = this.assetQueue[name];
 
-    const asset: Asset = this.assets[assetQueue.realName] || {
+    const asset: Asset<TKeys> = this.assets[assetQueue.realName] || {
       size: null,
       base: null,
       name,
@@ -64,16 +56,9 @@ export class AssetManager {
     }
 
     this.assets[assetQueue.realName] = asset;
-
-    this.$assetsLoaded++;
-    if (this.$assetsLoaded === this.$assetsRequested) {
-      setTimeout(() => {
-        this.completed && this.completed();
-      }, 100);
-    }
   }
 
-  static async start() {
+  async start() {
     const promises: Promise<void>[] = [];
     for (const name in this.assetQueue) {
       if (this.assetQueue.hasOwnProperty(name)) {
@@ -84,7 +69,7 @@ export class AssetManager {
               this.imageLoaded(img, name);
               res();
             };
-            img.src = this.assetQueue[name].url;
+            img.src = (this.assetQueue[name].url as unknown) as string;
           })
         );
       }
@@ -92,3 +77,5 @@ export class AssetManager {
     return await Promise.all(promises);
   }
 }
+
+export const OrbitalAssets = new AssetManager<AssetKeys>();

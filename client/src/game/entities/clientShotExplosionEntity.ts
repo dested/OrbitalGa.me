@@ -1,12 +1,12 @@
 import {ShotExplosionEntity, ShotExplosionModel} from '@common/entities/shotExplosionEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {Entity} from '@common/entities/entity';
 import {Utils} from '@common/utils/utils';
+import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
   rotate = Math.random() * 360;
@@ -42,7 +42,7 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
     return this.y + owner.drawY;
   }
   draw(context: CanvasRenderingContext2D): void {
-    const blueExplosion = AssetManager.assets['laser.blue.explosion'];
+    const blueExplosion = OrbitalAssets.assets['Lasers.laserBlue10'];
     context.save();
     context.translate(this.drawX, this.drawY);
     context.rotate(Utils.degToRad(this.rotate * 4));

@@ -1,8 +1,8 @@
 import React, {useEffect, useRef} from 'react';
 import {useAnimationFrame} from '../hooks/useAnimationFrame';
 import {GameData} from '../game/gameData';
-import {AssetManager} from '../utils/assetManager';
 import {GameConstants} from '@common/game/gameConstants';
+import {OrbitalAssets} from '../utils/assetManager';
 
 export const StarBackground: React.FC = (props) => {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -27,9 +27,11 @@ export const StarBackground: React.FC = (props) => {
 
     const viewY = view.viewY - frame.current / 2;
     let count = 0;
+    const image = OrbitalAssets.assets['Backgrounds.stars'].image;
+
     for (let x = view.viewX - (view.viewX % 256) - 256; x < view.viewX + view.viewWidth + 256 * 2; x += 256) {
       for (let y = viewY - (viewY % 256) - 256; y < viewY + view.viewHeight + 256 * 2; y += 256) {
-        context.drawImage(AssetManager.assets.stars.image, x, y);
+        context.drawImage(image, x, y);
         count++;
       }
     }

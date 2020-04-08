@@ -2,7 +2,6 @@ import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientPlayerEntity} from './clientPlayerEntity';

@@ -107,12 +107,16 @@ export class PlayerEntity extends Entity {
     }
     if (!this.game.isClient) {
       if (otherEntity instanceof EnemyShotEntity) {
-        return this.hurt(
-          1,
-          otherEntity,
-          collisionResult.overlap * collisionResult.overlap_x,
-          collisionResult.overlap * collisionResult.overlap_y
-        );
+        if (
+          this.hurt(
+            1,
+            otherEntity,
+            collisionResult.overlap * collisionResult.overlap_x,
+            collisionResult.overlap * collisionResult.overlap_y
+          )
+        ) {
+          this.game.destroyEntity(otherEntity);
+        }
       }
     }
     return false;
@@ -152,7 +156,6 @@ export class PlayerEntity extends Entity {
     }
 
     this.health -= damage;
-    this.game.destroyEntity(otherEntity);
     const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 5, this.entityId);
     shotExplosionEntity.start(x, y);
     this.game.entities.push(shotExplosionEntity);

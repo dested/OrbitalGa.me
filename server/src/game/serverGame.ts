@@ -116,7 +116,9 @@ export class ServerGame extends Game {
   }
 
   sendMessageToClient(connectionId: string, message: ServerToClientMessage) {
-    this.queuedMessagesToSend[connectionId].push(message);
+    if (this.queuedMessagesToSend[connectionId]) {
+      this.queuedMessagesToSend[connectionId].push(message);
+    }
   }
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
@@ -126,7 +128,9 @@ export class ServerGame extends Game {
           this.entities.length
         }, Messages:${this.queuedMessages.length}, Duration: ${tickTime}ms, -> ${Utils.formatBytes(
           this.serverSocket.totalBytesSent
-        )}, <- ${Utils.formatBytes(this.serverSocket.totalBytesReceived)}`
+        )}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSentPerSecond)}/s, <- ${Utils.formatBytes(
+          this.serverSocket.totalBytesReceived
+        )}`
       );
     }
 
@@ -192,7 +196,7 @@ export class ServerGame extends Game {
       for (let i = 0; i < enemyCount; i++) {
         const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
 
-        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId());
+        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), SwoopingEnemyEntity.randomEnemyColor());
         swoopingEnemyEntity.start(
           Utils.randomInRange(x0, x1),
           -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15

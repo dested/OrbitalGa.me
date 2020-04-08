@@ -115,8 +115,6 @@ export class MeteorEntity extends Entity {
         return true;
       }
       if (otherEntity instanceof PlayerEntity) {
-        otherEntity.momentum.x = 0;
-        otherEntity.momentum.y = 0;
         if (
           otherEntity.hurt(
             1,
@@ -125,6 +123,11 @@ export class MeteorEntity extends Entity {
             collisionResult.overlap * collisionResult.overlap_y
           )
         ) {
+          otherEntity.momentum.x = collisionResult.overlap * collisionResult.overlap_x * 4;
+          otherEntity.momentum.y = collisionResult.overlap * collisionResult.overlap_y * 4;
+          this.x += collisionResult.overlap * collisionResult.overlap_x * 3;
+          this.y += collisionResult.overlap * collisionResult.overlap_y * 3;
+
           this.health -= 1;
           if (this.health <= 0) {
             this.die();
@@ -141,6 +144,12 @@ export class MeteorEntity extends Entity {
             collisionResult.overlap * collisionResult.overlap_y
           )
         ) {
+          if (otherEntity.player) {
+            otherEntity.player.momentum.x = collisionResult.overlap * collisionResult.overlap_x * 4;
+            otherEntity.player.momentum.y = collisionResult.overlap * collisionResult.overlap_y * 4;
+          }
+          this.x -= collisionResult.overlap * collisionResult.overlap_x * 3;
+          this.y -= collisionResult.overlap * collisionResult.overlap_y * 3;
           this.health -= 1;
           if (this.health <= 0) {
             this.die();

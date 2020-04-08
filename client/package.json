@@ -28,6 +28,8 @@
 
   "devDependencies": {
     "customize-cra": "^0.9.1",
+    "glob": "^7.1.6",
+    "image-size": "^0.8.3",
     "prettier": "^2.0.2",
     "react-app-rewired": "^2.1.5",
     "ts-loader": "^6.2.1",
@@ -43,6 +45,7 @@
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
 
+    "assets": "node scripts/process-assets",
     "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
     "lint": "npx tslint -p tsconfig.json --fix"
   },

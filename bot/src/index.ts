@@ -20,7 +20,9 @@ async function main() {
       onOpen: (me: ClientGame) => {
         me.sendMessageToServer({type: 'join'});
       },
-      onDied: (me: ClientGame) => {},
+      onDied: (me: ClientGame) => {
+        me.joinGame();
+      },
     };
 
     new BotClientGame(serverPath, options, new ClientSocket());

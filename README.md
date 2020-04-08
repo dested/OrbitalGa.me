@@ -34,6 +34,8 @@
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
+- [ ] add momentum to rocks, maybe everything
+- [ ] import all assets
 - [x] revive does not work 
 - [x] abstract interpolate entities
 - [x] better death animation
@@ -55,10 +57,10 @@
 
 ## Game Rules
 
-- [ ] add concept of enemy types, better abstraction
+- [ ] add a concept of enemy types, better abstraction
 - [ ] add death effect
 - [ ] watch other shmups
-- [ ] add powerups
+- [ ] add power-ups
   - [ ] two clones fight with you
 - [ ] come up with more enemies
 - [ ] come up with realtime events
@@ -67,13 +69,14 @@
 - [ ] abstract game events into a class
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event
-- [ ] drop powerups from enemy
-- [ ] drop powerups from debris
+- [ ] drop power-ups from enemy
+- [ ] drop power-ups from debris
 - [ ] drop bombs
 - [ ] add shields
-  - [ ] you always have shield that regens but also upgradable
-- [ ] 3 lives before you die and reset???
-- [ ] add 5 second sustained laser
+  - [x] you always have shield that regens but also upgradable
+  - [x] add shield power up
+- [ ] add 5 second sustained lazer
+- [x] add multiple enemy colors
 - [x] better rock debris
 - [x] add rock debris
 

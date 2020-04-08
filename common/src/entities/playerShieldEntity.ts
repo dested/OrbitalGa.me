@@ -9,6 +9,7 @@ import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {GameConstants} from '../game/gameConstants';
 import {GameRules} from '../game/gameRules';
+import {PlayerEntity} from './playerEntity';
 
 export class PlayerShieldEntity extends Entity {
   boundingBoxes = [{width: 133, height: 108}];
@@ -23,6 +24,9 @@ export class PlayerShieldEntity extends Entity {
   constructor(game: Game, entityId: number, public ownerEntityId: number) {
     super(game, entityId, 'playerShield');
     this.createPolygon();
+  }
+  get player() {
+    return this.game.entities.lookup<PlayerEntity>(this.ownerEntityId);
   }
 
   get realX() {
@@ -42,7 +46,9 @@ export class PlayerShieldEntity extends Entity {
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof EnemyShotEntity) {
-      return this.hurt(1, otherEntity, this.realX - otherEntity.realX, this.realY - otherEntity.realY);
+      if (this.hurt(1, otherEntity, this.realX - otherEntity.realX, this.realY - otherEntity.realY)) {
+        otherEntity.destroy();
+      }
     }
 
     return false;
@@ -70,7 +76,6 @@ export class PlayerShieldEntity extends Entity {
     }
     this.health -= damage;
     this.lastHit = 10;
-    this.game.destroyEntity(otherEntity);
     const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 3, this.entityId);
     shotExplosionEntity.start(x, y);
     this.game.entities.push(shotExplosionEntity);

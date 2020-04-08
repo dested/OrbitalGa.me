@@ -1,9 +1,9 @@
 import {ShotEntity, ShotModel} from '@common/entities/shotEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {Entity} from '@common/entities/entity';
+import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientShotEntity extends ShotEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
@@ -38,7 +38,7 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
     return this.y + owner.drawY;
   }
   draw(context: CanvasRenderingContext2D): void {
-    const laserBlue = AssetManager.assets['laser.blue'];
+    const laserBlue = OrbitalAssets.assets['Lasers.laserBlue02'];
     context.save();
     context.translate(this.drawX, this.drawY);
     context.drawImage(laserBlue.image, -laserBlue.size.width / 2, -laserBlue.size.height / 2);

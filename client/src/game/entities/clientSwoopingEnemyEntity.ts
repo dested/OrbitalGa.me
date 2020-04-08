@@ -1,13 +1,15 @@
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '@common/entities/swoopingEnemyEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
+import {Asset, OrbitalAssets} from '../../utils/assetManager';
+import {AssetKeys} from '../../assets';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
+
   constructor(game: ClientGame, messageEntity: SwoopingEnemyModel) {
-    super(game, messageEntity.entityId);
+    super(game, messageEntity.entityId, messageEntity.enemyColor);
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     this.health = messageEntity.health;
@@ -28,10 +30,23 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     return this.y;
   }
   draw(context: CanvasRenderingContext2D): void {
-    const enemyShip = AssetManager.assets.ship2;
+    let enemyShip: Asset<AssetKeys>;
+    switch (this.enemyColor) {
+      case 'black':
+        enemyShip = OrbitalAssets.assets['Enemies.enemyBlack1'];
+        break;
+      case 'blue':
+        enemyShip = OrbitalAssets.assets['Enemies.enemyBlue1'];
+        break;
+      case 'green':
+        enemyShip = OrbitalAssets.assets['Enemies.enemyGreen1'];
+        break;
+      case 'red':
+        enemyShip = OrbitalAssets.assets['Enemies.enemyRed1'];
+        break;
+    }
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.rotate(Math.PI);
     context.drawImage(enemyShip.image, -enemyShip.size.width / 2, -enemyShip.size.height / 2);
     context.restore();
   }

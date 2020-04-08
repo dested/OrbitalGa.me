@@ -9,10 +9,14 @@ import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessage
 
 export class LocalServerSocket implements IServerSocket {
   connections: {connectionId: string; socket: WebSocketServerSocket}[] = [];
+  time = +new Date();
   totalBytesReceived = 0;
-
   totalBytesSent = 0;
   wss?: WebSocketServer;
+
+  get totalBytesSentPerSecond() {
+    return Math.round(this.totalBytesSent / ((+new Date() - this.time) / 1000));
+  }
 
   sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
     const client = this.connections.find((a) => a.connectionId === connectionId);

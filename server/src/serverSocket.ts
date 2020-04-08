@@ -9,10 +9,15 @@ import {createServer} from 'http';
 
 export class ServerSocket implements IServerSocket {
   connections: {connectionId: string; socket: WebServer.WebSocket}[] = [];
+
+  time = +new Date();
+
   totalBytesReceived = 0;
   totalBytesSent = 0;
   wss?: WebServer.Server;
-
+  get totalBytesSentPerSecond() {
+    return Math.round(this.totalBytesSent / ((+new Date() - this.time) / 1000));
+  }
   sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
     const client = this.connections.find((a) => a.connectionId === connectionId);
     if (!client) {
@@ -93,8 +98,8 @@ export class ServerSocket implements IServerSocket {
 
 export interface IServerSocket {
   totalBytesReceived: number;
-
   totalBytesSent: number;
+  totalBytesSentPerSecond: number;
 
   sendMessage(connectionId: string, messages: ServerToClientMessage[]): void;
   start(
