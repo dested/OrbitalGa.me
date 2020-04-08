@@ -8,7 +8,7 @@ import {PlayerEntity} from '@common/entities/playerEntity';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 import {Entity} from '@common/entities/entity';
-import {GameRules} from "@common/game/gameRules";
+import {GameRules} from '@common/game/gameRules';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
   get drawX() {

@@ -15,4 +15,3 @@ export class GameConstants {
   static playerStartingY = GameConstants.screenSize.height * 0.8;
   static numberOfSinglePlayerBots = 0;
 }
-

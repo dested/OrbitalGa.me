@@ -9,7 +9,7 @@ import {WallEntity} from './wallEntity';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
-import {GameRules} from "../game/gameRules";
+import {GameRules} from '../game/gameRules';
 
 export type PendingInput = {
   inputSequenceNumber: number;

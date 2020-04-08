@@ -9,7 +9,7 @@ import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {PathRunner} from '../utils/pathRunner';
-import {GameRules} from "../game/gameRules";
+import {GameRules} from '../game/gameRules';
 
 export class SwoopingEnemyEntity extends Entity {
   get realX() {
