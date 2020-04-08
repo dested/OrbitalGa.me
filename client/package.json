@@ -41,7 +41,10 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+
+    "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
+    "lint": "npx tslint -p tsconfig.json --fix"
   },
   "eslintConfig": {
     "extends": "react-app"

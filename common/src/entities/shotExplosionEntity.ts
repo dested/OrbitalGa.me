@@ -4,6 +4,13 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class ShotExplosionEntity extends Entity {
+  static totalAliveDuration = 5;
+  aliveDuration = ShotExplosionEntity.totalAliveDuration;
+
+  constructor(game: Game, entityId: number, public ownerEntityId?: number) {
+    super(game, entityId, 'shotExplosion');
+    this.createPolygon();
+  }
   get realX() {
     const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -19,22 +26,18 @@ export class ShotExplosionEntity extends Entity {
     return this.y + owner.realY;
   }
 
-  constructor(game: Game, entityId: number, public ownerEntityId?: number) {
-    super(game, entityId, 'shotExplosion');
-    this.createPolygon();
-  }
-
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     return false;
   }
-
-  static totalAliveDuration = 5;
-  aliveDuration = ShotExplosionEntity.totalAliveDuration;
   gameTick(duration: number) {
     this.aliveDuration -= 1;
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);
     }
+  }
+  reconcileFromServer(messageEntity: ShotExplosionModel) {
+    super.reconcileFromServer(messageEntity);
+    this.ownerEntityId = messageEntity.ownerEntityId;
   }
   serialize(): ShotExplosionModel {
     return {
@@ -43,9 +46,10 @@ export class ShotExplosionEntity extends Entity {
       entityType: 'shotExplosion',
     };
   }
-  reconcileFromServer(messageEntity: ShotExplosionModel) {
-    super.reconcileFromServer(messageEntity);
-    this.ownerEntityId = messageEntity.ownerEntityId;
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
+    Entity.addBuffer(buff, entity);
+    buff.addOptionalInt32(entity.ownerEntityId);
   }
 
   static readBuffer(reader: ArrayBufferReader): ShotExplosionModel {
@@ -54,11 +58,6 @@ export class ShotExplosionEntity extends Entity {
       entityType: 'shotExplosion',
       ownerEntityId: reader.readOptionalInt32(),
     };
-  }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addOptionalInt32(entity.ownerEntityId);
   }
 }
 

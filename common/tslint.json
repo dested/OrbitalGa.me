@@ -10,7 +10,7 @@
   },
   "rules": {
     "radix": false,
-    "member-ordering": false,
+    "member-ordering": [true, {"order": "instance-sandwich","alphabetize": true}],
     "no-namespace": false,
     "forin": false,
     "no-reference": false,

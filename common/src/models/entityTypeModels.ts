@@ -21,24 +21,24 @@ export type WorldStateEntity =
   | MeteorModel;
 
 export type EntityModelType = {
-  player: PlayerModel;
   enemyShot: EnemyShotModel;
+  meteor: MeteorModel;
+  player: PlayerModel;
+  playerShield: PlayerShieldModel;
   shot: ShotModel;
   shotExplosion: ShotExplosionModel;
+  spectator: SpectatorModel;
   swoopingEnemy: SwoopingEnemyModel;
   wall: WallModel;
-  spectator: SpectatorModel;
-  playerShield: PlayerShieldModel;
-  meteor: MeteorModel;
 };
 
 export type WorldEntityModelCastToEntityModel = any;
 
 export const EntityBufferType: {
   [key in WorldStateEntity['entityType']]: {
-    value: number;
     addBuffer: (buff: ArrayBufferBuilder, entityModel: EntityModelType[key]) => void;
     readBuffer: (reader: ArrayBufferReader) => EntityModelType[key];
+    value: number;
   };
 } = {
   player: {value: 1, addBuffer: PlayerEntity.addBuffer, readBuffer: PlayerEntity.readBuffer},

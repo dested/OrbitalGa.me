@@ -12,12 +12,7 @@ import {PathRunner} from '../utils/pathRunner';
 import {GameRules} from '../game/gameRules';
 
 export class SwoopingEnemyEntity extends Entity {
-  get realX() {
-    return this.x;
-  }
-  get realY() {
-    return this.y;
-  }
+  aliveTick: number = 0;
 
   // width = 112;
   // height = 75;
@@ -25,6 +20,8 @@ export class SwoopingEnemyEntity extends Entity {
     {width: 112, height: 34, offsetY: 41},
     {width: 57, height: 41, offsetX: 35},
   ];
+
+  health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
   private path = new PathRunner(
     [
@@ -83,14 +80,26 @@ export class SwoopingEnemyEntity extends Entity {
     super(game, entityId, 'swoopingEnemy');
     this.createPolygon();
   }
-
-  start(x: number, y: number) {
-    super.start(x, y);
-    this.path.setStartPosition(x, y);
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
   }
 
-  health: number = GameRules.enemies.swoopingEnemy.startingHealth;
-  aliveTick: number = 0;
+  collide(otherEntity: Entity, collisionResult: Result): boolean {
+    if (otherEntity instanceof ShotEntity) {
+      this.health -= 1;
+      this.game.destroyEntity(otherEntity);
+
+      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+      shotExplosionEntity.start(this.x - otherEntity.realX, this.y - otherEntity.realY);
+      this.game.entities.push(shotExplosionEntity);
+
+      return true;
+    }
+    return false;
+  }
   gameTick(duration: number): void {
     if (this.health <= 0) {
       this.game.destroyEntity(this);
@@ -113,18 +122,9 @@ export class SwoopingEnemyEntity extends Entity {
     this.aliveTick++;
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof ShotEntity) {
-      this.health -= 1;
-      this.game.destroyEntity(otherEntity);
-
-      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-      shotExplosionEntity.start(this.x - otherEntity.realX, this.y - otherEntity.realY);
-      this.game.entities.push(shotExplosionEntity);
-
-      return true;
-    }
-    return false;
+  reconcileFromServer(messageEntity: SwoopingEnemyModel) {
+    super.reconcileFromServer(messageEntity);
+    this.health = messageEntity.health;
   }
   serialize(): SwoopingEnemyModel {
     return {
@@ -134,9 +134,14 @@ export class SwoopingEnemyEntity extends Entity {
     };
   }
 
-  reconcileFromServer(messageEntity: SwoopingEnemyModel) {
-    super.reconcileFromServer(messageEntity);
-    this.health = messageEntity.health;
+  start(x: number, y: number) {
+    super.start(x, y);
+    this.path.setStartPosition(x, y);
+  }
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {
+    Entity.addBuffer(buff, entity);
+    buff.addUint8(entity.health);
   }
 
   static readBuffer(reader: ArrayBufferReader): SwoopingEnemyModel {
@@ -145,11 +150,6 @@ export class SwoopingEnemyEntity extends Entity {
       entityType: 'swoopingEnemy' as const,
       health: reader.readUint8(),
     };
-  }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.health);
   }
 }
 

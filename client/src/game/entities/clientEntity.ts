@@ -2,8 +2,8 @@ export interface ClientEntity {
   drawX: number;
   drawY: number;
   zIndex: DrawZIndex;
-  tick(duration: number): void;
   draw(context: CanvasRenderingContext2D): void;
+  tick(duration: number): void;
 }
 
 export enum DrawZIndex {

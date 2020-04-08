@@ -4,16 +4,15 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class SpectatorEntity extends Entity {
+  constructor(game: Game, entityId: number) {
+    super(game, entityId, 'spectator');
+    this.createPolygon();
+  }
   get realX() {
     return this.x;
   }
   get realY() {
     return this.y;
-  }
-
-  constructor(game: Game, entityId: number) {
-    super(game, entityId, 'spectator');
-    this.createPolygon();
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -29,15 +28,15 @@ export class SpectatorEntity extends Entity {
     };
   }
 
+  static addBuffer(buff: ArrayBufferBuilder, entity: SpectatorModel) {
+    Entity.addBuffer(buff, entity);
+  }
+
   static readBuffer(reader: ArrayBufferReader): SpectatorModel {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'spectator',
     };
-  }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: SpectatorModel) {
-    Entity.addBuffer(buff, entity);
   }
 }
 

@@ -8,26 +8,12 @@ import {GameConstants} from '@common/game/gameConstants';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 
 export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {
+  keys = {up: false, down: false, left: false, right: false, shoot: false};
+
+  positionLerp?: {duration: number; startTime: number; x: number; y: number};
   zIndex = DrawZIndex.Player;
   constructor(private clientGame: ClientGame, public messageEntity: PlayerModel) {
     super(clientGame, messageEntity);
-  }
-
-  positionLerp?: {startTime: number; duration: number; x: number; y: number};
-  tick() {}
-
-  gameTick(): void {
-    super.gameTick();
-  }
-
-  keys = {up: false, down: false, left: false, right: false, shoot: false};
-
-  pressKey(input: keyof ClientLivePlayerEntity['keys']) {
-    this.keys[input] = true;
-  }
-
-  releaseKey(input: keyof ClientLivePlayerEntity['keys']) {
-    this.keys[input] = false;
   }
 
   get drawX(): number {
@@ -56,6 +42,17 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
         return Utils.lerp(y, this.y, (now - startTime) / duration);
       }
     }
+  }
+
+  gameTick(): void {
+    super.gameTick();
+  }
+  interpolateEntity(renderTimestamp: number) {
+    // live entity does not need to interpolate anything
+  }
+
+  pressKey(input: keyof ClientLivePlayerEntity['keys']) {
+    this.keys[input] = true;
   }
 
   processInput(duration: number) {
@@ -108,7 +105,9 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
       this.pendingInputs.splice(0, spliceIndex + 1);
     }
   }
-  interpolateEntity(renderTimestamp: number) {
-    // live entity does not need to interpolate anything
+
+  releaseKey(input: keyof ClientLivePlayerEntity['keys']) {
+    this.keys[input] = false;
   }
+  tick() {}
 }

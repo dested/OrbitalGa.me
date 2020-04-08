@@ -5,6 +5,8 @@
   "scripts": {
     "build": "rimraf dist && webpack --mode development",
     "watch": "rimraf dist && webpack --mode development --watch",
+    "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
+    "lint": "npx tslint -p tsconfig.json --fix",
     "nodemon": "nodemon",
     "start": "node --expose-gc ./dist/index.js",
     "debug": "node --expose-gc --inspect-brk ./dist/index.js",

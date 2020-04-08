@@ -5,12 +5,7 @@ import {AssetManager} from '../../utils/assetManager';
 import {Utils} from '@common/utils/utils';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
-  get drawX() {
-    return this.realX;
-  }
-  get drawY() {
-    return this.realY;
-  }
+  zIndex = DrawZIndex.Scenery;
 
   constructor(game: ClientGame, messageEntity: MeteorModel) {
     super(game, messageEntity.entityId, messageEntity.meteorColor, messageEntity.size, messageEntity.type);
@@ -19,10 +14,12 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
     this.y = messageEntity.y;
     this.updatePolygon();
   }
-
-  tick() {}
-
-  zIndex = DrawZIndex.Scenery;
+  get drawX() {
+    return this.realX;
+  }
+  get drawY() {
+    return this.realY;
+  }
   draw(context: CanvasRenderingContext2D): void {
     const meteor = AssetManager.assets[`meteor.${this.meteorColor}.${this.size}.${this.type}`];
     context.save();
@@ -31,4 +28,6 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
     context.drawImage(meteor.image, -meteor.size.width / 2, -meteor.size.height / 2);
     context.restore();
   }
+
+  tick() {}
 }

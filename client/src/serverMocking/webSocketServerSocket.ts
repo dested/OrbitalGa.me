@@ -1,6 +1,7 @@
 import {WebSocketClient} from './webSocketClient';
 
 export class WebSocketServerSocket {
+  binaryType: string = '';
   private onMessageCallback?: (message: {}) => void;
 
   constructor(private wsClient: WebSocketClient) {
@@ -13,13 +14,11 @@ export class WebSocketServerSocket {
     this.wsClient.close();
   }
 
-  binaryType: string = '';
+  onclose(callback: () => void) {}
 
   onmessage(callback: (message: {}) => void) {
     this.onMessageCallback = callback;
   }
-
-  onclose(callback: () => void) {}
 
   send(message: string | ArrayBuffer) {
     this.wsClient.onmessage?.({data: message});

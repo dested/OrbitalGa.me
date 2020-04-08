@@ -6,6 +6,14 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {GameRules} from '../game/gameRules';
 
 export class EnemyShotEntity extends Entity {
+  aliveDuration = 3000;
+
+  boundingBoxes = [{width: 9, height: 57}];
+
+  constructor(game: Game, entityId: number, public ownerEntityId: number) {
+    super(game, entityId, 'enemyShot');
+    this.createPolygon();
+  }
   get realX() {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -21,13 +29,6 @@ export class EnemyShotEntity extends Entity {
     return this.y + owner.realY;
   }
 
-  boundingBoxes = [{width: 9, height: 57}];
-
-  constructor(game: Game, entityId: number, public ownerEntityId: number) {
-    super(game, entityId, 'enemyShot');
-    this.createPolygon();
-  }
-
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
       this.game.destroyEntity(this);
@@ -35,8 +36,6 @@ export class EnemyShotEntity extends Entity {
     }
     return false;
   }
-
-  aliveDuration = 3000;
 
   gameTick(duration: number) {
     this.y += GameRules.enemyShots.base.shotSpeedPerSecond * (duration / 1000);
@@ -54,17 +53,17 @@ export class EnemyShotEntity extends Entity {
     };
   }
 
+  static addBuffer(buff: ArrayBufferBuilder, entity: EnemyShotModel) {
+    Entity.addBuffer(buff, entity);
+    buff.addUint32(entity.ownerEntityId);
+  }
+
   static readBuffer(reader: ArrayBufferReader): EnemyShotModel {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'enemyShot',
       ownerEntityId: reader.readUint32(),
     };
-  }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: EnemyShotModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint32(entity.ownerEntityId);
   }
 }
 

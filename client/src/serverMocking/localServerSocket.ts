@@ -8,8 +8,27 @@ import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessage
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 
 export class LocalServerSocket implements IServerSocket {
-  wss?: WebSocketServer;
   connections: {connectionId: string; socket: WebSocketServerSocket}[] = [];
+  totalBytesReceived = 0;
+
+  totalBytesSent = 0;
+  wss?: WebSocketServer;
+
+  sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
+    const client = this.connections.find((a) => a.connectionId === connectionId);
+    if (!client) {
+      return;
+    }
+    if (GameConstants.binaryTransport) {
+      const body = ServerToClientMessageParser.fromServerToClientMessages(messages);
+      this.totalBytesSent += body.byteLength;
+      client.socket.send(body);
+    } else {
+      const body = JSON.stringify(messages);
+      this.totalBytesSent += body.length * 2 + 1;
+      client.socket.send(body);
+    }
+  }
 
   start(
     onJoin: (connectionId: string) => void,
@@ -51,23 +70,4 @@ export class LocalServerSocket implements IServerSocket {
       onJoin(me.connectionId);
     });
   }
-
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
-    const client = this.connections.find((a) => a.connectionId === connectionId);
-    if (!client) {
-      return;
-    }
-    if (GameConstants.binaryTransport) {
-      const body = ServerToClientMessageParser.fromServerToClientMessages(messages);
-      this.totalBytesSent += body.byteLength;
-      client.socket.send(body);
-    } else {
-      const body = JSON.stringify(messages);
-      this.totalBytesSent += body.length * 2 + 1;
-      client.socket.send(body);
-    }
-  }
-
-  totalBytesSent = 0;
-  totalBytesReceived = 0;
 }

@@ -10,10 +10,10 @@ import {ClientGameOptions} from './clientGame';
 
 export class GameData {
   static instance = new GameData();
+  client?: ClientGameUI;
 
   view: GameView;
   private serverPath?: string;
-  client?: ClientGameUI;
 
   private constructor() {
     this.view = new GameView(GameConstants.screenSize.width, GameConstants.screenSize.height);
@@ -48,21 +48,6 @@ export class GameData {
     }
   }
 
-  spectateGame(serverPath: string) {
-    this.serverPath = serverPath;
-    this.client = new ClientGameUI(
-      this.serverPath,
-      {
-        onDied: () => {},
-        onOpen: () => {
-          this.client!.spectateGame();
-        },
-        onDisconnect: () => {},
-      },
-      this.getClientSocket()
-    );
-  }
-
   getClientSocket() {
     if (GameConstants.singlePlayer) {
       return new LocalClientSocket();
@@ -79,5 +64,20 @@ export class GameData {
       this.client!.setOptions(options);
       this.client!.joinGame();
     }
+  }
+
+  spectateGame(serverPath: string) {
+    this.serverPath = serverPath;
+    this.client = new ClientGameUI(
+      this.serverPath,
+      {
+        onDied: () => {},
+        onOpen: () => {
+          this.client!.spectateGame();
+        },
+        onDisconnect: () => {},
+      },
+      this.getClientSocket()
+    );
   }
 }

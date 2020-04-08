@@ -17,5 +17,8 @@
     "tslint-react": "^4.2.0",
     "typescript": "^3.8.3"
   },
-  "scripts": {}
+  "scripts": {
+    "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
+    "lint": "npx tslint -p tsconfig.json --fix"
+  }
 }

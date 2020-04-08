@@ -5,6 +5,8 @@ import {ClientGame, ClientGameOptions} from './clientGame';
 type Moving = 'left' | 'right' | 'up' | 'down';
 
 export class BotClientGame extends ClientGame {
+  moving: Moving = 'left';
+  shooting: boolean = false;
   constructor(serverPath: string, options: ClientGameOptions, socket: IClientSocket) {
     super(serverPath, options, socket);
 
@@ -16,9 +18,6 @@ export class BotClientGame extends ClientGame {
     };
     doAction();
   }
-
-  moving: Moving = 'left';
-  shooting: boolean = false;
   private tryNextMoves() {
     const liveEntity = this.liveEntity;
     if (!liveEntity) {

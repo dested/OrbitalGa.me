@@ -12,9 +12,9 @@ export class LocalClientSocket implements IClientSocket {
   connect(
     serverPath: string,
     options: {
-      onOpen: () => void;
-      onMessage: (messages: ServerToClientMessage[]) => void;
       onDisconnect: () => void;
+      onMessage: (messages: ServerToClientMessage[]) => void;
+      onOpen: () => void;
     }
   ) {
     this.socket = new WebSocketClient(ClientConfig.websocketUrl(serverPath));
@@ -39,6 +39,10 @@ export class LocalClientSocket implements IClientSocket {
     };
   }
 
+  disconnect() {
+    this.socket?.close();
+  }
+
   sendMessage(message: ClientToServerMessage) {
     if (!this.socket) {
       throw new Error('Not connected');
@@ -52,9 +56,5 @@ export class LocalClientSocket implements IClientSocket {
     } catch (ex) {
       console.error('disconnected??');
     }
-  }
-
-  disconnect() {
-    this.socket?.close();
   }
 }

@@ -5,12 +5,7 @@ import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
-  get drawX() {
-    return this.x;
-  }
-  get drawY() {
-    return this.y;
-  }
+  zIndex = DrawZIndex.Player;
   constructor(game: ClientGame, messageEntity: SwoopingEnemyModel) {
     super(game, messageEntity.entityId);
     this.x = messageEntity.x;
@@ -26,9 +21,12 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
 
     this.updatePolygon();
   }
-  tick() {}
-
-  zIndex = DrawZIndex.Player;
+  get drawX() {
+    return this.x;
+  }
+  get drawY() {
+    return this.y;
+  }
   draw(context: CanvasRenderingContext2D): void {
     const enemyShip = AssetManager.assets.ship2;
     context.save();
@@ -37,4 +35,5 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     context.drawImage(enemyShip.image, -enemyShip.size.width / 2, -enemyShip.size.height / 2);
     context.restore();
   }
+  tick() {}
 }

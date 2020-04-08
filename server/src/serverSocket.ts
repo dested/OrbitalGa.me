@@ -8,8 +8,26 @@ import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessage
 import {createServer} from 'http';
 
 export class ServerSocket implements IServerSocket {
-  wss?: WebServer.Server;
   connections: {connectionId: string; socket: WebServer.WebSocket}[] = [];
+  totalBytesReceived = 0;
+  totalBytesSent = 0;
+  wss?: WebServer.Server;
+
+  sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
+    const client = this.connections.find((a) => a.connectionId === connectionId);
+    if (!client) {
+      return;
+    }
+    if (GameConstants.binaryTransport) {
+      const body = ServerToClientMessageParser.fromServerToClientMessages(messages);
+      this.totalBytesSent += body.byteLength;
+      client.socket.send(body);
+    } else {
+      const body = JSON.stringify(messages);
+      this.totalBytesSent += body.length * 2 + 1;
+      client.socket.send(body);
+    }
+  }
 
   start(
     onJoin: (connectionId: string) => void,
@@ -71,35 +89,17 @@ export class ServerSocket implements IServerSocket {
     });
     server.listen(port);
   }
-
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
-    const client = this.connections.find((a) => a.connectionId === connectionId);
-    if (!client) {
-      return;
-    }
-    if (GameConstants.binaryTransport) {
-      const body = ServerToClientMessageParser.fromServerToClientMessages(messages);
-      this.totalBytesSent += body.byteLength;
-      client.socket.send(body);
-    } else {
-      const body = JSON.stringify(messages);
-      this.totalBytesSent += body.length * 2 + 1;
-      client.socket.send(body);
-    }
-  }
-  totalBytesSent = 0;
-  totalBytesReceived = 0;
 }
 
 export interface IServerSocket {
+  totalBytesReceived: number;
+
+  totalBytesSent: number;
+
+  sendMessage(connectionId: string, messages: ServerToClientMessage[]): void;
   start(
     onJoin: (connectionId: string) => void,
     onLeave: (connectionId: string) => void,
     onMessage: (connectionId: string, message: ClientToServerMessage) => void
   ): void;
-
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]): void;
-
-  totalBytesSent: number;
-  totalBytesReceived: number;
 }

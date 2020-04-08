@@ -3,13 +3,7 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 
 export class ClientWallEntity extends WallEntity implements ClientEntity {
-  get drawX() {
-    return this.realX;
-  }
-  get drawY() {
-    return this.realY;
-  }
-  tick() {}
+  zIndex = DrawZIndex.Scenery;
 
   constructor(game: ClientGame, messageEntity: WallModel) {
     super(game, messageEntity.entityId, messageEntity.width, messageEntity.height);
@@ -18,10 +12,15 @@ export class ClientWallEntity extends WallEntity implements ClientEntity {
     this.y = messageEntity.y;
     this.updatePolygon();
   }
-
-  zIndex = DrawZIndex.Scenery;
+  get drawX() {
+    return this.realX;
+  }
+  get drawY() {
+    return this.realY;
+  }
   draw(context: CanvasRenderingContext2D): void {
     context.fillStyle = 'white';
     context.fillRect(this.drawX, this.drawY, this.width, this.height);
   }
+  tick() {}
 }

@@ -1,6 +1,8 @@
 export class ColorUtils {
-  static randomColor() {
-    return this.HSLToRGB(360 * Math.random(), 25 + 70 * Math.random(), 50 + 10 * Math.random());
+  static getTransparentHex(percent: number) {
+    const values = Math.max(percent * 255, 0);
+    const x = Math.min(values, 255);
+    return ('00' + Math.round(x).toString(16)).substr(-2);
   }
 
   static HSLToRGB(h: number, s: number, l: number) {
@@ -55,10 +57,7 @@ export class ColorUtils {
 
     return s1;
   }
-
-  static getTransparentHex(percent: number) {
-    const values = Math.max(percent * 255, 0);
-    const x = Math.min(values, 255);
-    return ('00' + Math.round(x).toString(16)).substr(-2);
+  static randomColor() {
+    return this.HSLToRGB(360 * Math.random(), 25 + 70 * Math.random(), 50 + 10 * Math.random());
   }
 }

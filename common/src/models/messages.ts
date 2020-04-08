@@ -16,25 +16,25 @@ export type ClientToServerMessage =
       type: 'spectate';
     }
   | {
-      type: 'playerInput';
+      down: boolean;
       inputSequenceNumber: number;
       left: boolean;
-      shoot: boolean;
       right: boolean;
+      shoot: boolean;
+      type: 'playerInput';
       up: boolean;
-      down: boolean;
     };
 
 export type ServerToClientMessage =
   | ({
-      type: 'joined';
       serverVersion: number;
+      type: 'joined';
     } & PlayerModel)
   | {
-      type: 'spectating';
       serverVersion: number;
+      type: 'spectating';
     }
   | {
-      type: 'worldState';
       entities: WorldStateEntity[];
+      type: 'worldState';
     };

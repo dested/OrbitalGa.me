@@ -16,5 +16,6 @@
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["node_modules"]
 }

@@ -14,8 +14,10 @@ import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
 
 export class ServerGame extends Game {
-  users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
+  queuedMessages: {connectionId: string; message: ClientToServerMessage}[] = [];
+  queuedMessagesToSend: {[connectionId: string]: ServerToClientMessage[]} = {};
   spectators: {connectionId: string}[] = [];
+  users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
 
   constructor(private serverSocket: IServerSocket) {
     super(false);
@@ -30,6 +32,39 @@ export class ServerGame extends Game {
         this.processMessage(connectionId, message);
       }
     );
+  }
+
+  clientJoin(connectionId: string) {
+    const spectatorIndex = this.spectators.findIndex((a) => a.connectionId === connectionId);
+    if (spectatorIndex >= 0) {
+      this.spectators.splice(spectatorIndex, 1);
+    }
+
+    const playerEntity = new ServerPlayerEntity(this, nextId());
+    const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
+    playerEntity.x = Utils.randomInRange(x0, x1);
+    playerEntity.y = GameConstants.playerStartingY;
+    this.users.push({connectionId, entity: playerEntity});
+    this.entities.push(playerEntity);
+
+    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId);
+    this.entities.push(playerShieldEntity);
+    playerEntity.setShieldEntity(playerShieldEntity.entityId);
+    this.sendMessageToClient(connectionId, {
+      type: 'joined',
+      ...playerEntity.serialize(),
+      serverVersion: GameConstants.serverVersion,
+    });
+  }
+
+  clientLeave(connectionId: string) {
+    delete this.queuedMessagesToSend[connectionId];
+    const user = this.users.find((c) => c.connectionId === connectionId);
+    if (!user) {
+      return;
+    }
+    this.users.splice(this.users.indexOf(user), 1);
+    this.entities.remove(user.entity);
   }
 
   init() {
@@ -72,45 +107,12 @@ export class ServerGame extends Game {
     }, 1000 / 5);
   }
 
-  clientLeave(connectionId: string) {
-    delete this.queuedMessagesToSend[connectionId];
-    const user = this.users.find((c) => c.connectionId === connectionId);
-    if (!user) {
-      return;
-    }
-    this.users.splice(this.users.indexOf(user), 1);
-    this.entities.remove(user.entity);
+  processMessage(connectionId: string, message: ClientToServerMessage) {
+    this.queuedMessages.push({connectionId, message});
   }
 
-  clientJoin(connectionId: string) {
-    const spectatorIndex = this.spectators.findIndex((a) => a.connectionId === connectionId);
-    if (spectatorIndex >= 0) {
-      this.spectators.splice(spectatorIndex, 1);
-    }
-
-    const playerEntity = new ServerPlayerEntity(this, nextId());
-    const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
-    playerEntity.x = Utils.randomInRange(x0, x1);
-    playerEntity.y = GameConstants.playerStartingY;
-    this.users.push({connectionId, entity: playerEntity});
-    this.entities.push(playerEntity);
-
-    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId);
-    this.entities.push(playerShieldEntity);
-    playerEntity.setShieldEntity(playerShieldEntity.entityId);
-    this.sendMessageToClient(connectionId, {
-      type: 'joined',
-      ...playerEntity.serialize(),
-      serverVersion: GameConstants.serverVersion,
-    });
-  }
-
-  spectatorJoin(connectionId: string) {
-    this.spectators.push({connectionId});
-    this.sendMessageToClient(connectionId, {
-      type: 'spectating',
-      serverVersion: GameConstants.serverVersion,
-    });
+  sendMessageToClient(connectionId: string, message: ServerToClientMessage) {
+    this.queuedMessagesToSend[connectionId].push(message);
   }
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
@@ -163,6 +165,13 @@ export class ServerGame extends Game {
           unreachable(q.message);
       }
     }
+
+    if (!stopped) {
+      this.queuedMessages.length = 0;
+    } else {
+      console.log(this.queuedMessages.length, 'remaining');
+    }
+
     for (const key in inputThisTick) {
       inputThisTick[key].entity.applyInput({
         down: false,
@@ -170,14 +179,8 @@ export class ServerGame extends Game {
         right: false,
         left: false,
         shoot: false,
-        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
+        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber,
       });
-    }
-
-    if (!stopped) {
-      this.queuedMessages.length = 0;
-    } else {
-      console.log(this.queuedMessages.length, 'remaining');
     }
 
     if (tickIndex % 50 < 2) {
@@ -248,49 +251,17 @@ export class ServerGame extends Game {
     }
   }
 
-  queuedMessages: {connectionId: string; message: ClientToServerMessage}[] = [];
-  queuedMessagesToSend: {[connectionId: string]: ServerToClientMessage[]} = {};
-
-  sendMessageToClient(connectionId: string, message: ServerToClientMessage) {
-    this.queuedMessagesToSend[connectionId].push(message);
+  spectatorJoin(connectionId: string) {
+    this.spectators.push({connectionId});
+    this.sendMessageToClient(connectionId, {
+      type: 'spectating',
+      serverVersion: GameConstants.serverVersion,
+    });
   }
 
-  processMessage(connectionId: string, message: ClientToServerMessage) {
-    this.queuedMessages.push({connectionId, message});
-  }
-
-  private sendWorldState() {
-    const entities = this.entities.map((entity) => ({
-      entity,
-      serializedEntity: entity.serialize() as WorldStateEntity,
-    }));
-
-    for (const user of this.users) {
-      if (!user.entity) {
-        continue;
-      }
-      const box = {
-        x0: user.entity.realX - GameConstants.screenRange / 2,
-        x1: user.entity.realX + GameConstants.screenRange / 2,
-      };
-
-      const myEntities = [...entities];
-
-      if (!GameConstants.debugDontFilterEntities) {
-        for (let i = myEntities.length - 1; i >= 0; i--) {
-          const myEntity = myEntities[i];
-          const x = myEntity.entity.realX;
-          if (x < box.x0 || x > box.x1) {
-            myEntities.splice(i, 1);
-          }
-        }
-      }
-
-      this.sendMessageToClient(user.connectionId, {
-        type: 'worldState',
-        entities: myEntities.map((a) => a.serializedEntity),
-      });
-    }
+  private initGame() {
+    this.entities.push(new SpectatorEntity(this, nextId()));
+    this.updateSpectatorPosition();
   }
 
   private sendSpectatorWorldState() {
@@ -328,9 +299,38 @@ export class ServerGame extends Game {
     }
   }
 
-  private initGame() {
-    this.entities.push(new SpectatorEntity(this, nextId()));
-    this.updateSpectatorPosition();
+  private sendWorldState() {
+    const entities = this.entities.map((entity) => ({
+      entity,
+      serializedEntity: entity.serialize() as WorldStateEntity,
+    }));
+
+    for (const user of this.users) {
+      if (!user.entity) {
+        continue;
+      }
+      const box = {
+        x0: user.entity.realX - GameConstants.screenRange / 2,
+        x1: user.entity.realX + GameConstants.screenRange / 2,
+      };
+
+      const myEntities = [...entities];
+
+      if (!GameConstants.debugDontFilterEntities) {
+        for (let i = myEntities.length - 1; i >= 0; i--) {
+          const myEntity = myEntities[i];
+          const x = myEntity.entity.realX;
+          if (x < box.x0 || x > box.x1) {
+            myEntities.splice(i, 1);
+          }
+        }
+      }
+
+      this.sendMessageToClient(user.connectionId, {
+        type: 'worldState',
+        entities: myEntities.map((a) => a.serializedEntity),
+      });
+    }
   }
 
   private updateSpectatorPosition() {

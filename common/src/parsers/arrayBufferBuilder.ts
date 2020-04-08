@@ -1,18 +1,15 @@
 export class ArrayBufferBuilder {
+  buffer: ArrayBuffer;
+  curPosition = 0;
+  view: DataView;
   constructor(initialBufferSize: number = 50) {
     this.buffer = new ArrayBuffer(initialBufferSize);
     this.view = new DataView(this.buffer);
   }
-
-  buffer: ArrayBuffer;
-  view: DataView;
-  curPosition = 0;
-
-  testSize(added: number) {
-    if (this.buffer.byteLength < this.curPosition + added) {
-      this.buffer = transfer(this.buffer, this.buffer.byteLength * 4);
-      this.view = new DataView(this.buffer);
-    }
+  addBoolean(value: boolean) {
+    this.testSize(1);
+    this.view.setUint8(this.curPosition, value ? 1 : 0);
+    this.curPosition += 1;
   }
 
   addFloat32(value: number) {
@@ -27,12 +24,6 @@ export class ArrayBufferBuilder {
     this.curPosition += 8;
   }
 
-  addInt8(value: number) {
-    this.testSize(1);
-    this.view.setInt8(this.curPosition, value);
-    this.curPosition += 1;
-  }
-
   addInt16(value: number) {
     this.testSize(2);
     this.view.setInt16(this.curPosition, value);
@@ -45,15 +36,25 @@ export class ArrayBufferBuilder {
     this.curPosition += 4;
   }
 
-  addUint8(value: number) {
+  addInt8(value: number) {
     this.testSize(1);
-    this.view.setUint8(this.curPosition, value);
+    this.view.setInt8(this.curPosition, value);
     this.curPosition += 1;
   }
-  addBoolean(value: boolean) {
-    this.testSize(1);
-    this.view.setUint8(this.curPosition, value ? 1 : 0);
-    this.curPosition += 1;
+
+  addOptionalInt32(value?: number) {
+    if (value === undefined) {
+      this.addInt32(-1);
+    } else {
+      this.addInt32(value);
+    }
+  }
+
+  addString(str: string) {
+    this.addUint16(str.length);
+    for (let i = 0, strLen = str.length; i < strLen; i++) {
+      this.addUint16(str.charCodeAt(i));
+    }
   }
 
   addUint16(value: number) {
@@ -68,33 +69,50 @@ export class ArrayBufferBuilder {
     this.curPosition += 4;
   }
 
-  addOptionalInt32(value?: number) {
-    if (value === undefined) {
-      this.addInt32(-1);
-    } else {
-      this.addInt32(value);
-    }
+  addUint8(value: number) {
+    this.testSize(1);
+    this.view.setUint8(this.curPosition, value);
+    this.curPosition += 1;
   }
 
   buildBuffer(): ArrayBuffer {
     return this.buffer.slice(0, this.curPosition);
   }
 
-  addString(str: string) {
-    this.addUint16(str.length);
-    for (let i = 0, strLen = str.length; i < strLen; i++) {
-      this.addUint16(str.charCodeAt(i));
+  testSize(added: number) {
+    if (this.buffer.byteLength < this.curPosition + added) {
+      this.buffer = transfer(this.buffer, this.buffer.byteLength * 4);
+      this.view = new DataView(this.buffer);
     }
   }
 }
 
 export class ArrayBufferReader {
-  private index: number;
   private dv: DataView;
+  private index: number;
 
   constructor(buffer: ArrayBuffer | ArrayBufferLike) {
     this.dv = new DataView(buffer);
     this.index = 0;
+  }
+
+  done() {
+    if (this.index !== this.dv.byteLength) {
+      throw new Error('Bad input size');
+    }
+  }
+
+  loop<T>(callback: () => T): T[] {
+    const len = this.readUint16();
+    const items: T[] = [];
+    for (let i = 0; i < len; i++) {
+      items.push(callback());
+    }
+    return items;
+  }
+
+  readBoolean() {
+    return this.readUint8() === 1;
   }
 
   readFloat32(): number {
@@ -106,12 +124,6 @@ export class ArrayBufferReader {
   readFloat64(): number {
     const result = this.dv.getFloat64(this.index);
     this.index += 8;
-    return result;
-  }
-
-  readInt8(): number {
-    const result = this.dv.getInt8(this.index);
-    this.index += 1;
     return result;
   }
 
@@ -127,18 +139,10 @@ export class ArrayBufferReader {
     return result;
   }
 
-  loop<T>(callback: () => T): T[] {
-    const len = this.readUint16();
-    const items: T[] = [];
-    for (let i = 0; i < len; i++) {
-      items.push(callback());
-    }
-    return items;
-  }
-
-  switch<TOptions extends number, TResult>(callback: {[key in TOptions]: () => TResult}): TResult {
-    const option = this.readUint8() as TOptions;
-    return callback[option]();
+  readInt8(): number {
+    const result = this.dv.getInt8(this.index);
+    this.index += 1;
+    return result;
   }
 
   readOptionalInt32(): number | undefined {
@@ -150,10 +154,13 @@ export class ArrayBufferReader {
     return result;
   }
 
-  readUint8(): number {
-    const result = this.dv.getUint8(this.index);
-    this.index += 1;
-    return result;
+  readString() {
+    const len = this.readUint16();
+    const strs: string[] = [];
+    for (let i = 0; i < len; i++) {
+      strs.push(String.fromCharCode(this.readUint16()));
+    }
+    return strs.join('');
   }
 
   readUint16(): number {
@@ -168,23 +175,15 @@ export class ArrayBufferReader {
     return result;
   }
 
-  readString() {
-    const len = this.readUint16();
-    const strs: string[] = [];
-    for (let i = 0; i < len; i++) {
-      strs.push(String.fromCharCode(this.readUint16()));
-    }
-    return strs.join('');
+  readUint8(): number {
+    const result = this.dv.getUint8(this.index);
+    this.index += 1;
+    return result;
   }
 
-  readBoolean() {
-    return this.readUint8() === 1;
-  }
-
-  done() {
-    if (this.index !== this.dv.byteLength) {
-      throw new Error('Bad input size');
-    }
+  switch<TOptions extends number, TResult>(callback: {[key in TOptions]: () => TResult}): TResult {
+    const option = this.readUint8() as TOptions;
+    return callback[option]();
   }
 }
 

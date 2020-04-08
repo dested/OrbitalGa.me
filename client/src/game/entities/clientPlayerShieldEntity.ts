@@ -11,21 +11,7 @@ import {Entity} from '@common/entities/entity';
 import {GameRules} from '@common/game/gameRules';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
-  get drawX() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.x;
-    }
-    return this.x + owner.drawX;
-  }
-  get drawY() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.y;
-    }
-    return this.y + owner.drawY;
-  }
-  tick() {}
+  zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageEntity: PlayerShieldModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);
@@ -41,8 +27,20 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     }
     this.updatePolygon();
   }
-
-  zIndex = DrawZIndex.Effect;
+  get drawX() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.drawX;
+  }
+  get drawY() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.drawY;
+  }
   draw(context: CanvasRenderingContext2D): void {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -57,4 +55,5 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     context.drawImage(shield.image, -shield.size.width / 2, -shield.size.height / 2);
     context.restore();
   }
+  tick() {}
 }

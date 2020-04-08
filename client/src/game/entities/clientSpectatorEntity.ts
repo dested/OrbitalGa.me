@@ -6,12 +6,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';
 
 export class ClientSpectatorEntity extends SpectatorEntity implements ClientEntity {
-  get drawX() {
-    return this.x;
-  }
-  get drawY() {
-    return this.y;
-  }
+  zIndex = DrawZIndex.Ordinance;
   constructor(game: ClientGame, messageEntity: SpectatorModel) {
     super(game, messageEntity.entityId);
     game.spectatorEntity = this;
@@ -26,8 +21,12 @@ export class ClientSpectatorEntity extends SpectatorEntity implements ClientEnti
     }
     this.updatePolygon();
   }
-  tick() {}
-
-  zIndex = DrawZIndex.Ordinance;
+  get drawX() {
+    return this.x;
+  }
+  get drawY() {
+    return this.y;
+  }
   draw(context: CanvasRenderingContext2D): void {}
+  tick() {}
 }

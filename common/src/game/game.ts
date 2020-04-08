@@ -3,22 +3,13 @@ import {Entity} from '../entities/entity';
 import {ArrayHash} from '../utils/arrayHash';
 
 export abstract class Game {
-  entities = new ArrayHash<Entity>('entityId');
   collisionEngine: Collisions;
   readonly collisionResult: Result;
+  entities = new ArrayHash<Entity>('entityId');
 
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
-  }
-
-  protected checkCollisions() {
-    this.collisionEngine.update();
-
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities.getIndex(i);
-      entity.checkCollisions();
-    }
   }
 
   destroyEntity(entity: Entity) {
@@ -37,5 +28,14 @@ export abstract class Game {
       range.x1 = Math.max(range.x1, entity.x);
     }
     return {x0: range.x0 - padding, x1: range.x1 + padding};
+  }
+
+  protected checkCollisions() {
+    this.collisionEngine.update();
+
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities.getIndex(i);
+      entity.checkCollisions();
+    }
   }
 }

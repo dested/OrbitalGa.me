@@ -4,35 +4,56 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {WorldStateEntity} from '../models/entityTypeModels';
 
 export abstract class Entity {
-  width: number = 0;
-  height: number = 0;
-
   boundingBoxes: {
-    polygon?: Polygon;
+    height: number;
     offsetX?: number;
     offsetY?: number;
+    polygon?: Polygon;
     width: number;
-    height: number;
   }[] = [];
+  create: boolean = true;
+  entityId: number;
+  height: number = 0;
 
-  abstract get realX(): number;
-  abstract get realY(): number;
+  markToDestroy: boolean = false;
+
+  positionBuffer: {time: number; x: number; y: number}[] = [];
+  width: number = 0;
 
   x: number = 0;
   y: number = 0;
-  entityId: number;
-  create: boolean = true;
-
-  positionBuffer: {time: number; x: number; y: number}[] = [];
   constructor(protected game: Game, entityId: number, public entityType: WorldStateEntity['entityType']) {
     this.entityId = entityId;
   }
 
-  start(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.updatePolygon();
+  abstract get realX(): number;
+  abstract get realY(): number;
+
+  checkCollisions() {
+    if (this.boundingBoxes.length === 0) {
+      return;
+    }
+
+    for (const boundingBox of this.boundingBoxes) {
+      const polygon = boundingBox.polygon;
+      if (!polygon) {
+        continue;
+      }
+      const potentials = polygon.potentials();
+      for (const body of potentials) {
+        if (polygon && polygon.collides(body, this.game.collisionResult)) {
+          const collided = this.collide(body.entity, this.game.collisionResult);
+          if (collided) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
+
+  abstract collide(otherEntity: Entity, collisionResult: Result): boolean;
 
   createPolygon(): void {
     const x = this.realX;
@@ -67,20 +88,6 @@ export abstract class Entity {
       }
     }
   }
-
-  updatePolygon() {
-    if (this.boundingBoxes.length === 0) {
-      return;
-    }
-    for (const boundingBox of this.boundingBoxes) {
-      if (boundingBox.polygon) {
-        boundingBox.polygon.x = this.realX;
-        boundingBox.polygon.y = this.realY;
-      }
-    }
-  }
-
-  markToDestroy: boolean = false;
   destroy() {
     for (const boundingBox of this.boundingBoxes) {
       if (boundingBox.polygon) {
@@ -91,65 +98,7 @@ export abstract class Entity {
     this.markToDestroy = true;
   }
 
-  abstract collide(otherEntity: Entity, collisionResult: Result): boolean;
-
-  checkCollisions() {
-    if (this.boundingBoxes.length === 0) {
-      return;
-    }
-
-    for (const boundingBox of this.boundingBoxes) {
-      const polygon = boundingBox.polygon;
-      if (!polygon) {
-        continue;
-      }
-      const potentials = polygon.potentials();
-      for (const body of potentials) {
-        if (polygon && polygon.collides(body, this.game.collisionResult)) {
-          const collided = this.collide(body.entity, this.game.collisionResult);
-          if (collided) {
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
-  }
-
   abstract gameTick(duration: number): void;
-  serialize(): EntityModel {
-    return {
-      entityId: this.entityId,
-      x: this.x,
-      y: this.y,
-      create: this.create,
-    };
-  }
-
-  postTick() {
-    this.create = false;
-  }
-
-  reconcileFromServer(messageEntity: EntityModel) {
-    this.positionBuffer.push({time: +new Date(), x: messageEntity.x, y: messageEntity.y});
-  }
-
-  static readBuffer(reader: ArrayBufferReader): EntityModel {
-    return {
-      x: reader.readFloat32(),
-      y: reader.readFloat32(),
-      entityId: reader.readUint32(),
-      create: reader.readBoolean(),
-    };
-  }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: EntityModel) {
-    buff.addFloat32(entity.x);
-    buff.addFloat32(entity.y);
-    buff.addUint32(entity.entityId);
-    buff.addBoolean(entity.create);
-  }
 
   interpolateEntity(renderTimestamp: number) {
     const buffer = this.positionBuffer;
@@ -169,6 +118,56 @@ export abstract class Entity {
       this.x = x0 + ((x1 - x0) * (renderTimestamp - t0)) / (t1 - t0);
       this.y = y0 + ((y1 - y0) * (renderTimestamp - t0)) / (t1 - t0);
     }
+  }
+
+  postTick() {
+    this.create = false;
+  }
+
+  reconcileFromServer(messageEntity: EntityModel) {
+    this.positionBuffer.push({time: +new Date(), x: messageEntity.x, y: messageEntity.y});
+  }
+  serialize(): EntityModel {
+    return {
+      entityId: this.entityId,
+      x: this.x,
+      y: this.y,
+      create: this.create,
+    };
+  }
+
+  start(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+    this.updatePolygon();
+  }
+
+  updatePolygon() {
+    if (this.boundingBoxes.length === 0) {
+      return;
+    }
+    for (const boundingBox of this.boundingBoxes) {
+      if (boundingBox.polygon) {
+        boundingBox.polygon.x = this.realX;
+        boundingBox.polygon.y = this.realY;
+      }
+    }
+  }
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: EntityModel) {
+    buff.addFloat32(entity.x);
+    buff.addFloat32(entity.y);
+    buff.addUint32(entity.entityId);
+    buff.addBoolean(entity.create);
+  }
+
+  static readBuffer(reader: ArrayBufferReader): EntityModel {
+    return {
+      x: reader.readFloat32(),
+      y: reader.readFloat32(),
+      entityId: reader.readUint32(),
+      create: reader.readBoolean(),
+    };
   }
 }
 

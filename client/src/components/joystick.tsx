@@ -3,9 +3,9 @@ import nipplejs from '../nipplejs/index';
 import {JoystickManager, JoystickManagerOptions} from 'nipplejs';
 
 type Props = {
-  options: JoystickManagerOptions;
   containerStyle: any;
   managerListener: (manager: JoystickManager) => void;
+  options: JoystickManagerOptions;
 };
 
 export class JoyStick extends Component<Props> {

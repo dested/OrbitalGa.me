@@ -1,15 +1,14 @@
 type Elements = [number, number][];
 
 export class Cluster {
+  static _centroid(set: Elements) {
+    return set.reduce((s, e) => [s[0] + e[0], s[1] + e[1]], [0, 0]).map((e) => e / set.length) as [number, number];
+  }
   static _dist(lat1: number, lon1: number, lat2: number, lon2: number) {
     const dlat = lat2 - lat1;
     const dlon = lon2 - lon1;
 
     return Math.sqrt(dlat * 2 + dlon * 2);
-  }
-
-  static _centroid(set: Elements) {
-    return set.reduce((s, e) => [s[0] + e[0], s[1] + e[1]], [0, 0]).map((e) => e / set.length) as [number, number];
   }
 
   static cluster(elements: Elements, bias: number = 1) {
@@ -39,7 +38,7 @@ export class Cluster {
     const diffStdev = Math.sqrt(diffVariance / diffs.length);
     const threshold = diffStdev * bias;
 
-    let clusterMap: {elements: Elements; centroid: [number, number]}[] = [];
+    let clusterMap: {centroid: [number, number]; elements: Elements}[] = [];
 
     // generate random initial cluster map
     clusterMap.push({

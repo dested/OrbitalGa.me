@@ -9,20 +9,9 @@ import {Entity} from '@common/entities/entity';
 import {Utils} from '@common/utils/utils';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
-  get drawX() {
-    const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.x;
-    }
-    return this.x + owner.drawX;
-  }
-  get drawY() {
-    const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.y;
-    }
-    return this.y + owner.drawY;
-  }
+  rotate = Math.random() * 360;
+
+  zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageEntity: ShotExplosionModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);
@@ -38,13 +27,20 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
     }
     this.updatePolygon();
   }
-
-  rotate = Math.random() * 360;
-  tick() {
-    this.rotate++;
+  get drawX() {
+    const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.drawX;
   }
-
-  zIndex = DrawZIndex.Effect;
+  get drawY() {
+    const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.drawY;
+  }
   draw(context: CanvasRenderingContext2D): void {
     const blueExplosion = AssetManager.assets['laser.blue.explosion'];
     context.save();
@@ -52,5 +48,8 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
     context.rotate(Utils.degToRad(this.rotate * 4));
     context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
     context.restore();
+  }
+  tick() {
+    this.rotate++;
   }
 }

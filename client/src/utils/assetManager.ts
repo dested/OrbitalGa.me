@@ -1,47 +1,28 @@
 export interface Asset {
-  name: string;
-  size: {width: number; height: number};
+  animated: boolean;
   base: {x: number; y: number};
   image: HTMLImageElement;
   images: HTMLImageElement[];
-  animated: boolean;
+  name: string;
+  size: {height: number; width: number};
 }
 
 export interface AssetItem {
-  size: {width: number; height: number};
   base: {x: number; y: number};
-  url: string;
   frameIndex?: number;
   realName: string;
+  size: {height: number; width: number};
+  url: string;
 }
 
 export class AssetManager {
+  static $assetsLoaded = 0;
+  static $assetsRequested = 0;
   static assetQueue: {[key: string]: AssetItem} = {};
   static assets: {[key: string]: Asset} = {};
   static completed: () => void;
-  static $assetsLoaded = 0;
-  static $assetsRequested = 0;
 
-  static async start() {
-    const promises: Promise<void>[] = [];
-    for (const name in this.assetQueue) {
-      if (this.assetQueue.hasOwnProperty(name)) {
-        promises.push(
-          new Promise((res) => {
-            const img = new Image();
-            img.onload = () => {
-              this.imageLoaded(img, name);
-              res();
-            };
-            img.src = this.assetQueue[name].url;
-          })
-        );
-      }
-    }
-    return await Promise.all(promises);
-  }
-
-  static addAsset(name: string, url: string, size: {width: number; height: number}, base: {x: number; y: number}) {
+  static addAsset(name: string, url: string, size: {height: number; width: number}, base: {x: number; y: number}) {
     this.assetQueue[name] = {base, size, url, realName: name};
     this.$assetsRequested++;
   }
@@ -50,7 +31,7 @@ export class AssetManager {
     name: string,
     frameIndex: number,
     url: string,
-    size: {width: number; height: number},
+    size: {height: number; width: number},
     base: {x: number; y: number}
   ) {
     this.assetQueue[name + frameIndex] = {base, size, url, frameIndex, realName: name};
@@ -90,5 +71,24 @@ export class AssetManager {
         this.completed && this.completed();
       }, 100);
     }
+  }
+
+  static async start() {
+    const promises: Promise<void>[] = [];
+    for (const name in this.assetQueue) {
+      if (this.assetQueue.hasOwnProperty(name)) {
+        promises.push(
+          new Promise((res) => {
+            const img = new Image();
+            img.onload = () => {
+              this.imageLoaded(img, name);
+              res();
+            };
+            img.src = this.assetQueue[name].url;
+          })
+        );
+      }
+    }
+    return await Promise.all(promises);
   }
 }

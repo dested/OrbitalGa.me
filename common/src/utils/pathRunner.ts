@@ -2,25 +2,31 @@ import {Entity} from '../entities/entity';
 import {Utils} from './utils';
 
 export type Path<TPhase> = {
-  phase: TPhase;
   duration: number;
-  points: {x: number; y: number; offset?: 'currentPosition' | 'static' | 'staticX' | 'staticY'}[];
-} & ({type: 'linear'} | {type: 'loop'; loopCount: number});
+  phase: TPhase;
+  points: {offset?: 'currentPosition' | 'static' | 'staticX' | 'staticY'; x: number; y: number}[];
+} & ({type: 'linear'} | {loopCount: number; type: 'loop'});
 
 export class PathRunner<TPhase> {
+  loopCount = 0;
+  pathIndex = 0;
+  pathPoint = 1;
+
+  startX: number;
+  startY: number;
+
+  ticks = 0;
   constructor(private paths: Path<TPhase>[], private entity: Entity) {
     this.startX = entity.x;
     this.startY = entity.y;
   }
 
-  ticks = 0;
-  pathIndex = 0;
-  pathPoint = 1;
-
-  loopCount = 0;
-
-  startX: number;
-  startY: number;
+  getCurrentPhase(): TPhase | 'done' {
+    if (this.paths.length === this.pathIndex) {
+      return 'done';
+    }
+    return this.paths[this.pathIndex].phase;
+  }
 
   progress(): 'done' | 'not-done' {
     if (this.paths.length <= this.pathIndex) {
@@ -100,12 +106,5 @@ export class PathRunner<TPhase> {
   setStartPosition(x: number, y: number) {
     this.startX = x;
     this.startY = y;
-  }
-
-  getCurrentPhase(): TPhase | 'done' {
-    if (this.paths.length === this.pathIndex) {
-      return 'done';
-    }
-    return this.paths[this.pathIndex].phase;
   }
 }

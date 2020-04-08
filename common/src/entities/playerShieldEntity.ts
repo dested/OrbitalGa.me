@@ -13,6 +13,18 @@ import {GameRules} from '../game/gameRules';
 export class PlayerShieldEntity extends Entity {
   boundingBoxes = [{width: 133, height: 108}];
 
+  depleted = false;
+
+  health = GameRules.playerShield.base.startingHealth;
+
+  lastHit = 0;
+  tickIndex = 0;
+
+  constructor(game: Game, entityId: number, public ownerEntityId: number) {
+    super(game, entityId, 'playerShield');
+    this.createPolygon();
+  }
+
   get realX() {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -28,27 +40,6 @@ export class PlayerShieldEntity extends Entity {
     return this.y + owner.realY;
   }
 
-  constructor(game: Game, entityId: number, public ownerEntityId: number) {
-    super(game, entityId, 'playerShield');
-    this.createPolygon();
-  }
-
-  lastHit = 0;
-
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    if (this.depleted) {
-      return false;
-    }
-    this.health -= damage;
-    this.lastHit = 10;
-    this.game.destroyEntity(otherEntity);
-    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-    shotExplosionEntity.start(x, y);
-    this.game.entities.push(shotExplosionEntity);
-
-    return true;
-  }
-
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof EnemyShotEntity) {
       return this.hurt(1, otherEntity, this.realX - otherEntity.realX, this.realY - otherEntity.realY);
@@ -56,11 +47,6 @@ export class PlayerShieldEntity extends Entity {
 
     return false;
   }
-
-  health = GameRules.playerShield.base.startingHealth;
-  tickIndex = 0;
-
-  depleted = false;
   gameTick(duration: number) {
     this.tickIndex++;
     if (!this.depleted && this.health <= 0) {
@@ -78,6 +64,26 @@ export class PlayerShieldEntity extends Entity {
     }
   }
 
+  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    if (this.depleted) {
+      return false;
+    }
+    this.health -= damage;
+    this.lastHit = 10;
+    this.game.destroyEntity(otherEntity);
+    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+    shotExplosionEntity.start(x, y);
+    this.game.entities.push(shotExplosionEntity);
+
+    return true;
+  }
+  reconcileFromServer(messageEntity: PlayerShieldModel) {
+    super.reconcileFromServer(messageEntity);
+    this.health = messageEntity.health;
+    this.depleted = messageEntity.depleted;
+    this.ownerEntityId = messageEntity.ownerEntityId;
+  }
+
   serialize(): PlayerShieldModel {
     return {
       ...super.serialize(),
@@ -87,11 +93,12 @@ export class PlayerShieldEntity extends Entity {
       entityType: 'playerShield',
     };
   }
-  reconcileFromServer(messageEntity: PlayerShieldModel) {
-    super.reconcileFromServer(messageEntity);
-    this.health = messageEntity.health;
-    this.depleted = messageEntity.depleted;
-    this.ownerEntityId = messageEntity.ownerEntityId;
+
+  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerShieldModel) {
+    Entity.addBuffer(buff, entity);
+    buff.addUint8(entity.health);
+    buff.addBoolean(entity.depleted);
+    buff.addUint32(entity.ownerEntityId);
   }
 
   static readBuffer(reader: ArrayBufferReader): PlayerShieldModel {
@@ -103,18 +110,11 @@ export class PlayerShieldEntity extends Entity {
       ownerEntityId: reader.readUint32(),
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerShieldModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.health);
-    buff.addBoolean(entity.depleted);
-    buff.addUint32(entity.ownerEntityId);
-  }
 }
 
 export type PlayerShieldModel = EntityModel & {
+  depleted: boolean;
   entityType: 'playerShield';
   health: number;
-  depleted: boolean;
   ownerEntityId: number;
 };

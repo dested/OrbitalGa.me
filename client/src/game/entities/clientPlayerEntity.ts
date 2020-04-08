@@ -5,13 +5,7 @@ import {ClientGame} from '../clientGame';
 import {GameRules} from '@common/game/gameRules';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
-  get drawX() {
-    return this.realX;
-  }
-  get drawY() {
-    return this.realY;
-  }
-  tick() {}
+  zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageEntity: PlayerModel) {
     super(game, messageEntity.entityId);
@@ -19,13 +13,18 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     this.y = messageEntity.y;
     this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
   }
-
-  zIndex = DrawZIndex.Player;
+  get drawX() {
+    return this.realX;
+  }
+  get drawY() {
+    return this.realY;
+  }
   draw(context: CanvasRenderingContext2D): void {
     const ship = AssetManager.assets.ship1;
     context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
     this.drawHealth(context);
   }
+  tick() {}
 
   private drawHealth(context: CanvasRenderingContext2D) {
     const ship = AssetManager.assets.ship1;

@@ -6,21 +6,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {Entity} from '@common/entities/entity';
 
 export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
-  get drawX() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.x;
-    }
-    return this.x + owner.drawX;
-  }
-  get drawY() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
-    if (!owner) {
-      return this.y;
-    }
-    return this.y + owner.drawY;
-  }
-  tick() {}
+  zIndex = DrawZIndex.Ordinance;
 
   constructor(game: ClientGame, messageEntity: EnemyShotModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);
@@ -38,8 +24,20 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
     }
     this.updatePolygon();
   }
-
-  zIndex = DrawZIndex.Ordinance;
+  get drawX() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.x;
+    }
+    return this.x + owner.drawX;
+  }
+  get drawY() {
+    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    if (!owner) {
+      return this.y;
+    }
+    return this.y + owner.drawY;
+  }
   draw(context: CanvasRenderingContext2D): void {
     const laserRed = AssetManager.assets['laser.red'];
     context.save();
@@ -48,4 +46,5 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
     context.drawImage(laserRed.image, -laserRed.size.width / 2, -laserRed.size.height / 2);
     context.restore();
   }
+  tick() {}
 }

@@ -13,29 +13,18 @@ import {ShotEntity} from './shotEntity';
 import {PlayerEntity} from './playerEntity';
 
 export class MeteorEntity extends Entity {
-  get realX() {
-    return this.x;
-  }
-  get realY() {
-    return this.y;
-  }
-
-  static randomMeteor() {
-    const meteorColor = Utils.randomElement(['brown' as const, 'grey' as const]);
-    const size = Utils.randomElement(['big' as const, 'med' as const, 'small' as const, 'tiny' as const]);
-    const type =
-      size === 'big'
-        ? Utils.randomElement([1 as const, 2 as const, 3 as const, 4 as const])
-        : Utils.randomElement([1 as const, 2 as const]);
-
-    return {meteorColor, size, type};
-  }
+  health = Math.ceil(3 + Math.random() * 3);
 
   meteorColor: 'brown' | 'grey';
-  size: 'big' | 'med' | 'small' | 'tiny';
-  type: 1 | 2 | 3 | 4;
+
+  positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
 
   rotate = Math.random() * 255;
+  rotateSpeed = Math.round(1 + Math.random() * 3);
+  size: 'big' | 'med' | 'small' | 'tiny';
+
+  speed = 5 + Math.random() * 10;
+  type: 1 | 2 | 3 | 4;
 
   constructor(
     game: Game,
@@ -99,6 +88,12 @@ export class MeteorEntity extends Entity {
     }
 
     this.createPolygon();
+  }
+  get realX() {
+    return this.x;
+  }
+  get realY() {
+    return this.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -165,27 +160,6 @@ export class MeteorEntity extends Entity {
     }
     return false;
   }
-  updatePolygon() {
-    super.updatePolygon();
-    if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.rotate);
-  }
-
-  private die() {
-    this.game.destroyEntity(this);
-
-    for (let i = 0; i < 5; i++) {
-      const deathExplosion = new ShotExplosionEntity(this.game, nextId());
-      deathExplosion.start(
-        this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
-        this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
-      );
-      this.game.entities.push(deathExplosion);
-    }
-  }
-
-  speed = 5 + Math.random() * 10;
-  health = Math.ceil(3 + Math.random() * 3);
-  rotateSpeed = Math.round(1 + Math.random() * 3);
 
   gameTick(duration: number) {
     this.rotate += this.rotateSpeed;
@@ -223,6 +197,13 @@ export class MeteorEntity extends Entity {
       this.rotate = rotate0 + ((rotate1 - rotate0) * (renderTimestamp - t0)) / (t1 - t0);
     }
   }
+  reconcileFromServer(messageEntity: MeteorModel) {
+    super.reconcileFromServer(messageEntity);
+    this.positionBuffer[this.positionBuffer.length - 1].rotate = messageEntity.rotate;
+    this.meteorColor = messageEntity.meteorColor;
+    this.size = messageEntity.size;
+    this.type = messageEntity.type;
+  }
 
   serialize(): MeteorModel {
     return {
@@ -234,38 +215,22 @@ export class MeteorEntity extends Entity {
       entityType: 'meteor',
     };
   }
-
-  positionBuffer: {time: number; x: number; y: number; rotate: number}[] = [];
-  reconcileFromServer(messageEntity: MeteorModel) {
-    super.reconcileFromServer(messageEntity);
-    this.positionBuffer[this.positionBuffer.length - 1].rotate = messageEntity.rotate;
-    this.meteorColor = messageEntity.meteorColor;
-    this.size = messageEntity.size;
-    this.type = messageEntity.type;
+  updatePolygon() {
+    super.updatePolygon();
+    if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.rotate);
   }
 
-  static readBuffer(reader: ArrayBufferReader): MeteorModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'meteor',
-      rotate: reader.readUint8(),
-      meteorColor: Utils.switchNumber(reader.readUint8(), {
-        1: 'brown' as const,
-        2: 'grey' as const,
-      }),
-      size: Utils.switchNumber(reader.readUint8(), {
-        1: 'big' as const,
-        2: 'med' as const,
-        3: 'small' as const,
-        4: 'tiny' as const,
-      }),
-      type: Utils.switchNumber(reader.readUint8(), {
-        1: 1 as const,
-        2: 2 as const,
-        3: 3 as const,
-        4: 4 as const,
-      }),
-    };
+  private die() {
+    this.game.destroyEntity(this);
+
+    for (let i = 0; i < 5; i++) {
+      const deathExplosion = new ShotExplosionEntity(this.game, nextId());
+      deathExplosion.start(
+        this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
+        this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
+      );
+      this.game.entities.push(deathExplosion);
+    }
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: MeteorModel) {
@@ -294,12 +259,47 @@ export class MeteorEntity extends Entity {
       })
     );
   }
+
+  static randomMeteor() {
+    const meteorColor = Utils.randomElement(['brown' as const, 'grey' as const]);
+    const size = Utils.randomElement(['big' as const, 'med' as const, 'small' as const, 'tiny' as const]);
+    const type =
+      size === 'big'
+        ? Utils.randomElement([1 as const, 2 as const, 3 as const, 4 as const])
+        : Utils.randomElement([1 as const, 2 as const]);
+
+    return {meteorColor, size, type};
+  }
+
+  static readBuffer(reader: ArrayBufferReader): MeteorModel {
+    return {
+      ...Entity.readBuffer(reader),
+      entityType: 'meteor',
+      rotate: reader.readUint8(),
+      meteorColor: Utils.switchNumber(reader.readUint8(), {
+        1: 'brown' as const,
+        2: 'grey' as const,
+      }),
+      size: Utils.switchNumber(reader.readUint8(), {
+        1: 'big' as const,
+        2: 'med' as const,
+        3: 'small' as const,
+        4: 'tiny' as const,
+      }),
+      type: Utils.switchNumber(reader.readUint8(), {
+        1: 1 as const,
+        2: 2 as const,
+        3: 3 as const,
+        4: 4 as const,
+      }),
+    };
+  }
 }
 
 export type MeteorModel = EntityModel & {
-  rotate: number;
   entityType: 'meteor';
   meteorColor: 'brown' | 'grey';
+  rotate: number;
   size: 'big' | 'med' | 'small' | 'tiny';
   type: 1 | 2 | 3 | 4;
 };

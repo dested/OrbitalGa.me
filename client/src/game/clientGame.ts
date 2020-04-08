@@ -14,19 +14,21 @@ import {ClientEntity} from './entities/clientEntity';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
-  onOpen: (me: ClientGame) => void;
   onDisconnect: (me: ClientGame) => void;
+  onOpen: (me: ClientGame) => void;
 };
 
 export class ClientGame extends Game {
   connectionId: string;
+
+  debugValues: {[key: string]: number | string} = {};
   isDead: boolean = false;
+  lastXY?: {x: number; y: number};
   liveEntity?: ClientLivePlayerEntity;
+  spectatorEntity?: SpectatorEntity;
+  protected spectatorMode: boolean = false;
   private messagesToProcess: ServerToClientMessage[] = [];
   private serverVersion: number = -1;
-  protected spectatorMode: boolean = false;
-  spectatorEntity?: SpectatorEntity;
-  lastXY?: {x: number; y: number};
 
   constructor(serverPath: string, private options: ClientGameOptions, private socket: IClientSocket) {
     super(true);
@@ -47,59 +49,80 @@ export class ClientGame extends Game {
 
     this.startTick();
   }
-  setOptions(options: ClientGameOptions) {
-    this.options = options;
+  clearDebug(key: string) {
+    delete this.debugValues[key];
+  }
+
+  died() {
+    this.isDead = true;
+    this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
+    this.liveEntity = undefined;
+    this.options.onDied(this);
+  }
+
+  disconnect() {
+    this.socket.disconnect();
+  }
+
+  gameTick(duration: number) {
+    if (!this.connectionId) {
+      return;
+    }
+    this.processInputs(duration);
+    this.liveEntity?.gameTick();
+    for (const entity of this.entities.array) {
+      entity.updatePolygon();
+    }
+    this.collisionEngine.update();
+    this.liveEntity?.checkCollisions();
   }
 
   joinGame() {
     this.lastXY = undefined;
     this.sendMessageToServer({type: 'join'});
   }
-  spectateGame() {
-    this.lastXY = undefined;
-    this.sendMessageToServer({type: 'spectate'});
-  }
 
-  private startTick() {
-    let time = +new Date();
-    let paused = 0;
-    const int = setInterval(() => {
-      const now = +new Date();
-      const duration = now - time;
-      if (duration > 900 || duration < 4) {
-        paused++;
-      } else {
-        if (paused > 3) {
-          paused = 0;
-        }
-      }
-      this.tick(duration);
-      time = +new Date();
-    }, 1000 / 60);
-
-    let gameTime = +new Date();
-    let gamePaused = 0;
-    const gameInt = setInterval(() => {
-      const now = +new Date();
-      const duration = now - gameTime;
-      if (duration > 900 || duration < 4) {
-        gamePaused++;
-      } else {
-        if (gamePaused > 3) {
-          gamePaused = 0;
-        }
-      }
-      this.gameTick(duration);
-      gameTime = +new Date();
-      if (gameTime - now > 20) {
-        console.log('bad duration', duration);
-      }
-      this.messagesToProcess.length = 0;
-    }, GameConstants.serverTickRate);
+  sendInput(input: ClientLivePlayerEntity['keys'] & {inputSequenceNumber: number}) {
+    this.sendMessageToServer({type: 'playerInput', ...input});
   }
 
   sendMessageToServer(message: ClientToServerMessage) {
     this.socket.sendMessage(message);
+  }
+  setDebug(key: string, value: number | string) {
+    this.debugValues[key] = value;
+  }
+  setOptions(options: ClientGameOptions) {
+    this.options = options;
+  }
+  spectateGame() {
+    this.lastXY = undefined;
+    this.sendMessageToServer({type: 'spectate'});
+  }
+  tick(duration: number) {
+    if (!this.connectionId) {
+      return;
+    }
+
+    const entities = this.entities.array;
+    assertType<(Entity & ClientEntity)[]>(entities);
+    for (const entity of entities) {
+      entity.tick(duration);
+    }
+    this.interpolateEntities();
+  }
+
+  private interpolateEntities() {
+    const now = +new Date();
+    const renderTimestamp = now - GameConstants.serverTickRate;
+
+    for (const entity of this.entities.array) {
+      entity.interpolateEntity(renderTimestamp);
+    }
+  }
+
+  private processInputs(duration: number) {
+    this.liveEntity?.processInput(duration);
   }
 
   private processMessages(messages: ServerToClientMessage[]) {
@@ -150,65 +173,42 @@ export class ClientGame extends Game {
       }
     }
   }
-  tick(duration: number) {
-    if (!this.connectionId) {
-      return;
-    }
 
-    const entities = this.entities.array;
-    assertType<(Entity & ClientEntity)[]>(entities);
-    for (const entity of entities) {
-      entity.tick(duration);
-    }
-    this.interpolateEntities();
-  }
+  private startTick() {
+    let time = +new Date();
+    let paused = 0;
+    const int = setInterval(() => {
+      const now = +new Date();
+      const duration = now - time;
+      if (duration > 900 || duration < 4) {
+        paused++;
+      } else {
+        if (paused > 3) {
+          paused = 0;
+        }
+      }
+      this.tick(duration);
+      time = +new Date();
+    }, 1000 / 60);
 
-  gameTick(duration: number) {
-    if (!this.connectionId) {
-      return;
-    }
-    this.processInputs(duration);
-    this.liveEntity?.gameTick();
-    for (const entity of this.entities.array) {
-      entity.updatePolygon();
-    }
-    this.collisionEngine.update();
-    this.liveEntity?.checkCollisions();
-  }
-
-  private interpolateEntities() {
-    const now = +new Date();
-    const renderTimestamp = now - GameConstants.serverTickRate;
-
-    for (const entity of this.entities.array) {
-      entity.interpolateEntity(renderTimestamp);
-    }
-  }
-
-  disconnect() {
-    this.socket.disconnect();
-  }
-
-  private processInputs(duration: number) {
-    this.liveEntity?.processInput(duration);
-  }
-
-  debugValues: {[key: string]: number | string} = {};
-  setDebug(key: string, value: number | string) {
-    this.debugValues[key] = value;
-  }
-  clearDebug(key: string) {
-    delete this.debugValues[key];
-  }
-
-  died() {
-    this.isDead = true;
-    this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
-    this.liveEntity = undefined;
-    this.options.onDied(this);
-  }
-
-  sendInput(input: ClientLivePlayerEntity['keys'] & {inputSequenceNumber: number}) {
-    this.sendMessageToServer({type: 'playerInput', ...input});
+    let gameTime = +new Date();
+    let gamePaused = 0;
+    const gameInt = setInterval(() => {
+      const now = +new Date();
+      const duration = now - gameTime;
+      if (duration > 900 || duration < 4) {
+        gamePaused++;
+      } else {
+        if (gamePaused > 3) {
+          gamePaused = 0;
+        }
+      }
+      this.gameTick(duration);
+      gameTime = +new Date();
+      if (gameTime - now > 20) {
+        console.log('bad duration', duration);
+      }
+      this.messagesToProcess.length = 0;
+    }, GameConstants.serverTickRate);
   }
 }

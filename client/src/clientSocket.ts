@@ -9,9 +9,9 @@ export class ClientSocket implements IClientSocket {
   connect(
     serverPath: string,
     options: {
-      onOpen: () => void;
-      onMessage: (messages: ServerToClientMessage[]) => void;
       onDisconnect: () => void;
+      onMessage: (messages: ServerToClientMessage[]) => void;
+      onOpen: () => void;
     }
   ) {
     let totalLength = 0;
@@ -42,6 +42,10 @@ export class ClientSocket implements IClientSocket {
     };
   }
 
+  disconnect() {
+    this.socket?.close();
+  }
+
   sendMessage(message: ClientToServerMessage) {
     if (GameConstants.binaryTransport) {
       this.socketSend(ClientToServerMessageParser.fromClientToServerMessage(message));
@@ -65,23 +69,19 @@ export class ClientSocket implements IClientSocket {
       console.error('disconnected??');
     }
   }
-
-  disconnect() {
-    this.socket?.close();
-  }
 }
 
 export interface IClientSocket {
   connect(
     serverPath: string,
     options: {
-      onOpen: () => void;
-      onMessage: (messages: ServerToClientMessage[]) => void;
       onDisconnect: () => void;
+      onMessage: (messages: ServerToClientMessage[]) => void;
+      onOpen: () => void;
     }
   ): void;
 
-  sendMessage(message: ClientToServerMessage): void;
-
   disconnect(): void;
+
+  sendMessage(message: ClientToServerMessage): void;
 }

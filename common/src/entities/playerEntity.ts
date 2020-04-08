@@ -12,46 +12,44 @@ import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules} from '../game/gameRules';
 
 export type PendingInput = {
+  down: boolean;
   inputSequenceNumber: number;
   left: boolean;
-  shoot: boolean;
   right: boolean;
+  shoot: boolean;
   up: boolean;
-  down: boolean;
 };
 
 export class PlayerEntity extends Entity {
+  boundingBoxes = [{width: 99, height: 75}];
+  dead: boolean = false;
+
+  health = GameRules.player.base.startingHealth;
+  inputSequenceNumber: number = 1;
+
+  lastProcessedInputSequenceNumber: number = 0;
+
+  momentum: {x: number; y: number} = {x: 0, y: 0};
+
+  pendingInputs: PendingInput[] = [];
+
+  shootTimer: number = 1;
+  shotSide: 'left' | 'right' = 'left';
+  xInputsThisTick: boolean = false;
+  yInputsThisTick: boolean = false;
+
+  private shieldEntityId?: number;
+
+  constructor(game: Game, entityId: number) {
+    super(game, entityId, 'player');
+    this.createPolygon();
+  }
   get realX() {
     return this.x;
   }
   get realY() {
     return this.y;
   }
-
-  boundingBoxes = [{width: 99, height: 75}];
-  xInputsThisTick: boolean = false;
-  yInputsThisTick: boolean = false;
-
-  constructor(game: Game, entityId: number) {
-    super(game, entityId, 'player');
-    this.createPolygon();
-  }
-
-  private shieldEntityId?: number;
-  setShieldEntity(shieldEntityId: number) {
-    this.shieldEntityId = shieldEntityId;
-  }
-
-  lastProcessedInputSequenceNumber: number = 0;
-
-  pendingInputs: PendingInput[] = [];
-  inputSequenceNumber: number = 1;
-
-  momentum: {x: number; y: number} = {x: 0, y: 0};
-
-  shootTimer: number = 1;
-  dead: boolean = false;
-  shotSide: 'left' | 'right' = 'left';
 
   applyInput(input: PendingInput) {
     this.xInputsThisTick = false;
@@ -100,11 +98,29 @@ export class PlayerEntity extends Entity {
     }
   }
 
+  collide(otherEntity: Entity, collisionResult: Result): boolean {
+    if (otherEntity instanceof WallEntity) {
+      this.x -= collisionResult.overlap * collisionResult.overlap_x;
+      this.y -= collisionResult.overlap * collisionResult.overlap_y;
+      this.updatePolygon();
+      return true;
+    }
+    if (!this.game.isClient) {
+      if (otherEntity instanceof EnemyShotEntity) {
+        return this.hurt(
+          1,
+          otherEntity,
+          collisionResult.overlap * collisionResult.overlap_x,
+          collisionResult.overlap * collisionResult.overlap_y
+        );
+      }
+    }
+    return false;
+  }
+
   destroy(): void {
     super.destroy();
   }
-
-  health = GameRules.player.base.startingHealth;
 
   gameTick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
@@ -143,24 +159,33 @@ export class PlayerEntity extends Entity {
     return true;
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof WallEntity) {
-      this.x -= collisionResult.overlap * collisionResult.overlap_x;
-      this.y -= collisionResult.overlap * collisionResult.overlap_y;
-      this.updatePolygon();
-      return true;
-    }
-    if (!this.game.isClient) {
-      if (otherEntity instanceof EnemyShotEntity) {
-        return this.hurt(
-          1,
-          otherEntity,
-          collisionResult.overlap * collisionResult.overlap_x,
-          collisionResult.overlap * collisionResult.overlap_y
-        );
-      }
-    }
-    return false;
+  reconcileDataFromServer(messageEntity: PlayerModel) {
+    // needed because LivePlayerEntity does not need the pending inputs from super.reconcile
+    this.health = messageEntity.health;
+    this.dead = messageEntity.dead;
+    this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
+    this.momentum.x = messageEntity.momentumX;
+    this.momentum.y = messageEntity.momentumY;
+  }
+
+  reconcileFromServer(messageEntity: PlayerModel) {
+    super.reconcileFromServer(messageEntity);
+    this.reconcileDataFromServer(messageEntity);
+  }
+
+  serialize(): PlayerModel {
+    return {
+      ...super.serialize(),
+      momentumX: this.momentum.x,
+      momentumY: this.momentum.y,
+      lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
+      health: this.health,
+      dead: this.dead,
+      entityType: 'player',
+    };
+  }
+  setShieldEntity(shieldEntityId: number) {
+    this.shieldEntityId = shieldEntityId;
   }
 
   updatedPositionFromMomentum() {
@@ -200,30 +225,13 @@ export class PlayerEntity extends Entity {
     }
   }
 
-  reconcileFromServer(messageEntity: PlayerModel) {
-    super.reconcileFromServer(messageEntity);
-    this.reconcileDataFromServer(messageEntity);
-  }
-
-  reconcileDataFromServer(messageEntity: PlayerModel) {
-    // needed because LivePlayerEntity does not need the pending inputs from super.reconcile
-    this.health = messageEntity.health;
-    this.dead = messageEntity.dead;
-    this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
-    this.momentum.x = messageEntity.momentumX;
-    this.momentum.y = messageEntity.momentumY;
-  }
-
-  serialize(): PlayerModel {
-    return {
-      ...super.serialize(),
-      momentumX: this.momentum.x,
-      momentumY: this.momentum.y,
-      lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
-      health: this.health,
-      dead: this.dead,
-      entityType: 'player',
-    };
+  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel) {
+    Entity.addBuffer(buff, entity);
+    buff.addFloat32(entity.momentumX);
+    buff.addFloat32(entity.momentumY);
+    buff.addUint8(entity.health);
+    buff.addBoolean(entity.dead);
+    buff.addUint32(entity.lastProcessedInputSequenceNumber);
   }
 
   static readBuffer(reader: ArrayBufferReader): PlayerModel {
@@ -237,22 +245,13 @@ export class PlayerEntity extends Entity {
       lastProcessedInputSequenceNumber: reader.readUint32(),
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addFloat32(entity.momentumX);
-    buff.addFloat32(entity.momentumY);
-    buff.addUint8(entity.health);
-    buff.addBoolean(entity.dead);
-    buff.addUint32(entity.lastProcessedInputSequenceNumber);
-  }
 }
 
 export type PlayerModel = EntityModel & {
+  dead: boolean;
   entityType: 'player';
+  health: number;
   lastProcessedInputSequenceNumber: number;
   momentumX: number;
   momentumY: number;
-  health: number;
-  dead: boolean;
 };
