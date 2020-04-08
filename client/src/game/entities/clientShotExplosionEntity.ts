@@ -6,6 +6,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {Entity} from '@common/entities/entity';
+import {Utils} from '@common/utils/utils';
 
 export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
   get drawX() {
@@ -27,7 +28,6 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);
     this.x = messageEntity.x;
     this.y = messageEntity.y;
-    this.aliveDuration = messageEntity.aliveDuration;
     if (messageEntity.create) {
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
@@ -39,13 +39,17 @@ export class ClientShotExplosionEntity extends ShotExplosionEntity implements Cl
     this.updatePolygon();
   }
 
+  rotate = Math.random() * 360;
+  tick() {
+    this.rotate++;
+  }
+
   zIndex = DrawZIndex.Effect;
   draw(context: CanvasRenderingContext2D): void {
     const blueExplosion = AssetManager.assets['laser.blue.explosion'];
     context.save();
-
     context.translate(this.drawX, this.drawY);
-    context.rotate(Math.PI * 2 * (this.aliveDuration / ShotExplosionEntity.totalAliveDuration));
+    context.rotate(Utils.degToRad(this.rotate * 4));
     context.drawImage(blueExplosion.image, -blueExplosion.size.width / 2, -blueExplosion.size.height / 2);
     context.restore();
   }

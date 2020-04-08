@@ -36,7 +36,7 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
     }
     this.updatePolygon();
   }
-
+  tick() {}
   zIndex = DrawZIndex.Ordinance;
   draw(context: CanvasRenderingContext2D): void {
     const laserBlue = AssetManager.assets['laser.blue'];

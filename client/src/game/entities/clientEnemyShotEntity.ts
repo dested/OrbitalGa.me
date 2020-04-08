@@ -20,6 +20,7 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
     }
     return this.y + owner.drawY;
   }
+  tick() {}
 
   constructor(game: ClientGame, messageEntity: EnemyShotModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);

@@ -193,11 +193,12 @@ export class ServerGame extends Game {
         this.entities.push(swoopingEnemyEntity);
       }
     }
-    if (tickIndex % 20 < 2) {
-      for (let i = 0; i < 2; i++) {
-        const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
+    if (tickIndex % 5 === 0) {
+      const {x0, x1} = this.getPlayerRange(1000, (entity) => entity.entityType === 'player');
 
-        const meteor = new MeteorEntity(this, nextId(), 'brown', 'big', 1);
+      for (let i = 0; i < Math.ceil((x1 - x0) / 700000); i++) {
+        const {meteorColor, type, size} = MeteorEntity.randomMeteor();
+        const meteor = new MeteorEntity(this, nextId(), meteorColor, size, type);
         meteor.start(
           Utils.randomInRange(x0, x1),
           -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15

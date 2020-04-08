@@ -150,6 +150,26 @@ export abstract class Entity {
     buff.addUint32(entity.entityId);
     buff.addBoolean(entity.create);
   }
+
+  interpolateEntity(renderTimestamp: number) {
+    const buffer = this.positionBuffer;
+
+    while (buffer.length >= 2 && buffer[1].time <= renderTimestamp) {
+      buffer.shift();
+    }
+
+    if (buffer.length >= 2 && buffer[0].time <= renderTimestamp) {
+      const x0 = buffer[0].x;
+      const x1 = buffer[1].x;
+      const y0 = buffer[0].y;
+      const y1 = buffer[1].y;
+      const t0 = buffer[0].time;
+      const t1 = buffer[1].time;
+
+      this.x = x0 + ((x1 - x0) * (renderTimestamp - t0)) / (t1 - t0);
+      this.y = y0 + ((y1 - y0) * (renderTimestamp - t0)) / (t1 - t0);
+    }
+  }
 }
 
 export type EntityModel = {

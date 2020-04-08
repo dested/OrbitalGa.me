@@ -26,6 +26,7 @@ export class ClientSpectatorEntity extends SpectatorEntity implements ClientEnti
     }
     this.updatePolygon();
   }
+  tick() {}
 
   zIndex = DrawZIndex.Ordinance;
   draw(context: CanvasRenderingContext2D): void {}

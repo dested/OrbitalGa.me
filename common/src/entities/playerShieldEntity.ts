@@ -35,27 +35,34 @@ export class PlayerShieldEntity extends Entity {
 
   lastHit = 0;
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof EnemyShotEntity && !this.depleted) {
-      this.health -= 1;
-      this.lastHit = 10;
-      this.game.destroyEntity(otherEntity);
-      const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-      shotExplosionEntity.start(this.realX - otherEntity.realX, this.realY - otherEntity.realY);
-      this.game.entities.push(shotExplosionEntity);
+  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    if (this.depleted) {
+      return false;
+    }
+    this.health -= damage;
+    this.lastHit = 10;
+    this.game.destroyEntity(otherEntity);
+    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+    shotExplosionEntity.start(x, y);
+    this.game.entities.push(shotExplosionEntity);
 
-      return true;
+    return true;
+  }
+
+  collide(otherEntity: Entity, collisionResult: Result): boolean {
+    if (otherEntity instanceof EnemyShotEntity) {
+      return this.hurt(1, otherEntity, this.realX - otherEntity.realX, this.realY - otherEntity.realY);
     }
 
     return false;
   }
 
   health = GameRules.playerShield.base.startingHealth;
-  tick = 0;
+  tickIndex = 0;
 
   depleted = false;
   gameTick(duration: number) {
-    this.tick++;
+    this.tickIndex++;
     if (!this.depleted && this.health <= 0) {
       this.lastHit = GameRules.playerShield.base.depletedRegenTimeout;
       this.depleted = true;
@@ -65,7 +72,7 @@ export class PlayerShieldEntity extends Entity {
       if (this.depleted) {
         this.depleted = false;
         this.health++;
-      } else if (this.tick % GameRules.playerShield.base.regenRate === 0) {
+      } else if (this.tickIndex % GameRules.playerShield.base.regenRate === 0) {
         this.health++;
       }
     }

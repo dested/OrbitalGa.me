@@ -11,6 +11,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   get drawY() {
     return this.realY;
   }
+  tick() {}
 
   constructor(game: ClientGame, messageEntity: PlayerModel) {
     super(game, messageEntity.entityId);

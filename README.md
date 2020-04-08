@@ -22,11 +22,10 @@
 - [ ] disconnect player for prolonged inactivity 
 - [ ] disconnect player for delayed pingpong 
 - [ ] test server version
-- [ ] i think interpolateEntities can be cleaner simpler
 - [ ] validate input sequence number so they can't send garbage negative, etc
 - [ ] add audio
+- [ ] add asset loading progress 
 - [ ] hard to go straight left with nipplejs
-- [ ] rename or remove lastProcessedInputSequenceNumber
 - [ ] maybe remove momentum
 - [ ] garbageless server tick
 - [ ] add server kill switch to boot everyone out
@@ -36,7 +35,8 @@
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
 - [ ] revive does not work 
-- [ ] better death animation
+- [x] abstract interpolate entities
+- [x] better death animation
 - [x] moving goes out of sync on mobile, i think its moving faster
 - [x] figure out mobile jitter, https://bugs.chromium.org/p/chromium/issues/detail?id=1068769 
 - [x] add death animation 
@@ -67,7 +67,6 @@
 - [ ] abstract game events into a class
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event
-- [x] add rock debris
 - [ ] drop powerups from enemy
 - [ ] drop powerups from debris
 - [ ] drop bombs
@@ -75,6 +74,8 @@
   - [ ] you always have shield that regens but also upgradable
 - [ ] 3 lives before you die and reset???
 - [ ] add 5 second sustained laser
+- [x] better rock debris
+- [x] add rock debris
 
 ## Infrastructure
 

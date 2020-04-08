@@ -25,6 +25,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     }
     return this.y + owner.drawY;
   }
+  tick() {}
 
   constructor(game: ClientGame, messageEntity: PlayerShieldModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId);

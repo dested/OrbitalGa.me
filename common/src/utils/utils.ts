@@ -233,6 +233,13 @@ export class Utils {
     }
     return options[n];
   }
+
+  static degToRad(deg: number) {
+    return deg * 0.0174533;
+  }
+  static byteDegToRad(deg: number) {
+    return deg * (360 / 255) * 0.0174533;
+  }
 }
 
 export function objectSafeKeys<T>(obj: T): (keyof T)[] {

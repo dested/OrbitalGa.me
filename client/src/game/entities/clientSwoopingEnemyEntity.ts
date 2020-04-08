@@ -26,6 +26,8 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
 
     this.updatePolygon();
   }
+  tick() {}
+
   zIndex = DrawZIndex.Player;
   draw(context: CanvasRenderingContext2D): void {
     const enemyShip = AssetManager.assets.ship2;

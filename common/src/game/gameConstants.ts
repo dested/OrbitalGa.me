@@ -2,7 +2,6 @@ export class GameConstants {
   static debugClient = false;
   static debugCollisions = false;
   static debugDontFilterEntities = false;
-  static debugDraw = false;
   static debugInvulnerable = false;
 
   static singlePlayer = typeof window === 'object' && window.location.pathname.indexOf('single') >= 0;

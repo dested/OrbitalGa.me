@@ -39,14 +39,12 @@ export class ShotExplosionEntity extends Entity {
   serialize(): ShotExplosionModel {
     return {
       ...super.serialize(),
-      aliveDuration: this.aliveDuration,
       ownerEntityId: this.ownerEntityId,
       entityType: 'shotExplosion',
     };
   }
   reconcileFromServer(messageEntity: ShotExplosionModel) {
     super.reconcileFromServer(messageEntity);
-    this.aliveDuration = messageEntity.aliveDuration;
     this.ownerEntityId = messageEntity.ownerEntityId;
   }
 
@@ -54,20 +52,17 @@ export class ShotExplosionEntity extends Entity {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'shotExplosion',
-      aliveDuration: reader.readUint8(),
       ownerEntityId: reader.readOptionalInt32(),
     };
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
     Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.aliveDuration);
     buff.addOptionalInt32(entity.ownerEntityId);
   }
 }
 
 export type ShotExplosionModel = EntityModel & {
   entityType: 'shotExplosion';
-  aliveDuration: number;
   ownerEntityId?: number;
 };

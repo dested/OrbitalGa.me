@@ -9,6 +9,7 @@ export class ClientWallEntity extends WallEntity implements ClientEntity {
   get drawY() {
     return this.realY;
   }
+  tick() {}
 
   constructor(game: ClientGame, messageEntity: WallModel) {
     super(game, messageEntity.entityId, messageEntity.width, messageEntity.height);

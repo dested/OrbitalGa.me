@@ -14,6 +14,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
 
   positionLerp?: {startTime: number; duration: number; x: number; y: number};
+  tick() {}
 
   gameTick(): void {
     super.gameTick();
@@ -106,5 +107,8 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     if (spliceIndex >= 0) {
       this.pendingInputs.splice(0, spliceIndex + 1);
     }
+  }
+  interpolateEntity(renderTimestamp: number) {
+    // live entity does not need to interpolate anything
   }
 }

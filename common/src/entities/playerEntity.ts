@@ -129,6 +129,20 @@ export class PlayerEntity extends Entity {
     }
   }
 
+  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
+    if (!shield.depleted) {
+      return false;
+    }
+
+    this.health -= damage;
+    this.game.destroyEntity(otherEntity);
+    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
+    shotExplosionEntity.start(x, y);
+    this.game.entities.push(shotExplosionEntity);
+    return true;
+  }
+
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
       this.x -= collisionResult.overlap * collisionResult.overlap_x;
@@ -138,21 +152,12 @@ export class PlayerEntity extends Entity {
     }
     if (!this.game.isClient) {
       if (otherEntity instanceof EnemyShotEntity) {
-        const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
-        if (!shield.depleted) {
-          return false;
-        }
-
-        this.health -= 1;
-        this.game.destroyEntity(otherEntity);
-        const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), this.entityId);
-        shotExplosionEntity.start(
-          this.realX - collisionResult.overlap * collisionResult.overlap_x,
-          this.realY - collisionResult.overlap * collisionResult.overlap_y
+        return this.hurt(
+          1,
+          otherEntity,
+          collisionResult.overlap * collisionResult.overlap_x,
+          collisionResult.overlap * collisionResult.overlap_y
         );
-        this.game.entities.push(shotExplosionEntity);
-
-        return true;
       }
     }
     return false;
