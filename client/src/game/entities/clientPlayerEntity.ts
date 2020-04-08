@@ -2,7 +2,7 @@ import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
-import {GameRules} from '@common/game/gameConstants';
+import {GameRules} from "@common/game/gameRules";
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   get drawX() {

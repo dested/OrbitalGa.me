@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
-import {GameConstants, GameRules} from '../game/gameConstants';
+import {GameConstants} from '../game/gameConstants';
 import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
@@ -9,6 +9,7 @@ import {WallEntity} from './wallEntity';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
+import {GameRules} from "../game/gameRules";
 
 export type PendingInput = {
   inputSequenceNumber: number;

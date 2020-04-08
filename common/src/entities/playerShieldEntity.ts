@@ -7,7 +7,8 @@ import {ShotEntity} from './shotEntity';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
-import {GameConstants, GameRules} from '../game/gameConstants';
+import {GameConstants} from '../game/gameConstants';
+import {GameRules} from "../game/gameRules";
 
 export class PlayerShieldEntity extends Entity {
   boundingBoxes = [{width: 133, height: 108}];

@@ -2,12 +2,13 @@ import {PlayerShieldEntity, PlayerShieldModel} from '@common/entities/playerShie
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {AssetManager} from '../../utils/assetManager';
 import {ClientGame} from '../clientGame';
-import {GameConstants, GameRules} from '@common/game/gameConstants';
+import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 import {Entity} from '@common/entities/entity';
+import {GameRules} from "@common/game/gameRules";
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
   get drawX() {

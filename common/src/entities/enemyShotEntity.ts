@@ -3,7 +3,7 @@ import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {GameRules} from '../game/gameConstants';
+import {GameRules} from "../game/gameRules";
 
 export class EnemyShotEntity extends Entity {
   get realX() {

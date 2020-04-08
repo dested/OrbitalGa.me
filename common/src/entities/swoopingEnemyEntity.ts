@@ -3,12 +3,13 @@ import {Utils} from '../utils/utils';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ShotEntity} from './shotEntity';
-import {GameConstants, GameRules} from '../game/gameConstants';
+import {GameConstants} from '../game/gameConstants';
 import {ShotExplosionEntity} from './shotExplosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {PathRunner} from '../utils/pathRunner';
+import {GameRules} from "../game/gameRules";
 
 export class SwoopingEnemyEntity extends Entity {
   get realX() {
