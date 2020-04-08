@@ -17,13 +17,15 @@ export class MeteorEntity extends Entity {
 
   meteorColor: 'brown' | 'grey';
 
+  momentumX: number = Math.random() * 10 - 5;
+  momentumY: number = 5 + Math.random() * 10;
+
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
 
   rotate = Math.random() * 255;
   rotateSpeed = Math.round(1 + Math.random() * 3);
   size: 'big' | 'med' | 'small' | 'tiny';
 
-  speed = 5 + Math.random() * 10;
   type: 1 | 2 | 3 | 4;
 
   constructor(
@@ -99,19 +101,13 @@ export class MeteorEntity extends Entity {
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (!this.game.isClient) {
       if (otherEntity instanceof ShotEntity) {
-        this.health -= 1;
         this.game.destroyEntity(otherEntity);
-        const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 1, this.entityId);
-        shotExplosionEntity.start(
+        this.hurt(
+          1,
+          otherEntity,
           collisionResult.overlap * collisionResult.overlap_x,
           collisionResult.overlap * collisionResult.overlap_y
         );
-        this.game.entities.push(shotExplosionEntity);
-
-        if (this.health <= 0) {
-          this.die();
-        }
-
         return true;
       }
       if (otherEntity instanceof PlayerEntity) {
@@ -123,15 +119,18 @@ export class MeteorEntity extends Entity {
             collisionResult.overlap * collisionResult.overlap_y
           )
         ) {
-          otherEntity.momentum.x = collisionResult.overlap * collisionResult.overlap_x * 4;
-          otherEntity.momentum.y = collisionResult.overlap * collisionResult.overlap_y * 4;
-          this.x += collisionResult.overlap * collisionResult.overlap_x * 3;
-          this.y += collisionResult.overlap * collisionResult.overlap_y * 3;
+          otherEntity.momentum.x += collisionResult.overlap * collisionResult.overlap_x * 2;
+          otherEntity.momentum.y += collisionResult.overlap * collisionResult.overlap_y * 2;
+          this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
+          this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
 
-          this.health -= 1;
-          if (this.health <= 0) {
-            this.die();
-          }
+          this.hurt(
+            1,
+            otherEntity,
+            collisionResult.overlap * collisionResult.overlap_x,
+            collisionResult.overlap * collisionResult.overlap_y
+          );
+
           return true;
         }
       }
@@ -145,15 +144,17 @@ export class MeteorEntity extends Entity {
           )
         ) {
           if (otherEntity.player) {
-            otherEntity.player.momentum.x = collisionResult.overlap * collisionResult.overlap_x * 4;
-            otherEntity.player.momentum.y = collisionResult.overlap * collisionResult.overlap_y * 4;
+            otherEntity.player.momentum.x += collisionResult.overlap * collisionResult.overlap_x * 2;
+            otherEntity.player.momentum.y += collisionResult.overlap * collisionResult.overlap_y * 2;
           }
-          this.x -= collisionResult.overlap * collisionResult.overlap_x * 3;
-          this.y -= collisionResult.overlap * collisionResult.overlap_y * 3;
-          this.health -= 1;
-          if (this.health <= 0) {
-            this.die();
-          }
+          this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
+          this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
+          this.hurt(
+            1,
+            otherEntity,
+            collisionResult.overlap * collisionResult.overlap_x,
+            collisionResult.overlap * collisionResult.overlap_y
+          );
           return true;
         }
       }
@@ -163,7 +164,8 @@ export class MeteorEntity extends Entity {
 
   gameTick(duration: number) {
     this.rotate += this.rotateSpeed;
-    this.y += this.speed;
+    this.x += this.momentumX;
+    this.y += this.momentumY;
     if (this.y > GameConstants.screenSize.height * 1.2) {
       this.game.destroyEntity(this);
     }
@@ -230,6 +232,17 @@ export class MeteorEntity extends Entity {
         this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
       );
       this.game.entities.push(deathExplosion);
+    }
+  }
+
+  private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    this.health -= damage;
+    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 1, this.entityId);
+    shotExplosionEntity.start(x, y);
+    this.game.entities.push(shotExplosionEntity);
+
+    if (this.health <= 0) {
+      this.die();
     }
   }
 
