@@ -3,5 +3,6 @@
   "singleQuote":true,
   "printWidth":120,
   "bracketSpacing":false,
+  "endOfLine": "auto",
   "trailingComma": "es5"
 }
