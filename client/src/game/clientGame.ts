@@ -9,7 +9,6 @@ import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {WorldEntityModelCastToEntityModel} from '@common/models/entityTypeModels';
-import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -88,7 +87,7 @@ export class ClientGame extends Game {
           gamePaused = 0;
         }
       }
-      this.gameTick(GameConstants.serverTickRate);
+      this.gameTick(duration);
       gameTime = +new Date();
       if (gameTime - now > 20) {
         console.log('bad duration', duration);

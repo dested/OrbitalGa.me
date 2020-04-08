@@ -11,6 +11,7 @@ import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {WorldStateEntity} from '@common/models/entityTypeModels';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
+import {MeteorEntity} from '@common/entities/meteorEntity';
 
 export class ServerGame extends Game {
   users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
@@ -190,6 +191,18 @@ export class ServerGame extends Game {
           -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
         );
         this.entities.push(swoopingEnemyEntity);
+      }
+    }
+    if (tickIndex % 20 < 2) {
+      for (let i = 0; i < 2; i++) {
+        const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
+
+        const meteor = new MeteorEntity(this, nextId(), 'brown', 'big', 1);
+        meteor.start(
+          Utils.randomInRange(x0, x1),
+          -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+        );
+        this.entities.push(meteor);
       }
     }
 

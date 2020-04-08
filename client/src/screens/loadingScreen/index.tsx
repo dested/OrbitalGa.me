@@ -6,6 +6,7 @@ import {Utils} from '@common/utils/utils';
 import {observer} from 'mobx-react-lite';
 import {AssetManager} from '../../utils/assetManager';
 
+import meteorBrownBig1 from '../../assets/meteors/meteorBrown_big1.png';
 import shield1 from '../../assets/shields/shield1.png';
 import shield2 from '../../assets/shields/shield2.png';
 import shield3 from '../../assets/shields/shield3.png';
@@ -30,6 +31,8 @@ export const LoadingScreen: React.FC = observer((props) => {
     }
 
     async function assets() {
+      AssetManager.addAsset('meteor.brown.big.1', meteorBrownBig1, {width: 101, height: 84}, {x: 0, y: 0});
+
       AssetManager.addAsset('laser.red', laserRed13, {width: 9, height: 57}, {x: 0, y: 0});
       AssetManager.addAsset('laser.blue', laserBlue13, {width: 9, height: 57}, {x: 0, y: 0});
       AssetManager.addAsset('laser.blue.explosion', laserBlueExplosion, {width: 48, height: 46}, {x: 0, y: 0});

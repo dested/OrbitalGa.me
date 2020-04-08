@@ -7,6 +7,7 @@ import {WallEntity, WallModel} from '../entities/wallEntity';
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
 import {PlayerEntity, PlayerModel} from '../entities/playerEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
 
 export type WorldStateEntity =
   | PlayerModel
@@ -16,7 +17,8 @@ export type WorldStateEntity =
   | ShotModel
   | ShotExplosionModel
   | EnemyShotModel
-  | PlayerShieldModel;
+  | PlayerShieldModel
+  | MeteorModel;
 
 export type EntityModelType = {
   player: PlayerModel;
@@ -27,6 +29,7 @@ export type EntityModelType = {
   wall: WallModel;
   spectator: SpectatorModel;
   playerShield: PlayerShieldModel;
+  meteor: MeteorModel;
 };
 
 export type WorldEntityModelCastToEntityModel = any;
@@ -46,6 +49,7 @@ export const EntityBufferType: {
   wall: {value: 6, addBuffer: WallEntity.addBuffer, readBuffer: WallEntity.readBuffer},
   spectator: {value: 7, addBuffer: SpectatorEntity.addBuffer, readBuffer: SpectatorEntity.readBuffer},
   playerShield: {value: 8, addBuffer: PlayerShieldEntity.addBuffer, readBuffer: PlayerShieldEntity.readBuffer},
+  meteor: {value: 9, addBuffer: MeteorEntity.addBuffer, readBuffer: MeteorEntity.readBuffer},
 };
 
 export const EntityBufferValue: {
@@ -59,4 +63,5 @@ export const EntityBufferValue: {
   6: 'wall',
   7: 'spectator',
   8: 'playerShield',
+  9: 'meteor',
 };

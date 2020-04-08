@@ -220,6 +220,19 @@ export class Utils {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
+
+  static switchNumber<TNumber extends number, TResult>(n: TNumber, options: {[key in TNumber]: TResult}): TResult {
+    if (!options[n]) {
+      throw new Error(`'Type not found', ${n}, ${JSON.stringify(options)}`);
+    }
+    return options[n];
+  }
+  static switchType<TType extends string | number, TResult>(n: TType, options: {[key in TType]: TResult}): TResult {
+    if (!options[n]) {
+      throw new Error(`'Type not found', ${n}, ${JSON.stringify(options)}`);
+    }
+    return options[n];
+  }
 }
 
 export function objectSafeKeys<T>(obj: T): (keyof T)[] {

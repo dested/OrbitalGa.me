@@ -51,7 +51,11 @@ export class ServerToClientMessageParser {
           type: 'worldState',
           entities: reader.loop(() => {
             const option = reader.readUint8();
-            return EntityBufferType[EntityBufferValue[option]].readBuffer(reader);
+            const entityBufferTypeElement = EntityBufferType[EntityBufferValue[option]];
+            if (!entityBufferTypeElement) {
+              throw new Error(`Buffer option not found: ${option}`);
+            }
+            return entityBufferTypeElement.readBuffer(reader);
           }),
         }),
       });

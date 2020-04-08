@@ -19,6 +19,8 @@
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
 - [ ] add ping -> latency
+- [ ] disconnect player for prolonged inactivity 
+- [ ] disconnect player for delayed pingpong 
 - [ ] test server version
 - [ ] i think interpolateEntities can be cleaner simpler
 - [ ] validate input sequence number so they can't send garbage negative, etc
@@ -65,7 +67,7 @@
 - [ ] abstract game events into a class
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event
-- [ ] add rock debris
+- [x] add rock debris
 - [ ] drop powerups from enemy
 - [ ] drop powerups from debris
 - [ ] drop bombs

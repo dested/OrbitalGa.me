@@ -9,6 +9,7 @@ import {ClientWallEntity} from './clientWallEntity';
 import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {ClientEnemyShotEntity} from './clientEnemyShotEntity';
+import {ClientMeteorEntity} from './clientMeteorEntity';
 
 export const ClientEntityTypes: {
   [key in WorldStateEntity['entityType']]: new (game: ClientGame, messageEntity: EntityModelType[key]) => Entity;
@@ -21,4 +22,5 @@ export const ClientEntityTypes: {
   wall: ClientWallEntity,
   spectator: ClientSpectatorEntity,
   playerShield: ClientPlayerShieldEntity,
+  meteor: ClientMeteorEntity,
 };
