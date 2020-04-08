@@ -179,7 +179,7 @@ export class ServerGame extends Game {
         right: false,
         left: false,
         shoot: false,
-        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber,
+        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
       });
     }
 
