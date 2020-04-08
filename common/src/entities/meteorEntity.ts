@@ -17,8 +17,8 @@ export class MeteorEntity extends Entity {
 
   meteorColor: 'brown' | 'grey';
 
-  momentumX: number = Math.random() * 10 - 5;
-  momentumY: number = 5 + Math.random() * 10;
+  momentumX = Math.random() * 10 - 5;
+  momentumY = 5 + Math.random() * 10;
 
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
 
@@ -119,8 +119,8 @@ export class MeteorEntity extends Entity {
             collisionResult.overlap * collisionResult.overlap_y
           )
         ) {
-          otherEntity.momentum.x += collisionResult.overlap * collisionResult.overlap_x * 2;
-          otherEntity.momentum.y += collisionResult.overlap * collisionResult.overlap_y * 2;
+          otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
+          otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
           this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
           this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
 
@@ -144,8 +144,8 @@ export class MeteorEntity extends Entity {
           )
         ) {
           if (otherEntity.player) {
-            otherEntity.player.momentum.x += collisionResult.overlap * collisionResult.overlap_x * 2;
-            otherEntity.player.momentum.y += collisionResult.overlap * collisionResult.overlap_y * 2;
+            otherEntity.player.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
+            otherEntity.player.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
           }
           this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
           this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;

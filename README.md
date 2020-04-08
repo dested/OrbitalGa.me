@@ -36,6 +36,7 @@
 - [ ] server is offline, play with bots locally
 - [ ] add momentum to rocks, maybe everything
 - [ ] import all assets
+- [ ] abstract shield better, player keeps taking damage
 - [x] fix shots being tied to entity xy
 - [x] revive does not work 
 - [x] abstract interpolate entities

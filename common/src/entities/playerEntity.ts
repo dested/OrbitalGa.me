@@ -31,7 +31,8 @@ export class PlayerEntity extends Entity {
 
   lastProcessedInputSequenceNumber: number = 0;
 
-  momentum: {x: number; y: number} = {x: 0, y: 0};
+  momentumX = 0;
+  momentumY = 0;
 
   pendingInputs: PendingInput[] = [];
 
@@ -72,30 +73,30 @@ export class PlayerEntity extends Entity {
     const ramp = 30;
     if (input.left) {
       this.xInputsThisTick = true;
-      this.momentum.x -= ramp;
-      if (this.momentum.x < -GameRules.player.base.maxSpeed) {
-        this.momentum.x = -GameRules.player.base.maxSpeed;
+      this.momentumX -= ramp;
+      if (this.momentumX < -GameRules.player.base.maxSpeed) {
+        this.momentumX = -GameRules.player.base.maxSpeed;
       }
     }
     if (input.right) {
       this.xInputsThisTick = true;
-      this.momentum.x += ramp;
-      if (this.momentum.x > GameRules.player.base.maxSpeed) {
-        this.momentum.x = GameRules.player.base.maxSpeed;
+      this.momentumX += ramp;
+      if (this.momentumX > GameRules.player.base.maxSpeed) {
+        this.momentumX = GameRules.player.base.maxSpeed;
       }
     }
     if (input.up) {
       this.yInputsThisTick = true;
-      this.momentum.y -= ramp;
-      if (this.momentum.y < -GameRules.player.base.maxSpeed) {
-        this.momentum.y = -GameRules.player.base.maxSpeed;
+      this.momentumY -= ramp;
+      if (this.momentumY < -GameRules.player.base.maxSpeed) {
+        this.momentumY = -GameRules.player.base.maxSpeed;
       }
     }
     if (input.down) {
       this.yInputsThisTick = true;
-      this.momentum.y += ramp;
-      if (this.momentum.y > GameRules.player.base.maxSpeed) {
-        this.momentum.y = GameRules.player.base.maxSpeed;
+      this.momentumY += ramp;
+      if (this.momentumY > GameRules.player.base.maxSpeed) {
+        this.momentumY = GameRules.player.base.maxSpeed;
       }
     }
   }
@@ -170,8 +171,8 @@ export class PlayerEntity extends Entity {
     this.dead = messageEntity.dead;
     this.playerColor = messageEntity.playerColor;
     this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
-    this.momentum.x = messageEntity.momentumX;
-    this.momentum.y = messageEntity.momentumY;
+    this.momentumX = messageEntity.momentumX;
+    this.momentumY = messageEntity.momentumY;
   }
 
   reconcileFromServer(messageEntity: PlayerModel) {
@@ -182,8 +183,8 @@ export class PlayerEntity extends Entity {
   serialize(): PlayerModel {
     return {
       ...super.serialize(),
-      momentumX: this.momentum.x,
-      momentumY: this.momentum.y,
+      momentumX: this.momentumX,
+      momentumY: this.momentumY,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       health: this.health,
       dead: this.dead,
@@ -196,39 +197,39 @@ export class PlayerEntity extends Entity {
   }
 
   updatedPositionFromMomentum() {
-    this.x += this.momentum.x;
-    this.y += this.momentum.y;
+    this.x += this.momentumX;
+    this.y += this.momentumY;
 
     if (!this.xInputsThisTick) {
-      this.momentum.x = this.momentum.x * GameRules.player.base.momentumDeceleration;
+      this.momentumX = this.momentumX * GameRules.player.base.momentumDeceleration;
     }
     if (!this.yInputsThisTick) {
-      this.momentum.y = this.momentum.y * GameRules.player.base.momentumDeceleration;
+      this.momentumY = this.momentumY * GameRules.player.base.momentumDeceleration;
     }
-    if (Math.abs(this.momentum.x) < 3) {
-      this.momentum.x = 0;
+    if (Math.abs(this.momentumX) < 3) {
+      this.momentumX = 0;
     }
-    if (Math.abs(this.momentum.y) < 3) {
-      this.momentum.y = 0;
+    if (Math.abs(this.momentumY) < 3) {
+      this.momentumY = 0;
     }
 
     const {x0, x1} = this.game.getPlayerRange(1000, (entity) => this !== entity);
     if (this.x < x0) {
       this.x = x0;
-      this.momentum.x = 0;
+      this.momentumX = 0;
     }
     if (this.x > x1) {
       this.x = x1;
-      this.momentum.x = 0;
+      this.momentumX = 0;
     }
 
     if (this.y < GameConstants.screenSize.height * 0.1) {
       this.y = GameConstants.screenSize.height * 0.1;
-      this.momentum.y = 0;
+      this.momentumY = 0;
     }
     if (this.y > GameConstants.screenSize.height * 1.1) {
       this.y = GameConstants.screenSize.height * 1.1;
-      this.momentum.y = 0;
+      this.momentumY = 0;
     }
   }
 

@@ -1,16 +1,17 @@
 import {Entity} from '../entities/entity';
 import {Utils} from './utils';
 
+type PathPoint = {offset?: 'currentPosition' | 'static' | 'staticX' | 'staticY'; x: number; y: number};
 export type Path<TPhase> = {
   duration: number;
   phase: TPhase;
-  points: {offset?: 'currentPosition' | 'static' | 'staticX' | 'staticY'; x: number; y: number}[];
+  points: PathPoint[];
 } & ({type: 'linear'} | {loopCount: number; type: 'loop'});
 
 export class PathRunner<TPhase> {
   loopCount = 0;
   pathIndex = 0;
-  pathPoint = 1;
+  pathPoint: number;
 
   startX: number;
   startY: number;
@@ -19,6 +20,7 @@ export class PathRunner<TPhase> {
   constructor(private paths: Path<TPhase>[], private entity: Entity) {
     this.startX = entity.x;
     this.startY = entity.y;
+    this.pathPoint = 1;
   }
 
   getCurrentPhase(): TPhase | 'done' {
@@ -36,6 +38,41 @@ export class PathRunner<TPhase> {
 
     const points = pathEntry.points;
 
+    this.progressPosition(points, pathEntry);
+
+    this.ticks++;
+    if (this.ticks % pathEntry.duration === 0) {
+      this.pathPoint++;
+      this.ticks = 0;
+      if (this.pathPoint >= points.length) {
+        this.pathPoint = 1;
+
+        if (pathEntry.type === 'loop') {
+          this.loopCount++;
+          if (this.loopCount < pathEntry.loopCount) {
+            return 'not-done';
+          }
+        }
+
+        this.loopCount = 0;
+        this.pathIndex++;
+        this.pathPoint = 1;
+        if (this.paths.length === this.pathIndex) {
+          return 'done';
+        }
+        this.startX = this.entity.x;
+        this.startY = this.entity.y;
+      }
+    }
+    return 'not-done';
+  }
+
+  setStartPosition(x: number, y: number) {
+    this.startX = x;
+    this.startY = y;
+  }
+
+  private progressPosition(points: PathPoint[], pathEntry: Path<TPhase>) {
     const prevPoint = points[this.pathPoint - 1];
     const curPoint = points[this.pathPoint];
 
@@ -76,35 +113,5 @@ export class PathRunner<TPhase> {
 
     this.entity.x = Utils.lerp(prevX, curX, this.ticks / pathEntry.duration);
     this.entity.y = Utils.lerp(prevY, curY, this.ticks / pathEntry.duration);
-    this.ticks++;
-    if (this.ticks % pathEntry.duration === 0) {
-      this.pathPoint++;
-      this.ticks = 0;
-      if (this.pathPoint >= points.length) {
-        this.pathPoint = 1;
-
-        if (pathEntry.type === 'loop') {
-          this.loopCount++;
-          if (this.loopCount < pathEntry.loopCount) {
-            return 'not-done';
-          }
-        }
-
-        this.loopCount = 0;
-        this.pathIndex++;
-        this.pathPoint = 1;
-        if (this.paths.length === this.pathIndex) {
-          return 'done';
-        }
-        this.startX = this.entity.x;
-        this.startY = this.entity.y;
-      }
-    }
-    return 'not-done';
-  }
-
-  setStartPosition(x: number, y: number) {
-    this.startX = x;
-    this.startY = y;
   }
 }

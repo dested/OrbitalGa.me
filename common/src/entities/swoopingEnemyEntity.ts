@@ -12,6 +12,7 @@ import {PathRunner} from '../utils/pathRunner';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
+import {MomentumRunner} from '../utils/momentumRunner';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -26,24 +27,27 @@ export class SwoopingEnemyEntity extends Entity {
   ];
 
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
+
+  momentumX = 0;
+  momentumY = 0;
+
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
-  private path = new PathRunner(
+  private path = new MomentumRunner(
     [
       {
         phase: 'swoop' as const,
         type: 'linear',
-        duration: 5,
+        duration: 7,
+        variability: 10,
         points: [
-          {x: 0, y: 0},
           {
-            x: -GameConstants.screenSize.width * 0.1,
-            y: GameConstants.screenSize.height * 0.4,
+            x: -10,
+            y: 30,
           },
-          {x: -GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
-          {x: -GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.5},
-          {x: 0, y: GameConstants.screenSize.height * 0.4},
-          {x: GameConstants.screenSize.width * 0.1, y: GameConstants.screenSize.height * 0.6},
-          {x: GameConstants.screenSize.width * 0.2, y: GameConstants.screenSize.height * 0.5},
+          {x: -10, y: 15},
+          {x: -20, y: -30},
+          {x: 25, y: 10},
+          {x: 20, y: -20},
         ],
       },
       {
@@ -51,28 +55,21 @@ export class SwoopingEnemyEntity extends Entity {
         type: 'loop',
         loopCount: 3,
         duration: 5,
+        variability: 10,
         points: [
-          {x: 0, y: GameConstants.screenSize.height * 0.1},
-          {x: 0, y: -GameConstants.screenSize.height * 0.1},
-          {x: 0, y: GameConstants.screenSize.height * 0.1},
+          {x: 0, y: 25},
+          {x: 0, y: -25},
         ],
       },
       {
         phase: 'exit' as const,
         type: 'linear',
-        duration: 10,
+        duration: 20,
+        variability: 0,
         points: [
           {
-            x: 0,
-            y: 0,
-          },
-          {
-            x:
-              this.swoopDirection === 'left'
-                ? -GameConstants.screenSize.width * 1.2
-                : +GameConstants.screenSize.width * 1.2,
-            y: -GameConstants.screenSize.height * 0.1,
-            offset: 'staticY',
+            x: this.swoopDirection === 'left' ? -150 : +150,
+            y: -200,
           },
         ],
       },
@@ -113,10 +110,10 @@ export class SwoopingEnemyEntity extends Entity {
           collisionResult.overlap * collisionResult.overlap_y
         )
       ) {
-        otherEntity.momentum.x = collisionResult.overlap * collisionResult.overlap_x * 4;
-        otherEntity.momentum.y = collisionResult.overlap * collisionResult.overlap_y * 4;
-        this.x += collisionResult.overlap * collisionResult.overlap_x * 3;
-        this.y += collisionResult.overlap * collisionResult.overlap_y * 3;
+        otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
+        otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
+        this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
+        this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
         this.health -= 1;
         if (this.health <= 0) {
           this.die();
@@ -134,11 +131,11 @@ export class SwoopingEnemyEntity extends Entity {
         )
       ) {
         if (otherEntity.player) {
-          otherEntity.player.momentum.x = collisionResult.overlap * collisionResult.overlap_x * 4;
-          otherEntity.player.momentum.y = collisionResult.overlap * collisionResult.overlap_y * 4;
+          otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
+          otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
         }
-        this.x -= collisionResult.overlap * collisionResult.overlap_x * 3;
-        this.y -= collisionResult.overlap * collisionResult.overlap_y * 3;
+        this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
+        this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
         this.health -= 1;
         if (this.health <= 0) {
           this.die();

@@ -17,6 +17,9 @@ export abstract class Entity {
 
   markToDestroy: boolean = false;
 
+  momentumX = 0;
+  momentumY = 0;
+
   positionBuffer: {time: number; x: number; y: number}[] = [];
   width: number = 0;
 
