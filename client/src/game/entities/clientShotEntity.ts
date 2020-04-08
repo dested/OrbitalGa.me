@@ -4,16 +4,20 @@ import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {Entity} from '@common/entities/entity';
 import {OrbitalAssets} from '../../utils/assetManager';
+import {ClientPlayerEntity} from './clientPlayerEntity';
 
 export class ClientShotEntity extends ShotEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
   constructor(game: ClientGame, messageEntity: ShotModel) {
-    super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.startY);
+    super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.offsetX, messageEntity.startY);
 
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     if (messageEntity.create) {
+      if (this.owner === game.liveEntity) {
+        this.x = this.owner.x + this.offsetX;
+      }
       this.y = messageEntity.startY;
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
@@ -28,6 +32,10 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
   }
   get drawY() {
     return this.y;
+  }
+
+  get owner() {
+    return this.game.entities.lookup<ClientPlayerEntity>(this.ownerEntityId);
   }
 
   draw(context: CanvasRenderingContext2D): void {
