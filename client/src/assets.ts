@@ -124,100 +124,46 @@ export type AssetKeys =
   | 'Meteors.meteorGrey_small2'
   | 'Meteors.meteorGrey_tiny1'
   | 'Meteors.meteorGrey_tiny2'
-  | 'Parts.beam0'
-  | 'Parts.beam1'
-  | 'Parts.beam2'
-  | 'Parts.beam3'
-  | 'Parts.beam4'
-  | 'Parts.beam5'
-  | 'Parts.beam6'
-  | 'Parts.beamLong1'
-  | 'Parts.beamLong2'
-  | 'Parts.cockpitBlue_0'
-  | 'Parts.cockpitBlue_1'
-  | 'Parts.cockpitBlue_2'
-  | 'Parts.cockpitBlue_3'
-  | 'Parts.cockpitBlue_4'
-  | 'Parts.cockpitBlue_5'
-  | 'Parts.cockpitBlue_6'
-  | 'Parts.cockpitBlue_7'
-  | 'Parts.cockpitGreen_0'
-  | 'Parts.cockpitGreen_1'
-  | 'Parts.cockpitGreen_2'
-  | 'Parts.cockpitGreen_3'
-  | 'Parts.cockpitGreen_4'
-  | 'Parts.cockpitGreen_5'
-  | 'Parts.cockpitGreen_6'
-  | 'Parts.cockpitGreen_7'
-  | 'Parts.cockpitRed_0'
-  | 'Parts.cockpitRed_1'
-  | 'Parts.cockpitRed_2'
-  | 'Parts.cockpitRed_3'
-  | 'Parts.cockpitRed_4'
-  | 'Parts.cockpitRed_5'
-  | 'Parts.cockpitRed_6'
-  | 'Parts.cockpitRed_7'
-  | 'Parts.cockpitYellow_0'
-  | 'Parts.cockpitYellow_1'
-  | 'Parts.cockpitYellow_2'
-  | 'Parts.cockpitYellow_3'
-  | 'Parts.cockpitYellow_4'
-  | 'Parts.cockpitYellow_5'
-  | 'Parts.cockpitYellow_6'
-  | 'Parts.cockpitYellow_7'
-  | 'Parts.engine1'
-  | 'Parts.engine2'
-  | 'Parts.engine3'
-  | 'Parts.engine4'
-  | 'Parts.engine5'
-  | 'Parts.gun00'
-  | 'Parts.gun01'
-  | 'Parts.gun02'
-  | 'Parts.gun03'
-  | 'Parts.gun04'
-  | 'Parts.gun05'
-  | 'Parts.gun06'
-  | 'Parts.gun07'
-  | 'Parts.gun08'
-  | 'Parts.gun09'
-  | 'Parts.gun10'
-  | 'Parts.scratch1'
-  | 'Parts.scratch2'
-  | 'Parts.scratch3'
-  | 'Parts.turretBase_big'
-  | 'Parts.turretBase_small'
-  | 'Parts.wingBlue_0'
-  | 'Parts.wingBlue_1'
-  | 'Parts.wingBlue_2'
-  | 'Parts.wingBlue_3'
-  | 'Parts.wingBlue_4'
-  | 'Parts.wingBlue_5'
-  | 'Parts.wingBlue_6'
-  | 'Parts.wingBlue_7'
-  | 'Parts.wingGreen_0'
-  | 'Parts.wingGreen_1'
-  | 'Parts.wingGreen_2'
-  | 'Parts.wingGreen_3'
-  | 'Parts.wingGreen_4'
-  | 'Parts.wingGreen_5'
-  | 'Parts.wingGreen_6'
-  | 'Parts.wingGreen_7'
-  | 'Parts.wingRed_0'
-  | 'Parts.wingRed_1'
-  | 'Parts.wingRed_2'
-  | 'Parts.wingRed_3'
-  | 'Parts.wingRed_4'
-  | 'Parts.wingRed_5'
-  | 'Parts.wingRed_6'
-  | 'Parts.wingRed_7'
-  | 'Parts.wingYellow_0'
-  | 'Parts.wingYellow_1'
-  | 'Parts.wingYellow_2'
-  | 'Parts.wingYellow_3'
-  | 'Parts.wingYellow_4'
-  | 'Parts.wingYellow_5'
-  | 'Parts.wingYellow_6'
-  | 'Parts.wingYellow_7'
+  | 'Missiles.spaceMissiles_001'
+  | 'Missiles.spaceMissiles_002'
+  | 'Missiles.spaceMissiles_003'
+  | 'Missiles.spaceMissiles_004'
+  | 'Missiles.spaceMissiles_005'
+  | 'Missiles.spaceMissiles_006'
+  | 'Missiles.spaceMissiles_007'
+  | 'Missiles.spaceMissiles_008'
+  | 'Missiles.spaceMissiles_009'
+  | 'Missiles.spaceMissiles_010'
+  | 'Missiles.spaceMissiles_011'
+  | 'Missiles.spaceMissiles_012'
+  | 'Missiles.spaceMissiles_013'
+  | 'Missiles.spaceMissiles_014'
+  | 'Missiles.spaceMissiles_015'
+  | 'Missiles.spaceMissiles_016'
+  | 'Missiles.spaceMissiles_017'
+  | 'Missiles.spaceMissiles_018'
+  | 'Missiles.spaceMissiles_019'
+  | 'Missiles.spaceMissiles_020'
+  | 'Missiles.spaceMissiles_021'
+  | 'Missiles.spaceMissiles_022'
+  | 'Missiles.spaceMissiles_023'
+  | 'Missiles.spaceMissiles_024'
+  | 'Missiles.spaceMissiles_025'
+  | 'Missiles.spaceMissiles_026'
+  | 'Missiles.spaceMissiles_027'
+  | 'Missiles.spaceMissiles_028'
+  | 'Missiles.spaceMissiles_029'
+  | 'Missiles.spaceMissiles_030'
+  | 'Missiles.spaceMissiles_031'
+  | 'Missiles.spaceMissiles_032'
+  | 'Missiles.spaceMissiles_033'
+  | 'Missiles.spaceMissiles_034'
+  | 'Missiles.spaceMissiles_035'
+  | 'Missiles.spaceMissiles_036'
+  | 'Missiles.spaceMissiles_037'
+  | 'Missiles.spaceMissiles_038'
+  | 'Missiles.spaceMissiles_039'
+  | 'Missiles.spaceMissiles_040'
   | 'Power_ups.bold_silver'
   | 'Power_ups.bolt_bronze'
   | 'Power_ups.bolt_gold'
@@ -420,100 +366,46 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Meteors.meteorGrey_small2': {asset: require('./assets/Meteors/meteorGrey_small2.png'), width: 29, height: 26},
   'Meteors.meteorGrey_tiny1': {asset: require('./assets/Meteors/meteorGrey_tiny1.png'), width: 18, height: 18},
   'Meteors.meteorGrey_tiny2': {asset: require('./assets/Meteors/meteorGrey_tiny2.png'), width: 16, height: 15},
-  'Parts.beam0': {asset: require('./assets/Parts/beam0.png'), width: 43, height: 31},
-  'Parts.beam1': {asset: require('./assets/Parts/beam1.png'), width: 40, height: 20},
-  'Parts.beam2': {asset: require('./assets/Parts/beam2.png'), width: 38, height: 31},
-  'Parts.beam3': {asset: require('./assets/Parts/beam3.png'), width: 29, height: 29},
-  'Parts.beam4': {asset: require('./assets/Parts/beam4.png'), width: 41, height: 17},
-  'Parts.beam5': {asset: require('./assets/Parts/beam5.png'), width: 40, height: 25},
-  'Parts.beam6': {asset: require('./assets/Parts/beam6.png'), width: 43, height: 23},
-  'Parts.beamLong1': {asset: require('./assets/Parts/beamLong1.png'), width: 15, height: 67},
-  'Parts.beamLong2': {asset: require('./assets/Parts/beamLong2.png'), width: 25, height: 64},
-  'Parts.cockpitBlue_0': {asset: require('./assets/Parts/cockpitBlue_0.png'), width: 51, height: 75},
-  'Parts.cockpitBlue_1': {asset: require('./assets/Parts/cockpitBlue_1.png'), width: 40, height: 40},
-  'Parts.cockpitBlue_2': {asset: require('./assets/Parts/cockpitBlue_2.png'), width: 42, height: 56},
-  'Parts.cockpitBlue_3': {asset: require('./assets/Parts/cockpitBlue_3.png'), width: 60, height: 61},
-  'Parts.cockpitBlue_4': {asset: require('./assets/Parts/cockpitBlue_4.png'), width: 47, height: 67},
-  'Parts.cockpitBlue_5': {asset: require('./assets/Parts/cockpitBlue_5.png'), width: 48, height: 75},
-  'Parts.cockpitBlue_6': {asset: require('./assets/Parts/cockpitBlue_6.png'), width: 42, height: 67},
-  'Parts.cockpitBlue_7': {asset: require('./assets/Parts/cockpitBlue_7.png'), width: 41, height: 71},
-  'Parts.cockpitGreen_0': {asset: require('./assets/Parts/cockpitGreen_0.png'), width: 51, height: 75},
-  'Parts.cockpitGreen_1': {asset: require('./assets/Parts/cockpitGreen_1.png'), width: 40, height: 40},
-  'Parts.cockpitGreen_2': {asset: require('./assets/Parts/cockpitGreen_2.png'), width: 42, height: 56},
-  'Parts.cockpitGreen_3': {asset: require('./assets/Parts/cockpitGreen_3.png'), width: 60, height: 61},
-  'Parts.cockpitGreen_4': {asset: require('./assets/Parts/cockpitGreen_4.png'), width: 47, height: 67},
-  'Parts.cockpitGreen_5': {asset: require('./assets/Parts/cockpitGreen_5.png'), width: 42, height: 67},
-  'Parts.cockpitGreen_6': {asset: require('./assets/Parts/cockpitGreen_6.png'), width: 41, height: 71},
-  'Parts.cockpitGreen_7': {asset: require('./assets/Parts/cockpitGreen_7.png'), width: 48, height: 75},
-  'Parts.cockpitRed_0': {asset: require('./assets/Parts/cockpitRed_0.png'), width: 51, height: 75},
-  'Parts.cockpitRed_1': {asset: require('./assets/Parts/cockpitRed_1.png'), width: 40, height: 40},
-  'Parts.cockpitRed_2': {asset: require('./assets/Parts/cockpitRed_2.png'), width: 42, height: 56},
-  'Parts.cockpitRed_3': {asset: require('./assets/Parts/cockpitRed_3.png'), width: 60, height: 61},
-  'Parts.cockpitRed_4': {asset: require('./assets/Parts/cockpitRed_4.png'), width: 47, height: 67},
-  'Parts.cockpitRed_5': {asset: require('./assets/Parts/cockpitRed_5.png'), width: 48, height: 75},
-  'Parts.cockpitRed_6': {asset: require('./assets/Parts/cockpitRed_6.png'), width: 42, height: 67},
-  'Parts.cockpitRed_7': {asset: require('./assets/Parts/cockpitRed_7.png'), width: 41, height: 71},
-  'Parts.cockpitYellow_0': {asset: require('./assets/Parts/cockpitYellow_0.png'), width: 40, height: 40},
-  'Parts.cockpitYellow_1': {asset: require('./assets/Parts/cockpitYellow_1.png'), width: 60, height: 61},
-  'Parts.cockpitYellow_2': {asset: require('./assets/Parts/cockpitYellow_2.png'), width: 47, height: 67},
-  'Parts.cockpitYellow_3': {asset: require('./assets/Parts/cockpitYellow_3.png'), width: 48, height: 75},
-  'Parts.cockpitYellow_4': {asset: require('./assets/Parts/cockpitYellow_4.png'), width: 42, height: 67},
-  'Parts.cockpitYellow_5': {asset: require('./assets/Parts/cockpitYellow_5.png'), width: 41, height: 71},
-  'Parts.cockpitYellow_6': {asset: require('./assets/Parts/cockpitYellow_6.png'), width: 42, height: 56},
-  'Parts.cockpitYellow_7': {asset: require('./assets/Parts/cockpitYellow_7.png'), width: 51, height: 75},
-  'Parts.engine1': {asset: require('./assets/Parts/engine1.png'), width: 38, height: 23},
-  'Parts.engine2': {asset: require('./assets/Parts/engine2.png'), width: 42, height: 28},
-  'Parts.engine3': {asset: require('./assets/Parts/engine3.png'), width: 27, height: 22},
-  'Parts.engine4': {asset: require('./assets/Parts/engine4.png'), width: 49, height: 45},
-  'Parts.engine5': {asset: require('./assets/Parts/engine5.png'), width: 44, height: 24},
-  'Parts.gun00': {asset: require('./assets/Parts/gun00.png'), width: 16, height: 36},
-  'Parts.gun01': {asset: require('./assets/Parts/gun01.png'), width: 17, height: 33},
-  'Parts.gun02': {asset: require('./assets/Parts/gun02.png'), width: 14, height: 36},
-  'Parts.gun03': {asset: require('./assets/Parts/gun03.png'), width: 20, height: 41},
-  'Parts.gun04': {asset: require('./assets/Parts/gun04.png'), width: 16, height: 41},
-  'Parts.gun05': {asset: require('./assets/Parts/gun05.png'), width: 21, height: 41},
-  'Parts.gun06': {asset: require('./assets/Parts/gun06.png'), width: 17, height: 38},
-  'Parts.gun07': {asset: require('./assets/Parts/gun07.png'), width: 14, height: 41},
-  'Parts.gun08': {asset: require('./assets/Parts/gun08.png'), width: 10, height: 47},
-  'Parts.gun09': {asset: require('./assets/Parts/gun09.png'), width: 20, height: 52},
-  'Parts.gun10': {asset: require('./assets/Parts/gun10.png'), width: 20, height: 52},
-  'Parts.scratch1': {asset: require('./assets/Parts/scratch1.png'), width: 21, height: 16},
-  'Parts.scratch2': {asset: require('./assets/Parts/scratch2.png'), width: 21, height: 16},
-  'Parts.scratch3': {asset: require('./assets/Parts/scratch3.png'), width: 16, height: 12},
-  'Parts.turretBase_big': {asset: require('./assets/Parts/turretBase_big.png'), width: 41, height: 41},
-  'Parts.turretBase_small': {asset: require('./assets/Parts/turretBase_small.png'), width: 26, height: 26},
-  'Parts.wingBlue_0': {asset: require('./assets/Parts/wingBlue_0.png'), width: 45, height: 78},
-  'Parts.wingBlue_1': {asset: require('./assets/Parts/wingBlue_1.png'), width: 37, height: 72},
-  'Parts.wingBlue_2': {asset: require('./assets/Parts/wingBlue_2.png'), width: 26, height: 84},
-  'Parts.wingBlue_3': {asset: require('./assets/Parts/wingBlue_3.png'), width: 51, height: 75},
-  'Parts.wingBlue_4': {asset: require('./assets/Parts/wingBlue_4.png'), width: 42, height: 80},
-  'Parts.wingBlue_5': {asset: require('./assets/Parts/wingBlue_5.png'), width: 51, height: 69},
-  'Parts.wingBlue_6': {asset: require('./assets/Parts/wingBlue_6.png'), width: 42, height: 74},
-  'Parts.wingBlue_7': {asset: require('./assets/Parts/wingBlue_7.png'), width: 43, height: 83},
-  'Parts.wingGreen_0': {asset: require('./assets/Parts/wingGreen_0.png'), width: 45, height: 78},
-  'Parts.wingGreen_1': {asset: require('./assets/Parts/wingGreen_1.png'), width: 37, height: 72},
-  'Parts.wingGreen_2': {asset: require('./assets/Parts/wingGreen_2.png'), width: 26, height: 84},
-  'Parts.wingGreen_3': {asset: require('./assets/Parts/wingGreen_3.png'), width: 51, height: 75},
-  'Parts.wingGreen_4': {asset: require('./assets/Parts/wingGreen_4.png'), width: 42, height: 80},
-  'Parts.wingGreen_5': {asset: require('./assets/Parts/wingGreen_5.png'), width: 51, height: 69},
-  'Parts.wingGreen_6': {asset: require('./assets/Parts/wingGreen_6.png'), width: 42, height: 74},
-  'Parts.wingGreen_7': {asset: require('./assets/Parts/wingGreen_7.png'), width: 43, height: 83},
-  'Parts.wingRed_0': {asset: require('./assets/Parts/wingRed_0.png'), width: 26, height: 84},
-  'Parts.wingRed_1': {asset: require('./assets/Parts/wingRed_1.png'), width: 37, height: 72},
-  'Parts.wingRed_2': {asset: require('./assets/Parts/wingRed_2.png'), width: 51, height: 75},
-  'Parts.wingRed_3': {asset: require('./assets/Parts/wingRed_3.png'), width: 42, height: 80},
-  'Parts.wingRed_4': {asset: require('./assets/Parts/wingRed_4.png'), width: 51, height: 69},
-  'Parts.wingRed_5': {asset: require('./assets/Parts/wingRed_5.png'), width: 42, height: 74},
-  'Parts.wingRed_6': {asset: require('./assets/Parts/wingRed_6.png'), width: 43, height: 83},
-  'Parts.wingRed_7': {asset: require('./assets/Parts/wingRed_7.png'), width: 45, height: 78},
-  'Parts.wingYellow_0': {asset: require('./assets/Parts/wingYellow_0.png'), width: 45, height: 78},
-  'Parts.wingYellow_1': {asset: require('./assets/Parts/wingYellow_1.png'), width: 37, height: 72},
-  'Parts.wingYellow_2': {asset: require('./assets/Parts/wingYellow_2.png'), width: 26, height: 84},
-  'Parts.wingYellow_3': {asset: require('./assets/Parts/wingYellow_3.png'), width: 51, height: 75},
-  'Parts.wingYellow_4': {asset: require('./assets/Parts/wingYellow_4.png'), width: 42, height: 80},
-  'Parts.wingYellow_5': {asset: require('./assets/Parts/wingYellow_5.png'), width: 51, height: 69},
-  'Parts.wingYellow_6': {asset: require('./assets/Parts/wingYellow_6.png'), width: 42, height: 74},
-  'Parts.wingYellow_7': {asset: require('./assets/Parts/wingYellow_7.png'), width: 43, height: 83},
+  'Missiles.spaceMissiles_001': {asset: require('./assets/Missiles/spaceMissiles_001.png'), width: 40, height: 69},
+  'Missiles.spaceMissiles_002': {asset: require('./assets/Missiles/spaceMissiles_002.png'), width: 40, height: 69},
+  'Missiles.spaceMissiles_003': {asset: require('./assets/Missiles/spaceMissiles_003.png'), width: 40, height: 69},
+  'Missiles.spaceMissiles_004': {asset: require('./assets/Missiles/spaceMissiles_004.png'), width: 35, height: 102},
+  'Missiles.spaceMissiles_005': {asset: require('./assets/Missiles/spaceMissiles_005.png'), width: 35, height: 102},
+  'Missiles.spaceMissiles_006': {asset: require('./assets/Missiles/spaceMissiles_006.png'), width: 35, height: 102},
+  'Missiles.spaceMissiles_007': {asset: require('./assets/Missiles/spaceMissiles_007.png'), width: 38, height: 80},
+  'Missiles.spaceMissiles_008': {asset: require('./assets/Missiles/spaceMissiles_008.png'), width: 38, height: 80},
+  'Missiles.spaceMissiles_009': {asset: require('./assets/Missiles/spaceMissiles_009.png'), width: 38, height: 80},
+  'Missiles.spaceMissiles_010': {asset: require('./assets/Missiles/spaceMissiles_010.png'), width: 24, height: 96},
+  'Missiles.spaceMissiles_011': {asset: require('./assets/Missiles/spaceMissiles_011.png'), width: 24, height: 96},
+  'Missiles.spaceMissiles_012': {asset: require('./assets/Missiles/spaceMissiles_012.png'), width: 24, height: 96},
+  'Missiles.spaceMissiles_013': {asset: require('./assets/Missiles/spaceMissiles_013.png'), width: 32, height: 44},
+  'Missiles.spaceMissiles_014': {asset: require('./assets/Missiles/spaceMissiles_014.png'), width: 32, height: 44},
+  'Missiles.spaceMissiles_015': {asset: require('./assets/Missiles/spaceMissiles_015.png'), width: 32, height: 44},
+  'Missiles.spaceMissiles_016': {asset: require('./assets/Missiles/spaceMissiles_016.png'), width: 25, height: 49},
+  'Missiles.spaceMissiles_017': {asset: require('./assets/Missiles/spaceMissiles_017.png'), width: 25, height: 49},
+  'Missiles.spaceMissiles_018': {asset: require('./assets/Missiles/spaceMissiles_018.png'), width: 25, height: 49},
+  'Missiles.spaceMissiles_019': {asset: require('./assets/Missiles/spaceMissiles_019.png'), width: 40, height: 69},
+  'Missiles.spaceMissiles_020': {asset: require('./assets/Missiles/spaceMissiles_020.png'), width: 40, height: 69},
+  'Missiles.spaceMissiles_021': {asset: require('./assets/Missiles/spaceMissiles_021.png'), width: 40, height: 69},
+  'Missiles.spaceMissiles_022': {asset: require('./assets/Missiles/spaceMissiles_022.png'), width: 43, height: 92},
+  'Missiles.spaceMissiles_023': {asset: require('./assets/Missiles/spaceMissiles_023.png'), width: 43, height: 92},
+  'Missiles.spaceMissiles_024': {asset: require('./assets/Missiles/spaceMissiles_024.png'), width: 43, height: 92},
+  'Missiles.spaceMissiles_025': {asset: require('./assets/Missiles/spaceMissiles_025.png'), width: 23, height: 95},
+  'Missiles.spaceMissiles_026': {asset: require('./assets/Missiles/spaceMissiles_026.png'), width: 23, height: 95},
+  'Missiles.spaceMissiles_027': {asset: require('./assets/Missiles/spaceMissiles_027.png'), width: 23, height: 95},
+  'Missiles.spaceMissiles_028': {asset: require('./assets/Missiles/spaceMissiles_028.png'), width: 17, height: 65},
+  'Missiles.spaceMissiles_029': {asset: require('./assets/Missiles/spaceMissiles_029.png'), width: 36, height: 65},
+  'Missiles.spaceMissiles_030': {asset: require('./assets/Missiles/spaceMissiles_030.png'), width: 31, height: 98},
+  'Missiles.spaceMissiles_031': {asset: require('./assets/Missiles/spaceMissiles_031.png'), width: 34, height: 76},
+  'Missiles.spaceMissiles_032': {asset: require('./assets/Missiles/spaceMissiles_032.png'), width: 20, height: 92},
+  'Missiles.spaceMissiles_033': {asset: require('./assets/Missiles/spaceMissiles_033.png'), width: 28, height: 40},
+  'Missiles.spaceMissiles_034': {asset: require('./assets/Missiles/spaceMissiles_034.png'), width: 21, height: 45},
+  'Missiles.spaceMissiles_035': {asset: require('./assets/Missiles/spaceMissiles_035.png'), width: 36, height: 65},
+  'Missiles.spaceMissiles_036': {asset: require('./assets/Missiles/spaceMissiles_036.png'), width: 39, height: 88},
+  'Missiles.spaceMissiles_037': {asset: require('./assets/Missiles/spaceMissiles_037.png'), width: 19, height: 91},
+  'Missiles.spaceMissiles_038': {asset: require('./assets/Missiles/spaceMissiles_038.png'), width: 21, height: 69},
+  'Missiles.spaceMissiles_039': {asset: require('./assets/Missiles/spaceMissiles_039.png'), width: 21, height: 69},
+  'Missiles.spaceMissiles_040': {asset: require('./assets/Missiles/spaceMissiles_040.png'), width: 21, height: 69},
   'Power_ups.bold_silver': {asset: require('./assets/Power-ups/bold_silver.png'), width: 19, height: 30},
   'Power_ups.bolt_bronze': {asset: require('./assets/Power-ups/bolt_bronze.png'), width: 19, height: 30},
   'Power_ups.bolt_gold': {asset: require('./assets/Power-ups/bolt_gold.png'), width: 19, height: 30},
