@@ -6,7 +6,6 @@ import {ShotEntity} from './shotEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {WallEntity} from './wallEntity';
-import {EnemyShotEntity} from './enemyShotEntity';
 import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules} from '../game/gameRules';
@@ -24,6 +23,7 @@ export type PendingInput = {
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
+
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
   boundingBoxes = [{width: 99, height: 75}];
@@ -39,7 +39,7 @@ export class PlayerEntity extends Entity implements Weapon {
   pendingInputs: PendingInput[] = [];
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
-  side = 'player' as const;
+  weaponSide = 'player' as const;
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
 
@@ -49,12 +49,15 @@ export class PlayerEntity extends Entity implements Weapon {
     super(game, entityId, 'player');
     this.createPolygon();
   }
+
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }
+
   applyInput(input: PendingInput) {
     this.aliveTick++;
     this.xInputsThisTick = false;
@@ -119,23 +122,23 @@ export class PlayerEntity extends Entity implements Weapon {
     }
     if (!this.game.isClient) {
       if (isEnemyWeapon(otherEntity)) {
-        if (
-          this.hurt(
-            otherEntity.damage,
-            otherEntity,
-            collisionResult.overlap * collisionResult.overlap_x,
-            collisionResult.overlap * collisionResult.overlap_y
-          )
-        ) {
-          this.game.destroyEntity(otherEntity);
-        }
+        otherEntity.hurt(
+          otherEntity.damage,
+          this,
+          collisionResult.overlap * collisionResult.overlap_x,
+          collisionResult.overlap * collisionResult.overlap_y
+        );
+        this.hurt(
+          otherEntity.damage,
+          otherEntity,
+          -collisionResult.overlap * collisionResult.overlap_x,
+          -collisionResult.overlap * collisionResult.overlap_y
+        );
+
+        return true;
       }
     }
     return false;
-  }
-
-  destroy(): void {
-    super.destroy();
   }
 
   gameTick(): void {
@@ -145,34 +148,29 @@ export class PlayerEntity extends Entity implements Weapon {
     if (!this.game.isClient) {
       if (this.health <= 0) {
         this.dead = true;
-
-        for (let i = 0; i < 15; i++) {
-          const explosionEntity = new ExplosionEntity(this.game, nextId(), 10);
-          explosionEntity.start(
-            this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
-            this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
-          );
-          this.game.entities.push(explosionEntity);
-        }
-
         if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId).destroy();
-        this.destroy();
+        this.game.explode(this, 'big');
       }
     }
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
     const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
+    this.momentumX += x;
+    this.momentumY += y;
     if (!shield.depleted) {
-      shield.hurt(damage, otherEntity, x, y);
-    } else {
-      this.health -= damage;
-      const explosionEntity = new ExplosionEntity(this.game, nextId(), 5, this.entityId);
-      explosionEntity.start(x, y);
-      this.game.entities.push(explosionEntity);
+      const damageLeft = shield.hurt(damage, otherEntity, x, y);
+      if (damageLeft === 0) {
+        return;
+      } else {
+        damage = damageLeft;
+      }
     }
 
-    return true;
+    this.health -= damage;
+    const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
+    explosionEntity.start(x, y);
+    this.game.entities.push(explosionEntity);
   }
 
   reconcileDataFromServer(messageModel: PlayerModel) {

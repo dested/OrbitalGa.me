@@ -24,6 +24,7 @@ export class PlayerShieldEntity extends Entity {
     this.health = this.shieldConfig.maxHealth;
     this.createPolygon();
   }
+
   get player() {
     return this.game.entities.lookup<PlayerEntity>(this.ownerEntityId);
   }
@@ -35,6 +36,7 @@ export class PlayerShieldEntity extends Entity {
     }
     return this.x + owner.realX;
   }
+
   get realY() {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -69,12 +71,18 @@ export class PlayerShieldEntity extends Entity {
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    this.health -= damage;
+    let damageLeft = 0;
+    if (damage > this.health) {
+      damageLeft = damage - this.health;
+      this.health = 0;
+    } else {
+      this.health -= damage;
+    }
     this.lastHit = 10;
     const explosionEntity = new ExplosionEntity(this.game, nextId(), 3, this.entityId);
     explosionEntity.start(x, y);
     this.game.entities.push(explosionEntity);
-    return true;
+    return damageLeft;
   }
 
   reconcileFromServer(messageModel: PlayerShieldModel) {

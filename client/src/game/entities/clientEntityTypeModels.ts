@@ -1,5 +1,4 @@
 import {ClientSpectatorEntity} from './clientSpectatorEntity';
-import {Entity} from '@common/entities/entity';
 import {EntityType, EntityModels} from '@common/models/entityTypeModels';
 import {ClientExplosionEntity} from './clientExplosionEntity';
 import {ClientPlayerShieldEntity} from './clientPlayerShieldEntity';

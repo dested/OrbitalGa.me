@@ -8,9 +8,11 @@ export class SpectatorEntity extends Entity {
     super(game, entityId, 'spectator');
     this.createPolygon();
   }
+
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }

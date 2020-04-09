@@ -14,9 +14,11 @@ export class WallEntity extends Entity {
     });
     this.createPolygon();
   }
+
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }
@@ -26,6 +28,7 @@ export class WallEntity extends Entity {
   }
 
   gameTick(): void {}
+
   serialize(): WallModel {
     return {
       ...super.serialize(),

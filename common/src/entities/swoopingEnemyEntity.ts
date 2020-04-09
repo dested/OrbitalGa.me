@@ -7,7 +7,6 @@ import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameRules} from '../game/gameRules';
-import {PlayerEntity} from './playerEntity';
 import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 
@@ -15,23 +14,21 @@ export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
 export class SwoopingEnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
-
   // width = 112;
   // height = 75;
   boundingBoxes = [
     {width: 112, height: 34, offsetY: 41},
     {width: 57, height: 41, offsetX: 35},
   ];
-
   damage = 2;
   explosionIntensity = 4;
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   isWeapon = true as const;
   momentumX = 0;
   momentumY = 0;
-  side = 'enemy' as const;
-
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
+  weaponSide = 'enemy' as const;
+
   private path = new MomentumRunner(
     [
       {
@@ -81,47 +78,33 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     super(game, entityId, 'swoopingEnemy');
     this.createPolygon();
   }
+
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (isPlayerWeapon(otherEntity)) {
-      this.health -= otherEntity.damage;
-      this.game.destroyEntity(otherEntity);
+      otherEntity.hurt(
+        otherEntity.damage,
+        this,
+        collisionResult.overlap * collisionResult.overlap_x,
+        collisionResult.overlap * collisionResult.overlap_y
+      );
+      this.hurt(
+        otherEntity.damage,
+        otherEntity,
+        -collisionResult.overlap * collisionResult.overlap_x,
+        -collisionResult.overlap * collisionResult.overlap_y
+      );
 
-      const explosionEntity = new ExplosionEntity(this.game, nextId(), otherEntity.explosionIntensity, this.entityId);
-      explosionEntity.start(this.x - otherEntity.realX, this.y - otherEntity.realY);
-      this.game.entities.push(explosionEntity);
-      if (this.health <= 0) {
-        this.die();
-      }
       return true;
     }
 
-    if (otherEntity instanceof PlayerEntity) {
-      if (
-        otherEntity.hurt(
-          otherEntity.damage,
-          this,
-          collisionResult.overlap * collisionResult.overlap_x,
-          collisionResult.overlap * collisionResult.overlap_y
-        )
-      ) {
-        otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
-        otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
-        this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
-        this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
-        this.health -= otherEntity.damage;
-        if (this.health <= 0) {
-          this.die();
-        }
-        return true;
-      }
-    }
     return false;
   }
 
@@ -137,9 +120,22 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
 
     const result = this.path.progress();
     if (result === 'done') {
-      this.game.destroyEntity(this);
+      this.destroy();
     }
     this.aliveTick++;
+  }
+
+  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    this.health -= damage;
+    this.momentumX += x;
+    this.momentumY += y;
+
+    const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
+    explosionEntity.start(this.x - x, this.y - y);
+    this.game.entities.push(explosionEntity);
+    if (this.health <= 0) {
+      this.game.explode(this, 'medium');
+    }
   }
 
   reconcileFromServer(messageModel: SwoopingEnemyModel) {
@@ -147,6 +143,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this.health = messageModel.health;
     this.enemyColor = messageModel.enemyColor;
   }
+
   serialize(): SwoopingEnemyModel {
     return {
       ...super.serialize(),
@@ -159,19 +156,6 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   start(x: number, y: number) {
     super.start(x, y);
     this.path.setStartPosition(x, y);
-  }
-
-  private die() {
-    this.game.destroyEntity(this);
-
-    for (let i = 0; i < 5; i++) {
-      const deathExplosion = new ExplosionEntity(this.game, nextId(), 2);
-      deathExplosion.start(
-        this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
-        this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
-      );
-      this.game.entities.push(deathExplosion);
-    }
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {

@@ -9,11 +9,10 @@ import {Weapon} from './weapon';
 export class ShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
-
   damage = 1;
   explosionIntensity = 1;
   isWeapon = true as const;
-  side = 'player' as const;
+  weaponSide = 'player' as const;
 
   constructor(
     game: Game,
@@ -29,13 +28,14 @@ export class ShotEntity extends Entity implements Weapon {
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
-      this.game.destroyEntity(this);
+      this.destroy();
       return true;
     }
     return false;
@@ -45,8 +45,12 @@ export class ShotEntity extends Entity implements Weapon {
     this.y -= GameRules.playerShots.base.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
-      this.game.destroyEntity(this);
+      this.destroy();
     }
+  }
+
+  hurt(damage: number, otherEntity: Entity, overlapX: number, overlap: number): void {
+    this.destroy();
   }
 
   reconcileFromServer(messageModel: ShotModel) {

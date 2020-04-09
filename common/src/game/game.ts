@@ -1,6 +1,8 @@
 import {Collisions, Result} from 'collisions';
 import {Entity} from '../entities/entity';
 import {ArrayHash} from '../utils/arrayHash';
+import {nextId} from '../utils/uuid';
+import {ExplosionEntity} from '../entities/explosionEntity';
 
 export abstract class Game {
   collisionEngine: Collisions;
@@ -12,8 +14,28 @@ export abstract class Game {
     this.collisionResult = this.collisionEngine.createResult();
   }
 
-  destroyEntity(entity: Entity) {
+  explode(entity: Entity, explosionSize: 'small' | 'medium' | 'big') {
     entity.destroy();
+    let size = 0;
+    switch (explosionSize) {
+      case 'small':
+        size = 3;
+        break;
+      case 'medium':
+        size = 5;
+        break;
+      case 'big':
+        size = 8;
+        break;
+    }
+    for (let i = 0; i < size; i++) {
+      const deathExplosion = new ExplosionEntity(this, nextId(), 2);
+      deathExplosion.start(
+        entity.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
+        entity.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height
+      );
+      this.entities.push(deathExplosion);
+    }
   }
 
   getPlayerRange(padding: number, filter: (e: Entity) => boolean) {

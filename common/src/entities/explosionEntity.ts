@@ -11,6 +11,7 @@ export class ExplosionEntity extends Entity {
     super(game, entityId, 'explosion');
     this.createPolygon();
   }
+
   get realX() {
     const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -18,6 +19,7 @@ export class ExplosionEntity extends Entity {
     }
     return this.x + owner.realX;
   }
+
   get realY() {
     const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
@@ -29,12 +31,14 @@ export class ExplosionEntity extends Entity {
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     return false;
   }
+
   gameTick(duration: number) {
     this.aliveDuration -= 1;
     if (this.aliveDuration <= 0) {
-      this.game.destroyEntity(this);
+      this.destroy();
     }
   }
+
   reconcileFromServer(messageModel: ExplosionModel) {
     super.reconcileFromServer(messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;

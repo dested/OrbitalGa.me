@@ -14,7 +14,6 @@
 
 - [ ] warning when you go too far left?
 - [ ] keep everyone mostly near each other
-- [ ] make collision code better
 - [ ] improve bot logic
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
@@ -24,9 +23,7 @@
 - [ ] test server version
 - [ ] validate input sequence number, assure they can't send garbage negative, etc
 - [ ] add audio
-- [ ] add asset loading progress
 - [ ] hard to go straight left with nipplejs
-- [ ] maybe remove momentum
 - [ ] garbageless server tick
 - [ ] add server kill switch to boot everyone out
 - [ ] support multiple bounding boxes
@@ -34,9 +31,11 @@
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
-- [ ] add momentum to rocks, maybe everything
 - [ ] import all assets
-- [ ] abstract shield better, player keeps taking damage
+- [x] add momentum to rocks
+- [x] make collisions work better, faster tick?
+- [x] abstract shield better, player keeps taking damage
+- [x] make collision more abstracted
 - [x] fix shots being tied to entity xy
 - [x] revive does not work 
 - [x] abstract interpolate entities
@@ -59,11 +58,9 @@
 
 ## Game Rules
 
-- [ ] add a concept of enemy types, better abstraction
-- [ ] add death effect
 - [ ] watch other shmups
 - [ ] add power-ups
-  - [ ] two clones fight with you
+  - [ ] two clones fight with you?
 - [ ] come up with more enemies
 - [ ] come up with realtime events
   - [ ] big bosses every 5 min?
@@ -74,7 +71,9 @@
 - [ ] drop power-ups from enemy
 - [ ] drop power-ups from debris
 - [ ] drop bombs
-- [ ] add shields
+- [x] add death effect
+- [x] add a concept of enemy types, better abstraction
+- [x] add shields
   - [x] you always have shield that regens but also upgradable
   - [x] add shield power up
 - [ ] add 5 second sustained lazer

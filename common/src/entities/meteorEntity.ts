@@ -6,23 +6,17 @@ import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
-import {PlayerEntity} from './playerEntity';
 import {isPlayerWeapon} from './weapon';
 
 export class MeteorEntity extends Entity {
   health = Math.ceil(3 + Math.random() * 3);
-
   meteorColor: 'brown' | 'grey';
-
   momentumX = Math.random() * 10 - 5;
   momentumY = 5 + Math.random() * 10;
-
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
-
   rotate = Math.random() * 255;
   rotateSpeed = Math.round(1 + Math.random() * 3);
   size: 'big' | 'med' | 'small' | 'tiny';
-
   type: 1 | 2 | 3 | 4;
 
   constructor(
@@ -88,9 +82,11 @@ export class MeteorEntity extends Entity {
 
     this.createPolygon();
   }
+
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }
@@ -98,38 +94,19 @@ export class MeteorEntity extends Entity {
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (!this.game.isClient) {
       if (isPlayerWeapon(otherEntity)) {
-        this.game.destroyEntity(otherEntity);
-        this.hurt(
-          otherEntity.damage,
-          otherEntity,
+        otherEntity.hurt(
+          1,
+          this,
           collisionResult.overlap * collisionResult.overlap_x,
           collisionResult.overlap * collisionResult.overlap_y
         );
+        this.hurt(
+          otherEntity.damage,
+          otherEntity,
+          -collisionResult.overlap * collisionResult.overlap_x,
+          -collisionResult.overlap * collisionResult.overlap_y
+        );
         return true;
-      }
-      if (otherEntity instanceof PlayerEntity) {
-        if (
-          otherEntity.hurt(
-            1,
-            this,
-            collisionResult.overlap * collisionResult.overlap_x,
-            collisionResult.overlap * collisionResult.overlap_y
-          )
-        ) {
-          otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x;
-          otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y;
-          this.momentumX -= collisionResult.overlap * collisionResult.overlap_x;
-          this.momentumY -= collisionResult.overlap * collisionResult.overlap_y;
-
-          this.hurt(
-            1,
-            otherEntity,
-            collisionResult.overlap * collisionResult.overlap_x,
-            collisionResult.overlap * collisionResult.overlap_y
-          );
-
-          return true;
-        }
       }
     }
     return false;
@@ -140,7 +117,7 @@ export class MeteorEntity extends Entity {
     this.x += this.momentumX;
     this.y += this.momentumY;
     if (this.y > GameConstants.screenSize.height * 1.2) {
-      this.game.destroyEntity(this);
+      this.destroy();
     }
   }
 
@@ -172,6 +149,7 @@ export class MeteorEntity extends Entity {
       this.rotate = rotate0 + ((rotate1 - rotate0) * (renderTimestamp - t0)) / (t1 - t0);
     }
   }
+
   reconcileFromServer(messageModel: MeteorModel) {
     super.reconcileFromServer(messageModel);
     this.positionBuffer[this.positionBuffer.length - 1].rotate = messageModel.rotate;
@@ -190,22 +168,10 @@ export class MeteorEntity extends Entity {
       entityType: 'meteor',
     };
   }
+
   updatePolygon() {
     super.updatePolygon();
     if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.rotate);
-  }
-
-  private die() {
-    this.game.destroyEntity(this);
-
-    for (let i = 0; i < 5; i++) {
-      const deathExplosion = new ExplosionEntity(this.game, nextId(), 2);
-      deathExplosion.start(
-        this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
-        this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
-      );
-      this.game.entities.push(deathExplosion);
-    }
   }
 
   private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
@@ -213,9 +179,10 @@ export class MeteorEntity extends Entity {
     const explosionEntity = new ExplosionEntity(this.game, nextId(), 1, this.entityId);
     explosionEntity.start(x, y);
     this.game.entities.push(explosionEntity);
-
+    this.momentumX += x;
+    this.momentumY += y;
     if (this.health <= 0) {
-      this.die();
+      this.game.explode(this, 'small');
     }
   }
 

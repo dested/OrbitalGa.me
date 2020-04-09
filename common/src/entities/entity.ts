@@ -2,29 +2,29 @@ import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {EntityModels} from '../models/entityTypeModels';
+import {nextId} from '../utils/uuid';
+
+type BoundingBox = {
+  height: number;
+  offsetX?: number;
+  offsetY?: number;
+  polygon?: Polygon;
+  width: number;
+};
 
 export abstract class Entity {
-  boundingBoxes: {
-    height: number;
-    offsetX?: number;
-    offsetY?: number;
-    polygon?: Polygon;
-    width: number;
-  }[] = [];
+  boundingBoxes: BoundingBox[] = [];
   create: boolean = true;
   entityId: number;
   height: number = 0;
-
   markToDestroy: boolean = false;
-
   momentumX = 0;
   momentumY = 0;
-
   positionBuffer: {time: number; x: number; y: number}[] = [];
   width: number = 0;
-
   x: number = 0;
   y: number = 0;
+
   constructor(protected game: Game, entityId: number, public entityType: EntityModels['entityType']) {
     this.entityId = entityId;
   }
@@ -91,6 +91,7 @@ export abstract class Entity {
       }
     }
   }
+
   destroy() {
     for (const boundingBox of this.boundingBoxes) {
       if (boundingBox.polygon) {
@@ -130,6 +131,7 @@ export abstract class Entity {
   reconcileFromServer(messageModel: EntityModel) {
     this.positionBuffer.push({time: +new Date(), x: messageModel.x, y: messageModel.y});
   }
+
   serialize(): EntityModel {
     return {
       entityId: this.entityId,

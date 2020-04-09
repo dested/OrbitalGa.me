@@ -12,7 +12,7 @@ export class EnemyShotEntity extends Entity implements Weapon {
   damage = 1;
   explosionIntensity = 2;
   isWeapon = true as const;
-  side = 'enemy' as const;
+  weaponSide = 'enemy' as const;
 
   constructor(game: Game, entityId: number) {
     super(game, entityId, 'enemyShot');
@@ -27,7 +27,7 @@ export class EnemyShotEntity extends Entity implements Weapon {
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
-      this.game.destroyEntity(this);
+      this.destroy();
       return true;
     }
     return false;
@@ -37,8 +37,11 @@ export class EnemyShotEntity extends Entity implements Weapon {
     this.y += GameRules.enemyShots.base.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
-      this.game.destroyEntity(this);
+      this.destroy();
     }
+  }
+  hurt(damage: number, otherEntity: Entity, overlapX: number, overlap: number): void {
+    this.destroy();
   }
 
   serialize(): EnemyShotModel {

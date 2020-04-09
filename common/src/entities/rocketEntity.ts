@@ -9,11 +9,10 @@ import {Weapon} from './weapon';
 export class RocketEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
-
   damage = 4;
   explosionIntensity = 5;
   isWeapon = true as const;
-  side = 'player' as const;
+  weaponSide = 'player' as const;
 
   constructor(
     game: Game,
@@ -35,7 +34,7 @@ export class RocketEntity extends Entity implements Weapon {
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
-      this.game.destroyEntity(this);
+      this.game.explode(this, 'small');
       return true;
     }
     return false;
@@ -45,8 +44,12 @@ export class RocketEntity extends Entity implements Weapon {
     this.y -= GameRules.playerRockets.base.rocketSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
-      this.game.destroyEntity(this);
+      this.destroy();
     }
+  }
+
+  hurt(damage: number, otherEntity: Entity, overlapX: number, overlap: number): void {
+    this.destroy();
   }
 
   reconcileFromServer(messageModel: RocketModel) {
