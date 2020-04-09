@@ -9,12 +9,12 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
   zIndex = DrawZIndex.Effect;
 
-  constructor(game: ClientGame, messageEntity: PlayerShieldModel) {
-    super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.shieldStrength);
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    this.health = messageEntity.health;
-    if (messageEntity.create) {
+  constructor(game: ClientGame, messageModel: PlayerShieldModel) {
+    super(game, messageModel.entityId, messageModel.ownerEntityId, messageModel.shieldStrength);
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    this.health = messageModel.health;
+    if (messageModel.create) {
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,

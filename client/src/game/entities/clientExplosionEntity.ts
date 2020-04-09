@@ -1,4 +1,4 @@
-import {ExplosionEntity, ShotExplosionModel} from '@common/entities/explosionEntity';
+import {ExplosionEntity, ExplosionModel} from '@common/entities/explosionEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
@@ -7,22 +7,22 @@ import {Entity} from '@common/entities/entity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 
-export class ClientShotExplosionEntity extends ExplosionEntity implements ClientEntity {
+export class ClientExplosionEntity extends ExplosionEntity implements ClientEntity {
   rotate = Math.random() * 360;
 
   zIndex = DrawZIndex.Effect;
 
-  constructor(game: ClientGame, messageEntity: ShotExplosionModel) {
-    super(game, messageEntity.entityId, messageEntity.intensity, messageEntity.ownerEntityId);
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    if (messageEntity.create) {
+  constructor(game: ClientGame, messageModel: ExplosionModel) {
+    super(game, messageModel.entityId, messageModel.intensity, messageModel.ownerEntityId);
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    if (messageModel.create) {
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,
         y: this.y,
       });
-      ShakeGame(messageEntity.intensity);
+      ShakeGame(messageModel.intensity);
     }
     this.updatePolygon();
   }

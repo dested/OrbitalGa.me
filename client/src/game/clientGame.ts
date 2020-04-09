@@ -154,17 +154,17 @@ export class ClientGame extends Game {
             entity.destroy();
             this.entities.remove(entity);
           }
-          for (const messageEntity of message.entities) {
-            let foundEntity = this.entities.lookup(messageEntity.entityId);
+          for (const messageModel of message.entities) {
+            let foundEntity = this.entities.lookup(messageModel.entityId);
             if (!foundEntity) {
-              foundEntity = new ClientEntityTypes[messageEntity.entityType](
+              foundEntity = new ClientEntityTypes[messageModel.entityType](
                 this,
-                messageEntity as WorldModelCastToEntityModel
+                messageModel as WorldModelCastToEntityModel
               );
               this.entities.push(foundEntity);
             }
 
-            foundEntity.reconcileFromServer(messageEntity);
+            foundEntity.reconcileFromServer(messageModel);
           }
           break;
         default:

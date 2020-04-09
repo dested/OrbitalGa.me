@@ -77,12 +77,12 @@ export class PlayerShieldEntity extends Entity {
     return true;
   }
 
-  reconcileFromServer(messageEntity: PlayerShieldModel) {
-    super.reconcileFromServer(messageEntity);
-    this.health = messageEntity.health;
-    this.depleted = messageEntity.depleted;
-    this.ownerEntityId = messageEntity.ownerEntityId;
-    this.shieldStrength = messageEntity.shieldStrength;
+  reconcileFromServer(messageModel: PlayerShieldModel) {
+    super.reconcileFromServer(messageModel);
+    this.health = messageModel.health;
+    this.depleted = messageModel.depleted;
+    this.ownerEntityId = messageModel.ownerEntityId;
+    this.shieldStrength = messageModel.shieldStrength;
   }
 
   serialize(): PlayerShieldModel {

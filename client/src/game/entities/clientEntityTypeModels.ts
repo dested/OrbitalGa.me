@@ -1,7 +1,7 @@
 import {ClientSpectatorEntity} from './clientSpectatorEntity';
 import {Entity} from '@common/entities/entity';
-import {EntityModelType, WorldModel} from '@common/models/entityTypeModels';
-import {ClientShotExplosionEntity} from './clientShotExplosionEntity';
+import {EntityType, EntityModels} from '@common/models/entityTypeModels';
+import {ClientExplosionEntity} from './clientExplosionEntity';
 import {ClientPlayerShieldEntity} from './clientPlayerShieldEntity';
 import {ClientSwoopingEnemyEntity} from './clientSwoopingEnemyEntity';
 import {ClientShotEntity} from './clientShotEntity';
@@ -13,12 +13,15 @@ import {ClientMeteorEntity} from './clientMeteorEntity';
 import {ClientRocketEntity} from './clientRocketEntity';
 
 export const ClientEntityTypes: {
-  [key in WorldModel['entityType']]: new (game: ClientGame, messageEntity: EntityModelType[key]) => Entity;
+  [key in EntityModels['entityType']]: new (
+    game: ClientGame,
+    messageModel: EntityType[key]['model']
+  ) => EntityType[key]['entity'];
 } = {
   player: ClientPlayerEntity,
   enemyShot: ClientEnemyShotEntity,
   shot: ClientShotEntity,
-  shotExplosion: ClientShotExplosionEntity,
+  explosion: ClientExplosionEntity,
   swoopingEnemy: ClientSwoopingEnemyEntity,
   wall: ClientWallEntity,
   spectator: ClientSpectatorEntity,

@@ -5,12 +5,12 @@ import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity'
 
 export class ClientSpectatorEntity extends SpectatorEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
-  constructor(game: ClientGame, messageEntity: SpectatorModel) {
-    super(game, messageEntity.entityId);
+  constructor(game: ClientGame, messageModel: SpectatorModel) {
+    super(game, messageModel.entityId);
     game.spectatorEntity = this;
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    if (messageEntity.create) {
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    if (messageModel.create) {
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,

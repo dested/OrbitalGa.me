@@ -8,7 +8,7 @@ export class ExplosionEntity extends Entity {
   aliveDuration = ExplosionEntity.totalAliveDuration;
 
   constructor(game: Game, entityId: number, public intensity: number, public ownerEntityId?: number) {
-    super(game, entityId, 'shotExplosion');
+    super(game, entityId, 'explosion');
     this.createPolygon();
   }
   get realX() {
@@ -35,39 +35,39 @@ export class ExplosionEntity extends Entity {
       this.game.destroyEntity(this);
     }
   }
-  reconcileFromServer(messageEntity: ShotExplosionModel) {
-    super.reconcileFromServer(messageEntity);
-    this.ownerEntityId = messageEntity.ownerEntityId;
-    this.intensity = messageEntity.intensity;
+  reconcileFromServer(messageModel: ExplosionModel) {
+    super.reconcileFromServer(messageModel);
+    this.ownerEntityId = messageModel.ownerEntityId;
+    this.intensity = messageModel.intensity;
   }
 
-  serialize(): ShotExplosionModel {
+  serialize(): ExplosionModel {
     return {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
       intensity: this.intensity,
-      entityType: 'shotExplosion',
+      entityType: 'explosion',
     };
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: ShotExplosionModel) {
+  static addBuffer(buff: ArrayBufferBuilder, entity: ExplosionModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.intensity);
     buff.addOptionalInt32(entity.ownerEntityId);
   }
 
-  static readBuffer(reader: ArrayBufferReader): ShotExplosionModel {
+  static readBuffer(reader: ArrayBufferReader): ExplosionModel {
     return {
       ...Entity.readBuffer(reader),
-      entityType: 'shotExplosion',
+      entityType: 'explosion',
       intensity: reader.readUint8(),
       ownerEntityId: reader.readOptionalInt32(),
     };
   }
 }
 
-export type ShotExplosionModel = EntityModel & {
-  entityType: 'shotExplosion';
+export type ExplosionModel = EntityModel & {
+  entityType: 'explosion';
   intensity: number;
   ownerEntityId?: number;
 };

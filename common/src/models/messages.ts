@@ -1,5 +1,5 @@
 import {PlayerModel} from '../entities/playerEntity';
-import {WorldModel} from './entityTypeModels';
+import {EntityModels} from './entityTypeModels';
 
 export type ClientToServerMessage =
   | {
@@ -28,6 +28,6 @@ export type ServerToClientMessage =
       type: 'spectating';
     }
   | {
-      entities: WorldModel[];
+      entities: EntityModels[];
       type: 'worldState';
     };

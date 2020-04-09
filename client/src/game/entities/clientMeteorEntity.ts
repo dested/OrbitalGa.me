@@ -7,10 +7,10 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   zIndex = DrawZIndex.Scenery;
 
-  constructor(game: ClientGame, messageEntity: MeteorModel) {
-    super(game, messageEntity.entityId, messageEntity.meteorColor, messageEntity.size, messageEntity.type);
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
+  constructor(game: ClientGame, messageModel: MeteorModel) {
+    super(game, messageModel.entityId, messageModel.meteorColor, messageModel.size, messageModel.type);
+    this.x = messageModel.x;
+    this.y = messageModel.y;
     this.updatePolygon();
   }
   get drawX() {

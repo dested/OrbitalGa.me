@@ -8,7 +8,7 @@ import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {WorldModel} from '@common/models/entityTypeModels';
+import {EntityModels} from '@common/models/entityTypeModels';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
@@ -284,7 +284,7 @@ export class ServerGame extends Game {
 
     const myEntities = this.entities.map((entity) => ({
       entity,
-      serializedEntity: entity.serialize() as WorldModel,
+      serializedEntity: entity.serialize() as EntityModels,
     }));
 
     if (!GameConstants.debugDontFilterEntities) {
@@ -310,7 +310,7 @@ export class ServerGame extends Game {
   private sendWorldState() {
     const entities = this.entities.map((entity) => ({
       entity,
-      serializedEntity: entity.serialize() as WorldModel,
+      serializedEntity: entity.serialize() as EntityModels,
     }));
 
     for (const user of this.users) {

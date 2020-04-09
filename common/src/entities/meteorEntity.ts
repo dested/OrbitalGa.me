@@ -172,12 +172,12 @@ export class MeteorEntity extends Entity {
       this.rotate = rotate0 + ((rotate1 - rotate0) * (renderTimestamp - t0)) / (t1 - t0);
     }
   }
-  reconcileFromServer(messageEntity: MeteorModel) {
-    super.reconcileFromServer(messageEntity);
-    this.positionBuffer[this.positionBuffer.length - 1].rotate = messageEntity.rotate;
-    this.meteorColor = messageEntity.meteorColor;
-    this.size = messageEntity.size;
-    this.type = messageEntity.type;
+  reconcileFromServer(messageModel: MeteorModel) {
+    super.reconcileFromServer(messageModel);
+    this.positionBuffer[this.positionBuffer.length - 1].rotate = messageModel.rotate;
+    this.meteorColor = messageModel.meteorColor;
+    this.size = messageModel.size;
+    this.type = messageModel.type;
   }
 
   serialize(): MeteorModel {

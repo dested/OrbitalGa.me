@@ -9,8 +9,8 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};
   zIndex = DrawZIndex.Player;
-  constructor(private clientGame: ClientGame, public messageEntity: PlayerModel) {
-    super(clientGame, messageEntity);
+  constructor(private clientGame: ClientGame, public messageModel: PlayerModel) {
+    super(clientGame, messageModel);
   }
 
   get drawX(): number {
@@ -81,17 +81,17 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     }
   }
 
-  reconcileFromServer(messageEntity: PlayerModel) {
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    super.reconcileDataFromServer(messageEntity);
+  reconcileFromServer(messageModel: PlayerModel) {
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    super.reconcileDataFromServer(messageModel);
     if (this.dead) {
       this.clientGame.died();
     }
     let spliceIndex = -1;
     for (let i = 0; i < this.pendingInputs.length; i++) {
       const input = this.pendingInputs[i];
-      if (input.inputSequenceNumber <= messageEntity.lastProcessedInputSequenceNumber) {
+      if (input.inputSequenceNumber <= messageModel.lastProcessedInputSequenceNumber) {
         spliceIndex = i;
       } else {
         this.applyInput(input);

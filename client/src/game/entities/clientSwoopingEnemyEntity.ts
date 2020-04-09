@@ -7,16 +7,16 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
 
-  constructor(game: ClientGame, messageEntity: SwoopingEnemyModel) {
-    super(game, messageEntity.entityId, messageEntity.enemyColor);
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    this.health = messageEntity.health;
-    if (messageEntity.create) {
+  constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {
+    super(game, messageModel.entityId, messageModel.enemyColor);
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    this.health = messageModel.health;
+    if (messageModel.create) {
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
-        x: messageEntity.x,
-        y: messageEntity.y,
+        x: messageModel.x,
+        y: messageModel.y,
       });
     }
 

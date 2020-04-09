@@ -7,13 +7,13 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(game: ClientGame, messageEntity: EnemyShotModel) {
-    super(game, messageEntity.entityId);
+  constructor(game: ClientGame, messageModel: EnemyShotModel) {
+    super(game, messageModel.entityId);
 
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
+    this.x = messageModel.x;
+    this.y = messageModel.y;
 
-    if (messageEntity.create) {
+    if (messageModel.create) {
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,

@@ -7,11 +7,11 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
 
-  constructor(game: ClientGame, messageEntity: PlayerModel) {
-    super(game, messageEntity.entityId, messageEntity.playerColor);
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
+  constructor(game: ClientGame, messageModel: PlayerModel) {
+    super(game, messageModel.entityId, messageModel.playerColor);
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
   }
   get drawX() {
     return this.realX;

@@ -49,11 +49,11 @@ export class RocketEntity extends Entity implements Weapon {
     }
   }
 
-  reconcileFromServer(messageEntity: RocketEntity) {
-    super.reconcileFromServer(messageEntity);
-    this.ownerEntityId = messageEntity.ownerEntityId;
-    this.startY = messageEntity.startY;
-    this.offsetX = messageEntity.offsetX;
+  reconcileFromServer(messageModel: RocketModel) {
+    super.reconcileFromServer(messageModel);
+    this.ownerEntityId = messageModel.ownerEntityId;
+    this.startY = messageModel.startY;
+    this.offsetX = messageModel.offsetX;
   }
 
   serialize(): RocketModel {

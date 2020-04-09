@@ -1,7 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {WorldModel} from '../models/entityTypeModels';
+import {EntityModels} from '../models/entityTypeModels';
 
 export abstract class Entity {
   boundingBoxes: {
@@ -25,7 +25,7 @@ export abstract class Entity {
 
   x: number = 0;
   y: number = 0;
-  constructor(protected game: Game, entityId: number, public entityType: WorldModel['entityType']) {
+  constructor(protected game: Game, entityId: number, public entityType: EntityModels['entityType']) {
     this.entityId = entityId;
   }
 
@@ -127,8 +127,8 @@ export abstract class Entity {
     this.create = false;
   }
 
-  reconcileFromServer(messageEntity: EntityModel) {
-    this.positionBuffer.push({time: +new Date(), x: messageEntity.x, y: messageEntity.y});
+  reconcileFromServer(messageModel: EntityModel) {
+    this.positionBuffer.push({time: +new Date(), x: messageModel.x, y: messageModel.y});
   }
   serialize(): EntityModel {
     return {

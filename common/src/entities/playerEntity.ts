@@ -175,19 +175,19 @@ export class PlayerEntity extends Entity implements Weapon {
     return true;
   }
 
-  reconcileDataFromServer(messageEntity: PlayerModel) {
+  reconcileDataFromServer(messageModel: PlayerModel) {
     // needed because LivePlayerEntity does not need the pending inputs from super.reconcile
-    this.health = messageEntity.health;
-    this.dead = messageEntity.dead;
-    this.playerColor = messageEntity.playerColor;
-    this.lastProcessedInputSequenceNumber = messageEntity.lastProcessedInputSequenceNumber;
-    this.momentumX = messageEntity.momentumX;
-    this.momentumY = messageEntity.momentumY;
+    this.health = messageModel.health;
+    this.dead = messageModel.dead;
+    this.playerColor = messageModel.playerColor;
+    this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
+    this.momentumX = messageModel.momentumX;
+    this.momentumY = messageModel.momentumY;
   }
 
-  reconcileFromServer(messageEntity: PlayerModel) {
-    super.reconcileFromServer(messageEntity);
-    this.reconcileDataFromServer(messageEntity);
+  reconcileFromServer(messageModel: PlayerModel) {
+    super.reconcileFromServer(messageModel);
+    this.reconcileDataFromServer(messageModel);
   }
 
   serialize(): PlayerModel {

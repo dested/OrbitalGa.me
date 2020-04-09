@@ -142,10 +142,10 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this.aliveTick++;
   }
 
-  reconcileFromServer(messageEntity: SwoopingEnemyModel) {
-    super.reconcileFromServer(messageEntity);
-    this.health = messageEntity.health;
-    this.enemyColor = messageEntity.enemyColor;
+  reconcileFromServer(messageModel: SwoopingEnemyModel) {
+    super.reconcileFromServer(messageModel);
+    this.health = messageModel.health;
+    this.enemyColor = messageModel.enemyColor;
   }
   serialize(): SwoopingEnemyModel {
     return {

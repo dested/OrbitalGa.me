@@ -8,20 +8,20 @@ import {ClientPlayerEntity} from './clientPlayerEntity';
 export class ClientShotEntity extends ShotEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(game: ClientGame, messageEntity: ShotModel) {
-    super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.offsetX, messageEntity.startY);
+  constructor(game: ClientGame, messageModel: ShotModel) {
+    super(game, messageModel.entityId, messageModel.ownerEntityId, messageModel.offsetX, messageModel.startY);
 
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
-    if (messageEntity.create) {
+    this.x = messageModel.x;
+    this.y = messageModel.y;
+    if (messageModel.create) {
       if (this.owner === game.liveEntity && game.liveEntity) {
         this.x = this.owner.x + this.offsetX;
       }
-      this.y = messageEntity.startY;
+      this.y = messageModel.startY;
       this.positionBuffer.push({
         time: +new Date() - GameConstants.serverTickRate,
         x: this.x,
-        y: messageEntity.startY,
+        y: messageModel.startY,
       });
     }
     this.updatePolygon();

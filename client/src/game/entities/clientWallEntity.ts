@@ -5,11 +5,11 @@ import {ClientGame} from '../clientGame';
 export class ClientWallEntity extends WallEntity implements ClientEntity {
   zIndex = DrawZIndex.Scenery;
 
-  constructor(game: ClientGame, messageEntity: WallModel) {
-    super(game, messageEntity.entityId, messageEntity.width, messageEntity.height);
+  constructor(game: ClientGame, messageModel: WallModel) {
+    super(game, messageModel.entityId, messageModel.width, messageModel.height);
 
-    this.x = messageEntity.x;
-    this.y = messageEntity.y;
+    this.x = messageModel.x;
+    this.y = messageModel.y;
     this.updatePolygon();
   }
   get drawX() {
