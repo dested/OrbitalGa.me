@@ -1,9 +1,7 @@
-import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
-import {Game} from '@common/game/game';
+import {PlayerModel} from '@common/entities/playerEntity';
 import {Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 
 export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {

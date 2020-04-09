@@ -1,6 +1,6 @@
 import {SpectatorEntity, SpectatorModel} from '../entities/spectatorEntity';
 import {PlayerShieldEntity, PlayerShieldModel} from '../entities/playerShieldEntity';
-import {ShotExplosionEntity, ShotExplosionModel} from '../entities/shotExplosionEntity';
+import {ExplosionEntity, ShotExplosionModel} from '../entities/explosionEntity';
 import {EnemyShotEntity, EnemyShotModel} from '../entities/enemyShotEntity';
 import {ShotEntity, ShotModel} from '../entities/shotEntity';
 import {WallEntity, WallModel} from '../entities/wallEntity';
@@ -9,8 +9,22 @@ import {PlayerEntity, PlayerModel} from '../entities/playerEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
 import {Utils} from '../utils/utils';
+import {RocketEntity, RocketModel} from '../entities/rocketEntity';
 
-export type WorldStateEntity =
+export type EntityModelType = {
+  enemyShot: EnemyShotModel;
+  meteor: MeteorModel;
+  player: PlayerModel;
+  playerShield: PlayerShieldModel;
+  rocket: RocketModel;
+  shot: ShotModel;
+  shotExplosion: ShotExplosionModel;
+  spectator: SpectatorModel;
+  swoopingEnemy: SwoopingEnemyModel;
+  wall: WallModel;
+};
+
+export type WorldModel =
   | PlayerModel
   | SpectatorModel
   | SwoopingEnemyModel
@@ -19,23 +33,12 @@ export type WorldStateEntity =
   | ShotExplosionModel
   | EnemyShotModel
   | PlayerShieldModel
-  | MeteorModel;
+  | MeteorModel
+  | RocketModel;
 
-export type EntityModelType = {
-  enemyShot: EnemyShotModel;
-  meteor: MeteorModel;
-  player: PlayerModel;
-  playerShield: PlayerShieldModel;
-  shot: ShotModel;
-  shotExplosion: ShotExplosionModel;
-  spectator: SpectatorModel;
-  swoopingEnemy: SwoopingEnemyModel;
-  wall: WallModel;
-};
-
-export type WorldEntityModelCastToEntityModel = any;
+export type WorldModelCastToEntityModel = any;
 export const EntityBufferValue: {
-  [key in WorldStateEntity['entityType']]: number;
+  [key in WorldModel['entityType']]: number;
 } = {
   player: 1,
   enemyShot: 2,
@@ -46,14 +49,15 @@ export const EntityBufferValue: {
   spectator: 7,
   playerShield: 8,
   meteor: 9,
+  rocket: 10,
 };
 
 export const EntityBufferValueLookup: {
-  [key in number]: WorldStateEntity['entityType'];
+  [key in number]: WorldModel['entityType'];
 } = Utils.toDictionary(Utils.safeKeys(EntityBufferValue), (a) => EntityBufferValue[a]);
 
 export const EntityBufferType: {
-  [key in WorldStateEntity['entityType']]: {
+  [key in WorldModel['entityType']]: {
     addBuffer: (buff: ArrayBufferBuilder, entityModel: EntityModelType[key]) => void;
     readBuffer: (reader: ArrayBufferReader) => EntityModelType[key];
     value: number;
@@ -68,8 +72,8 @@ export const EntityBufferType: {
   shot: {value: EntityBufferValue.shot, addBuffer: ShotEntity.addBuffer, readBuffer: ShotEntity.readBuffer},
   shotExplosion: {
     value: EntityBufferValue.shotExplosion,
-    addBuffer: ShotExplosionEntity.addBuffer,
-    readBuffer: ShotExplosionEntity.readBuffer,
+    addBuffer: ExplosionEntity.addBuffer,
+    readBuffer: ExplosionEntity.readBuffer,
   },
   swoopingEnemy: {
     value: EntityBufferValue.swoopingEnemy,
@@ -88,4 +92,5 @@ export const EntityBufferType: {
     readBuffer: PlayerShieldEntity.readBuffer,
   },
   meteor: {value: EntityBufferValue.meteor, addBuffer: MeteorEntity.addBuffer, readBuffer: MeteorEntity.readBuffer},
+  rocket: {value: EntityBufferValue.rocket, addBuffer: RocketEntity.addBuffer, readBuffer: RocketEntity.readBuffer},
 };

@@ -8,7 +8,7 @@ import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {WorldStateEntity} from '@common/models/entityTypeModels';
+import {WorldModel} from '@common/models/entityTypeModels';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
@@ -51,7 +51,7 @@ export class ServerGame extends Game {
     this.users.push({connectionId, entity: playerEntity});
     this.entities.push(playerEntity);
 
-    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId);
+    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId, 'small');
     this.entities.push(playerShieldEntity);
     playerEntity.setShieldEntity(playerShieldEntity.entityId);
     this.sendMessageToClient(connectionId, {
@@ -284,7 +284,7 @@ export class ServerGame extends Game {
 
     const myEntities = this.entities.map((entity) => ({
       entity,
-      serializedEntity: entity.serialize() as WorldStateEntity,
+      serializedEntity: entity.serialize() as WorldModel,
     }));
 
     if (!GameConstants.debugDontFilterEntities) {
@@ -310,7 +310,7 @@ export class ServerGame extends Game {
   private sendWorldState() {
     const entities = this.entities.map((entity) => ({
       entity,
-      serializedEntity: entity.serialize() as WorldStateEntity,
+      serializedEntity: entity.serialize() as WorldModel,
     }));
 
     for (const user of this.users) {

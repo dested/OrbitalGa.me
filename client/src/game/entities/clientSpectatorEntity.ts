@@ -1,4 +1,3 @@
-import {EnemyShotEntity, EnemyShotModel} from '@common/entities/enemyShotEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';

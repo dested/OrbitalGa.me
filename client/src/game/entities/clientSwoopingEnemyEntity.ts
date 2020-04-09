@@ -2,8 +2,7 @@ import {SwoopingEnemyEntity, SwoopingEnemyModel} from '@common/entities/swooping
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
-import {Asset, OrbitalAssets} from '../../utils/assetManager';
-import {AssetKeys} from '../../assets';
+import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;

@@ -4,11 +4,15 @@ import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameRules} from '../game/gameRules';
+import {Weapon} from './weapon';
 
-export class EnemyShotEntity extends Entity {
+export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
-
   boundingBoxes = [{width: 9, height: 57}];
+  damage = 1;
+  explosionIntensity = 2;
+  isWeapon = true as const;
+  side = 'enemy' as const;
 
   constructor(game: Game, entityId: number) {
     super(game, entityId, 'enemyShot');

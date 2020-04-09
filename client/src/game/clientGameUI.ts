@@ -5,7 +5,6 @@ import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
-import {ClientShotExplosionEntity} from './entities/clientShotExplosionEntity';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;

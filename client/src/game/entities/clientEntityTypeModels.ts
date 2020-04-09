@@ -1,6 +1,6 @@
 import {ClientSpectatorEntity} from './clientSpectatorEntity';
 import {Entity} from '@common/entities/entity';
-import {EntityModelType, WorldStateEntity} from '@common/models/entityTypeModels';
+import {EntityModelType, WorldModel} from '@common/models/entityTypeModels';
 import {ClientShotExplosionEntity} from './clientShotExplosionEntity';
 import {ClientPlayerShieldEntity} from './clientPlayerShieldEntity';
 import {ClientSwoopingEnemyEntity} from './clientSwoopingEnemyEntity';
@@ -10,9 +10,10 @@ import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {ClientEnemyShotEntity} from './clientEnemyShotEntity';
 import {ClientMeteorEntity} from './clientMeteorEntity';
+import {ClientRocketEntity} from './clientRocketEntity';
 
 export const ClientEntityTypes: {
-  [key in WorldStateEntity['entityType']]: new (game: ClientGame, messageEntity: EntityModelType[key]) => Entity;
+  [key in WorldModel['entityType']]: new (game: ClientGame, messageEntity: EntityModelType[key]) => Entity;
 } = {
   player: ClientPlayerEntity,
   enemyShot: ClientEnemyShotEntity,
@@ -23,4 +24,5 @@ export const ClientEntityTypes: {
   spectator: ClientSpectatorEntity,
   playerShield: ClientPlayerShieldEntity,
   meteor: ClientMeteorEntity,
+  rocket: ClientRocketEntity,
 };

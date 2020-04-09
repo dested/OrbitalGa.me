@@ -1,28 +1,27 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {ShotEntity} from './shotEntity';
-import {ShotExplosionEntity} from './shotExplosionEntity';
+import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
-import {EnemyShotEntity} from './enemyShotEntity';
-import {GameConstants} from '../game/gameConstants';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
+import {Utils} from '../utils/utils';
+
+export type ShieldStrength = 'small' | 'medium' | 'big';
 
 export class PlayerShieldEntity extends Entity {
-  boundingBoxes = [{width: 133, height: 108}];
-
+  boundingBoxes = [];
   depleted = false;
-
-  health = GameRules.playerShield.base.startingHealth;
-
+  health: number;
   lastHit = 0;
+  shieldStrength: ShieldStrength;
   tickIndex = 0;
 
-  constructor(game: Game, entityId: number, public ownerEntityId: number) {
+  constructor(game: Game, entityId: number, public ownerEntityId: number, shieldStrength: ShieldStrength) {
     super(game, entityId, 'playerShield');
+    this.shieldStrength = shieldStrength;
+    this.health = this.shieldConfig.maxHealth;
     this.createPolygon();
   }
   get player() {
@@ -44,49 +43,46 @@ export class PlayerShieldEntity extends Entity {
     return this.y + owner.realY;
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof EnemyShotEntity) {
-      if (this.hurt(1, otherEntity, this.realX - otherEntity.realX, this.realY - otherEntity.realY)) {
-        otherEntity.destroy();
-      }
-    }
+  get shieldConfig() {
+    return GameRules.playerShield[this.shieldStrength];
+  }
 
+  collide(otherEntity: Entity, collisionResult: Result): boolean {
     return false;
   }
+
   gameTick(duration: number) {
     this.tickIndex++;
     if (!this.depleted && this.health <= 0) {
-      this.lastHit = GameRules.playerShield.base.depletedRegenTimeout;
+      this.lastHit = this.shieldConfig.depletedRegenTimeout;
       this.depleted = true;
     }
     this.lastHit--;
-    if (this.lastHit <= 0 && this.health < GameRules.playerShield.base.startingHealth) {
+    if (this.lastHit <= 0 && this.health < this.shieldConfig.maxHealth) {
       if (this.depleted) {
         this.depleted = false;
         this.health++;
-      } else if (this.tickIndex % GameRules.playerShield.base.regenRate === 0) {
+      } else if (this.tickIndex % this.shieldConfig.regenRate === 0) {
         this.health++;
       }
     }
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    if (this.depleted) {
-      return false;
-    }
     this.health -= damage;
     this.lastHit = 10;
-    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 3, this.entityId);
-    shotExplosionEntity.start(x, y);
-    this.game.entities.push(shotExplosionEntity);
-
+    const explosionEntity = new ExplosionEntity(this.game, nextId(), 3, this.entityId);
+    explosionEntity.start(x, y);
+    this.game.entities.push(explosionEntity);
     return true;
   }
+
   reconcileFromServer(messageEntity: PlayerShieldModel) {
     super.reconcileFromServer(messageEntity);
     this.health = messageEntity.health;
     this.depleted = messageEntity.depleted;
     this.ownerEntityId = messageEntity.ownerEntityId;
+    this.shieldStrength = messageEntity.shieldStrength;
   }
 
   serialize(): PlayerShieldModel {
@@ -95,6 +91,7 @@ export class PlayerShieldEntity extends Entity {
       health: this.health,
       depleted: this.depleted,
       ownerEntityId: this.ownerEntityId,
+      shieldStrength: this.shieldStrength,
       entityType: 'playerShield',
     };
   }
@@ -104,6 +101,13 @@ export class PlayerShieldEntity extends Entity {
     buff.addUint8(entity.health);
     buff.addBoolean(entity.depleted);
     buff.addUint32(entity.ownerEntityId);
+    buff.addUint8(
+      Utils.switchType(entity.shieldStrength, {
+        small: 1,
+        medium: 2,
+        big: 3,
+      })
+    );
   }
 
   static readBuffer(reader: ArrayBufferReader): PlayerShieldModel {
@@ -113,6 +117,11 @@ export class PlayerShieldEntity extends Entity {
       health: reader.readUint8(),
       depleted: reader.readBoolean(),
       ownerEntityId: reader.readUint32(),
+      shieldStrength: Utils.switchNumber(reader.readUint8(), {
+        1: 'small' as const,
+        2: 'medium' as const,
+        3: 'big' as const,
+      }),
     };
   }
 }
@@ -122,4 +131,5 @@ export type PlayerShieldModel = EntityModel & {
   entityType: 'playerShield';
   health: number;
   ownerEntityId: number;
+  shieldStrength: ShieldStrength;
 };

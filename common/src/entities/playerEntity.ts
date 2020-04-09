@@ -7,10 +7,12 @@ import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {WallEntity} from './wallEntity';
 import {EnemyShotEntity} from './enemyShotEntity';
-import {ShotExplosionEntity} from './shotExplosionEntity';
+import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules} from '../game/gameRules';
 import {Utils} from '../utils/utils';
+import {RocketEntity} from './rocketEntity';
+import {isEnemyWeapon, Weapon} from './weapon';
 
 export type PendingInput = {
   down: boolean;
@@ -22,22 +24,22 @@ export type PendingInput = {
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
-export class PlayerEntity extends Entity {
+export class PlayerEntity extends Entity implements Weapon {
+  aliveTick = 0;
   boundingBoxes = [{width: 99, height: 75}];
+  damage = 2;
   dead: boolean = false;
-
+  explosionIntensity = 2;
   health = GameRules.player.base.startingHealth;
   inputSequenceNumber: number = 1;
-
+  isWeapon = true as const;
   lastProcessedInputSequenceNumber: number = 0;
-
   momentumX = 0;
   momentumY = 0;
-
   pendingInputs: PendingInput[] = [];
-
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
+  side = 'player' as const;
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
 
@@ -53,18 +55,24 @@ export class PlayerEntity extends Entity {
   get realY() {
     return this.y;
   }
-
   applyInput(input: PendingInput) {
+    this.aliveTick++;
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
 
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          let offsetX = this.shotSide === 'left' ? -42 : 42;
-          const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
-          shotEntity.start(this.x + offsetX, this.y - 6);
-          this.game.entities.push(shotEntity);
+          const offsetX = this.shotSide === 'left' ? -42 : 42;
+          if (this.aliveTick % 10 === 0) {
+            const shotEntity = new RocketEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
+            shotEntity.start(this.x + offsetX, this.y - 6);
+            this.game.entities.push(shotEntity);
+          } else {
+            const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
+            shotEntity.start(this.x + offsetX, this.y - 6);
+            this.game.entities.push(shotEntity);
+          }
           this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           this.shootTimer = 1;
         }
@@ -110,10 +118,10 @@ export class PlayerEntity extends Entity {
       return true;
     }
     if (!this.game.isClient) {
-      if (otherEntity instanceof EnemyShotEntity) {
+      if (isEnemyWeapon(otherEntity)) {
         if (
           this.hurt(
-            1,
+            otherEntity.damage,
             otherEntity,
             collisionResult.overlap * collisionResult.overlap_x,
             collisionResult.overlap * collisionResult.overlap_y
@@ -139,12 +147,12 @@ export class PlayerEntity extends Entity {
         this.dead = true;
 
         for (let i = 0; i < 15; i++) {
-          const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 10);
-          shotExplosionEntity.start(
+          const explosionEntity = new ExplosionEntity(this.game, nextId(), 10);
+          explosionEntity.start(
             this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
             this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
           );
-          this.game.entities.push(shotExplosionEntity);
+          this.game.entities.push(explosionEntity);
         }
 
         if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId).destroy();
@@ -156,13 +164,14 @@ export class PlayerEntity extends Entity {
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
     const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
     if (!shield.depleted) {
-      return false;
+      shield.hurt(damage, otherEntity, x, y);
+    } else {
+      this.health -= damage;
+      const explosionEntity = new ExplosionEntity(this.game, nextId(), 5, this.entityId);
+      explosionEntity.start(x, y);
+      this.game.entities.push(explosionEntity);
     }
 
-    this.health -= damage;
-    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 5, this.entityId);
-    shotExplosionEntity.start(x, y);
-    this.game.entities.push(shotExplosionEntity);
     return true;
   }
 

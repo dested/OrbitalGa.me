@@ -8,7 +8,7 @@ import {assertType, Utils} from '@common/utils/utils';
 import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {WorldEntityModelCastToEntityModel} from '@common/models/entityTypeModels';
+import {WorldModelCastToEntityModel} from '@common/models/entityTypeModels';
 import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
 
@@ -159,7 +159,7 @@ export class ClientGame extends Game {
             if (!foundEntity) {
               foundEntity = new ClientEntityTypes[messageEntity.entityType](
                 this,
-                messageEntity as WorldEntityModelCastToEntityModel
+                messageEntity as WorldModelCastToEntityModel
               );
               this.entities.push(foundEntity);
             }

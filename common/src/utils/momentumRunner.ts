@@ -1,5 +1,4 @@
 import {Entity} from '../entities/entity';
-import {Utils} from './utils';
 
 type MomentumPoint = {x: number; y: number};
 export type MomentumEntry<TPhase> = {

@@ -6,12 +6,12 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 
-export class ShotEntity extends Entity implements Weapon {
+export class RocketEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
 
-  damage = 1;
-  explosionIntensity = 1;
+  damage = 4;
+  explosionIntensity = 5;
   isWeapon = true as const;
   side = 'player' as const;
 
@@ -22,7 +22,7 @@ export class ShotEntity extends Entity implements Weapon {
     public offsetX: number,
     public startY: number
   ) {
-    super(game, entityId, 'shot');
+    super(game, entityId, 'rocket');
     this.createPolygon();
   }
 
@@ -42,41 +42,41 @@ export class ShotEntity extends Entity implements Weapon {
   }
 
   gameTick(duration: number) {
-    this.y -= GameRules.playerShots.base.shotSpeedPerSecond * (duration / 1000);
+    this.y -= GameRules.playerRockets.base.rocketSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
       this.game.destroyEntity(this);
     }
   }
 
-  reconcileFromServer(messageEntity: ShotEntity) {
+  reconcileFromServer(messageEntity: RocketEntity) {
     super.reconcileFromServer(messageEntity);
     this.ownerEntityId = messageEntity.ownerEntityId;
     this.startY = messageEntity.startY;
     this.offsetX = messageEntity.offsetX;
   }
 
-  serialize(): ShotModel {
+  serialize(): RocketModel {
     return {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
       offsetX: this.offsetX,
       startY: this.startY,
-      entityType: 'shot',
+      entityType: 'rocket',
     };
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: ShotModel) {
+  static addBuffer(buff: ArrayBufferBuilder, entity: RocketModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint32(entity.ownerEntityId);
     buff.addInt32(entity.offsetX);
     buff.addInt32(entity.startY);
   }
 
-  static readBuffer(reader: ArrayBufferReader): ShotModel {
+  static readBuffer(reader: ArrayBufferReader): RocketModel {
     return {
       ...Entity.readBuffer(reader),
-      entityType: 'shot',
+      entityType: 'rocket',
       ownerEntityId: reader.readUint32(),
       offsetX: reader.readInt32(),
       startY: reader.readInt32(),
@@ -84,8 +84,8 @@ export class ShotEntity extends Entity implements Weapon {
   }
 }
 
-export type ShotModel = EntityModel & {
-  entityType: 'shot';
+export type RocketModel = EntityModel & {
+  entityType: 'rocket';
   offsetX: number;
   ownerEntityId: number;
   startY: number;

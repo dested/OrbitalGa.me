@@ -1,7 +1,5 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './index.css';
-import {ClientGameUI} from '../../game/clientGameUI';
-import {ClientSocket} from '../../clientSocket';
 import {observer} from 'mobx-react';
 import {GameConstants} from '@common/game/gameConstants';
 import {useStores} from '../../store/stores';

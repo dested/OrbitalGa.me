@@ -1,14 +1,13 @@
-import {ShotExplosionEntity, ShotExplosionModel} from '@common/entities/shotExplosionEntity';
+import {ExplosionEntity, ShotExplosionModel} from '@common/entities/explosionEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
-import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {Entity} from '@common/entities/entity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 
-export class ClientShotExplosionEntity extends ShotExplosionEntity implements ClientEntity {
+export class ClientShotExplosionEntity extends ExplosionEntity implements ClientEntity {
   rotate = Math.random() * 360;
 
   zIndex = DrawZIndex.Effect;

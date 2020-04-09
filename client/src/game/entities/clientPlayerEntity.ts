@@ -2,8 +2,7 @@ import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameRules} from '@common/game/gameRules';
-import {Asset, OrbitalAssets} from '../../utils/assetManager';
-import {AssetKeys} from '../../assets';
+import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;

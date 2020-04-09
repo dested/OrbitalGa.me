@@ -1,7 +1,7 @@
 import {ServerToClientMessage} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
-import {EntityBufferType, EntityBufferValue, EntityBufferValueLookup} from '../models/entityTypeModels';
+import {EntityBufferType, EntityBufferValueLookup} from '../models/entityTypeModels';
 
 export class ServerToClientMessageParser {
   static fromServerToClientMessages(messages: ServerToClientMessage[]) {

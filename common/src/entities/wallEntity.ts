@@ -1,4 +1,4 @@
-import {Polygon, Result} from 'collisions';
+import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';

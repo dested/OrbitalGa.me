@@ -10,7 +10,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
   zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageEntity: PlayerShieldModel) {
-    super(game, messageEntity.entityId, messageEntity.ownerEntityId);
+    super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.shieldStrength);
     this.x = messageEntity.x;
     this.y = messageEntity.y;
     this.health = messageEntity.health;
@@ -37,19 +37,31 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     }
     return this.y + owner.drawY;
   }
+
   draw(context: CanvasRenderingContext2D): void {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
       return;
     }
 
-    const shield = OrbitalAssets.assets['Effects.shield1'];
+    const shield = this.getShieldAsset();
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.globalAlpha = this.health / GameRules.playerShield.base.startingHealth;
-
+    context.globalAlpha = this.health / GameRules.playerShield[this.shieldStrength].maxHealth;
     context.drawImage(shield.image, -shield.size.width / 2, -shield.size.height / 2);
     context.restore();
   }
+
   tick() {}
+
+  private getShieldAsset() {
+    switch (this.shieldStrength) {
+      case 'small':
+        return OrbitalAssets.assets['Effects.shield1'];
+      case 'medium':
+        return OrbitalAssets.assets['Effects.shield2'];
+      case 'big':
+        return OrbitalAssets.assets['Effects.shield3'];
+    }
+  }
 }

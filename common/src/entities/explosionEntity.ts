@@ -3,9 +3,9 @@ import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
-export class ShotExplosionEntity extends Entity {
+export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
-  aliveDuration = ShotExplosionEntity.totalAliveDuration;
+  aliveDuration = ExplosionEntity.totalAliveDuration;
 
   constructor(game: Game, entityId: number, public intensity: number, public ownerEntityId?: number) {
     super(game, entityId, 'shotExplosion');

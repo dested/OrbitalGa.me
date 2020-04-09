@@ -1,14 +1,14 @@
-import {ShotEntity, ShotModel} from '@common/entities/shotEntity';
+import {RocketEntity, RocketModel} from '@common/entities/rocketEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 
-export class ClientShotEntity extends ShotEntity implements ClientEntity {
+export class ClientRocketEntity extends RocketEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(game: ClientGame, messageEntity: ShotModel) {
+  constructor(game: ClientGame, messageEntity: RocketModel) {
     super(game, messageEntity.entityId, messageEntity.ownerEntityId, messageEntity.offsetX, messageEntity.startY);
 
     this.x = messageEntity.x;
@@ -38,7 +38,7 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
   }
 
   draw(context: CanvasRenderingContext2D): void {
-    const laserBlue = OrbitalAssets.assets['Lasers.laserBlue02'];
+    const laserBlue = OrbitalAssets.assets['Missiles.spaceMissiles_001'];
     context.save();
     context.translate(this.drawX, this.drawY);
     context.drawImage(laserBlue.image, -laserBlue.size.width / 2, -laserBlue.size.height / 2);

@@ -4,13 +4,10 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
-import {WallEntity} from './wallEntity';
-import {EnemyShotEntity} from './enemyShotEntity';
-import {PlayerShieldEntity} from './playerShieldEntity';
-import {ShotExplosionEntity} from './shotExplosionEntity';
+import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
-import {ShotEntity} from './shotEntity';
 import {PlayerEntity} from './playerEntity';
+import {isPlayerWeapon} from './weapon';
 
 export class MeteorEntity extends Entity {
   health = Math.ceil(3 + Math.random() * 3);
@@ -100,10 +97,10 @@ export class MeteorEntity extends Entity {
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (!this.game.isClient) {
-      if (otherEntity instanceof ShotEntity) {
+      if (isPlayerWeapon(otherEntity)) {
         this.game.destroyEntity(otherEntity);
         this.hurt(
-          1,
+          otherEntity.damage,
           otherEntity,
           collisionResult.overlap * collisionResult.overlap_x,
           collisionResult.overlap * collisionResult.overlap_y
@@ -119,10 +116,10 @@ export class MeteorEntity extends Entity {
             collisionResult.overlap * collisionResult.overlap_y
           )
         ) {
-          otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
-          otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
-          this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
-          this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
+          otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x;
+          otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y;
+          this.momentumX -= collisionResult.overlap * collisionResult.overlap_x;
+          this.momentumY -= collisionResult.overlap * collisionResult.overlap_y;
 
           this.hurt(
             1,
@@ -131,30 +128,6 @@ export class MeteorEntity extends Entity {
             collisionResult.overlap * collisionResult.overlap_y
           );
 
-          return true;
-        }
-      }
-      if (otherEntity instanceof PlayerShieldEntity) {
-        if (
-          otherEntity.hurt(
-            1,
-            this,
-            collisionResult.overlap * collisionResult.overlap_x,
-            collisionResult.overlap * collisionResult.overlap_y
-          )
-        ) {
-          if (otherEntity.player) {
-            otherEntity.player.momentumX += collisionResult.overlap * collisionResult.overlap_x * 2;
-            otherEntity.player.momentumY += collisionResult.overlap * collisionResult.overlap_y * 2;
-          }
-          this.momentumX -= collisionResult.overlap * collisionResult.overlap_x * 2;
-          this.momentumY -= collisionResult.overlap * collisionResult.overlap_y * 2;
-          this.hurt(
-            1,
-            otherEntity,
-            collisionResult.overlap * collisionResult.overlap_x,
-            collisionResult.overlap * collisionResult.overlap_y
-          );
           return true;
         }
       }
@@ -226,7 +199,7 @@ export class MeteorEntity extends Entity {
     this.game.destroyEntity(this);
 
     for (let i = 0; i < 5; i++) {
-      const deathExplosion = new ShotExplosionEntity(this.game, nextId(), 2);
+      const deathExplosion = new ExplosionEntity(this.game, nextId(), 2);
       deathExplosion.start(
         this.x - this.boundingBoxes[0].width / 2 + Math.random() * this.boundingBoxes[0].width,
         this.y - this.boundingBoxes[0].height / 2 + Math.random() * this.boundingBoxes[0].height
@@ -237,9 +210,9 @@ export class MeteorEntity extends Entity {
 
   private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
     this.health -= damage;
-    const shotExplosionEntity = new ShotExplosionEntity(this.game, nextId(), 1, this.entityId);
-    shotExplosionEntity.start(x, y);
-    this.game.entities.push(shotExplosionEntity);
+    const explosionEntity = new ExplosionEntity(this.game, nextId(), 1, this.entityId);
+    explosionEntity.start(x, y);
+    this.game.entities.push(explosionEntity);
 
     if (this.health <= 0) {
       this.die();
