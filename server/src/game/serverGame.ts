@@ -134,7 +134,7 @@ export class ServerGame extends Game {
       );
     }
 
-    const inputThisTick = Utils.toDictionary(this.users, (a) => a.entity.entityId);
+    const noInputThisTick = Utils.toDictionary(this.users, (a) => a.entity.entityId);
 
     const time = +new Date();
     let stopped = false;
@@ -161,7 +161,7 @@ export class ServerGame extends Game {
         case 'playerInput': {
           const user = this.users.find((a) => a.connectionId === q.connectionId);
           if (user) {
-            delete inputThisTick[user.entity.entityId];
+            delete noInputThisTick[user.entity.entityId];
             user.entity.applyInput(q.message);
             this.collisionEngine.update();
             user.entity.checkCollisions();
@@ -180,14 +180,15 @@ export class ServerGame extends Game {
       console.log(this.queuedMessages.length, 'remaining');
     }
 
-    for (const key in inputThisTick) {
-      inputThisTick[key].entity.applyInput({
+    for (const key in noInputThisTick) {
+      noInputThisTick[key].entity.applyInput({
         down: false,
         up: false,
         right: false,
         left: false,
         shoot: false,
-        inputSequenceNumber: inputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
+        weapon: noInputThisTick[key].entity.selectedWeapon,
+        inputSequenceNumber: noInputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
       });
     }
 

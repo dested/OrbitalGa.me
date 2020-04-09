@@ -40,29 +40,29 @@ export class BotClientGame extends ClientGame {
     this.moving = Utils.randomElement(options);
     this.shooting = Utils.random(30);
 
-    liveEntity.releaseKey('down');
-    liveEntity.releaseKey('left');
-    liveEntity.releaseKey('right');
-    liveEntity.releaseKey('up');
-    liveEntity.releaseKey('shoot');
+    liveEntity.setKey('down',false);
+    liveEntity.setKey('left',false);
+    liveEntity.setKey('right',false);
+    liveEntity.setKey('up',false);
+    liveEntity.setKey('shoot',false);
 
     switch (this.moving) {
       case 'left':
-        liveEntity.pressKey('left');
+        liveEntity.setKey('left',true);
         break;
       case 'right':
-        liveEntity.pressKey('right');
+        liveEntity.setKey('right',true);
         break;
       case 'up':
-        liveEntity.pressKey('up');
+        liveEntity.setKey('up',true);
         break;
       case 'down':
-        liveEntity.pressKey('down');
+        liveEntity.setKey('down',true);
         break;
     }
 
     if (this.shooting) {
-      liveEntity.pressKey('shoot');
+      liveEntity.setKey('shoot',true);
     }
   }
 }

@@ -5,6 +5,9 @@ import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
+import {CanvasUtils} from '../utils/canvasUtils';
+import {AllPlayerWeapons} from '@common/entities/playerEntity';
+import {OrbitalAssets} from '../utils/assetManager';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -28,32 +31,35 @@ export class ClientGameUI extends ClientGame {
 
     document.onkeydown = (e) => {
       if (e.keyCode === 65) {
-        this.liveEntity?.pressKey('shoot');
+        this.liveEntity?.setKey('shoot', true);
+      }
+      if (e.keyCode === 66) {
+        this.liveEntity!.setKey('weapon', this.liveEntity!.selectedWeapon === 'rocket' ? 'none' : 'rocket');
       }
       if (e.keyCode === 38) {
-        this.liveEntity?.pressKey('up');
+        this.liveEntity?.setKey('up', true);
       } else if (e.keyCode === 40) {
-        this.liveEntity?.pressKey('down');
+        this.liveEntity?.setKey('down', true);
       } else if (e.keyCode === 37) {
-        this.liveEntity?.pressKey('left');
+        this.liveEntity?.setKey('left', true);
       } else if (e.keyCode === 39) {
-        this.liveEntity?.pressKey('right');
+        this.liveEntity?.setKey('right', true);
       }
       // e.preventDefault();
     };
     document.onkeyup = (e) => {
       if (e.keyCode === 65) {
-        this.liveEntity?.releaseKey('shoot');
+        this.liveEntity?.setKey('shoot', false);
       }
 
       if (e.keyCode === 38) {
-        this.liveEntity?.releaseKey('up');
+        this.liveEntity?.setKey('up', false);
       } else if (e.keyCode === 40) {
-        this.liveEntity?.releaseKey('down');
+        this.liveEntity?.setKey('down', false);
       } else if (e.keyCode === 37) {
-        this.liveEntity?.releaseKey('left');
+        this.liveEntity?.setKey('left', false);
       } else if (e.keyCode === 39) {
-        this.liveEntity?.releaseKey('right');
+        this.liveEntity?.setKey('right', false);
       }
     };
 
@@ -73,24 +79,8 @@ export class ClientGameUI extends ClientGame {
     const context = this.context;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const gameData = GameData.instance;
-    if (this.liveEntity) {
-      gameData.view.setCenterPosition(
-        gameData.view.transformPoint(this.liveEntity.drawX),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.liveEntity.drawY / 5 /*todo this isnt good*/)
-      );
-    }
-    if (this.spectatorMode && this.spectatorEntity) {
-      gameData.view.setCenterPosition(
-        gameData.view.transformPoint(this.spectatorEntity.x),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
-      );
-    }
-    if (this.lastXY) {
-      gameData.view.setCenterPosition(
-        gameData.view.transformPoint(this.lastXY.x),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.lastXY.y / 5)
-      );
-    }
+
+    this.centerView(gameData);
 
     if (!this.connectionId) {
       context.fillStyle = 'white';
@@ -118,6 +108,43 @@ export class ClientGameUI extends ClientGame {
 
     context.restore();
 
+    if (this.liveEntity) {
+      context.save();
+      const boxSize = 70;
+      const padding = 20;
+
+      let startingX = context.canvas.width / 2;
+      const startingY = context.canvas.height - boxSize - 20;
+
+      startingX -= (boxSize * AllPlayerWeapons.length + padding) / 2;
+      context.lineWidth = 3;
+      for (let i = 0; i < AllPlayerWeapons.length; i++) {
+        const weapon = AllPlayerWeapons[i];
+        context.fillStyle = this.liveEntity.selectedWeapon === weapon ? 'red' : 'white';
+        context.strokeStyle = this.liveEntity.availableWeapons.find((a) => a.weapon === weapon && a.ammo > 0)
+          ? 'green'
+          : 'grey';
+        CanvasUtils.roundRect(
+          context,
+          startingX + i * (boxSize + padding),
+          startingY,
+          boxSize,
+          boxSize,
+          10,
+          true,
+          true
+        );
+        context.drawImage(
+          OrbitalAssets.assets['Missiles.spaceMissiles_001'].image,
+          startingX + i * (boxSize + padding) + 5,
+          startingY + 5,
+          boxSize - 10,
+          boxSize - 10
+        );
+      }
+      context.restore();
+    }
+
     if (GameConstants.debugClient) {
       context.save();
       context.font = '30px bold';
@@ -140,6 +167,27 @@ export class ClientGameUI extends ClientGame {
       context.fillStyle = 'rgba(255,0,85,0.4)';
       context.fill();
       context.restore();
+    }
+  }
+
+  private centerView(gameData: GameData) {
+    if (this.liveEntity) {
+      gameData.view.setCenterPosition(
+        gameData.view.transformPoint(this.liveEntity.drawX),
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.liveEntity.drawY / 5 /*todo this isnt good*/)
+      );
+    }
+    if (this.spectatorMode && this.spectatorEntity) {
+      gameData.view.setCenterPosition(
+        gameData.view.transformPoint(this.spectatorEntity.x),
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
+      );
+    }
+    if (this.lastXY) {
+      gameData.view.setCenterPosition(
+        gameData.view.transformPoint(this.lastXY.x),
+        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.lastXY.y / 5)
+      );
     }
   }
 }

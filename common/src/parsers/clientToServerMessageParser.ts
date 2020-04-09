@@ -2,6 +2,7 @@ import {ClientToServerMessage} from '../models/messages';
 import {unreachable} from '../utils/unreachable';
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 import {Utils} from '../utils/utils';
+import {PlayerEntity} from '../entities/playerEntity';
 
 export class ClientToServerMessageParser {
   static fromClientToServerMessage(message: ClientToServerMessage) {
@@ -17,6 +18,7 @@ export class ClientToServerMessageParser {
       case 'playerInput':
         buff.addUint8(3);
         buff.addUint32(message.inputSequenceNumber);
+        PlayerEntity.addBufferWeapon(buff, message.weapon);
         buff.addUint8(Utils.bitsToInt(message.up, message.down, message.left, message.right, message.shoot));
         break;
       default:
@@ -41,6 +43,7 @@ export class ClientToServerMessageParser {
           result = {
             type: 'playerInput',
             inputSequenceNumber: reader.readUint32(),
+            weapon: PlayerEntity.readBufferWeapon(reader),
             ...(() => {
               const [up, down, left, right, shoot] = Utils.intToBits(reader.readUint8());
               return {up, down, left, right, shoot};

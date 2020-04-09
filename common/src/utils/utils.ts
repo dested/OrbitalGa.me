@@ -212,13 +212,13 @@ export class Utils {
   }
 
   static switchNumber<TNumber extends number, TResult>(n: TNumber, options: {[key in TNumber]: TResult}): TResult {
-    if (!options[n]) {
+    if (options[n] === undefined) {
       throw new Error(`'Type not found', ${n}, ${JSON.stringify(options)}`);
     }
     return options[n];
   }
   static switchType<TType extends string | number, TResult>(n: TType, options: {[key in TType]: TResult}): TResult {
-    if (!options[n]) {
+    if (options[n] === undefined) {
       throw new Error(`'Type not found', ${n}, ${JSON.stringify(options)}`);
     }
     return options[n];

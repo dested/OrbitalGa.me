@@ -1,11 +1,20 @@
-import {PlayerModel} from '@common/entities/playerEntity';
+import {PlayerInput, PlayerModel, PlayerWeapon} from '@common/entities/playerEntity';
 import {Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 
+type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
+
 export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {
-  keys = {up: false, down: false, left: false, right: false, shoot: false};
+  keys: KeyInput = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+    shoot: false,
+    weapon: 'none',
+  };
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};
   zIndex = DrawZIndex.Player;
@@ -44,12 +53,9 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   gameTick(): void {
     super.gameTick();
   }
+
   interpolateEntity(renderTimestamp: number) {
     // live entity does not need to interpolate anything
-  }
-
-  pressKey(input: keyof ClientLivePlayerEntity['keys']) {
-    this.keys[input] = true;
   }
 
   processInput(duration: number) {
@@ -73,10 +79,11 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     };
 
     this.pendingInputs.push(input);
+    const weaponChanged = this.keys.weapon !== this.selectedWeapon;
 
     this.applyInput(input);
 
-    if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down) {
+    if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
       this.clientGame.sendInput(input);
     }
   }
@@ -103,8 +110,9 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     }
   }
 
-  releaseKey(input: keyof ClientLivePlayerEntity['keys']) {
-    this.keys[input] = false;
+  setKey<Key extends keyof KeyInput>(input: Key, value: KeyInput[Key]) {
+    this.keys[input] = value;
   }
+
   tick() {}
 }

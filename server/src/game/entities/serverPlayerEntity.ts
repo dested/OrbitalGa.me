@@ -1,7 +1,7 @@
-import {PendingInput, PlayerEntity} from '@common/entities/playerEntity';
+import {PlayerInput, PlayerEntity} from '@common/entities/playerEntity';
 
 export class ServerPlayerEntity extends PlayerEntity {
-  applyInput(input: PendingInput) {
+  applyInput(input: PlayerInput) {
     super.applyInput(input);
     this.lastProcessedInputSequenceNumber = input.inputSequenceNumber;
   }

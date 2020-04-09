@@ -102,8 +102,16 @@ export class ArrayBufferReader {
     }
   }
 
-  loop<T>(callback: () => T): T[] {
-    const len = this.readUint16();
+  loop<T>(callback: () => T, size: '16' | '8' = '16'): T[] {
+    let len: number;
+    switch (size) {
+      case '16':
+        len = this.readUint16();
+        break;
+      case '8':
+        len = this.readUint8();
+        break;
+    }
     const items: T[] = [];
     for (let i = 0; i < len; i++) {
       items.push(callback());
@@ -183,6 +191,10 @@ export class ArrayBufferReader {
 
   switch<TOptions extends number, TResult>(callback: {[key in TOptions]: () => TResult}): TResult {
     const option = this.readUint8() as TOptions;
+    if (callback[option] === undefined) {
+      debugger;
+      throw new Error(`'Type not found', ${option}`);
+    }
     return callback[option]();
   }
 }

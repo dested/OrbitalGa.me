@@ -131,7 +131,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this.momentumY += y;
 
     const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
-    explosionEntity.start(this.x - x, this.y - y);
+    explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
       this.game.explode(this, 'medium');

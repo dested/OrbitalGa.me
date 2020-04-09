@@ -1,4 +1,4 @@
-import {PlayerModel} from '../entities/playerEntity';
+import {PlayerInput, PlayerModel} from '../entities/playerEntity';
 import {EntityModels} from './entityTypeModels';
 
 export type ClientToServerMessage =
@@ -8,15 +8,9 @@ export type ClientToServerMessage =
   | {
       type: 'spectate';
     }
-  | {
-      down: boolean;
-      inputSequenceNumber: number;
-      left: boolean;
-      right: boolean;
-      shoot: boolean;
+  | ({
       type: 'playerInput';
-      up: boolean;
-    };
+    } & PlayerInput);
 
 export type ServerToClientMessage =
   | ({

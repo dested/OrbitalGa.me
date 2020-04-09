@@ -13,19 +13,27 @@ import {Utils} from '../utils/utils';
 import {RocketEntity} from './rocketEntity';
 import {isEnemyWeapon, Weapon} from './weapon';
 
-export type PendingInput = {
+export type PlayerInput = {
   down: boolean;
   inputSequenceNumber: number;
   left: boolean;
   right: boolean;
   shoot: boolean;
   up: boolean;
+  weapon: PlayerWeapon;
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
+export type PlayerWeapon = 'none' | 'rocket' | 'laser';
+export const AllPlayerWeapons: PlayerWeapon[] = ['rocket', 'laser', 'rocket'];
+export type AvailableWeapon = {ammo: number; weapon: PlayerWeapon};
 
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
+  availableWeapons: AvailableWeapon[] = [
+    {ammo: 100, weapon: 'rocket'},
+    {ammo: 100, weapon: 'laser'},
+  ];
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
@@ -36,7 +44,8 @@ export class PlayerEntity extends Entity implements Weapon {
   lastProcessedInputSequenceNumber: number = 0;
   momentumX = 0;
   momentumY = 0;
-  pendingInputs: PendingInput[] = [];
+  pendingInputs: PlayerInput[] = [];
+  selectedWeapon: PlayerWeapon | 'none' = 'none';
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
   weaponSide = 'player' as const;
@@ -58,25 +67,25 @@ export class PlayerEntity extends Entity implements Weapon {
     return this.y;
   }
 
-  applyInput(input: PendingInput) {
+  applyInput(input: PlayerInput) {
     this.aliveTick++;
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
-
+    this.selectedWeapon = input.weapon;
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          const offsetX = this.shotSide === 'left' ? -42 : 42;
-          if (this.aliveTick % 10 === 0) {
-            const shotEntity = new RocketEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
-            shotEntity.start(this.x + offsetX, this.y - 6);
+          if (this.selectedWeapon === 'rocket') {
+            const shotEntity = new RocketEntity(this.game, nextId(), this.entityId, 0, this.y - 6);
+            shotEntity.start(this.x, this.y - 6);
             this.game.entities.push(shotEntity);
           } else {
+            const offsetX = this.shotSide === 'left' ? -42 : 42;
             const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
             shotEntity.start(this.x + offsetX, this.y - 6);
             this.game.entities.push(shotEntity);
+            this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           }
-          this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
           this.shootTimer = 1;
         }
       }
@@ -120,6 +129,7 @@ export class PlayerEntity extends Entity implements Weapon {
       this.updatePolygon();
       return true;
     }
+
     if (!this.game.isClient) {
       if (isEnemyWeapon(otherEntity)) {
         otherEntity.hurt(
@@ -181,6 +191,8 @@ export class PlayerEntity extends Entity implements Weapon {
     this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
     this.momentumX = messageModel.momentumX;
     this.momentumY = messageModel.momentumY;
+    this.availableWeapons = messageModel.availableWeapons;
+    this.selectedWeapon = messageModel.selectedWeapon;
   }
 
   reconcileFromServer(messageModel: PlayerModel) {
@@ -198,8 +210,11 @@ export class PlayerEntity extends Entity implements Weapon {
       dead: this.dead,
       playerColor: this.playerColor,
       entityType: 'player',
+      selectedWeapon: this.selectedWeapon,
+      availableWeapons: this.availableWeapons.map((w) => ({weapon: w.weapon, ammo: w.ammo})),
     };
   }
+
   setShieldEntity(shieldEntityId: number) {
     this.shieldEntityId = shieldEntityId;
   }
@@ -256,10 +271,34 @@ export class PlayerEntity extends Entity implements Weapon {
         red: 4,
       })
     );
+    buff.addUint8(
+      Utils.switchType(entity.selectedWeapon, {
+        none: 1,
+        rocket: 2,
+        laser: 3,
+      })
+    );
+    buff.addUint8(entity.availableWeapons.length);
+    for (const availableWeapon of entity.availableWeapons) {
+      PlayerEntity.addBufferWeapon(buff, availableWeapon.weapon);
+      buff.addUint16(availableWeapon.ammo);
+    }
   }
+
+  static addBufferWeapon(buff: ArrayBufferBuilder, weapon: PlayerWeapon) {
+    buff.addUint8(
+      Utils.switchType(weapon, {
+        none: 1,
+        rocket: 2,
+        laser: 3,
+      })
+    );
+  }
+
   static randomEnemyColor() {
     return Utils.randomElement(['blue' as const, 'green' as const, 'orange' as const, 'red' as const]);
   }
+
   static readBuffer(reader: ArrayBufferReader): PlayerModel {
     return {
       ...Entity.readBuffer(reader),
@@ -275,11 +314,28 @@ export class PlayerEntity extends Entity implements Weapon {
         3: 'orange' as const,
         4: 'red' as const,
       }),
+      selectedWeapon: PlayerEntity.readBufferWeapon(reader),
+      availableWeapons: reader.loop(
+        () => ({
+          weapon: PlayerEntity.readBufferWeapon(reader),
+          ammo: reader.readUint16(),
+        }),
+        '8'
+      ),
     };
+  }
+
+  static readBufferWeapon(reader: ArrayBufferReader): PlayerWeapon {
+    return Utils.switchNumber(reader.readUint8(), {
+      1: 'none' as const,
+      2: 'rocket' as const,
+      3: 'laser' as const,
+    });
   }
 }
 
 export type PlayerModel = EntityModel & {
+  availableWeapons: {ammo: number; weapon: PlayerWeapon}[];
   dead: boolean;
   entityType: 'player';
   health: number;
@@ -287,4 +343,5 @@ export type PlayerModel = EntityModel & {
   momentumX: number;
   momentumY: number;
   playerColor: PlayerColor;
+  selectedWeapon: PlayerWeapon | 'none';
 };

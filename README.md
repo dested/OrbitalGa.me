@@ -31,7 +31,8 @@
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
-- [ ] import all assets
+- [ ] maybe only send data for livePlayer vs non
+- [x] import all assets
 - [x] add momentum to rocks
 - [x] make collisions work better, faster tick?
 - [x] abstract shield better, player keeps taking damage
@@ -54,7 +55,7 @@
 - [x] garbageless client tick
 - [x] add server version
 - [x] add collisionless entities
-- [x] add shake screen effects when bomb
+- [x] add shake screen effects when attack
 
 ## Game Rules
 
@@ -70,13 +71,14 @@
   - [ ] puzzles solve together like a maze blow up walls game event
 - [ ] drop power-ups from enemy
 - [ ] drop power-ups from debris
-- [ ] drop bombs
+- [ ] add 5 second sustained laser
+- [x] add rocket
+- [x] abstract weapons
 - [x] add death effect
 - [x] add a concept of enemy types, better abstraction
 - [x] add shields
   - [x] you always have shield that regens but also upgradable
   - [x] add shield power up
-- [ ] add 5 second sustained lazer
 - [x] support for player color
 - [x] add multiple enemy colors
 - [x] better rock debris

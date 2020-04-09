@@ -38,33 +38,33 @@ export const GameScreen: React.FC = observer((props) => {
 
   const managerListenerMove = useCallback((manager: JoystickManager) => {
     const onMove = (evt: EventData, stick: JoystickOutputData) => {
-      GameData.instance.client?.liveEntity?.releaseKey('left');
-      GameData.instance.client?.liveEntity?.releaseKey('down');
-      GameData.instance.client?.liveEntity?.releaseKey('right');
-      GameData.instance.client?.liveEntity?.releaseKey('up');
+      GameData.instance.client?.liveEntity?.setKey('left', false);
+      GameData.instance.client?.liveEntity?.setKey('down', false);
+      GameData.instance.client?.liveEntity?.setKey('right', false);
+      GameData.instance.client?.liveEntity?.setKey('up', false);
       switch (stick.direction?.x) {
         case 'left':
-          GameData.instance.client?.liveEntity?.pressKey('left');
+          GameData.instance.client?.liveEntity?.setKey('left', true);
           break;
         case 'right':
-          GameData.instance.client?.liveEntity?.pressKey('right');
+          GameData.instance.client?.liveEntity?.setKey('right', true);
           break;
       }
       switch (stick.direction?.y) {
         case 'up':
-          GameData.instance.client?.liveEntity?.pressKey('up');
+          GameData.instance.client?.liveEntity?.setKey('up', true);
           break;
         case 'down':
-          GameData.instance.client?.liveEntity?.pressKey('down');
+          GameData.instance.client?.liveEntity?.setKey('down', true);
           break;
       }
     };
 
     const onEnd = () => {
-      GameData.instance.client?.liveEntity?.releaseKey('left');
-      GameData.instance.client?.liveEntity?.releaseKey('down');
-      GameData.instance.client?.liveEntity?.releaseKey('right');
-      GameData.instance.client?.liveEntity?.releaseKey('up');
+      GameData.instance.client?.liveEntity?.setKey('left', false);
+      GameData.instance.client?.liveEntity?.setKey('down', false);
+      GameData.instance.client?.liveEntity?.setKey('right', false);
+      GameData.instance.client?.liveEntity?.setKey('up', false);
     };
 
     manager.on('move', onMove);
@@ -77,11 +77,11 @@ export const GameScreen: React.FC = observer((props) => {
 
   const managerListenerShoot = useCallback((manager: any) => {
     const onMove = (e: any, stick: any) => {
-      GameData.instance.client?.liveEntity?.pressKey('shoot');
+      GameData.instance.client?.liveEntity?.setKey('shoot', true);
     };
 
     const onEnd = () => {
-      GameData.instance.client?.liveEntity?.releaseKey('shoot');
+      GameData.instance.client?.liveEntity?.setKey('shoot', false);
     };
 
     manager.on('move', onMove);

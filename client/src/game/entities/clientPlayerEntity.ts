@@ -13,9 +13,11 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     this.y = messageModel.y;
     this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
   }
+
   get drawX() {
     return this.realX;
   }
+
   get drawY() {
     return this.realY;
   }
