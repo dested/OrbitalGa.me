@@ -110,7 +110,6 @@ export class ServerGame<TSocketType> extends Game {
           break;
         case 'playerInput': {
           {
-            console.log('input', q.message);
             const user = this.users.lookup(q.connectionId);
             const connection = this.serverSocket.connections.lookup(q.connectionId);
             if (user && connection) {
@@ -203,7 +202,6 @@ export class ServerGame<TSocketType> extends Game {
         this.entities.push(meteor);
       }
     }
-
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
       entity.gameTick(duration);
@@ -308,7 +306,7 @@ export class ServerGame<TSocketType> extends Game {
     playerEntity.setShieldEntity(playerShieldEntity.entityId);
     this.sendMessageToClient(connectionId, {
       type: 'joined',
-      ...playerEntity.serialize(),
+      ...playerEntity.serializeLive(),
       serverVersion: GameConstants.serverVersion,
     });
   }
@@ -385,11 +383,15 @@ export class ServerGame<TSocketType> extends Game {
       };
 
       const myEntities = [...entities];
+      const myEntity = myEntities.find((a) => a.entity === user.entity);
+      if (myEntity) {
+        myEntity.serializedEntity = user.entity.serializeLive();
+      }
 
       if (!GameConstants.debugDontFilterEntities) {
         for (let i = myEntities.length - 1; i >= 0; i--) {
-          const myEntity = myEntities[i];
-          const x = myEntity.entity.realX;
+          const entity = myEntities[i];
+          const x = entity.entity.realX;
           if (x < box.x0 || x > box.x1) {
             myEntities.splice(i, 1);
           }

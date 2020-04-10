@@ -27,7 +27,7 @@
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
-- [ ] maybe only send data for livePlayer vs non
+- [x] only send data for livePlayer vs non
 - [x] validate input sequence number, assure they can't send garbage negative, etc
 - [x] add ping
 - [x] disconnect player for prolonged inactivity 

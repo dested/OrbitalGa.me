@@ -1,4 +1,4 @@
-import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
+import {LivePlayerModel, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameRules} from '@common/game/gameRules';
@@ -7,11 +7,10 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
 
-  constructor(game: ClientGame, messageModel: PlayerModel) {
+  constructor(game: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
     super(game, messageModel.entityId, messageModel.playerColor);
     this.x = messageModel.x;
     this.y = messageModel.y;
-    this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
   }
 
   get drawX() {

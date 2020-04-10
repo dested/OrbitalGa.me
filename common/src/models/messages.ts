@@ -1,4 +1,4 @@
-import {PlayerInput, PlayerModel} from '../entities/playerEntity';
+import {LivePlayerModel, PlayerInput, PlayerModel} from '../entities/playerEntity';
 import {EntityModels} from './entityTypeModels';
 
 export type ClientToServerMessage =
@@ -19,7 +19,7 @@ export type ServerToClientMessage =
   | ({
       serverVersion: number;
       type: 'joined';
-    } & PlayerModel)
+    } & LivePlayerModel)
   | {
       serverVersion: number;
       type: 'spectating';

@@ -1,5 +1,5 @@
-import {PlayerInput, PlayerModel, PlayerWeapon} from '@common/entities/playerEntity';
-import {Utils} from '@common/utils/utils';
+import {LivePlayerModel, PlayerInput, PlayerModel, PlayerWeapon} from '@common/entities/playerEntity';
+import {assertType, Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
@@ -18,8 +18,9 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};
   zIndex = DrawZIndex.Player;
-  constructor(private clientGame: ClientGame, public messageModel: PlayerModel) {
+  constructor(private clientGame: ClientGame, public messageModel: LivePlayerModel) {
     super(clientGame, messageModel);
+    this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
   }
 
   get drawX(): number {
@@ -90,10 +91,10 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     }
   }
 
-  reconcileFromServer(messageModel: PlayerModel) {
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    super.reconcileDataFromServer(messageModel);
+  reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {
+    assertType<LivePlayerModel>(messageModel);
+    super.reconcileFromServerLive(messageModel);
+
     if (this.dead) {
       this.clientGame.died();
     }

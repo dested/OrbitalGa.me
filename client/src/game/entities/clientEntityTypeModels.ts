@@ -10,6 +10,7 @@ import {ClientPlayerEntity} from './clientPlayerEntity';
 import {ClientEnemyShotEntity} from './clientEnemyShotEntity';
 import {ClientMeteorEntity} from './clientMeteorEntity';
 import {ClientRocketEntity} from './clientRocketEntity';
+import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 
 export const ClientEntityTypes: {
   [key in EntityModels['entityType']]: new (
@@ -27,4 +28,5 @@ export const ClientEntityTypes: {
   playerShield: ClientPlayerShieldEntity,
   meteor: ClientMeteorEntity,
   rocket: ClientRocketEntity,
+  livePlayer: ClientLivePlayerEntity,
 };

@@ -187,8 +187,15 @@ export class PlayerEntity extends Entity implements Weapon {
     this.game.entities.push(explosionEntity);
   }
 
-  reconcileDataFromServer(messageModel: PlayerModel) {
-    // needed because LivePlayerEntity does not need the pending inputs from super.reconcile
+  reconcileFromServer(messageModel: PlayerModel) {
+    super.reconcileFromServer(messageModel);
+    this.health = messageModel.health;
+    this.playerColor = messageModel.playerColor;
+  }
+
+  reconcileFromServerLive(messageModel: LivePlayerModel) {
+    this.x = messageModel.x;
+    this.y = messageModel.y;
     this.health = messageModel.health;
     this.dead = messageModel.dead;
     this.playerColor = messageModel.playerColor;
@@ -199,21 +206,22 @@ export class PlayerEntity extends Entity implements Weapon {
     this.selectedWeapon = messageModel.selectedWeapon;
   }
 
-  reconcileFromServer(messageModel: PlayerModel) {
-    super.reconcileFromServer(messageModel);
-    this.reconcileDataFromServer(messageModel);
-  }
-
   serialize(): PlayerModel {
     return {
       ...super.serialize(),
+      health: this.health,
+      playerColor: this.playerColor,
+      entityType: 'player',
+    };
+  }
+  serializeLive(): LivePlayerModel {
+    return {
+      ...this.serialize(),
       momentumX: this.momentumX,
       momentumY: this.momentumY,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
-      health: this.health,
       dead: this.dead,
-      playerColor: this.playerColor,
-      entityType: 'player',
+      entityType: 'livePlayer',
       selectedWeapon: this.selectedWeapon,
       availableWeapons: this.availableWeapons.map((w) => ({weapon: w.weapon, ammo: w.ammo})),
     };
@@ -260,13 +268,9 @@ export class PlayerEntity extends Entity implements Weapon {
     }
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel) {
+  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel | LivePlayerModel) {
     Entity.addBuffer(buff, entity);
-    buff.addFloat32(entity.momentumX);
-    buff.addFloat32(entity.momentumY);
     buff.addUint8(entity.health);
-    buff.addBoolean(entity.dead);
-    buff.addUint32(entity.lastProcessedInputSequenceNumber);
     buff.addUint8(
       Utils.switchType(entity.playerColor, {
         blue: 1,
@@ -275,6 +279,13 @@ export class PlayerEntity extends Entity implements Weapon {
         red: 4,
       })
     );
+  }
+  static addBufferLive(buff: ArrayBufferBuilder, entity: LivePlayerModel) {
+    PlayerEntity.addBuffer(buff, entity);
+    buff.addFloat32(entity.momentumX);
+    buff.addFloat32(entity.momentumY);
+    buff.addBoolean(entity.dead);
+    buff.addUint32(entity.lastProcessedInputSequenceNumber);
     buff.addUint8(
       Utils.switchType(entity.selectedWeapon, {
         none: 1,
@@ -307,17 +318,23 @@ export class PlayerEntity extends Entity implements Weapon {
     return {
       ...Entity.readBuffer(reader),
       entityType: 'player',
-      momentumX: reader.readFloat32(),
-      momentumY: reader.readFloat32(),
       health: reader.readUint8(),
-      dead: reader.readBoolean(),
-      lastProcessedInputSequenceNumber: reader.readUint32(),
       playerColor: Utils.switchNumber(reader.readUint8(), {
         1: 'blue' as const,
         2: 'green' as const,
         3: 'orange' as const,
         4: 'red' as const,
       }),
+    };
+  }
+  static readBufferLive(reader: ArrayBufferReader): LivePlayerModel {
+    return {
+      ...PlayerEntity.readBuffer(reader),
+      entityType: 'livePlayer',
+      momentumX: reader.readFloat32(),
+      momentumY: reader.readFloat32(),
+      dead: reader.readBoolean(),
+      lastProcessedInputSequenceNumber: reader.readUint32(),
       selectedWeapon: PlayerEntity.readBufferWeapon(reader),
       availableWeapons: reader.loop(
         () => ({
@@ -339,9 +356,15 @@ export class PlayerEntity extends Entity implements Weapon {
 }
 
 export type PlayerModel = EntityModel & {
+  entityType: 'player';
+  health: number;
+  playerColor: PlayerColor;
+};
+
+export type LivePlayerModel = EntityModel & {
   availableWeapons: {ammo: number; weapon: PlayerWeapon}[];
   dead: boolean;
-  entityType: 'player';
+  entityType: 'livePlayer';
   health: number;
   lastProcessedInputSequenceNumber: number;
   momentumX: number;

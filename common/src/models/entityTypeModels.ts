@@ -5,7 +5,7 @@ import {EnemyShotEntity, EnemyShotModel} from '../entities/enemyShotEntity';
 import {ShotEntity, ShotModel} from '../entities/shotEntity';
 import {WallEntity, WallModel} from '../entities/wallEntity';
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
-import {PlayerEntity, PlayerModel} from '../entities/playerEntity';
+import {LivePlayerModel, PlayerEntity, PlayerModel} from '../entities/playerEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
 import {Utils} from '../utils/utils';
@@ -14,6 +14,7 @@ import {RocketEntity, RocketModel} from '../entities/rocketEntity';
 export type EntityType = {
   enemyShot: {entity: EnemyShotEntity; index: 1; model: EnemyShotModel};
   explosion: {entity: ExplosionEntity; index: 7; model: ExplosionModel};
+  livePlayer: {entity: PlayerEntity; index: 11; model: LivePlayerModel};
   meteor: {entity: MeteorEntity; index: 2; model: MeteorModel};
   player: {entity: PlayerEntity; index: 3; model: PlayerModel};
   playerShield: {entity: PlayerShieldEntity; index: 4; model: PlayerShieldModel};
@@ -41,6 +42,7 @@ export const EntityBufferValue: {
   playerShield: 8,
   meteor: 9,
   rocket: 10,
+  livePlayer: 11,
 };
 
 export const EntityBufferValueLookup: {
@@ -55,6 +57,11 @@ export const EntityBufferType: {
   };
 } = {
   player: {value: EntityBufferValue.player, addBuffer: PlayerEntity.addBuffer, readBuffer: PlayerEntity.readBuffer},
+  livePlayer: {
+    value: EntityBufferValue.livePlayer,
+    addBuffer: PlayerEntity.addBufferLive,
+    readBuffer: PlayerEntity.readBufferLive,
+  },
   enemyShot: {
     value: EntityBufferValue.enemyShot,
     addBuffer: EnemyShotEntity.addBuffer,
