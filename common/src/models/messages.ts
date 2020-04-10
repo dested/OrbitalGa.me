@@ -8,6 +8,9 @@ export type ClientToServerMessage =
   | {
       type: 'spectate';
     }
+  | {
+      type: 'ping';
+    }
   | ({
       type: 'playerInput';
     } & PlayerInput);

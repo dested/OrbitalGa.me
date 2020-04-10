@@ -13,7 +13,7 @@ export class ArrayHash<T> {
     return this.array[index];
   }
 
-  lookup<TLookup extends T>(key: number): TLookup {
+  lookup<TLookup extends T>(key: number): TLookup | undefined {
     return this.hash[key] as TLookup;
   }
 

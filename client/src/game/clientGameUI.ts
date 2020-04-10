@@ -82,13 +82,7 @@ export class ClientGameUI extends ClientGame {
 
     this.centerView(gameData);
 
-    if (!this.connectionId) {
-      context.fillStyle = 'white';
-      context.fillText('Connecting...', 100, 100);
-      return;
-    }
     context.save();
-
     const outerBox = gameData.view.outerViewBox;
     const box = gameData.view.viewBox;
     context.scale(gameData.view.scale, gameData.view.scale);
@@ -107,43 +101,6 @@ export class ClientGameUI extends ClientGame {
     }
 
     context.restore();
-
-    if (this.liveEntity) {
-      context.save();
-      const boxSize = 70;
-      const padding = 20;
-
-      let startingX = context.canvas.width / 2;
-      const startingY = context.canvas.height - boxSize - 20;
-
-      startingX -= (boxSize * AllPlayerWeapons.length + padding) / 2;
-      context.lineWidth = 3;
-      for (let i = 0; i < AllPlayerWeapons.length; i++) {
-        const weapon = AllPlayerWeapons[i];
-        context.fillStyle = this.liveEntity.selectedWeapon === weapon ? 'red' : 'white';
-        context.strokeStyle = this.liveEntity.availableWeapons.find((a) => a.weapon === weapon && a.ammo > 0)
-          ? 'green'
-          : 'grey';
-        CanvasUtils.roundRect(
-          context,
-          startingX + i * (boxSize + padding),
-          startingY,
-          boxSize,
-          boxSize,
-          10,
-          true,
-          true
-        );
-        context.drawImage(
-          OrbitalAssets.assets['Missiles.spaceMissiles_001'].image,
-          startingX + i * (boxSize + padding) + 5,
-          startingY + 5,
-          boxSize - 10,
-          boxSize - 10
-        );
-      }
-      context.restore();
-    }
 
     if (GameConstants.debugClient) {
       context.save();

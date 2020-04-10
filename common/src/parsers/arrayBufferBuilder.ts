@@ -192,7 +192,6 @@ export class ArrayBufferReader {
   switch<TOptions extends number, TResult>(callback: {[key in TOptions]: () => TResult}): TResult {
     const option = this.readUint8() as TOptions;
     if (callback[option] === undefined) {
-      debugger;
       throw new Error(`'Type not found', ${option}`);
     }
     return callback[option]();

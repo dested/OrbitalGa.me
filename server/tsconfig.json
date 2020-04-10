@@ -12,7 +12,6 @@
     "sourceMap": true,
     "pretty": true,
     "moduleResolution": "node",
-    "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports": true,
     "baseUrl": "./src",
     "outDir": "./dist",

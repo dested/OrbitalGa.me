@@ -12,63 +12,31 @@ import {EntityModels} from '@common/models/entityTypeModels';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
+import {ArrayHash} from '@common/utils/arrayHash';
 
-export class ServerGame extends Game {
-  queuedMessages: {connectionId: string; message: ClientToServerMessage}[] = [];
-  queuedMessagesToSend: {[connectionId: string]: ServerToClientMessage[]} = {};
-  spectators: {connectionId: string}[] = [];
-  users: {connectionId: string; entity: ServerPlayerEntity}[] = [];
+type Spectator = {connectionId: number};
+type User = {connectionId: number; entity: ServerPlayerEntity};
 
-  constructor(private serverSocket: IServerSocket) {
+export class ServerGame<TSocketType> extends Game {
+  queuedMessages: {connectionId: number; message: ClientToServerMessage}[] = [];
+  queuedMessagesToSend: {[connectionId: number]: ServerToClientMessage[]} = {};
+
+  spectators = new ArrayHash<Spectator>('connectionId');
+  users = new ArrayHash<User>('connectionId');
+
+  constructor(private serverSocket: IServerSocket<TSocketType>) {
     super(false);
-    serverSocket.start(
-      (connectionId) => {
+    serverSocket.start({
+      onJoin: (connectionId) => {
         this.queuedMessagesToSend[connectionId] = [];
       },
-      (connectionId) => {
-        this.clientLeave(connectionId);
+      onLeave: (connectionId) => {
+        this.userLeave(connectionId);
       },
-      (connectionId, message) => {
+      onMessage: (connectionId, message) => {
         this.processMessage(connectionId, message);
-      }
-    );
-  }
-
-  clientJoin(connectionId: string) {
-    const spectatorIndex = this.spectators.findIndex((a) => a.connectionId === connectionId);
-    if (spectatorIndex >= 0) {
-      this.spectators.splice(spectatorIndex, 1);
-    }
-    const userIndex = this.users.findIndex((a) => a.connectionId === connectionId);
-    if (userIndex >= 0) {
-      this.users.splice(userIndex, 1);
-    }
-
-    const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
-    const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
-    playerEntity.x = Utils.randomInRange(x0, x1);
-    playerEntity.y = GameConstants.playerStartingY;
-    this.users.push({connectionId, entity: playerEntity});
-    this.entities.push(playerEntity);
-
-    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId, 'small');
-    this.entities.push(playerShieldEntity);
-    playerEntity.setShieldEntity(playerShieldEntity.entityId);
-    this.sendMessageToClient(connectionId, {
-      type: 'joined',
-      ...playerEntity.serialize(),
-      serverVersion: GameConstants.serverVersion,
+      },
     });
-  }
-
-  clientLeave(connectionId: string) {
-    delete this.queuedMessagesToSend[connectionId];
-    const user = this.users.find((c) => c.connectionId === connectionId);
-    if (!user) {
-      return;
-    }
-    this.users.splice(this.users.indexOf(user), 1);
-    this.entities.remove(user.entity);
   }
 
   init() {
@@ -111,30 +79,8 @@ export class ServerGame extends Game {
     }, 1000 / 5);
   }
 
-  processMessage(connectionId: string, message: ClientToServerMessage) {
-    this.queuedMessages.push({connectionId, message});
-  }
-
-  sendMessageToClient(connectionId: string, message: ServerToClientMessage) {
-    if (this.queuedMessagesToSend[connectionId]) {
-      this.queuedMessagesToSend[connectionId].push(message);
-    }
-  }
-
-  serverTick(tickIndex: number, duration: number, tickTime: number) {
-    if (!GameConstants.singlePlayer) {
-      console.log(
-        `#${tickIndex}, Users: ${this.users.length}, Spectators: ${this.spectators.length}, Entities: ${
-          this.entities.length
-        }, Messages:${this.queuedMessages.length}, Duration: ${tickTime}ms, -> ${Utils.formatBytes(
-          this.serverSocket.totalBytesSent
-        )}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSentPerSecond)}/s, <- ${Utils.formatBytes(
-          this.serverSocket.totalBytesReceived
-        )}`
-      );
-    }
-
-    const noInputThisTick = Utils.toDictionary(this.users, (a) => a.entity.entityId);
+  processInputs() {
+    const noInputThisTick = Utils.toDictionary(this.users.array, (a) => a.entity.entityId);
 
     const time = +new Date();
     let stopped = false;
@@ -149,24 +95,37 @@ export class ServerGame extends Game {
       const q = this.queuedMessages[i];
       switch (q.message.type) {
         case 'join':
-          {
-            this.clientJoin(q.connectionId);
-          }
+          this.userJoin(q.connectionId);
           break;
         case 'spectate':
+          this.spectatorJoin(q.connectionId);
+          break;
+        case 'ping':
           {
-            this.spectatorJoin(q.connectionId);
+            const connection = this.serverSocket.connections.lookup(q.connectionId);
+            if (connection) {
+              connection.lastPing = +new Date();
+            }
           }
           break;
         case 'playerInput': {
-          const user = this.users.find((a) => a.connectionId === q.connectionId);
-          if (user) {
-            delete noInputThisTick[user.entity.entityId];
-            user.entity.applyInput(q.message);
-            this.collisionEngine.update();
-            user.entity.checkCollisions();
+          {
+            console.log('input', q.message);
+            const user = this.users.lookup(q.connectionId);
+            const connection = this.serverSocket.connections.lookup(q.connectionId);
+            if (user && connection) {
+              connection.lastAction = +new Date();
+              delete noInputThisTick[user.entity.entityId];
+              if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
+                console.log('User input sequence too far off');
+                this.serverSocket.disconnect(connection.connectionId);
+              } else {
+                user.entity.applyInput(q.message);
+                this.collisionEngine.update();
+                user.entity.checkCollisions();
+              }
+            }
           }
-
           break;
         }
         default:
@@ -191,6 +150,32 @@ export class ServerGame extends Game {
         inputSequenceNumber: noInputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
       });
     }
+  }
+
+  processMessage(connectionId: number, message: ClientToServerMessage) {
+    this.queuedMessages.push({connectionId, message});
+  }
+
+  sendMessageToClient(connectionId: number, message: ServerToClientMessage) {
+    if (this.queuedMessagesToSend[connectionId]) {
+      this.queuedMessagesToSend[connectionId].push(message);
+    }
+  }
+
+  serverTick(tickIndex: number, duration: number, tickTime: number) {
+    if (!GameConstants.singlePlayer) {
+      console.log(
+        `#${tickIndex}, Users: ${this.users.length}, Spectators: ${this.spectators.length}, Entities: ${
+          this.entities.length
+        }, Messages:${this.queuedMessages.length}, Duration: ${tickTime}ms, -> ${Utils.formatBytes(
+          this.serverSocket.totalBytesSent
+        )}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSentPerSecond)}/s, <- ${Utils.formatBytes(
+          this.serverSocket.totalBytesReceived
+        )}`
+      );
+    }
+
+    this.processInputs();
 
     if (tickIndex % 50 < 2) {
       const enemyCount = this.users.length + 1;
@@ -232,7 +217,7 @@ export class ServerGame extends Game {
 
     this.sendWorldState();
 
-    for (const c of this.users) {
+    for (const c of this.users.array) {
       const messages = this.queuedMessagesToSend[c.connectionId];
       if (messages && messages.length > 0) {
         this.serverSocket.sendMessage(c.connectionId, messages);
@@ -242,7 +227,7 @@ export class ServerGame extends Game {
 
     this.sendSpectatorWorldState();
 
-    for (const c of this.spectators) {
+    for (const c of this.spectators.array) {
       const messages = this.queuedMessagesToSend[c.connectionId];
       if (messages && messages.length > 0) {
         this.serverSocket.sendMessage(c.connectionId, messages);
@@ -258,14 +243,86 @@ export class ServerGame extends Game {
         entity.postTick();
       }
     }
+
+    const now = +new Date();
+    for (let i = this.serverSocket.connections.array.length - 1; i >= 0; i--) {
+      const connection = this.serverSocket.connections.array[i];
+      if (this.users.lookup(connection.connectionId)) {
+        if (connection.lastAction + GameConstants.lastActionTimeout < now) {
+          this.serverSocket.disconnect(connection.connectionId);
+          continue;
+        }
+      }
+      if (this.spectators.lookup(connection.connectionId)) {
+        if (connection.spectatorJoin + GameConstants.totalSpectatorDuration < now) {
+          this.serverSocket.disconnect(connection.connectionId);
+          continue;
+        }
+      }
+      if (connection.lastPing + GameConstants.lastPingTimeout < now) {
+        this.serverSocket.disconnect(connection.connectionId);
+      }
+    }
   }
 
-  spectatorJoin(connectionId: string) {
+  spectatorJoin(connectionId: number) {
     this.spectators.push({connectionId});
+    const connection = this.serverSocket.connections.lookup(connectionId);
+    if (connection) {
+      connection.spectatorJoin = +new Date();
+    }
+
     this.sendMessageToClient(connectionId, {
       type: 'spectating',
       serverVersion: GameConstants.serverVersion,
     });
+  }
+
+  userJoin(connectionId: number) {
+    const spectator = this.spectators.lookup(connectionId);
+    if (spectator) {
+      this.spectators.remove(spectator);
+    }
+    const user = this.users.lookup(connectionId);
+    if (user) {
+      this.users.remove(user);
+    }
+    const connection = this.serverSocket.connections.lookup(connectionId);
+    if (connection) {
+      connection.lastAction = +new Date();
+    }
+
+    const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
+    const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
+    playerEntity.x = Utils.randomInRange(x0, x1);
+    playerEntity.y = GameConstants.playerStartingY;
+    this.users.push({connectionId, entity: playerEntity});
+    this.entities.push(playerEntity);
+
+    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId, 'small');
+    this.entities.push(playerShieldEntity);
+    playerEntity.setShieldEntity(playerShieldEntity.entityId);
+    this.sendMessageToClient(connectionId, {
+      type: 'joined',
+      ...playerEntity.serialize(),
+      serverVersion: GameConstants.serverVersion,
+    });
+  }
+
+  userLeave(connectionId: number) {
+    const spectator = this.spectators.lookup(connectionId);
+    if (spectator) {
+      this.spectators.remove(spectator);
+    }
+
+    const user = this.users.lookup(connectionId);
+    if (!user) {
+      delete this.queuedMessagesToSend[connectionId];
+      return;
+    }
+    user.entity.die();
+    this.users.remove(user);
+    delete this.queuedMessagesToSend[connectionId];
   }
 
   private initGame() {
@@ -298,7 +355,7 @@ export class ServerGame extends Game {
       }
     }
 
-    for (const c of this.spectators) {
+    for (const c of this.spectators.array) {
       this.serverSocket.sendMessage(c.connectionId, [
         {
           type: 'worldState',
@@ -314,7 +371,7 @@ export class ServerGame extends Game {
       serializedEntity: entity.serialize() as EntityModels,
     }));
 
-    for (const user of this.users) {
+    for (const user of this.users.array) {
       if (!user.entity) {
         continue;
       }

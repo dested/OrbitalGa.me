@@ -14,7 +14,7 @@ export class ClientShotEntity extends ShotEntity implements ClientEntity {
     this.x = messageModel.x;
     this.y = messageModel.y;
     if (messageModel.create) {
-      if (this.owner === game.liveEntity && game.liveEntity) {
+      if (this.owner && this.owner === game.liveEntity && game.liveEntity) {
         this.x = this.owner.x + this.offsetX;
       }
       this.y = messageModel.startY;

@@ -17,11 +17,7 @@
 - [ ] improve bot logic
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
-- [ ] add ping -> latency
-- [ ] disconnect player for prolonged inactivity 
-- [ ] disconnect player for delayed pingpong 
-- [ ] test server version
-- [ ] validate input sequence number, assure they can't send garbage negative, etc
+- [ ] add latency tracking
 - [ ] add audio
 - [ ] hard to go straight left with nipplejs
 - [ ] garbageless server tick
@@ -32,6 +28,11 @@
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
 - [ ] maybe only send data for livePlayer vs non
+- [x] validate input sequence number, assure they can't send garbage negative, etc
+- [x] add ping
+- [x] disconnect player for prolonged inactivity 
+- [x] disconnect player for delayed pingpong 
+- [x] test server version
 - [x] import all assets
 - [x] add momentum to rocks
 - [x] make collisions work better, faster tick?
@@ -86,7 +87,6 @@
 
 ## Infrastructure
 
-- [ ] make sure disconnect and kill work
 - [ ] leaderboard
   - [ ] redis
 - [ ] add lambda for join/etc, checks redis for servers, spins one up?
@@ -95,6 +95,7 @@
 - [ ] test what happens if server crashes on aws
 - [ ] add analytics to server to see users connected, enemies, etc
 - [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation 
+- [x] make sure disconnect and kill work
 
 ## Money
 

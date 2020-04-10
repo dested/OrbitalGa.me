@@ -15,8 +15,11 @@ export class ClientToServerMessageParser {
       case 'spectate':
         buff.addUint8(2);
         break;
-      case 'playerInput':
+      case 'ping':
         buff.addUint8(3);
+        break;
+      case 'playerInput':
+        buff.addUint8(4);
         buff.addUint32(message.inputSequenceNumber);
         PlayerEntity.addBufferWeapon(buff, message.weapon);
         buff.addUint8(Utils.bitsToInt(message.up, message.down, message.left, message.right, message.shoot));
@@ -40,6 +43,9 @@ export class ClientToServerMessageParser {
           result = {type: 'spectate'};
           break;
         case 3:
+          result = {type: 'ping'};
+          break;
+        case 4:
           result = {
             type: 'playerInput',
             inputSequenceNumber: reader.readUint32(),

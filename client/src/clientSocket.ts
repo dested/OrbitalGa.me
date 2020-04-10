@@ -46,6 +46,10 @@ export class ClientSocket implements IClientSocket {
     this.socket?.close();
   }
 
+  isConnected(): boolean {
+    return !!this.socket && this.socket.readyState === this.socket.OPEN;
+  }
+
   sendMessage(message: ClientToServerMessage) {
     if (GameConstants.binaryTransport) {
       this.socketSend(ClientToServerMessageParser.fromClientToServerMessage(message));
@@ -80,8 +84,7 @@ export interface IClientSocket {
       onOpen: () => void;
     }
   ): void;
-
   disconnect(): void;
-
+  isConnected(): boolean;
   sendMessage(message: ClientToServerMessage): void;
 }

@@ -8,11 +8,13 @@ import {JoyStick} from '../../components/joystick';
 import {GoFullScreen} from '../../components/goFullScreen';
 import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
 import {GameData} from '../../game/gameData';
+import {Weapons} from '../../components/weapons';
 
 export const GameScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
   const [died, setDied] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     connect();
@@ -22,6 +24,9 @@ export const GameScreen: React.FC = observer((props) => {
     GameData.instance.joinGame(uiStore.serverPath!, {
       onDied: () => {
         setDied(true);
+      },
+      onUIUpdate: () => {
+        setTick(Math.random());
       },
       onOpen: (client) => {
         client.joinGame();
@@ -100,6 +105,7 @@ export const GameScreen: React.FC = observer((props) => {
         height={GameConstants.screenSize.height}
         style={{width: '100vw', height: '100vh', position: 'absolute', zIndex: -99}}
       />
+      <Weapons tick={tick} />
       {disconnected && (
         <div
           style={{

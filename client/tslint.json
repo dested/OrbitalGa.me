@@ -13,6 +13,7 @@
     "member-ordering": [true, {"order": "instance-sandwich","alphabetize": true}],
     "no-namespace": false,
     "forin": false,
+    "type-literal-delimiter": true,
     "no-reference": false,
     "trailing-comma": [
       false,

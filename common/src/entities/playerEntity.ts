@@ -151,15 +151,19 @@ export class PlayerEntity extends Entity implements Weapon {
     return false;
   }
 
+  die() {
+    this.dead = true;
+    if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId)?.destroy();
+    this.game.explode(this, 'big');
+  }
+
   gameTick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
     this.updatedPositionFromMomentum();
 
     if (!this.game.isClient) {
       if (this.health <= 0) {
-        this.dead = true;
-        if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId).destroy();
-        this.game.explode(this, 'big');
+        this.die();
       }
     }
   }
@@ -168,7 +172,7 @@ export class PlayerEntity extends Entity implements Weapon {
     const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
     this.momentumX += x;
     this.momentumY += y;
-    if (!shield.depleted) {
+    if (shield && !shield.depleted) {
       const damageLeft = shield.hurt(damage, otherEntity, x, y);
       if (damageLeft === 0) {
         return;

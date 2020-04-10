@@ -1,25 +1,37 @@
-import {IServerSocket} from '../../../server/src/serverSocket';
+import {IServerSocket, ServerSocketOptions, SocketConnection} from '../../../server/src/serverSocket';
 import {WebSocketServer} from './webSocketServer';
 import {WebSocketServerSocket} from './webSocketServerSocket';
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
-import {uuid} from '@common/utils/uuid';
+import {nextId, uuid} from '@common/utils/uuid';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
+import {ArrayHash} from '@common/utils/arrayHash';
 
-export class LocalServerSocket implements IServerSocket {
-  connections: {connectionId: string; socket: WebSocketServerSocket}[] = [];
+export class LocalServerSocket implements IServerSocket<WebSocketServerSocket> {
+  connections = new ArrayHash<SocketConnection<WebSocketServerSocket>>('connectionId');
   time = +new Date();
   totalBytesReceived = 0;
   totalBytesSent = 0;
   wss?: WebSocketServer;
+  private serverSocketOptions?: ServerSocketOptions;
 
   get totalBytesSentPerSecond() {
     return Math.round(this.totalBytesSent / ((+new Date() - this.time) / 1000));
   }
 
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
-    const client = this.connections.find((a) => a.connectionId === connectionId);
+  disconnect(connectionId: number): void {
+    const connection = this.connections.lookup(connectionId);
+    if (connection) {
+      connection.socket.close();
+      this.connections.remove(connection);
+      console.log('closed: connections', this.connections.length);
+      this.serverSocketOptions?.onLeave(connectionId);
+    }
+  }
+
+  sendMessage(connectionId: number, messages: ServerToClientMessage[]) {
+    const client = this.connections.lookup(connectionId);
     if (!client) {
       return;
     }
@@ -34,17 +46,22 @@ export class LocalServerSocket implements IServerSocket {
     }
   }
 
-  start(
-    onJoin: (connectionId: string) => void,
-    onLeave: (connectionId: string) => void,
-    onMessage: (connectionId: string, message: ClientToServerMessage) => void
-  ) {
+  start(serverSocketOptions: ServerSocketOptions) {
+    this.serverSocketOptions = serverSocketOptions;
+    const {onJoin, onLeave, onMessage} = serverSocketOptions;
+
     const port = parseInt('8081');
     this.wss = new WebSocketServer({port, perMessageDeflate: false});
 
     this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
-      const me = {socket: ws, connectionId: uuid()};
+      const me: SocketConnection<WebSocketServerSocket> = {
+        socket: ws,
+        connectionId: nextId(),
+        spectatorJoin: +new Date(),
+        lastAction: +new Date(),
+        lastPing: +new Date(),
+      };
       // console.log('new connection', me.connectionId);
       this.connections.push(me);
 
@@ -64,11 +81,11 @@ export class LocalServerSocket implements IServerSocket {
       });
 
       ws.onclose = () => {
-        const ind = this.connections.findIndex((a) => a.connectionId === me.connectionId);
-        if (ind === -1) {
+        const connection = this.connections.lookup(me.connectionId);
+        if (!connection) {
           return;
         }
-        this.connections.splice(ind, 1);
+        this.connections.remove(connection);
         onLeave(me.connectionId);
       };
       onJoin(me.connectionId);

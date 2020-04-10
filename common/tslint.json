@@ -11,6 +11,7 @@
   "rules": {
     "radix": false,
     "member-ordering": [true, {"order": "instance-sandwich","alphabetize": true}],
+    "type-literal-delimiter": true,
     "no-namespace": false,
     "forin": false,
     "no-reference": false,

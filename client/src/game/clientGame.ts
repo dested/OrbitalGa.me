@@ -16,31 +16,38 @@ export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
   onDisconnect: (me: ClientGame) => void;
   onOpen: (me: ClientGame) => void;
+  onUIUpdate: (me: ClientGame) => void;
 };
 
 export class ClientGame extends Game {
-  connectionId: string;
-
   debugValues: {[key: string]: number | string} = {};
   isDead: boolean = false;
   lastXY?: {x: number; y: number};
   liveEntity?: ClientLivePlayerEntity;
   spectatorEntity?: SpectatorEntity;
   protected spectatorMode: boolean = false;
+  private connected = false;
   private messagesToProcess: ServerToClientMessage[] = [];
   private serverVersion: number = -1;
 
-  constructor(serverPath: string, private options: ClientGameOptions, private socket: IClientSocket) {
+  constructor(private serverPath: string, public options: ClientGameOptions, public socket: IClientSocket) {
     super(true);
-    this.connectionId = uuid();
-    this.socket.connect(serverPath, {
+    this.connect();
+  }
+  clearDebug(key: string) {
+    delete this.debugValues[key];
+  }
+
+  connect() {
+    this.connected = true;
+    this.socket.connect(this.serverPath, {
       onOpen: () => {
-        options.onOpen(this);
+        this.options.onOpen(this);
       },
       onDisconnect: () => {
-        options.onDisconnect(this);
+        this.options.onDisconnect(this);
+        this.connected = false;
       },
-
       onMessage: (messages) => {
         this.processMessages(messages);
         this.messagesToProcess.push(...messages);
@@ -48,9 +55,6 @@ export class ClientGame extends Game {
     });
 
     this.startTick();
-  }
-  clearDebug(key: string) {
-    delete this.debugValues[key];
   }
 
   died() {
@@ -65,9 +69,6 @@ export class ClientGame extends Game {
   }
 
   gameTick(duration: number) {
-    if (!this.connectionId) {
-      return;
-    }
     this.processInputs(duration);
     this.liveEntity?.gameTick();
     for (const entity of this.entities.array) {
@@ -100,10 +101,6 @@ export class ClientGame extends Game {
     this.sendMessageToServer({type: 'spectate'});
   }
   tick(duration: number) {
-    if (!this.connectionId) {
-      return;
-    }
-
     const entities = this.entities.array;
     assertType<(Entity & ClientEntity)[]>(entities);
     for (const entity of entities) {
@@ -131,12 +128,17 @@ export class ClientGame extends Game {
         case 'joined':
           const clientEntity = new ClientLivePlayerEntity(this, message);
           this.serverVersion = message.serverVersion;
+          if (this.serverVersion !== GameConstants.serverVersion) {
+            alert('Sorry, this client is out of date, please refresh this window.');
+            throw new Error('Out of date');
+          }
           console.log('Server version', this.serverVersion);
           this.isDead = false;
           this.lastXY = undefined;
           this.spectatorMode = false;
           this.liveEntity = clientEntity;
           this.entities.push(clientEntity);
+          this.options.onUIUpdate(this);
           break;
         case 'spectating':
           this.serverVersion = message.serverVersion;
@@ -178,6 +180,10 @@ export class ClientGame extends Game {
     let time = +new Date();
     let paused = 0;
     const int = setInterval(() => {
+      if (!this.connected) {
+        clearInterval(int);
+        return;
+      }
       const now = +new Date();
       const duration = now - time;
       if (duration > 900 || duration < 4) {
@@ -194,6 +200,10 @@ export class ClientGame extends Game {
     let gameTime = +new Date();
     let gamePaused = 0;
     const gameInt = setInterval(() => {
+      if (!this.connected) {
+        clearInterval(gameInt);
+        return;
+      }
       const now = +new Date();
       const duration = now - gameTime;
       if (duration > 900 || duration < 4) {
@@ -210,5 +220,13 @@ export class ClientGame extends Game {
       }
       this.messagesToProcess.length = 0;
     }, GameConstants.serverTickRate);
+
+    const pingInterval = setInterval(() => {
+      if (!this.connected) {
+        clearInterval(pingInterval);
+        return;
+      }
+      this.socket.sendMessage({type: 'ping'});
+    }, GameConstants.pingInterval);
   }
 }

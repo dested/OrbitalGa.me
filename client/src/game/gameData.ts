@@ -37,6 +37,7 @@ export class GameData {
             onDied: (client) => {
               client.joinGame();
             },
+            onUIUpdate: () => {},
             onOpen: (client) => {
               client.joinGame();
             },
@@ -57,12 +58,18 @@ export class GameData {
   }
 
   joinGame(serverPath: string, options: ClientGameOptions) {
-    if (this.serverPath !== serverPath) {
+    if (!this.client || this.serverPath !== serverPath) {
+      this.client?.disconnect();
       this.serverPath = serverPath;
       this.client = new ClientGameUI(this.serverPath, options, this.getClientSocket());
     } else {
-      this.client!.setOptions(options);
-      this.client!.joinGame();
+      if (!this.client.socket.isConnected()) {
+        this.client.setOptions(options);
+        this.client.connect();
+      } else {
+        this.client.setOptions(options);
+        this.client.joinGame();
+      }
     }
   }
 
@@ -72,6 +79,7 @@ export class GameData {
       this.serverPath,
       {
         onDied: () => {},
+        onUIUpdate: () => {},
         onOpen: () => {
           this.client!.spectateGame();
         },

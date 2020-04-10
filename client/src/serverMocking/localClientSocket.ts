@@ -43,6 +43,10 @@ export class LocalClientSocket implements IClientSocket {
     this.socket?.close();
   }
 
+  isConnected(): boolean {
+    return this.socket?.connected ?? false;
+  }
+
   sendMessage(message: ClientToServerMessage) {
     if (!this.socket) {
       throw new Error('Not connected');

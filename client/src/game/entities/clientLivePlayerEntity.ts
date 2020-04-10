@@ -80,11 +80,13 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
     this.pendingInputs.push(input);
     const weaponChanged = this.keys.weapon !== this.selectedWeapon;
-
     this.applyInput(input);
 
     if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
       this.clientGame.sendInput(input);
+    }
+    if (weaponChanged) {
+      this.clientGame.options.onUIUpdate(this.clientGame);
     }
   }
 

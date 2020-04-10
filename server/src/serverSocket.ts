@@ -2,24 +2,50 @@
 import * as WebServer from 'ws';
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {GameConstants} from '@common/game/gameConstants';
-import {uuid} from '@common/utils/uuid';
+import {nextId, uuid} from '@common/utils/uuid';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 import {createServer} from 'http';
+import {ArrayHash} from '@common/utils/arrayHash';
 
-export class ServerSocket implements IServerSocket {
-  connections: {connectionId: string; socket: WebServer.WebSocket}[] = [];
+export type SocketConnection<SocketType> = {
+  connectionId: number;
+  lastAction: number;
+  lastPing: number;
+  socket: SocketType;
+  spectatorJoin: number;
+};
+
+export type ServerSocketOptions = {
+  onJoin: (connectionId: number) => void;
+  onLeave: (connectionId: number) => void;
+  onMessage: (connectionId: number, message: ClientToServerMessage) => void;
+};
+export class ServerSocket implements IServerSocket<WebServer.WebSocket> {
+  connections = new ArrayHash<SocketConnection<WebServer.WebSocket>>('connectionId');
 
   time = +new Date();
 
   totalBytesReceived = 0;
   totalBytesSent = 0;
   wss?: WebServer.Server;
+  private serverSocketOptions?: ServerSocketOptions;
   get totalBytesSentPerSecond() {
     return Math.round(this.totalBytesSent / ((+new Date() - this.time) / 1000));
   }
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]) {
-    const client = this.connections.find((a) => a.connectionId === connectionId);
+
+  disconnect(connectionId: number): void {
+    const connection = this.connections.lookup(connectionId);
+    if (connection) {
+      connection.socket.close();
+      this.connections.remove(connection);
+      console.log('closed: connections', this.connections.length);
+      this.serverSocketOptions?.onLeave(connectionId);
+    }
+  }
+
+  sendMessage(connectionId: number, messages: ServerToClientMessage[]) {
+    const client = this.connections.lookup(connectionId);
     if (!client) {
       return;
     }
@@ -34,11 +60,10 @@ export class ServerSocket implements IServerSocket {
     }
   }
 
-  start(
-    onJoin: (connectionId: string) => void,
-    onLeave: (connectionId: string) => void,
-    onMessage: (connectionId: string, message: ClientToServerMessage) => void
-  ) {
+  start(serverSocketOptions: ServerSocketOptions) {
+    this.serverSocketOptions = serverSocketOptions;
+    const {onJoin, onLeave, onMessage} = serverSocketOptions;
+
     const port = parseInt('8081');
     console.log('port', port);
     const server = createServer((req, res) => {
@@ -54,7 +79,13 @@ export class ServerSocket implements IServerSocket {
 
     this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
-      const me = {socket: ws, connectionId: uuid()};
+      const me: SocketConnection<WebServer.WebSocket> = {
+        socket: ws,
+        connectionId: nextId(),
+        spectatorJoin: +new Date(),
+        lastAction: +new Date(),
+        lastPing: +new Date(),
+      };
       this.connections.push(me);
       console.log('opened: connections', this.connections.length);
       ws.on('error', (a: any, b: any) => {
@@ -82,11 +113,11 @@ export class ServerSocket implements IServerSocket {
       ws.on('error', (e) => console.log('errored', e));
 
       ws.onclose = () => {
-        const ind = this.connections.findIndex((a) => a.connectionId === me.connectionId);
-        if (ind === -1) {
+        const connection = this.connections.lookup(me.connectionId);
+        if (!connection) {
           return;
         }
-        this.connections.splice(ind, 1);
+        this.connections.remove(connection);
         console.log('closed: connections', this.connections.length);
         onLeave(me.connectionId);
       };
@@ -96,15 +127,13 @@ export class ServerSocket implements IServerSocket {
   }
 }
 
-export interface IServerSocket {
+export interface IServerSocket<SocketType> {
+  connections: ArrayHash<SocketConnection<SocketType>>;
   totalBytesReceived: number;
   totalBytesSent: number;
   totalBytesSentPerSecond: number;
 
-  sendMessage(connectionId: string, messages: ServerToClientMessage[]): void;
-  start(
-    onJoin: (connectionId: string) => void,
-    onLeave: (connectionId: string) => void,
-    onMessage: (connectionId: string, message: ClientToServerMessage) => void
-  ): void;
+  disconnect(connectionId: number): void;
+  sendMessage(connectionId: number, messages: ServerToClientMessage[]): void;
+  start(serverSocketOptions: ServerSocketOptions): void;
 }
