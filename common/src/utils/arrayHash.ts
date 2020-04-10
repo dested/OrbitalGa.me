@@ -28,6 +28,10 @@ export class ArrayHash<T> {
 
   remove(item: T) {
     delete this.hash[(item[this.primaryKey] as unknown) as number];
+    if (this.array.indexOf(item) === -1) {
+      console.error('BAD REMOVE FROM ARRAY HASH', item);
+      throw new Error('BAD REMOVE FROM ARRAY HASH');
+    }
     this.array.splice(this.array.indexOf(item), 1);
   }
 }

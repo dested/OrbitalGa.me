@@ -279,6 +279,14 @@ export class ServerGame<TSocketType> extends Game {
   }
 
   userJoin(connectionId: number) {
+    const connection = this.serverSocket.connections.lookup(connectionId);
+    if (connection) {
+      connection.lastAction = +new Date();
+    } else {
+      // connection is already dead
+      return;
+    }
+
     const spectator = this.spectators.lookup(connectionId);
     if (spectator) {
       this.spectators.remove(spectator);
@@ -286,10 +294,6 @@ export class ServerGame<TSocketType> extends Game {
     const user = this.users.lookup(connectionId);
     if (user) {
       this.users.remove(user);
-    }
-    const connection = this.serverSocket.connections.lookup(connectionId);
-    if (connection) {
-      connection.lastAction = +new Date();
     }
 
     const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());

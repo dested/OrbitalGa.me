@@ -15,17 +15,20 @@ async function main() {
   return;*/
   const serverPath = '1';
   for (let i = 0; i < 50; i++) {
-    const options = {
-      onDisconnect: () => {},
-      onOpen: (me: ClientGame) => {
-        me.sendMessageToServer({type: 'join'});
+    new BotClientGame(
+      serverPath,
+      {
+        onDisconnect: () => {},
+        onOpen: (me: ClientGame) => {
+          me.sendMessageToServer({type: 'join'});
+        },
+        onUIUpdate: () => {},
+        onDied: (me: ClientGame) => {
+          me.joinGame();
+        },
       },
-      onDied: (me: ClientGame) => {
-        me.joinGame();
-      },
-    };
-
-    new BotClientGame(serverPath, options, new ClientSocket());
+      new ClientSocket()
+    );
     await Utils.timeout(100);
   }
 }
