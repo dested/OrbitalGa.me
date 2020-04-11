@@ -13,7 +13,7 @@
 ## Features/Bugs
 
 - [ ] warning when you go too far left?
-- [ ] keep everyone mostly near each other
+- [ ] better grouping of players and enemies
 - [ ] improve bot logic
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
@@ -136,3 +136,8 @@
 * [x] load test
 * [x] deploy to beanstalk
 * [x] determine how to scale up servers dynamically
+
+
+## Groupings
+
+Ideal grouping is 3 players per screen width, try to force this as much as possible, ai and user placement should always enforce this balance

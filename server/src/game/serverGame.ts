@@ -13,6 +13,7 @@ import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
 import {ArrayHash} from '@common/utils/arrayHash';
+import {EntityClusterer} from './entityClusterer';
 
 type Spectator = {connectionId: number};
 type User = {connectionId: number; entity: ServerPlayerEntity};
@@ -23,9 +24,11 @@ export class ServerGame<TSocketType> extends Game {
 
   spectators = new ArrayHash<Spectator>('connectionId');
   users = new ArrayHash<User>('connectionId');
+  private entityClusterer: EntityClusterer;
 
   constructor(private serverSocket: IServerSocket<TSocketType>) {
     super(false);
+    this.entityClusterer = new EntityClusterer(this.entities, 3);
     serverSocket.start({
       onJoin: (connectionId) => {
         this.queuedMessagesToSend[connectionId] = [];
@@ -298,8 +301,7 @@ export class ServerGame<TSocketType> extends Game {
     }
 
     const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
-    const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
-    const startingPos = this.getFreeXSpotNear(Utils.randomInRange(x0, x1), GameConstants.playerStartingY);
+    const startingPos = this.entityClusterer.getNewPlayerXPosition();
     playerEntity.x = startingPos;
     playerEntity.y = GameConstants.playerStartingY;
     this.users.push({connectionId, entity: playerEntity});
@@ -308,6 +310,7 @@ export class ServerGame<TSocketType> extends Game {
     const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId, 'small');
     this.entities.push(playerShieldEntity);
     playerEntity.setShieldEntity(playerShieldEntity.entityId);
+
     this.sendMessageToClient(connectionId, {
       type: 'joined',
       ...playerEntity.serializeLive(),
@@ -329,19 +332,6 @@ export class ServerGame<TSocketType> extends Game {
     user.entity.die();
     this.users.remove(user);
     delete this.queuedMessagesToSend[connectionId];
-  }
-
-  private getFreeXSpotNear(x: number, y: number) {
-    for (const entity of this.entities.array) {
-      if (entity.realX - 50 < x && entity.realX + 50 > x && entity.realY - 50 < y && entity.realY + 50 > y) {
-        if (entity.realX < x) {
-          x += 50;
-        } else {
-          x -= 50;
-        }
-      }
-    }
-    return x;
   }
 
   private initGame() {
@@ -400,9 +390,12 @@ export class ServerGame<TSocketType> extends Game {
       };
 
       const myEntities = [...entities];
-      const myEntity = myEntities.find((a) => a.entity === user.entity);
-      if (myEntity) {
-        myEntity.serializedEntity = user.entity.serializeLive();
+      const myEntityIndex = myEntities.findIndex((a) => a.entity === user.entity);
+      if (myEntityIndex >= 0) {
+        myEntities[myEntityIndex] = {
+          entity: myEntities[myEntityIndex].entity,
+          serializedEntity: user.entity.serializeLive(),
+        };
       }
 
       if (!GameConstants.debugDontFilterEntities) {

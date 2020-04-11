@@ -178,6 +178,10 @@ export class Utils {
   static randomInRange(x0: number, x1: number) {
     return (x1 - x0) * Math.random() + x0;
   }
+  static randomInRanges(ranges: {x0: number; x1: number}[]) {
+    const range = this.randomElement(ranges);
+    return this.randomInRange(range.x0, range.x1);
+  }
 
   static range(start: number, finish: number) {
     const r: number[] = [];

@@ -164,7 +164,6 @@ export class ClientGame extends Game {
               );
               this.entities.push(foundEntity);
             }
-
             foundEntity.reconcileFromServer(messageModel);
           }
           break;
