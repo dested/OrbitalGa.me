@@ -1,6 +1,5 @@
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
-import {uuid} from '@common/utils/uuid';
 import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';

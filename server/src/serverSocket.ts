@@ -2,11 +2,11 @@
 import * as WebServer from 'ws';
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {GameConstants} from '@common/game/gameConstants';
-import {nextId, uuid} from '@common/utils/uuid';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 import {createServer} from 'http';
 import {ArrayHash} from '@common/utils/arrayHash';
+import {nextId} from '@common/utils/uuid';
 
 export type SocketConnection<SocketType> = {
   connectionId: number;

@@ -17,10 +17,12 @@
     "ws": "^7.2.1",
     "collisions": "^2.0.13",
     "bufferutil": "^4.0.1",
-    "utf-8-validate": "^5.0.2"
+    "utf-8-validate": "^5.0.2",
+    "redis": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "13.9.2",
+    "@types/redis": "^2.8.17",
     "nodemon": "^2.0.2",
     "prettier": "^2.0.2",
     "ts-loader": "^6.2.1",

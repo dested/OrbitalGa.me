@@ -94,6 +94,7 @@
 - [ ] add license to repo
 - [ ] test what happens if server crashes on aws
 - [ ] add analytics to server to see users connected, enemies, etc
+- [ ] add monitoring server to watch things happen
 - [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation 
 - [x] make sure disconnect and kill work
 

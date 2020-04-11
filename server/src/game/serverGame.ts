@@ -177,9 +177,12 @@ export class ServerGame<TSocketType> extends Game {
     this.processInputs();
 
     if (tickIndex % 50 < 2) {
-      const enemyCount = this.users.length + 1;
+      const enemyCount = this.users.length / 4 + 1;
       for (let i = 0; i < enemyCount; i++) {
-        const {x0, x1} = this.getPlayerRange(200, (entity) => entity.entityType === 'player');
+        const {x0, x1} = this.getPlayerRange(
+          GameConstants.screenSize.width * 2,
+          (entity) => entity.entityType === 'player'
+        );
 
         const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), SwoopingEnemyEntity.randomEnemyColor());
         swoopingEnemyEntity.start(
@@ -296,7 +299,8 @@ export class ServerGame<TSocketType> extends Game {
 
     const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
     const {x0, x1} = this.getPlayerRange(200, (e) => e.entityType === 'player');
-    playerEntity.x = Utils.randomInRange(x0, x1);
+    const startingPos = this.getFreeXSpotNear(Utils.randomInRange(x0, x1), GameConstants.playerStartingY);
+    playerEntity.x = startingPos;
     playerEntity.y = GameConstants.playerStartingY;
     this.users.push({connectionId, entity: playerEntity});
     this.entities.push(playerEntity);
@@ -325,6 +329,19 @@ export class ServerGame<TSocketType> extends Game {
     user.entity.die();
     this.users.remove(user);
     delete this.queuedMessagesToSend[connectionId];
+  }
+
+  private getFreeXSpotNear(x: number, y: number) {
+    for (const entity of this.entities.array) {
+      if (entity.realX - 50 < x && entity.realX + 50 > x && entity.realY - 50 < y && entity.realY + 50 > y) {
+        if (entity.realX < x) {
+          x += 50;
+        } else {
+          x -= 50;
+        }
+      }
+    }
+    return x;
   }
 
   private initGame() {

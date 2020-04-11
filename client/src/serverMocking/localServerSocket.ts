@@ -2,11 +2,11 @@ import {IServerSocket, ServerSocketOptions, SocketConnection} from '../../../ser
 import {WebSocketServer} from './webSocketServer';
 import {WebSocketServerSocket} from './webSocketServerSocket';
 import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
-import {nextId, uuid} from '@common/utils/uuid';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
 import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 import {ArrayHash} from '@common/utils/arrayHash';
+import {nextId} from '@common/utils/uuid';
 
 export class LocalServerSocket implements IServerSocket<WebSocketServerSocket> {
   connections = new ArrayHash<SocketConnection<WebSocketServerSocket>>('connectionId');
