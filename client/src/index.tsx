@@ -8,6 +8,9 @@ import {unreachable} from '@common/utils/unreachable';
 import {LoadingScreen} from './screens/loadingScreen';
 import {LoginScreen} from './screens/loginScreen';
 import {StarBackground} from './components/starBackground';
+import {ArrayHash} from '@common/utils/arrayHash';
+import {EntityClusterer} from '../../server/src/game/entityClusterer';
+import {Entity} from '@common/entities/entity';
 
 const App = observer(() => {
   const {uiStore} = useStores();
@@ -42,3 +45,21 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
+
+/*
+const arrayHash = new ArrayHash<Entity>('entityId');
+const cluster = new EntityClusterer(arrayHash, 3);
+for (let i = 0; i < 50; i++) {
+  const x = cluster.getNewPlayerXPosition();
+  arrayHash.push({x, y: 100, entityType: 'player', entityId: i} as Entity);
+}
+/!*
+for (let i = 0; i < 50; i++) {
+  const x = cluster.getNewEnemyXPosition();
+  arrayHash.push({x, y: 100, entityType: 'swoopingEnemy', entityId: i} as Entity);
+}
+*!/
+const g=cluster.getGroupings('player')
+debugger;
+cluster.getNewPlayerXPosition();
+*/

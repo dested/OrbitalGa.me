@@ -1,4 +1,5 @@
 export const ShakeGame = (magnitude = 16) => {
+  return;
   if (typeof document === 'undefined') return;
   const element = document.getElementById('game')!;
   let counter = 1;

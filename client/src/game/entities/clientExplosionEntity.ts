@@ -22,7 +22,9 @@ export class ClientExplosionEntity extends ExplosionEntity implements ClientEnti
         x: this.x,
         y: this.y,
       });
-      ShakeGame(messageModel.intensity);
+      if (!('isBot' in game)) {
+        ShakeGame(messageModel.intensity);
+      }
     }
     this.updatePolygon();
   }

@@ -5,6 +5,7 @@ import {ClientGame, ClientGameOptions} from './clientGame';
 type Moving = 'left' | 'right' | 'up' | 'down';
 
 export class BotClientGame extends ClientGame {
+  isBot = true;
   moving: Moving = 'left';
   shooting: boolean = false;
   constructor(serverPath: string, options: ClientGameOptions, socket: IClientSocket) {
@@ -39,6 +40,7 @@ export class BotClientGame extends ClientGame {
     }
     this.moving = Utils.randomElement(options);
     this.shooting = Utils.random(30);
+    liveEntity.setKey('weapon', 'laser');
 
     liveEntity.setKey('down', false);
     liveEntity.setKey('left', false);

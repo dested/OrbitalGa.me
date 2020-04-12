@@ -8,6 +8,7 @@ import {Entity} from '@common/entities/entity';
 import {CanvasUtils} from '../utils/canvasUtils';
 import {AllPlayerWeapons} from '@common/entities/playerEntity';
 import {OrbitalAssets} from '../utils/assetManager';
+import {unreachable} from '@common/utils/unreachable';
 
 export class ClientGameUI extends ClientGame {
   private canvas: HTMLCanvasElement;
@@ -34,7 +35,19 @@ export class ClientGameUI extends ClientGame {
         this.liveEntity?.setKey('shoot', true);
       }
       if (e.keyCode === 66) {
-        this.liveEntity!.setKey('weapon', this.liveEntity!.selectedWeapon === 'rocket' ? 'none' : 'rocket');
+        switch (this.liveEntity!.selectedWeapon) {
+          case 'rocket':
+            this.liveEntity!.setKey('weapon', 'torpedo');
+            break;
+          case 'laser':
+            this.liveEntity!.setKey('weapon', 'rocket');
+            break;
+          case 'torpedo':
+            this.liveEntity!.setKey('weapon', 'laser');
+            break;
+          default:
+            unreachable(this.liveEntity!.selectedWeapon);
+        }
       }
       if (e.keyCode === 38) {
         this.liveEntity?.setKey('up', true);

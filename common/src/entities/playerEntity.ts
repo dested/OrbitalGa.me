@@ -12,6 +12,7 @@ import {GameRules} from '../game/gameRules';
 import {Utils} from '../utils/utils';
 import {RocketEntity} from './rocketEntity';
 import {isEnemyWeapon, Weapon} from './weapon';
+import {unreachable} from '../utils/unreachable';
 
 export type PlayerInput = {
   down: boolean;
@@ -24,15 +25,16 @@ export type PlayerInput = {
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
-export type PlayerWeapon = 'none' | 'rocket' | 'laser';
-export const AllPlayerWeapons: PlayerWeapon[] = ['rocket', 'laser', 'rocket'];
+export type PlayerWeapon = 'rocket' | 'laser' | 'torpedo';
+export const AllPlayerWeapons: PlayerWeapon[] = ['laser', 'rocket', 'torpedo'];
 export type AvailableWeapon = {ammo: number; weapon: PlayerWeapon};
 
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
   availableWeapons: AvailableWeapon[] = [
-    {ammo: 100, weapon: 'rocket'},
     {ammo: 100, weapon: 'laser'},
+    {ammo: 100, weapon: 'rocket'},
+    {ammo: 100, weapon: 'torpedo'},
   ];
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
@@ -45,7 +47,7 @@ export class PlayerEntity extends Entity implements Weapon {
   momentumX = 0;
   momentumY = 0;
   pendingInputs: PlayerInput[] = [];
-  selectedWeapon: PlayerWeapon | 'none' = 'none';
+  selectedWeapon: PlayerWeapon = 'laser';
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
   weaponSide = 'player' as const;
@@ -75,18 +77,30 @@ export class PlayerEntity extends Entity implements Weapon {
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          if (this.selectedWeapon === 'rocket') {
-            const shotEntity = new RocketEntity(this.game, nextId(), this.entityId, 0, this.y - 6);
-            shotEntity.start(this.x, this.y - 6);
-            this.game.entities.push(shotEntity);
-          } else {
-            const offsetX = this.shotSide === 'left' ? -42 : 42;
-            const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
-            shotEntity.start(this.x + offsetX, this.y - 6);
-            this.game.entities.push(shotEntity);
-            this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
+          switch (this.selectedWeapon) {
+            case 'rocket':
+              {
+                const shotEntity = new RocketEntity(this.game, nextId(), this.entityId, 0, this.y - 6);
+                shotEntity.start(this.x, this.y - 6);
+                this.game.entities.push(shotEntity);
+                this.shootTimer = 10;
+              }
+              break;
+            case 'laser':
+              {
+                const offsetX = this.shotSide === 'left' ? -42 : 42;
+                const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
+                shotEntity.start(this.x + offsetX, this.y - 6);
+                this.game.entities.push(shotEntity);
+                this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
+                this.shootTimer = 1;
+              }
+              break;
+            case 'torpedo':
+              break;
+            default:
+              unreachable(this.selectedWeapon);
           }
-          this.shootTimer = 1;
         }
       }
     }
@@ -288,9 +302,9 @@ export class PlayerEntity extends Entity implements Weapon {
     buff.addUint32(entity.lastProcessedInputSequenceNumber);
     buff.addUint8(
       Utils.switchType(entity.selectedWeapon, {
-        none: 1,
-        rocket: 2,
-        laser: 3,
+        rocket: 1,
+        laser: 2,
+        torpedo: 3,
       })
     );
     buff.addUint8(entity.availableWeapons.length);
@@ -303,9 +317,9 @@ export class PlayerEntity extends Entity implements Weapon {
   static addBufferWeapon(buff: ArrayBufferBuilder, weapon: PlayerWeapon) {
     buff.addUint8(
       Utils.switchType(weapon, {
-        none: 1,
-        rocket: 2,
-        laser: 3,
+        rocket: 1,
+        laser: 2,
+        torpedo: 3,
       })
     );
   }
@@ -348,9 +362,9 @@ export class PlayerEntity extends Entity implements Weapon {
 
   static readBufferWeapon(reader: ArrayBufferReader): PlayerWeapon {
     return Utils.switchNumber(reader.readUint8(), {
-      1: 'none' as const,
-      2: 'rocket' as const,
-      3: 'laser' as const,
+      1: 'rocket' as const,
+      2: 'laser' as const,
+      3: 'torpedo' as const,
     });
   }
 }
@@ -370,5 +384,5 @@ export type LivePlayerModel = EntityModel & {
   momentumX: number;
   momentumY: number;
   playerColor: PlayerColor;
-  selectedWeapon: PlayerWeapon | 'none';
+  selectedWeapon: PlayerWeapon;
 };

@@ -116,6 +116,7 @@ export class MeteorEntity extends Entity {
     this.rotate += this.rotateSpeed;
     this.x += this.momentumX;
     this.y += this.momentumY;
+    this.y += 3;
     if (this.y > GameConstants.screenSize.height * 1.2) {
       this.destroy();
     }

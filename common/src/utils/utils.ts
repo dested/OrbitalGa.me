@@ -165,6 +165,9 @@ export class Utils {
     }
     return 0;
   }
+  static mod(n: number, mod: number) {
+    return ((n % mod) + mod) % mod;
+  }
 
   static random(chance: number) {
     return Math.random() * 100 < chance;
@@ -181,6 +184,10 @@ export class Utils {
   static randomInRanges(ranges: {x0: number; x1: number}[]) {
     const range = this.randomElement(ranges);
     return this.randomInRange(range.x0, range.x1);
+  }
+
+  static randomizeArray<T>(items: T[]): T[] {
+    return [...items].sort(() => Math.random() - 0.5);
   }
 
   static range(start: number, finish: number) {

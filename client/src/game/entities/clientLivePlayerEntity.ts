@@ -13,7 +13,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     left: false,
     right: false,
     shoot: false,
-    weapon: 'none',
+    weapon: 'laser',
   };
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};

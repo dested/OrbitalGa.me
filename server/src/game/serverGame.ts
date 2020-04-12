@@ -14,6 +14,9 @@ import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {EntityClusterer} from './entityClusterer';
+import {RBush} from '@common/utils/rbush';
+import {Entity} from '@common/entities/entity';
+import {RBushXOnly} from '@common/utils/rbushXOnly';
 
 type Spectator = {connectionId: number};
 type User = {connectionId: number; entity: ServerPlayerEntity};
@@ -179,33 +182,31 @@ export class ServerGame<TSocketType> extends Game {
 
     this.processInputs();
 
-    if (tickIndex % 50 < 2) {
-      const enemyCount = this.users.length / 4 + 1;
-      for (let i = 0; i < enemyCount; i++) {
-        const {x0, x1} = this.getPlayerRange(
-          GameConstants.screenSize.width * 2,
-          (entity) => entity.entityType === 'player'
-        );
+    const enemyCount = this.entities.filter((a) => a.entityType === 'swoopingEnemy').length;
+    const playerCount = this.users.length;
 
+    if (enemyCount < playerCount * 2) {
+      for (let i = 0; i < playerCount * 2 - enemyCount; i++) {
         const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), SwoopingEnemyEntity.randomEnemyColor());
         swoopingEnemyEntity.start(
-          Utils.randomInRange(x0, x1),
+          this.entityClusterer.getNewEnemyXPosition(),
           -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
         );
         this.entities.push(swoopingEnemyEntity);
       }
     }
-    if (tickIndex % 5 === 0) {
-      const {x0, x1} = this.getPlayerRange(1000, (entity) => entity.entityType === 'player');
 
-      for (let i = 0; i < Math.ceil((x1 - x0) / 700000); i++) {
-        const {meteorColor, type, size} = MeteorEntity.randomMeteor();
-        const meteor = new MeteorEntity(this, nextId(), meteorColor, size, type);
-        meteor.start(
-          Utils.randomInRange(x0, x1),
-          -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
-        );
-        this.entities.push(meteor);
+    if (tickIndex % 50 === 0) {
+      for (const grouping of this.entityClusterer.getGroupings('player')) {
+        for (let i = 0; i < 10; i++) {
+          const {meteorColor, type, size} = MeteorEntity.randomMeteor();
+          const meteor = new MeteorEntity(this, nextId(), meteorColor, size, type);
+          meteor.start(
+            Utils.randomInRange(grouping.x0, grouping.x1),
+            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+          );
+          this.entities.push(meteor);
+        }
       }
     }
     for (let i = this.entities.length - 1; i >= 0; i--) {
@@ -423,7 +424,12 @@ export class ServerGame<TSocketType> extends Game {
         entities: myEntities.map((a) => a.serializedEntity),
       });
     }
+    const time = +new Date() - now;
+    this.times.push(time);
+    this.times = this.times.slice(-10);
+    console.log(Utils.sum(this.times, (a) => a) / this.times.length);
   }
+  times: number[] = [];
 
   private updateSpectatorPosition() {
     const range = this.getPlayerRange(0, (e) => e.y > 30);
