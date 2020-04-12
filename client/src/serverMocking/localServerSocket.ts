@@ -8,8 +8,8 @@ import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessage
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 
-export class LocalServerSocket implements IServerSocket<WebSocketServerSocket> {
-  connections = new ArrayHash<SocketConnection<WebSocketServerSocket>>('connectionId');
+export class LocalServerSocket implements IServerSocket {
+  connections = new ArrayHash<SocketConnection>('connectionId');
   time = +new Date();
   totalBytesReceived = 0;
   totalBytesSent = 0;
@@ -55,7 +55,7 @@ export class LocalServerSocket implements IServerSocket<WebSocketServerSocket> {
 
     this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
-      const me: SocketConnection<WebSocketServerSocket> = {
+      const me: SocketConnection = {
         socket: ws,
         connectionId: nextId(),
         spectatorJoin: +new Date(),

@@ -4,7 +4,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {Utils} from '@common/utils/utils';
 import {EntityModels, EntityType} from '@common/models/entityTypeModels';
 
-type EntityGrouping = {entities: Entity[]; x0: number; x1: number};
+export type EntityGrouping = {entities: Entity[]; x0: number; x1: number};
 
 export class EntityClusterer {
   constructor(private entities: ArrayHash<Entity>, private idealSize: number) {}

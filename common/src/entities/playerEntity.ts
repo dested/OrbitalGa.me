@@ -249,27 +249,19 @@ export class PlayerEntity extends Entity implements Weapon {
     this.x += this.momentumX;
     this.y += this.momentumY;
 
+    const momentumDeceleration = GameRules.player.base.momentumDeceleration;
+
     if (!this.xInputsThisTick) {
-      this.momentumX = this.momentumX * GameRules.player.base.momentumDeceleration;
+      this.momentumX = this.momentumX * momentumDeceleration;
     }
     if (!this.yInputsThisTick) {
-      this.momentumY = this.momentumY * GameRules.player.base.momentumDeceleration;
+      this.momentumY = this.momentumY * momentumDeceleration;
     }
     if (Math.abs(this.momentumX) < 3) {
       this.momentumX = 0;
     }
     if (Math.abs(this.momentumY) < 3) {
       this.momentumY = 0;
-    }
-
-    const {x0, x1} = this.game.getPlayerRange(1000, (entity) => this !== entity);
-    if (this.x < x0) {
-      this.x = x0;
-      this.momentumX = 0;
-    }
-    if (this.x > x1) {
-      this.x = x1;
-      this.momentumX = 0;
     }
 
     if (this.y < GameConstants.screenSize.height * 0.1) {

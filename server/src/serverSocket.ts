@@ -8,21 +8,29 @@ import {createServer} from 'http';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 
-export type SocketConnection<SocketType> = {
+export type SocketConnection = {
   connectionId: number;
   lastAction: number;
   lastPing: number;
-  socket: SocketType;
+  socket: ISocket;
   spectatorJoin: number;
 };
+
+export interface ISocket {
+  binaryType: string;
+  onclose: (result: any) => void;
+  onmessage: (message: any) => void;
+  close(): void;
+  send(message: string | ArrayBuffer): void;
+}
 
 export type ServerSocketOptions = {
   onJoin: (connectionId: number) => void;
   onLeave: (connectionId: number) => void;
   onMessage: (connectionId: number, message: ClientToServerMessage) => void;
 };
-export class ServerSocket implements IServerSocket<WebServer.WebSocket> {
-  connections = new ArrayHash<SocketConnection<WebServer.WebSocket>>('connectionId');
+export class ServerSocket implements IServerSocket {
+  connections = new ArrayHash<SocketConnection>('connectionId');
 
   time = +new Date();
 
@@ -79,7 +87,7 @@ export class ServerSocket implements IServerSocket<WebServer.WebSocket> {
 
     this.wss.on('connection', (ws) => {
       ws.binaryType = 'arraybuffer';
-      const me: SocketConnection<WebServer.WebSocket> = {
+      const me: SocketConnection = {
         socket: ws,
         connectionId: nextId(),
         spectatorJoin: +new Date(),
@@ -127,8 +135,8 @@ export class ServerSocket implements IServerSocket<WebServer.WebSocket> {
   }
 }
 
-export interface IServerSocket<SocketType> {
-  connections: ArrayHash<SocketConnection<SocketType>>;
+export interface IServerSocket {
+  connections: ArrayHash<SocketConnection>;
   totalBytesReceived: number;
   totalBytesSent: number;
   totalBytesSentPerSecond: number;

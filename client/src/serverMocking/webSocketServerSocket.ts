@@ -1,6 +1,7 @@
 import {WebSocketClient} from './webSocketClient';
+import {ISocket} from '../../../server/src/serverSocket';
 
-export class WebSocketServerSocket {
+export class WebSocketServerSocket implements ISocket {
   binaryType: string = '';
   private onMessageCallback?: (message: {}) => void;
 

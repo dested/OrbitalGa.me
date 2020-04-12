@@ -13,25 +13,24 @@ import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
 import {ArrayHash} from '@common/utils/arrayHash';
-import {EntityClusterer} from './entityClusterer';
-import {RBush} from '@common/utils/rbush';
 import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
+import {EntityGrouping} from './entityClusterer';
 
 type Spectator = {connectionId: number};
 type User = {connectionId: number; entity: ServerPlayerEntity};
 
-export class ServerGame<TSocketType> extends Game {
+export class ServerGame extends Game {
   queuedMessages: {connectionId: number; message: ClientToServerMessage}[] = [];
   queuedMessagesToSend: {[connectionId: number]: ServerToClientMessage[]} = {};
 
   spectators = new ArrayHash<Spectator>('connectionId');
   users = new ArrayHash<User>('connectionId');
-  private entityClusterer: EntityClusterer;
 
-  constructor(private serverSocket: IServerSocket<TSocketType>) {
+  entityGroupingsThisTick: EntityGrouping[] = [];
+
+  constructor(private serverSocket: IServerSocket) {
     super(false);
-    this.entityClusterer = new EntityClusterer(this.entities, 3);
     serverSocket.start({
       onJoin: (connectionId) => {
         this.queuedMessagesToSend[connectionId] = [];
@@ -126,8 +125,6 @@ export class ServerGame<TSocketType> extends Game {
                 this.serverSocket.disconnect(connection.connectionId);
               } else {
                 user.entity.applyInput(q.message);
-                this.collisionEngine.update();
-                user.entity.checkCollisions();
               }
             }
           }
@@ -209,6 +206,8 @@ export class ServerGame<TSocketType> extends Game {
         }
       }
     }
+
+    this.entityGroupingsThisTick = this.entityClusterer.getGroupings('player');
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
       entity.gameTick(duration);
@@ -378,8 +377,6 @@ export class ServerGame<TSocketType> extends Game {
   private sendWorldState() {
     if (this.users.array.length === 0) return;
 
-    const now = +new Date();
-
     const bush = new RBushXOnly<{entity: Entity; serializedEntity: EntityModels}>();
 
     for (const entity of this.entities.array) {
@@ -424,12 +421,7 @@ export class ServerGame<TSocketType> extends Game {
         entities: myEntities.map((a) => a.serializedEntity),
       });
     }
-    const time = +new Date() - now;
-    this.times.push(time);
-    this.times = this.times.slice(-10);
-    console.log(Utils.sum(this.times, (a) => a) / this.times.length);
   }
-  times: number[] = [];
 
   private updateSpectatorPosition() {
     const range = this.getPlayerRange(0, (e) => e.y > 30);

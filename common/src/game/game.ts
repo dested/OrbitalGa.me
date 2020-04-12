@@ -3,15 +3,18 @@ import {Entity} from '../entities/entity';
 import {ArrayHash} from '../utils/arrayHash';
 import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
+import {EntityClusterer} from '../../../server/src/game/entityClusterer';
 
 export abstract class Game {
   collisionEngine: Collisions;
   readonly collisionResult: Result;
   entities = new ArrayHash<Entity>('entityId');
+  entityClusterer: EntityClusterer;
 
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
+    this.entityClusterer = new EntityClusterer(this.entities, 3);
   }
 
   explode(entity: Entity, explosionSize: 'small' | 'medium' | 'big') {
