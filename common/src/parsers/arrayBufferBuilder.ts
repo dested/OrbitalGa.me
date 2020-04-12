@@ -42,6 +42,14 @@ export class ArrayBufferBuilder {
     this.curPosition += 1;
   }
 
+  addInt8Optional(value?: number) {
+    if (value === undefined) {
+      this.addInt8(-1);
+    } else {
+      this.addInt8(value);
+    }
+  }
+
   addOptionalInt32(value?: number) {
     if (value === undefined) {
       this.addInt32(-1);
@@ -150,6 +158,14 @@ export class ArrayBufferReader {
   readInt8(): number {
     const result = this.dv.getInt8(this.index);
     this.index += 1;
+    return result;
+  }
+  readInt8Optional(): number | undefined {
+    const result = this.dv.getInt8(this.index);
+    this.index += 1;
+    if (result === -1) {
+      return undefined;
+    }
     return result;
   }
 

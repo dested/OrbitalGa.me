@@ -12,7 +12,7 @@
 
 ## Features/Bugs
 
-- [ ] warning when you go too far left?
+- [ ] add arrows to direct you to where the action is
 - [ ] improve bot logic
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
@@ -22,7 +22,7 @@
 - [ ] add server kill switch to boot everyone out
 - [ ] support multiple bounding boxes
   - [ ] fix boundingbox not being from center
-  - [ ] add rotate to bounding box
+  - [x] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
 - [ ] figure out ghost players

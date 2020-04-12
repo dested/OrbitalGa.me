@@ -3,13 +3,12 @@ import {EntityType, EntityModels} from '@common/models/entityTypeModels';
 import {ClientExplosionEntity} from './clientExplosionEntity';
 import {ClientPlayerShieldEntity} from './clientPlayerShieldEntity';
 import {ClientSwoopingEnemyEntity} from './clientSwoopingEnemyEntity';
-import {ClientShotEntity} from './clientShotEntity';
+import {ClientPlayerWeapon} from './clientPlayerWeapon';
 import {ClientWallEntity} from './clientWallEntity';
 import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {ClientEnemyShotEntity} from './clientEnemyShotEntity';
 import {ClientMeteorEntity} from './clientMeteorEntity';
-import {ClientRocketEntity} from './clientRocketEntity';
 import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 import {ClientDropEntity} from './clientDropEntity';
 
@@ -21,14 +20,13 @@ export const ClientEntityTypes: {
 } = {
   player: ClientPlayerEntity,
   enemyShot: ClientEnemyShotEntity,
-  shot: ClientShotEntity,
+  playerWeapon: ClientPlayerWeapon,
   explosion: ClientExplosionEntity,
   swoopingEnemy: ClientSwoopingEnemyEntity,
   wall: ClientWallEntity,
   spectator: ClientSpectatorEntity,
   playerShield: ClientPlayerShieldEntity,
   meteor: ClientMeteorEntity,
-  rocket: ClientRocketEntity,
   livePlayer: ClientLivePlayerEntity,
   drop: ClientDropEntity,
 };

@@ -49,11 +49,12 @@ export class ClientDropEntity extends DropEntity implements ClientEntity {
   }
 
   draw(context: CanvasRenderingContext2D): void {
+    const circleSize = 50;
     const size = 30;
     context.save();
     context.translate(this.drawX, this.drawY);
     const asset = this.asset;
-    CanvasUtils.circle(context, 0, 0, (size * 1.5) / 2);
+    CanvasUtils.circle(context, 0, 0, circleSize / 2);
     context.fillStyle = 'white';
     context.strokeStyle = 'red';
     context.lineWidth = 4;

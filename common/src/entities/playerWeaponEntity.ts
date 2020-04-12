@@ -3,14 +3,15 @@ import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {GameRules} from '../game/gameRules';
+import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
+import {PlayerEntity} from './playerEntity';
 
-export class ShotEntity extends Entity implements Weapon {
+export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
-  damage = 1;
-  explosionIntensity = 1;
+  damage: number;
+  explosionIntensity: number;
   isWeapon = true as const;
   weaponSide = 'player' as const;
 
@@ -19,9 +20,12 @@ export class ShotEntity extends Entity implements Weapon {
     entityId: number,
     public ownerEntityId: number,
     public offsetX: number,
-    public startY: number
+    public startY: number,
+    public weaponType: PlayerWeapon
   ) {
-    super(game, entityId, 'shot');
+    super(game, entityId, 'playerWeapon');
+    this.damage = WeaponConfigs[weaponType].damage;
+    this.explosionIntensity = WeaponConfigs[weaponType].explosionIntensity;
     this.createPolygon();
   }
 
@@ -42,7 +46,13 @@ export class ShotEntity extends Entity implements Weapon {
   }
 
   gameTick(duration: number) {
-    this.y -= GameRules.playerShots.base.shotSpeedPerSecond * (duration / 1000);
+    const config = WeaponConfigs[this.weaponType];
+    if (config.rampUp) {
+      this.momentumY += config.speed * (duration / 1000);
+      this.y -= this.momentumY;
+    } else {
+      this.y -= config.speed * (duration / 1000);
+    }
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
       this.destroy();
@@ -58,6 +68,7 @@ export class ShotEntity extends Entity implements Weapon {
     this.ownerEntityId = messageModel.ownerEntityId;
     this.startY = messageModel.startY;
     this.offsetX = messageModel.offsetX;
+    this.weaponType = messageModel.weaponType;
   }
 
   serialize(): ShotModel {
@@ -66,7 +77,8 @@ export class ShotEntity extends Entity implements Weapon {
       ownerEntityId: this.ownerEntityId,
       offsetX: this.offsetX,
       startY: this.startY,
-      entityType: 'shot',
+      weaponType: this.weaponType,
+      entityType: 'playerWeapon',
     };
   }
 
@@ -75,22 +87,25 @@ export class ShotEntity extends Entity implements Weapon {
     buff.addUint32(entity.ownerEntityId);
     buff.addInt32(entity.offsetX);
     buff.addInt32(entity.startY);
+    PlayerEntity.addBufferWeapon(buff, entity.weaponType);
   }
 
   static readBuffer(reader: ArrayBufferReader): ShotModel {
     return {
       ...Entity.readBuffer(reader),
-      entityType: 'shot',
+      entityType: 'playerWeapon',
       ownerEntityId: reader.readUint32(),
       offsetX: reader.readInt32(),
       startY: reader.readInt32(),
+      weaponType: PlayerEntity.readBufferWeapon(reader),
     };
   }
 }
 
 export type ShotModel = EntityModel & {
-  entityType: 'shot';
+  entityType: 'playerWeapon';
   offsetX: number;
   ownerEntityId: number;
   startY: number;
+  weaponType: PlayerWeapon;
 };

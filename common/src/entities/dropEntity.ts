@@ -7,8 +7,9 @@ import {Utils} from '../utils/utils';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
-import {PlayerEntity, PlayerWeapon} from './playerEntity';
+import {PlayerEntity} from './playerEntity';
 import {Size} from './meteorEntity';
+import {PlayerWeapon} from '../game/gameRules';
 
 export type DropType =
   | {
@@ -18,6 +19,8 @@ export type DropType =
   | {ammo: number; type: 'weapon'; weapon: PlayerWeapon};
 
 export class DropEntity extends Entity {
+  boundingBoxes = [{width: 50, height: 50}];
+
   constructor(game: Game, entityId: number, public drop: DropType) {
     super(game, entityId, 'drop');
     this.createPolygon();
@@ -34,7 +37,7 @@ export class DropEntity extends Entity {
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (!this.game.isClient) {
       if (otherEntity instanceof PlayerEntity) {
-        add to the player
+        otherEntity.addDrop(this.drop);
         this.destroy();
       }
     }

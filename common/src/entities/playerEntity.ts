@@ -2,17 +2,17 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {GameConstants} from '../game/gameConstants';
-import {ShotEntity} from './shotEntity';
+import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {WallEntity} from './wallEntity';
 import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
-import {GameRules} from '../game/gameRules';
+import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Utils} from '../utils/utils';
-import {RocketEntity} from './rocketEntity';
 import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
+import {DropType} from './dropEntity';
 
 export type PlayerInput = {
   down: boolean;
@@ -21,20 +21,18 @@ export type PlayerInput = {
   right: boolean;
   shoot: boolean;
   up: boolean;
-  weapon: PlayerWeapon;
+  weapon?: PlayerWeapon;
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
-export type PlayerWeapon = 'rocket' | 'laser' | 'torpedo';
-export const AllPlayerWeapons: PlayerWeapon[] = ['laser', 'rocket', 'torpedo'];
 export type AvailableWeapon = {ammo: number; weapon: PlayerWeapon};
 
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
   availableWeapons: AvailableWeapon[] = [
     {ammo: 100, weapon: 'laser'},
-    {ammo: 100, weapon: 'rocket'},
-    {ammo: 100, weapon: 'torpedo'},
+    {ammo: 5, weapon: 'rocket'},
+    {ammo: 3, weapon: 'torpedo'},
   ];
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
@@ -69,37 +67,73 @@ export class PlayerEntity extends Entity implements Weapon {
     return this.y;
   }
 
+  addDrop(drop: DropType) {
+    switch (drop.type) {
+      case 'health':
+        this.health += drop.amount;
+        this.health = Math.min(this.health, GameRules.player.base.startingHealth);
+        break;
+      case 'weapon':
+        let myWeapon = this.availableWeapons.find((a) => a.weapon === drop.weapon);
+        if (!myWeapon) {
+          this.availableWeapons.push((myWeapon = {weapon: drop.weapon, ammo: 0}));
+        }
+        switch (drop.weapon) {
+          case 'rocket':
+            myWeapon.ammo += drop.ammo;
+            break;
+          case 'laser':
+            break;
+          case 'torpedo':
+            break;
+          default:
+            unreachable(drop.weapon);
+        }
+        break;
+      default:
+        unreachable(drop);
+    }
+  }
+
   applyInput(input: PlayerInput) {
     this.aliveTick++;
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
-    this.selectedWeapon = input.weapon;
+    if (input.weapon) {
+      this.selectedWeapon = input.weapon;
+    }
     if (input.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
-          switch (this.selectedWeapon) {
-            case 'rocket':
-              {
-                const shotEntity = new RocketEntity(this.game, nextId(), this.entityId, 0, this.y - 6);
-                shotEntity.start(this.x, this.y - 6);
-                this.game.entities.push(shotEntity);
-                this.shootTimer = 10;
+          const availableWeapon = this.availableWeapons.find((w) => w.weapon === this.selectedWeapon);
+          if (availableWeapon && availableWeapon.ammo > 0) {
+            const config = WeaponConfigs[this.selectedWeapon];
+            let offsetX = 0;
+            if (config.alternateSide) {
+              offsetX = this.shotSide === 'left' ? -42 : 42;
+            }
+            const playerWeaponEntity = new PlayerWeaponEntity(
+              this.game,
+              nextId(),
+              this.entityId,
+              offsetX,
+              this.y - 6,
+              this.selectedWeapon
+            );
+            playerWeaponEntity.start(this.x + offsetX, this.y - 6);
+            this.game.entities.push(playerWeaponEntity);
+            if (config.alternateSide) {
+              this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
+            }
+            this.shootTimer = config.resetShootTimer;
+            if (!config.infinite) {
+              availableWeapon.ammo--;
+              if (availableWeapon.ammo <= 0) {
+                const index = this.availableWeapons.findIndex((a) => a.weapon === this.selectedWeapon);
+                this.selectedWeapon = this.availableWeapons[(index + 1) % this.availableWeapons.length].weapon;
+                this.availableWeapons.splice(this.availableWeapons.indexOf(availableWeapon), 1);
               }
-              break;
-            case 'laser':
-              {
-                const offsetX = this.shotSide === 'left' ? -42 : 42;
-                const shotEntity = new ShotEntity(this.game, nextId(), this.entityId, offsetX, this.y - 6);
-                shotEntity.start(this.x + offsetX, this.y - 6);
-                this.game.entities.push(shotEntity);
-                this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
-                this.shootTimer = 1;
-              }
-              break;
-            case 'torpedo':
-              break;
-            default:
-              unreachable(this.selectedWeapon);
+            }
           }
         }
       }
@@ -315,6 +349,17 @@ export class PlayerEntity extends Entity implements Weapon {
       })
     );
   }
+  static addBufferWeaponOptional(buff: ArrayBufferBuilder, weapon?: PlayerWeapon) {
+    buff.addInt8Optional(
+      weapon === undefined
+        ? undefined
+        : Utils.switchType(weapon, {
+            rocket: 1,
+            laser: 2,
+            torpedo: 3,
+          })
+    );
+  }
 
   static randomEnemyColor() {
     return Utils.randomElement(['blue' as const, 'green' as const, 'orange' as const, 'red' as const]);
@@ -354,6 +399,17 @@ export class PlayerEntity extends Entity implements Weapon {
 
   static readBufferWeapon(reader: ArrayBufferReader): PlayerWeapon {
     return Utils.switchNumber(reader.readUint8(), {
+      1: 'rocket' as const,
+      2: 'laser' as const,
+      3: 'torpedo' as const,
+    });
+  }
+  static readBufferWeaponOptional(reader: ArrayBufferReader): PlayerWeapon | undefined {
+    const weapon = reader.readInt8Optional();
+    if (weapon === undefined) {
+      return undefined;
+    }
+    return Utils.switchNumber(weapon, {
       1: 'rocket' as const,
       2: 'laser' as const,
       3: 'torpedo' as const,

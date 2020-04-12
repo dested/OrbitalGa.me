@@ -21,7 +21,7 @@ export class ClientToServerMessageParser {
       case 'playerInput':
         buff.addUint8(4);
         buff.addUint32(message.inputSequenceNumber);
-        PlayerEntity.addBufferWeapon(buff, message.weapon);
+        PlayerEntity.addBufferWeaponOptional(buff, message.weapon);
         buff.addUint8(Utils.bitsToInt(message.up, message.down, message.left, message.right, message.shoot));
         break;
       default:
@@ -49,7 +49,7 @@ export class ClientToServerMessageParser {
           result = {
             type: 'playerInput',
             inputSequenceNumber: reader.readUint32(),
-            weapon: PlayerEntity.readBufferWeapon(reader),
+            weapon: PlayerEntity.readBufferWeaponOptional(reader),
             ...(() => {
               const [up, down, left, right, shoot] = Utils.intToBits(reader.readUint8());
               return {up, down, left, right, shoot};

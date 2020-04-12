@@ -7,7 +7,6 @@ import {Utils} from '../utils/utils';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
-import {PlayerWeapon} from './playerEntity';
 import {DropEntity} from './dropEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';

@@ -138,7 +138,6 @@ export class ClientGame extends Game {
           this.spectatorMode = false;
           this.liveEntity = clientEntity;
           this.entities.push(clientEntity);
-          this.options.onUIUpdate(this);
           break;
         case 'spectating':
           this.serverVersion = message.serverVersion;
@@ -215,6 +214,7 @@ export class ClientGame extends Game {
         }
       }
       this.gameTick(duration);
+      this.options.onUIUpdate(this);
       gameTime = +new Date();
       if (gameTime - now > 20) {
         console.log('bad duration', duration);

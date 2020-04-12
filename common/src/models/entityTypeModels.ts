@@ -2,29 +2,28 @@ import {SpectatorEntity, SpectatorModel} from '../entities/spectatorEntity';
 import {PlayerShieldEntity, PlayerShieldModel} from '../entities/playerShieldEntity';
 import {ExplosionEntity, ExplosionModel} from '../entities/explosionEntity';
 import {EnemyShotEntity, EnemyShotModel} from '../entities/enemyShotEntity';
-import {ShotEntity, ShotModel} from '../entities/shotEntity';
+import {PlayerWeaponEntity, ShotModel} from '../entities/playerWeaponEntity';
 import {WallEntity, WallModel} from '../entities/wallEntity';
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
 import {LivePlayerModel, PlayerEntity, PlayerModel} from '../entities/playerEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
 import {Utils} from '../utils/utils';
-import {RocketEntity, RocketModel} from '../entities/rocketEntity';
 import {DropEntity, DropModel} from '../entities/dropEntity';
 
+/* tslint:disable:member-ordering */
 export type EntityType = {
-  drop: {entity: DropEntity; index: 12; model: DropModel};
-  enemyShot: {entity: EnemyShotEntity; index: 1; model: EnemyShotModel};
-  explosion: {entity: ExplosionEntity; index: 7; model: ExplosionModel};
-  livePlayer: {entity: PlayerEntity; index: 11; model: LivePlayerModel};
+  player: {entity: PlayerEntity; index: 1; model: PlayerModel};
   meteor: {entity: MeteorEntity; index: 2; model: MeteorModel};
-  player: {entity: PlayerEntity; index: 3; model: PlayerModel};
+  enemyShot: {entity: EnemyShotEntity; index: 3; model: EnemyShotModel};
   playerShield: {entity: PlayerShieldEntity; index: 4; model: PlayerShieldModel};
-  rocket: {entity: RocketEntity; index: 5; model: RocketModel};
-  shot: {entity: ShotEntity; index: 6; model: ShotModel};
-  spectator: {entity: SpectatorEntity; index: 8; model: SpectatorModel};
-  swoopingEnemy: {entity: SwoopingEnemyEntity; index: 9; model: SwoopingEnemyModel};
-  wall: {entity: WallEntity; index: 10; model: WallModel};
+  playerWeapon: {entity: PlayerWeaponEntity; index: 5; model: ShotModel};
+  explosion: {entity: ExplosionEntity; index: 6; model: ExplosionModel};
+  spectator: {entity: SpectatorEntity; index: 7; model: SpectatorModel};
+  swoopingEnemy: {entity: SwoopingEnemyEntity; index: 8; model: SwoopingEnemyModel};
+  wall: {entity: WallEntity; index: 9; model: WallModel};
+  livePlayer: {entity: PlayerEntity; index: 10; model: LivePlayerModel};
+  drop: {entity: DropEntity; index: 11; model: DropModel};
 };
 
 export type EntityModels = EntityType[keyof EntityType]['model'];
@@ -35,17 +34,16 @@ export const EntityBufferValue: {
   [key in EntityModels['entityType']]: EntityType[keyof EntityType]['index'];
 } = {
   player: 1,
-  enemyShot: 2,
-  shot: 3,
-  explosion: 4,
-  swoopingEnemy: 5,
-  wall: 6,
+  meteor: 2,
+  enemyShot: 3,
+  playerShield: 4,
+  playerWeapon: 5,
+  explosion: 6,
   spectator: 7,
-  playerShield: 8,
-  meteor: 9,
-  rocket: 10,
-  livePlayer: 11,
-  drop: 12,
+  swoopingEnemy: 8,
+  wall: 9,
+  livePlayer: 10,
+  drop: 11,
 };
 
 export const EntityBufferValueLookup: {
@@ -70,7 +68,11 @@ export const EntityBufferType: {
     addBuffer: EnemyShotEntity.addBuffer,
     readBuffer: EnemyShotEntity.readBuffer,
   },
-  shot: {value: EntityBufferValue.shot, addBuffer: ShotEntity.addBuffer, readBuffer: ShotEntity.readBuffer},
+  playerWeapon: {
+    value: EntityBufferValue.playerWeapon,
+    addBuffer: PlayerWeaponEntity.addBuffer,
+    readBuffer: PlayerWeaponEntity.readBuffer,
+  },
   explosion: {
     value: EntityBufferValue.explosion,
     addBuffer: ExplosionEntity.addBuffer,
@@ -93,6 +95,5 @@ export const EntityBufferType: {
     readBuffer: PlayerShieldEntity.readBuffer,
   },
   meteor: {value: EntityBufferValue.meteor, addBuffer: MeteorEntity.addBuffer, readBuffer: MeteorEntity.readBuffer},
-  rocket: {value: EntityBufferValue.rocket, addBuffer: RocketEntity.addBuffer, readBuffer: RocketEntity.readBuffer},
   drop: {value: EntityBufferValue.drop, addBuffer: DropEntity.addBuffer, readBuffer: DropEntity.readBuffer},
 };

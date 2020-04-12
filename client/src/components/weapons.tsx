@@ -1,12 +1,10 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {AllPlayerWeapons, PlayerWeapon} from '@common/entities/playerEntity';
-import {CanvasUtils} from '../utils/canvasUtils';
-import {OrbitalAssets} from '../utils/assetManager';
 import {GameData} from '../game/gameData';
 import spaceMissiles_001 from '../assets/Missiles/spaceMissiles_001.png';
 import spaceMissiles_004 from '../assets/Missiles/spaceMissiles_004.png';
 import laserBlue02 from '../assets/Lasers/laserBlue02.png';
 import {GameConstants} from '@common/game/gameConstants';
+import {AllPlayerWeapons, PlayerWeapon} from '@common/game/gameRules';
 
 const images: {[key in PlayerWeapon]: string} = {
   laser: laserBlue02,
@@ -34,24 +32,22 @@ export const Weapons = (props: {tick: number}) => {
       }}
     >
       <div style={{flex: 1}} />
-      {AllPlayerWeapons.map((weapon) => (
+      {liveEntity.availableWeapons.map((weapon) => (
         <div
-          key={weapon}
+          key={weapon.weapon}
           style={{
             width: boxSize,
             height: boxSize,
-            backgroundColor: liveEntity.selectedWeapon === weapon ? 'red' : 'white',
+            backgroundColor: liveEntity.selectedWeapon === weapon.weapon ? 'red' : 'white',
             margin,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 10,
-            border:
-              'solid 3px ' +
-              (liveEntity.availableWeapons.find((a) => a.weapon === weapon && a.ammo > 0) ? 'green' : 'grey'),
+            border: 'solid 3px ' + (weapon.ammo > 0 ? 'green' : 'grey'),
           }}
         >
-          <img src={images[weapon]} style={{height: boxSize - 10 * 2, margin: 10}} />
+          <img src={images[weapon.weapon]} style={{height: boxSize - 10 * 2, margin: 10}} />
         </div>
       ))}
       <div style={{flex: 1}} />
