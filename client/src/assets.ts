@@ -196,6 +196,39 @@ export type AssetKeys =
   | 'Power_ups.things_bronze'
   | 'Power_ups.things_gold'
   | 'Power_ups.things_silver'
+  | 'Rocket_parts.spaceRocketParts_001'
+  | 'Rocket_parts.spaceRocketParts_002'
+  | 'Rocket_parts.spaceRocketParts_003'
+  | 'Rocket_parts.spaceRocketParts_004'
+  | 'Rocket_parts.spaceRocketParts_005'
+  | 'Rocket_parts.spaceRocketParts_006'
+  | 'Rocket_parts.spaceRocketParts_007'
+  | 'Rocket_parts.spaceRocketParts_008'
+  | 'Rocket_parts.spaceRocketParts_009'
+  | 'Rocket_parts.spaceRocketParts_010'
+  | 'Rocket_parts.spaceRocketParts_011'
+  | 'Rocket_parts.spaceRocketParts_012'
+  | 'Rocket_parts.spaceRocketParts_013'
+  | 'Rocket_parts.spaceRocketParts_014'
+  | 'Rocket_parts.spaceRocketParts_015'
+  | 'Rocket_parts.spaceRocketParts_016'
+  | 'Rocket_parts.spaceRocketParts_017'
+  | 'Rocket_parts.spaceRocketParts_018'
+  | 'Rocket_parts.spaceRocketParts_019'
+  | 'Rocket_parts.spaceRocketParts_020'
+  | 'Rocket_parts.spaceRocketParts_021'
+  | 'Rocket_parts.spaceRocketParts_022'
+  | 'Rocket_parts.spaceRocketParts_023'
+  | 'Rocket_parts.spaceRocketParts_024'
+  | 'Rocket_parts.spaceRocketParts_025'
+  | 'Rocket_parts.spaceRocketParts_026'
+  | 'Rocket_parts.spaceRocketParts_027'
+  | 'Rocket_parts.spaceRocketParts_028'
+  | 'Rocket_parts.spaceRocketParts_029'
+  | 'Rocket_parts.spaceRocketParts_030'
+  | 'Rocket_parts.spaceRocketParts_031'
+  | 'Rocket_parts.spaceRocketParts_032'
+  | 'Rocket_parts.spaceRocketParts_033'
   | 'Ships.playerShip1_blue'
   | 'Ships.playerShip1_green'
   | 'Ships.playerShip1_orange'
@@ -212,6 +245,37 @@ export type AssetKeys =
   | 'Ships.ufoGreen'
   | 'Ships.ufoRed'
   | 'Ships.ufoYellow'
+  | 'Station.spaceStation_001'
+  | 'Station.spaceStation_002'
+  | 'Station.spaceStation_003'
+  | 'Station.spaceStation_004'
+  | 'Station.spaceStation_005'
+  | 'Station.spaceStation_006'
+  | 'Station.spaceStation_007'
+  | 'Station.spaceStation_008'
+  | 'Station.spaceStation_009'
+  | 'Station.spaceStation_010'
+  | 'Station.spaceStation_011'
+  | 'Station.spaceStation_012'
+  | 'Station.spaceStation_013'
+  | 'Station.spaceStation_014'
+  | 'Station.spaceStation_015'
+  | 'Station.spaceStation_016'
+  | 'Station.spaceStation_017'
+  | 'Station.spaceStation_018'
+  | 'Station.spaceStation_019'
+  | 'Station.spaceStation_020'
+  | 'Station.spaceStation_021'
+  | 'Station.spaceStation_022'
+  | 'Station.spaceStation_023'
+  | 'Station.spaceStation_024'
+  | 'Station.spaceStation_025'
+  | 'Station.spaceStation_026'
+  | 'Station.spaceStation_027'
+  | 'Station.spaceStation_028'
+  | 'Station.spaceStation_029'
+  | 'Station.spaceStation_030'
+  | 'Station.spaceStation_031'
   | 'UI.buttonBlue'
   | 'UI.buttonGreen'
   | 'UI.buttonRed'
@@ -446,6 +510,171 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Power_ups.things_bronze': {asset: require('./assets/Power-ups/things_bronze.png'), width: 32, height: 32},
   'Power_ups.things_gold': {asset: require('./assets/Power-ups/things_gold.png'), width: 32, height: 32},
   'Power_ups.things_silver': {asset: require('./assets/Power-ups/things_silver.png'), width: 32, height: 32},
+  'Rocket_parts.spaceRocketParts_001': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_001.png'),
+    width: 72,
+    height: 320,
+  },
+  'Rocket_parts.spaceRocketParts_002': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_002.png'),
+    width: 79,
+    height: 291,
+  },
+  'Rocket_parts.spaceRocketParts_003': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_003.png'),
+    width: 81,
+    height: 160,
+  },
+  'Rocket_parts.spaceRocketParts_004': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_004.png'),
+    width: 79,
+    height: 193,
+  },
+  'Rocket_parts.spaceRocketParts_005': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_005.png'),
+    width: 74,
+    height: 179,
+  },
+  'Rocket_parts.spaceRocketParts_006': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_006.png'),
+    width: 93,
+    height: 169,
+  },
+  'Rocket_parts.spaceRocketParts_007': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_007.png'),
+    width: 61,
+    height: 165,
+  },
+  'Rocket_parts.spaceRocketParts_008': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_008.png'),
+    width: 136,
+    height: 156,
+  },
+  'Rocket_parts.spaceRocketParts_009': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_009.png'),
+    width: 136,
+    height: 156,
+  },
+  'Rocket_parts.spaceRocketParts_010': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_010.png'),
+    width: 136,
+    height: 156,
+  },
+  'Rocket_parts.spaceRocketParts_011': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_011.png'),
+    width: 136,
+    height: 156,
+  },
+  'Rocket_parts.spaceRocketParts_012': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_012.png'),
+    width: 137,
+    height: 52,
+  },
+  'Rocket_parts.spaceRocketParts_013': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_013.png'),
+    width: 136,
+    height: 142,
+  },
+  'Rocket_parts.spaceRocketParts_014': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_014.png'),
+    width: 136,
+    height: 146,
+  },
+  'Rocket_parts.spaceRocketParts_015': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_015.png'),
+    width: 136,
+    height: 146,
+  },
+  'Rocket_parts.spaceRocketParts_016': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_016.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_017': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_017.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_018': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_018.png'),
+    width: 147,
+    height: 90,
+  },
+  'Rocket_parts.spaceRocketParts_019': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_019.png'),
+    width: 136,
+    height: 80,
+  },
+  'Rocket_parts.spaceRocketParts_020': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_020.png'),
+    width: 162,
+    height: 98,
+  },
+  'Rocket_parts.spaceRocketParts_021': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_021.png'),
+    width: 136,
+    height: 83,
+  },
+  'Rocket_parts.spaceRocketParts_022': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_022.png'),
+    width: 118,
+    height: 104,
+  },
+  'Rocket_parts.spaceRocketParts_023': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_023.png'),
+    width: 88,
+    height: 88,
+  },
+  'Rocket_parts.spaceRocketParts_024': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_024.png'),
+    width: 72,
+    height: 72,
+  },
+  'Rocket_parts.spaceRocketParts_025': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_025.png'),
+    width: 56,
+    height: 56,
+  },
+  'Rocket_parts.spaceRocketParts_026': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_026.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_027': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_027.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_028': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_028.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_029': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_029.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_030': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_030.png'),
+    width: 58,
+    height: 340,
+  },
+  'Rocket_parts.spaceRocketParts_031': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_031.png'),
+    width: 58,
+    height: 264,
+  },
+  'Rocket_parts.spaceRocketParts_032': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_032.png'),
+    width: 136,
+    height: 128,
+  },
+  'Rocket_parts.spaceRocketParts_033': {
+    asset: require('./assets/Rocket parts/spaceRocketParts_033.png'),
+    width: 136,
+    height: 128,
+  },
   'Ships.playerShip1_blue': {asset: require('./assets/Ships/playerShip1_blue.png'), width: 99, height: 75},
   'Ships.playerShip1_green': {asset: require('./assets/Ships/playerShip1_green.png'), width: 99, height: 75},
   'Ships.playerShip1_orange': {asset: require('./assets/Ships/playerShip1_orange.png'), width: 99, height: 75},
@@ -462,6 +691,37 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Ships.ufoGreen': {asset: require('./assets/Ships/ufoGreen.png'), width: 91, height: 91},
   'Ships.ufoRed': {asset: require('./assets/Ships/ufoRed.png'), width: 91, height: 91},
   'Ships.ufoYellow': {asset: require('./assets/Ships/ufoYellow.png'), width: 91, height: 91},
+  'Station.spaceStation_001': {asset: require('./assets/Station/spaceStation_001.png'), width: 168, height: 72},
+  'Station.spaceStation_002': {asset: require('./assets/Station/spaceStation_002.png'), width: 248, height: 80},
+  'Station.spaceStation_003': {asset: require('./assets/Station/spaceStation_003.png'), width: 80, height: 56},
+  'Station.spaceStation_004': {asset: require('./assets/Station/spaceStation_004.png'), width: 80, height: 56},
+  'Station.spaceStation_005': {asset: require('./assets/Station/spaceStation_005.png'), width: 80, height: 56},
+  'Station.spaceStation_006': {asset: require('./assets/Station/spaceStation_006.png'), width: 84, height: 88},
+  'Station.spaceStation_007': {asset: require('./assets/Station/spaceStation_007.png'), width: 72, height: 88},
+  'Station.spaceStation_008': {asset: require('./assets/Station/spaceStation_008.png'), width: 64, height: 88},
+  'Station.spaceStation_009': {asset: require('./assets/Station/spaceStation_009.png'), width: 64, height: 88},
+  'Station.spaceStation_010': {asset: require('./assets/Station/spaceStation_010.png'), width: 32, height: 88},
+  'Station.spaceStation_011': {asset: require('./assets/Station/spaceStation_011.png'), width: 48, height: 88},
+  'Station.spaceStation_012': {asset: require('./assets/Station/spaceStation_012.png'), width: 96, height: 88},
+  'Station.spaceStation_013': {asset: require('./assets/Station/spaceStation_013.png'), width: 64, height: 88},
+  'Station.spaceStation_014': {asset: require('./assets/Station/spaceStation_014.png'), width: 112, height: 88},
+  'Station.spaceStation_015': {asset: require('./assets/Station/spaceStation_015.png'), width: 84, height: 88},
+  'Station.spaceStation_016': {asset: require('./assets/Station/spaceStation_016.png'), width: 80, height: 80},
+  'Station.spaceStation_017': {asset: require('./assets/Station/spaceStation_017.png'), width: 344, height: 577},
+  'Station.spaceStation_018': {asset: require('./assets/Station/spaceStation_018.png'), width: 344, height: 104},
+  'Station.spaceStation_019': {asset: require('./assets/Station/spaceStation_019.png'), width: 344, height: 104},
+  'Station.spaceStation_020': {asset: require('./assets/Station/spaceStation_020.png'), width: 248, height: 694},
+  'Station.spaceStation_021': {asset: require('./assets/Station/spaceStation_021.png'), width: 32, height: 132},
+  'Station.spaceStation_022': {asset: require('./assets/Station/spaceStation_022.png'), width: 48, height: 84},
+  'Station.spaceStation_023': {asset: require('./assets/Station/spaceStation_023.png'), width: 40, height: 132},
+  'Station.spaceStation_024': {asset: require('./assets/Station/spaceStation_024.png'), width: 344, height: 80},
+  'Station.spaceStation_025': {asset: require('./assets/Station/spaceStation_025.png'), width: 344, height: 80},
+  'Station.spaceStation_026': {asset: require('./assets/Station/spaceStation_026.png'), width: 552, height: 800},
+  'Station.spaceStation_027': {asset: require('./assets/Station/spaceStation_027.png'), width: 244, height: 89},
+  'Station.spaceStation_028': {asset: require('./assets/Station/spaceStation_028.png'), width: 164, height: 89},
+  'Station.spaceStation_029': {asset: require('./assets/Station/spaceStation_029.png'), width: 248, height: 116},
+  'Station.spaceStation_030': {asset: require('./assets/Station/spaceStation_030.png'), width: 104, height: 68},
+  'Station.spaceStation_031': {asset: require('./assets/Station/spaceStation_031.png'), width: 120, height: 76},
   'UI.buttonBlue': {asset: require('./assets/UI/buttonBlue.png'), width: 222, height: 39},
   'UI.buttonGreen': {asset: require('./assets/UI/buttonGreen.png'), width: 222, height: 39},
   'UI.buttonRed': {asset: require('./assets/UI/buttonRed.png'), width: 222, height: 39},

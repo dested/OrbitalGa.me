@@ -25,7 +25,9 @@
   - [x] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
+- [ ] fix momentum for player, should be additive not replacing
 - [ ] figure out ghost players
+- [ ] cluster size never scales back down after 400 users?
 - [x] better grouping of players and enemies
 - [x] optimize server
 - [x] only send data for livePlayer vs non
