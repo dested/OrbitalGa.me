@@ -70,12 +70,12 @@
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event?
 - [ ] add 5 second sustained laser
-- [ ] add laser upgrades
-- [ ] add shield upgrades
+- [ ] add smoke to rockets
 - [x] drop power-ups from enemy
 - [x] drop power-ups from debris
 - [x] add power-ups
   - [ ] two clones fight with you?
+- [x] add shield upgrades
 - [x] add rocket
 - [x] abstract weapons
 - [x] add death effect

@@ -28,40 +28,45 @@ export class ClientGameUI extends ClientGame {
     );
 
     document.onkeydown = (e) => {
+      const player = this.liveEntity;
+      if (!player) {
+        return;
+      }
       if (e.keyCode === 65) {
-        this.liveEntity?.setKey('shoot', true);
+        player.setKey('shoot', true);
       }
       if (e.keyCode === 66) {
-        const index = this.liveEntity!.availableWeapons.findIndex((a) => a.weapon === this.liveEntity!.selectedWeapon);
-        this.liveEntity!.setKey(
-          'weapon',
-          this.liveEntity?.availableWeapons[(index + 1) % this.liveEntity!.availableWeapons.length].weapon!
-        );
+        const index = player.availableWeapons.findIndex((a) => a.weapon === player.selectedWeapon);
+        player.setKey('weapon', player.availableWeapons[(index + 1) % player.availableWeapons.length].weapon!);
       }
       if (e.keyCode === 38) {
-        this.liveEntity?.setKey('up', true);
+        player.setKey('up', true);
       } else if (e.keyCode === 40) {
-        this.liveEntity?.setKey('down', true);
+        player.setKey('down', true);
       } else if (e.keyCode === 37) {
-        this.liveEntity?.setKey('left', true);
+        player.setKey('left', true);
       } else if (e.keyCode === 39) {
-        this.liveEntity?.setKey('right', true);
+        player.setKey('right', true);
       }
       // e.preventDefault();
     };
     document.onkeyup = (e) => {
+      const player = this.liveEntity;
+      if (!player) {
+        return;
+      }
       if (e.keyCode === 65) {
-        this.liveEntity?.setKey('shoot', false);
+        player.setKey('shoot', false);
       }
 
       if (e.keyCode === 38) {
-        this.liveEntity?.setKey('up', false);
+        player.setKey('up', false);
       } else if (e.keyCode === 40) {
-        this.liveEntity?.setKey('down', false);
+        player.setKey('down', false);
       } else if (e.keyCode === 37) {
-        this.liveEntity?.setKey('left', false);
+        player.setKey('left', false);
       } else if (e.keyCode === 39) {
-        this.liveEntity?.setKey('right', false);
+        player.setKey('right', false);
       }
     };
 
@@ -106,14 +111,20 @@ export class ClientGameUI extends ClientGame {
 
     if (GameConstants.debugClient) {
       context.save();
-      context.font = '30px bold';
+      context.font = '22px bold';
       context.fillStyle = 'white';
       context.textBaseline = 'top';
       let debugY = 0;
       for (const key of Object.keys(this.debugValues)) {
         context.fillText(`${key}: ${this.debugValues[key]}`, this.canvas.width * 0.8, debugY);
-        debugY += 30;
+        debugY += 22;
       }
+      context.fillText(
+        `Average Lag between ticks: ${this.lagAverage.average.toFixed(1)}ms`,
+        this.canvas.width * 0.8,
+        debugY
+      );
+
       context.restore();
     }
 

@@ -56,8 +56,12 @@ export class PlayerShieldEntity extends Entity {
   gameTick(duration: number) {
     this.tickIndex++;
     if (!this.depleted && this.health <= 0) {
-      this.lastHit = this.shieldConfig.depletedRegenTimeout;
-      this.depleted = true;
+      if (this.shieldStrength === 'small') {
+        this.lastHit = this.shieldConfig.depletedRegenTimeout;
+        this.depleted = true;
+      } else {
+        this.shieldStrength = 'small';
+      }
     }
     this.lastHit--;
     if (this.lastHit <= 0 && this.health < this.shieldConfig.maxHealth) {

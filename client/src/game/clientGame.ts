@@ -10,6 +10,7 @@ import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {WorldModelCastToEntityModel} from '@common/models/entityTypeModels';
 import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
+import {RollingAverage} from '@common/utils/rollingAverage';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -21,6 +22,7 @@ export type ClientGameOptions = {
 export class ClientGame extends Game {
   debugValues: {[key: string]: number | string} = {};
   isDead: boolean = false;
+  lagAverage = new RollingAverage();
   lastXY?: {x: number; y: number};
   liveEntity?: ClientLivePlayerEntity;
   spectatorEntity?: SpectatorEntity;
@@ -146,7 +148,7 @@ export class ClientGame extends Game {
           console.log('Server version', this.serverVersion);
           break;
         case 'worldState':
-          console.log(+new Date() - this.lastWorldStateTick);
+          this.lagAverage.push(GameConstants.serverTickRate - (+new Date() - this.lastWorldStateTick));
           this.lastWorldStateTick = +new Date();
           const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
           for (let i = this.entities.length - 1; i >= 0; i--) {

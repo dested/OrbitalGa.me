@@ -90,6 +90,17 @@ export class PlayerEntity extends Entity implements Weapon {
             unreachable(drop.weapon);
         }
         break;
+      case 'shield':
+        const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
+        if (shield) {
+          if (drop.level === 'medium' && shield.shieldStrength === 'big') {
+            shield.health = GameRules.playerShield.big.maxHealth;
+          } else {
+            shield.health = GameRules.playerShield[drop.level].maxHealth;
+            shield.shieldStrength = drop.level;
+          }
+        }
+        break;
       default:
         unreachable(drop);
     }

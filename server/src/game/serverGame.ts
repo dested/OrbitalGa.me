@@ -16,6 +16,7 @@ import {ArrayHash} from '@common/utils/arrayHash';
 import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {EntityGrouping} from './entityClusterer';
+import {DropEntity} from '@common/entities/dropEntity';
 
 type Spectator = {connectionId: number};
 type User = {connectionId: number; entity: ServerPlayerEntity};

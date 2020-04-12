@@ -10,11 +10,16 @@ import {isPlayerWeapon} from './weapon';
 import {PlayerEntity} from './playerEntity';
 import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
+import {unreachable} from '../utils/unreachable';
 
 export type DropType =
   | {
       amount: number;
       type: 'health';
+    }
+  | {
+      level: 'medium' | 'big';
+      type: 'shield';
     }
   | {ammo: number; type: 'weapon'; weapon: PlayerWeapon};
 
@@ -70,23 +75,35 @@ export class DropEntity extends Entity {
       Utils.switchType(entity.drop.type, {
         health: 1,
         weapon: 2,
+        shield: 3,
       })
     );
     switch (entity.drop.type) {
       case 'health':
         buff.addUint8(entity.drop.amount);
         break;
+      case 'shield':
+        buff.addUint8(
+          Utils.switchType(entity.drop.level, {
+            medium: 2,
+            big: 3,
+          })
+        );
+        break;
       case 'weapon':
         PlayerEntity.addBufferWeapon(buff, entity.drop.weapon);
         buff.addUint8(entity.drop.ammo);
         break;
+      default:
+        unreachable(entity.drop);
     }
   }
 
   static randomDrop(size: Size): DropType {
     const type = Utils.randomWeightedElement<DropType['type']>([
       {item: 'weapon', weight: 30},
-      {item: 'health', weight: 70},
+      {item: 'shield', weight: 10},
+      {item: 'health', weight: 60},
     ]);
     let amount;
     switch (size) {
@@ -112,6 +129,10 @@ export class DropEntity extends Entity {
         return {type: 'weapon', ammo: amount, weapon};
       case 'health':
         return {type: 'health', amount};
+      case 'shield':
+        return {type: 'shield', level: amount > 7 ? ('big' as const) : ('medium' as const)};
+      default:
+        throw unreachable(type);
     }
   }
 
@@ -130,6 +151,14 @@ export class DropEntity extends Entity {
             type: 'weapon',
             weapon: PlayerEntity.readBufferWeapon(reader),
             ammo: reader.readUint8(),
+          } as DropType),
+        3: () =>
+          ({
+            type: 'shield',
+            level: Utils.switchNumber(reader.readUint8(), {
+              2: 'medium',
+              3: 'big',
+            }),
           } as DropType),
       })(),
     };

@@ -2,7 +2,7 @@ const screenSize = {width: 1500 * 1.3, height: 692 * 1.3};
 
 export class GameConstants {
   static binaryTransport = true;
-  static debugClient = false;
+  static debugClient = true;
   static debugCollisions = false;
   static debugDontFilterEntities = false;
   static debugInvulnerable = false;
@@ -14,7 +14,7 @@ export class GameConstants {
   static screenRange = screenSize.width * 1.4;
   static screenSize = screenSize;
   static serverTickRate = 150;
-  static serverVersion = 7;
+  static serverVersion = 8;
   static singlePlayer = typeof window === 'object' && window.location.pathname.indexOf('single') >= 0;
   static throttleClient = false;
   static totalSpectatorDuration = 30_000;

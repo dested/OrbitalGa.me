@@ -37,6 +37,15 @@ export class ClientDropEntity extends DropEntity implements ClientEntity {
           default:
             throw unreachable(this.drop.weapon);
         }
+      case 'shield':
+        switch (this.drop.level) {
+          case 'medium':
+            return OrbitalAssets.assets['Effects.shield2'];
+          case 'big':
+            return OrbitalAssets.assets['Effects.shield3'];
+          default:
+            throw unreachable(this.drop.level);
+        }
       default:
         throw unreachable(this.drop);
     }
@@ -55,10 +64,8 @@ export class ClientDropEntity extends DropEntity implements ClientEntity {
     context.translate(this.drawX, this.drawY);
     const asset = this.asset;
     CanvasUtils.circle(context, 0, 0, circleSize / 2);
-    context.fillStyle = 'white';
     context.strokeStyle = 'red';
-    context.lineWidth = 4;
-    context.fill();
+    context.lineWidth = 3;
     context.stroke();
     context.drawImage(asset.image, -size / 2, -size / 2, size, size);
     context.restore();
