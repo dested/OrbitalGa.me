@@ -1,3 +1,5 @@
+import {Utils} from '../utils/utils';
+
 export class ArrayBufferBuilder {
   buffer: ArrayBuffer;
   curPosition = 0;
@@ -63,6 +65,10 @@ export class ArrayBufferBuilder {
     for (let i = 0, strLen = str.length; i < strLen; i++) {
       this.addUint16(str.charCodeAt(i));
     }
+  }
+
+  addSwitch<TType extends string | number, TResult extends number>(n: TType, options: {[key in TType]: TResult}) {
+    this.addUint8(Utils.switchType(n, options));
   }
 
   addUint16(value: number) {

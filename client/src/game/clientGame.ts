@@ -21,6 +21,7 @@ export type ClientGameOptions = {
 
 export class ClientGame extends Game {
   debugValues: {[key: string]: number | string} = {};
+  drawTick = 0;
   isDead: boolean = false;
   lagAverage = new RollingAverage();
   lastXY?: {x: number; y: number};

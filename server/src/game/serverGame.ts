@@ -17,6 +17,7 @@ import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {EntityGrouping} from './entityClusterer';
 import {DropEntity} from '@common/entities/dropEntity';
+import {BossEvent1Entity} from '@common/entities/bossEvent1Entity';
 
 type Spectator = {connectionId: number};
 type User = {connectionId: number; entity: ServerPlayerEntity};
@@ -192,6 +193,10 @@ export class ServerGame extends Game {
       }
     }
 
+    if (tickIndex === 50) {
+      const groupings = this.entityClusterer.getGroupings('player');
+      new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
+    }
     if (tickIndex % 50 === 0) {
       for (const grouping of this.entityClusterer.getGroupings('player')) {
         for (let i = 0; i < 10; i++) {

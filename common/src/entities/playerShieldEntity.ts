@@ -113,13 +113,11 @@ export class PlayerShieldEntity extends Entity {
     buff.addUint8(entity.health);
     buff.addBoolean(entity.depleted);
     buff.addUint32(entity.ownerEntityId);
-    buff.addUint8(
-      Utils.switchType(entity.shieldStrength, {
-        small: 1,
-        medium: 2,
-        big: 3,
-      })
-    );
+    buff.addSwitch(entity.shieldStrength, {
+      small: 1,
+      medium: 2,
+      big: 3,
+    });
   }
 
   static readBuffer(reader: ArrayBufferReader): PlayerShieldModel {

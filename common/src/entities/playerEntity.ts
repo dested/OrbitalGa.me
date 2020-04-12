@@ -322,14 +322,12 @@ export class PlayerEntity extends Entity implements Weapon {
   static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel | LivePlayerModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.health);
-    buff.addUint8(
-      Utils.switchType(entity.playerColor, {
-        blue: 1,
-        green: 2,
-        orange: 3,
-        red: 4,
-      })
-    );
+    buff.addSwitch(entity.playerColor, {
+      blue: 1,
+      green: 2,
+      orange: 3,
+      red: 4,
+    });
   }
   static addBufferLive(buff: ArrayBufferBuilder, entity: LivePlayerModel) {
     PlayerEntity.addBuffer(buff, entity);
@@ -337,13 +335,11 @@ export class PlayerEntity extends Entity implements Weapon {
     buff.addFloat32(entity.momentumY);
     buff.addBoolean(entity.dead);
     buff.addUint32(entity.lastProcessedInputSequenceNumber);
-    buff.addUint8(
-      Utils.switchType(entity.selectedWeapon, {
-        rocket: 1,
-        laser: 2,
-        torpedo: 3,
-      })
-    );
+    buff.addSwitch(entity.selectedWeapon, {
+      rocket: 1,
+      laser: 2,
+      torpedo: 3,
+    });
     buff.addUint8(entity.availableWeapons.length);
     for (const availableWeapon of entity.availableWeapons) {
       PlayerEntity.addBufferWeapon(buff, availableWeapon.weapon);
@@ -352,13 +348,11 @@ export class PlayerEntity extends Entity implements Weapon {
   }
 
   static addBufferWeapon(buff: ArrayBufferBuilder, weapon: PlayerWeapon) {
-    buff.addUint8(
-      Utils.switchType(weapon, {
-        rocket: 1,
-        laser: 2,
-        torpedo: 3,
-      })
-    );
+    buff.addSwitch(weapon, {
+      rocket: 1,
+      laser: 2,
+      torpedo: 3,
+    });
   }
   static addBufferWeaponOptional(buff: ArrayBufferBuilder, weapon?: PlayerWeapon) {
     buff.addInt8Optional(

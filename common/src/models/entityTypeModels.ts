@@ -10,6 +10,8 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
 import {Utils} from '../utils/utils';
 import {DropEntity, DropModel} from '../entities/dropEntity';
+import {BossEvent1Entity, BossEvent1Model} from '../entities/bossEvent1Entity';
+import {BossEvent1EnemyEntity, BossEvent1EnemyModel} from '../entities/bossEvent1EnemyEntity';
 
 /* tslint:disable:member-ordering */
 export type EntityType = {
@@ -24,6 +26,8 @@ export type EntityType = {
   wall: {entity: WallEntity; index: 9; model: WallModel};
   livePlayer: {entity: PlayerEntity; index: 10; model: LivePlayerModel};
   drop: {entity: DropEntity; index: 11; model: DropModel};
+  bossEvent1: {entity: BossEvent1Entity; index: 12; model: BossEvent1Model};
+  bossEvent1Enemy: {entity: BossEvent1EnemyEntity; index: 13; model: BossEvent1EnemyModel};
 };
 
 export type EntityModels = EntityType[keyof EntityType]['model'];
@@ -44,6 +48,8 @@ export const EntityBufferValue: {
   wall: 9,
   livePlayer: 10,
   drop: 11,
+  bossEvent1: 12,
+  bossEvent1Enemy: 13,
 };
 
 export const EntityBufferValueLookup: {
@@ -96,4 +102,14 @@ export const EntityBufferType: {
   },
   meteor: {value: EntityBufferValue.meteor, addBuffer: MeteorEntity.addBuffer, readBuffer: MeteorEntity.readBuffer},
   drop: {value: EntityBufferValue.drop, addBuffer: DropEntity.addBuffer, readBuffer: DropEntity.readBuffer},
+  bossEvent1: {
+    value: EntityBufferValue.bossEvent1,
+    addBuffer: BossEvent1Entity.addBuffer,
+    readBuffer: BossEvent1Entity.readBuffer,
+  },
+  bossEvent1Enemy: {
+    value: EntityBufferValue.bossEvent1Enemy,
+    addBuffer: BossEvent1EnemyEntity.addBuffer,
+    readBuffer: BossEvent1EnemyEntity.readBuffer,
+  },
 };

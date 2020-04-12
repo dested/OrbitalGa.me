@@ -168,14 +168,12 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.health);
-    buff.addUint8(
-      Utils.switchType(entity.enemyColor, {
-        black: 1,
-        blue: 2,
-        green: 3,
-        red: 4,
-      })
-    );
+    buff.addSwitch(entity.enemyColor, {
+      black: 1,
+      blue: 2,
+      green: 3,
+      red: 4,
+    });
   }
 
   static randomEnemyColor() {

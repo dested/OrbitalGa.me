@@ -13,6 +13,7 @@ type BoundingBox = {
 };
 
 export abstract class Entity {
+  alwaysPresent = false;
   boundingBoxes: BoundingBox[] = [];
   create: boolean = true;
   entityId: number;

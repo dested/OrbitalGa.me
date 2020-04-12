@@ -210,28 +210,22 @@ export class MeteorEntity extends Entity {
   static addBuffer(buff: ArrayBufferBuilder, entity: MeteorModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.rotate);
-    buff.addUint8(
-      Utils.switchType(entity.meteorColor, {
-        brown: 1,
-        grey: 2,
-      })
-    );
-    buff.addUint8(
-      Utils.switchType(entity.size, {
-        big: 1,
-        med: 2,
-        small: 3,
-        tiny: 4,
-      })
-    );
-    buff.addUint8(
-      Utils.switchType(entity.type, {
-        1: 1,
-        2: 2,
-        3: 3,
-        4: 4,
-      })
-    );
+    buff.addSwitch(entity.meteorColor, {
+      brown: 1,
+      grey: 2,
+    });
+    buff.addSwitch(entity.size, {
+      big: 1,
+      med: 2,
+      small: 3,
+      tiny: 4,
+    });
+    buff.addSwitch(entity.type, {
+      1: 1,
+      2: 2,
+      3: 3,
+      4: 4,
+    });
   }
 
   static randomMeteor() {

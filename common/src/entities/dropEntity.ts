@@ -71,24 +71,20 @@ export class DropEntity extends Entity {
 
   static addBuffer(buff: ArrayBufferBuilder, entity: DropModel) {
     Entity.addBuffer(buff, entity);
-    buff.addUint8(
-      Utils.switchType(entity.drop.type, {
-        health: 1,
-        weapon: 2,
-        shield: 3,
-      })
-    );
+    buff.addSwitch(entity.drop.type, {
+      health: 1,
+      weapon: 2,
+      shield: 3,
+    });
     switch (entity.drop.type) {
       case 'health':
         buff.addUint8(entity.drop.amount);
         break;
       case 'shield':
-        buff.addUint8(
-          Utils.switchType(entity.drop.level, {
-            medium: 2,
-            big: 3,
-          })
-        );
+        buff.addSwitch(entity.drop.level, {
+          medium: 2,
+          big: 3,
+        });
         break;
       case 'weapon':
         PlayerEntity.addBufferWeapon(buff, entity.drop.weapon);

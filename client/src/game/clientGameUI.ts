@@ -9,6 +9,7 @@ import {unreachable} from '@common/utils/unreachable';
 import {OrbitalAssets} from '../utils/assetManager';
 
 export class ClientGameUI extends ClientGame {
+  drawTick = 0;
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
 
@@ -79,8 +80,8 @@ export class ClientGameUI extends ClientGame {
     };
     requestNextFrame();
   }
-  drawTick = 0;
   draw() {
+    this.drawTick++;
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
 
@@ -109,7 +110,7 @@ export class ClientGameUI extends ClientGame {
     }
 
     context.restore();
-    const nose = OrbitalAssets.assets['Rocket_parts.spaceRocketParts_008'];
+    /*const nose = OrbitalAssets.assets['Rocket_parts.spaceRocketParts_008'];
     if (nose) {
       this.drawTick++;
       const body1 = OrbitalAssets.assets['Rocket_parts.spaceRocketParts_026'];
@@ -123,7 +124,6 @@ export class ClientGameUI extends ClientGame {
       const bodyOffsetY = bodyBackOffsetY + body1.size.height * 2 - nose.size.height;
       const noseOffsetY = bodyOffsetY + nose.size.height;
       const items = [
-
         {asset: nose, rotate: 180, offsetX: noseOffsetX, offsetY: noseOffsetY},
         {asset: nose, rotate: 180, offsetX: noseOffsetX + nose.size.width * 2, offsetY: noseOffsetY},
         {asset: nose, rotate: 180, offsetX: noseOffsetX + nose.size.width * 4, offsetY: noseOffsetY},
@@ -167,7 +167,7 @@ export class ClientGameUI extends ClientGame {
         context.drawImage(item.asset.image, -item.asset.size.width / 2, -item.asset.size.height / 2);
         context.restore();
       }
-    }
+    }*/
 
     if (GameConstants.debugClient) {
       context.save();
