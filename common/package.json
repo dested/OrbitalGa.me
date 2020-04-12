@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "collisions": "^2.0.13"
+    "collisions": "^2.0.13",
+    "quickselect": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^13.9.2",

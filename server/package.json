@@ -18,7 +18,8 @@
     "collisions": "^2.0.13",
     "bufferutil": "^4.0.1",
     "utf-8-validate": "^5.0.2",
-    "redis": "^3.0.2"
+    "redis": "^3.0.2",
+    "quickselect": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "13.9.2",

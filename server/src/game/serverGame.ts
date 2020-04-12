@@ -375,35 +375,45 @@ export class ServerGame<TSocketType> extends Game {
   }
 
   private sendWorldState() {
-    const entities = this.entities.map((entity) => ({
-      entity,
-      serializedEntity: entity.serialize() as EntityModels,
-    }));
+    if (this.users.array.length === 0) return;
+
+    const now = +new Date();
+
+    const bush = new RBushXOnly<{entity: Entity; serializedEntity: EntityModels}>();
+
+    for (const entity of this.entities.array) {
+      bush.insert({
+        maxX: entity.realX,
+        minX: entity.realX,
+        item: {
+          entity,
+          serializedEntity: entity.serialize() as EntityModels,
+        },
+        children: undefined!,
+        height: undefined!,
+      });
+    }
 
     for (const user of this.users.array) {
       if (!user.entity) {
         continue;
       }
-      const box = {
-        x0: user.entity.realX - GameConstants.screenRange / 2,
-        x1: user.entity.realX + GameConstants.screenRange / 2,
-      };
 
-      const myEntities = [...entities];
-      const myEntityIndex = myEntities.findIndex((a) => a.entity === user.entity);
-      if (myEntityIndex >= 0) {
-        myEntities[myEntityIndex] = {
-          entity: myEntities[myEntityIndex].entity,
-          serializedEntity: user.entity.serializeLive(),
-        };
-      }
+      const items = bush.search({
+        minX: user.entity.realX - GameConstants.screenRange / 2,
+        maxX: user.entity.realX + GameConstants.screenRange / 2,
+      });
+
+      const myEntities: typeof bush.data.item[] = [];
+      myEntities.push({
+        entity: user.entity,
+        serializedEntity: user.entity.serializeLive(),
+      });
 
       if (!GameConstants.debugDontFilterEntities) {
-        for (let i = myEntities.length - 1; i >= 0; i--) {
-          const entity = myEntities[i];
-          const x = entity.entity.realX;
-          if (x < box.x0 || x > box.x1) {
-            myEntities.splice(i, 1);
+        for (const entity of items) {
+          if (entity.item.entity !== user.entity) {
+            myEntities.push(entity.item);
           }
         }
       }
