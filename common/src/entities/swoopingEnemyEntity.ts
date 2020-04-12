@@ -9,6 +9,7 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {GameRules} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
+import {DropEntity} from './dropEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -126,6 +127,9 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    if (this.markToDestroy) {
+      return;
+    }
     this.health -= damage;
     this.momentumX += x;
     this.momentumY += y;
@@ -134,6 +138,9 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
+      const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
+      drop.start(this.x, this.y);
+      this.game.entities.push(drop);
       this.game.explode(this, 'medium');
     }
   }

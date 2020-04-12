@@ -1,5 +1,5 @@
 export class ClientConfig {
-  static isLocal = true;
+  static isLocal = false;
   static websocketUrl(serverPath: string) {
     switch (this.isLocal) {
       case true:

@@ -10,8 +10,10 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
 import {Utils} from '../utils/utils';
 import {RocketEntity, RocketModel} from '../entities/rocketEntity';
+import {DropEntity, DropModel} from '../entities/dropEntity';
 
 export type EntityType = {
+  drop: {entity: DropEntity; index: 12; model: DropModel};
   enemyShot: {entity: EnemyShotEntity; index: 1; model: EnemyShotModel};
   explosion: {entity: ExplosionEntity; index: 7; model: ExplosionModel};
   livePlayer: {entity: PlayerEntity; index: 11; model: LivePlayerModel};
@@ -43,6 +45,7 @@ export const EntityBufferValue: {
   meteor: 9,
   rocket: 10,
   livePlayer: 11,
+  drop: 12,
 };
 
 export const EntityBufferValueLookup: {
@@ -91,4 +94,5 @@ export const EntityBufferType: {
   },
   meteor: {value: EntityBufferValue.meteor, addBuffer: MeteorEntity.addBuffer, readBuffer: MeteorEntity.readBuffer},
   rocket: {value: EntityBufferValue.rocket, addBuffer: RocketEntity.addBuffer, readBuffer: RocketEntity.readBuffer},
+  drop: {value: EntityBufferValue.drop, addBuffer: DropEntity.addBuffer, readBuffer: DropEntity.readBuffer},
 };

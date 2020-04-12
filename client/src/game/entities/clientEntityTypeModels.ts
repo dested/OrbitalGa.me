@@ -11,6 +11,7 @@ import {ClientEnemyShotEntity} from './clientEnemyShotEntity';
 import {ClientMeteorEntity} from './clientMeteorEntity';
 import {ClientRocketEntity} from './clientRocketEntity';
 import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
+import {ClientDropEntity} from './clientDropEntity';
 
 export const ClientEntityTypes: {
   [key in EntityModels['entityType']]: new (
@@ -29,4 +30,5 @@ export const ClientEntityTypes: {
   meteor: ClientMeteorEntity,
   rocket: ClientRocketEntity,
   livePlayer: ClientLivePlayerEntity,
+  drop: ClientDropEntity,
 };

@@ -36,6 +36,7 @@ export const Weapons = (props: {tick: number}) => {
       <div style={{flex: 1}} />
       {AllPlayerWeapons.map((weapon) => (
         <div
+          key={weapon}
           style={{
             width: boxSize,
             height: boxSize,

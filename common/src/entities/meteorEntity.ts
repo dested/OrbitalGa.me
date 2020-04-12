@@ -7,16 +7,20 @@ import {Utils} from '../utils/utils';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
+import {PlayerWeapon} from './playerEntity';
+import {DropEntity} from './dropEntity';
+
+export type Size = 'big' | 'med' | 'small' | 'tiny';
 
 export class MeteorEntity extends Entity {
-  health = Math.ceil(3 + Math.random() * 3);
+  health: number;
   meteorColor: 'brown' | 'grey';
   momentumX = Math.random() * 10 - 5;
   momentumY = 5 + Math.random() * 10;
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
   rotate = Math.random() * 255;
   rotateSpeed = Math.round(1 + Math.random() * 3);
-  size: 'big' | 'med' | 'small' | 'tiny';
+  size: Size;
   type: 1 | 2 | 3 | 4;
 
   constructor(
@@ -79,7 +83,20 @@ export class MeteorEntity extends Entity {
         }
         break;
     }
-
+    switch (size) {
+      case 'big':
+        this.health = Math.ceil(5 + Math.random() * 5);
+        break;
+      case 'med':
+        this.health = Math.ceil(4 + Math.random() * 4);
+        break;
+      case 'small':
+        this.health = Math.ceil(3 + Math.random() * 3);
+        break;
+      case 'tiny':
+        this.health = Math.ceil(2 + Math.random() * 2);
+        break;
+    }
     this.createPolygon();
   }
 
@@ -176,6 +193,7 @@ export class MeteorEntity extends Entity {
   }
 
   private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    if (this.markToDestroy) return;
     this.health -= damage;
     const explosionEntity = new ExplosionEntity(this.game, nextId(), 1, this.entityId);
     explosionEntity.start(x, y);
@@ -183,6 +201,9 @@ export class MeteorEntity extends Entity {
     this.momentumX += x;
     this.momentumY += y;
     if (this.health <= 0) {
+      const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop(this.size));
+      drop.start(this.x, this.y);
+      this.game.entities.push(drop);
       this.game.explode(this, 'small');
     }
   }

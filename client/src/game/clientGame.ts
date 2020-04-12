@@ -26,6 +26,7 @@ export class ClientGame extends Game {
   spectatorEntity?: SpectatorEntity;
   protected spectatorMode: boolean = false;
   private connected = false;
+  private lastWorldStateTick: number = +new Date();
   private messagesToProcess: ServerToClientMessage[] = [];
   private serverVersion: number = -1;
 
@@ -146,6 +147,8 @@ export class ClientGame extends Game {
           console.log('Server version', this.serverVersion);
           break;
         case 'worldState':
+          console.log(+new Date() - this.lastWorldStateTick);
+          this.lastWorldStateTick = +new Date();
           const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
           for (let i = this.entities.length - 1; i >= 0; i--) {
             const entity = this.entities.getIndex(i);

@@ -21,13 +21,11 @@ type Spectator = {connectionId: number};
 type User = {connectionId: number; entity: ServerPlayerEntity};
 
 export class ServerGame extends Game {
+  entityGroupingsThisTick: EntityGrouping[] = [];
   queuedMessages: {connectionId: number; message: ClientToServerMessage}[] = [];
   queuedMessagesToSend: {[connectionId: number]: ServerToClientMessage[]} = {};
-
   spectators = new ArrayHash<Spectator>('connectionId');
   users = new ArrayHash<User>('connectionId');
-
-  entityGroupingsThisTick: EntityGrouping[] = [];
 
   constructor(private serverSocket: IServerSocket) {
     super(false);

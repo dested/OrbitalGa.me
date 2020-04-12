@@ -62,8 +62,6 @@
 ## Game Rules
 
 - [ ] watch other shmups
-- [ ] add power-ups
-  - [ ] two clones fight with you?
 - [ ] come up with more enemies
 - [ ] come up with realtime events
   - [ ] big bosses every 5 min?
@@ -71,9 +69,13 @@
 - [ ] abstract game events into a class
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event?
-- [ ] drop power-ups from enemy
-- [ ] drop power-ups from debris
 - [ ] add 5 second sustained laser
+- [ ] add laser upgrades
+- [ ] add shield upgrades
+- [x] drop power-ups from enemy
+- [x] drop power-ups from debris
+- [x] add power-ups
+  - [ ] two clones fight with you?
 - [x] add rocket
 - [x] abstract weapons
 - [x] add death effect

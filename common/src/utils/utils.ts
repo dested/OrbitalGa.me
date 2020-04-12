@@ -190,6 +190,16 @@ export class Utils {
     return [...items].sort(() => Math.random() - 0.5);
   }
 
+  static randomWeightedElement<T>(array: {item: T; weight: number}[]): T {
+    let sum = 0;
+    const r = Math.random() * 100;
+    for (const item of array) {
+      sum += item.weight;
+      if (r <= sum) return item.item;
+    }
+    return undefined as never;
+  }
+
   static range(start: number, finish: number) {
     const r: number[] = [];
     for (let i = start; i < finish; i++) {
