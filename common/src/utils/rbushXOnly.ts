@@ -391,7 +391,12 @@ export class RBushXOnly<T> {
   }
 
   // total margin of all possible split distributions where each node is at least m full
-  private _allDistMargin(node: RNodeXOnly<T>, m: number, M: number, compare: (left: RNodeXOnly<T>, right: RNodeXOnly<T>) => number) {
+  private _allDistMargin(
+    node: RNodeXOnly<T>,
+    m: number,
+    M: number,
+    compare: (left: RNodeXOnly<T>, right: RNodeXOnly<T>) => number
+  ) {
     node.children.sort(compare);
 
     const toBBox = this.toBBox;
@@ -434,7 +439,11 @@ export class RBushXOnly<T> {
   }
 }
 
-function findItem<T>(item: RNodeXOnly<T>, items: RNodeXOnly<T>[], equalsFn?: (left: BBoxXOnly, right: BBoxXOnly) => boolean) {
+function findItem<T>(
+  item: RNodeXOnly<T>,
+  items: RNodeXOnly<T>[],
+  equalsFn?: (left: BBoxXOnly, right: BBoxXOnly) => boolean
+) {
   if (!equalsFn) return items.indexOf(item);
 
   for (let i = 0; i < items.length; i++) {
@@ -449,7 +458,13 @@ function calcBBox<T>(node: RNodeXOnly<T>, toBBox: (node: RNodeXOnly<T>) => BBoxX
 }
 
 // min bounding rectangle of node children from k to p-1
-function distBBox<T>(node: RNodeXOnly<T>, k: number, p: number, toBBox: (node: RNodeXOnly<T>) => BBoxXOnly, destNode?: RNodeXOnly<T>) {
+function distBBox<T>(
+  node: RNodeXOnly<T>,
+  k: number,
+  p: number,
+  toBBox: (node: RNodeXOnly<T>) => BBoxXOnly,
+  destNode?: RNodeXOnly<T>
+) {
   if (!destNode) destNode = createNode<T>(null!);
   destNode!.minX = Infinity;
   destNode!.maxX = -Infinity;

@@ -13,20 +13,21 @@
 ## Features/Bugs
 
 - [ ] warning when you go too far left?
-- [ ] better grouping of players and enemies
 - [ ] improve bot logic
 - [ ] make keyboard wasd
 - [ ] fix explosion animation
 - [ ] add latency tracking
 - [ ] add audio
 - [ ] hard to go straight left with nipplejs
-- [ ] garbageless server tick
 - [ ] add server kill switch to boot everyone out
 - [ ] support multiple bounding boxes
   - [ ] fix boundingbox not being from center
   - [ ] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
+- [ ] figure out ghost players
+- [x] better grouping of players and enemies
+- [x] optimize server
 - [x] only send data for livePlayer vs non
 - [x] validate input sequence number, assure they can't send garbage negative, etc
 - [x] add ping
@@ -69,7 +70,7 @@
   - [ ] build big enemy like in top left of Kenney expansion
 - [ ] abstract game events into a class
   - [ ] register event at tick?
-  - [ ] puzzles solve together like a maze blow up walls game event
+  - [ ] puzzles solve together like a maze blow up walls game event?
 - [ ] drop power-ups from enemy
 - [ ] drop power-ups from debris
 - [ ] add 5 second sustained laser
