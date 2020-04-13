@@ -15,11 +15,12 @@ export class MeteorEntity extends Entity {
   health: number;
   meteorColor: 'brown' | 'grey';
   momentumX = Math.random() * 10 - 5;
-  momentumY = 5 + Math.random() * 10;
+  momentumY: number;
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
   rotate = Math.random() * 255;
   rotateSpeed = Math.round(1 + Math.random() * 3);
   size: Size;
+  startingMomentumY: number;
   type: 1 | 2 | 3 | 4;
 
   constructor(
@@ -33,6 +34,8 @@ export class MeteorEntity extends Entity {
     this.meteorColor = meteorColor;
     this.size = size;
     this.type = type;
+    this.startingMomentumY = 5 + Math.random() * 10;
+    this.momentumY = this.startingMomentumY;
 
     switch (size) {
       case 'big':
@@ -132,8 +135,14 @@ export class MeteorEntity extends Entity {
     this.rotate += this.rotateSpeed;
     this.x += this.momentumX;
     this.y += this.momentumY;
-    this.y += 3;
-    if (this.y > GameConstants.screenSize.height * 1.2) {
+
+    if (this.momentumY < this.startingMomentumY) {
+      this.momentumY += 0.1;
+    }
+    if (this.y > GameConstants.screenSize.height * 1.3) {
+      this.destroy();
+    }
+    if (this.y < -GameConstants.screenSize.height * 1.3) {
       this.destroy();
     }
   }

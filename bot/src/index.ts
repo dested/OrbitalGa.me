@@ -2,8 +2,8 @@ import {w3cwebsocket} from 'websocket';
 (global as any).WebSocket = w3cwebsocket;
 import {Utils} from '@common/utils/utils';
 import {ClientSocket} from '../../client/src/clientSocket';
-import {ClientGame} from '../../client/src/game/clientGame';
 import {BotClientGame} from '../../client/src/game/botClientGame';
+import {ClientGame} from '../../client/src/game/clientGame';
 
 console.log('started');
 
@@ -15,21 +15,30 @@ async function main() {
   return;*/
   const serverPath = '1';
   for (let i = 0; i < 50; i++) {
-    new BotClientGame(
-      serverPath,
-      {
-        onDisconnect: () => {},
-        onOpen: (me: ClientGame) => {
-          me.sendMessageToServer({type: 'join'});
+    const start = () => {
+      new BotClientGame(
+        serverPath,
+        {
+          onDisconnect: () => {
+            start();
+          },
+          onOpen: (me: ClientGame) => {
+            me.sendMessageToServer({type: 'join'});
+            setTimeout(async () => {
+              me.disconnect();
+              await Utils.timeout(1000);
+            }, 4000 + Math.random() * 1000);
+          },
+          onUIUpdate: () => {},
+          onDied: (me: ClientGame) => {
+            me.joinGame();
+          },
         },
-        onUIUpdate: () => {},
-        onDied: (me: ClientGame) => {
-          me.joinGame();
-        },
-      },
-      new ClientSocket()
-    );
-    await Utils.timeout(100);
+        new ClientSocket()
+      );
+    };
+    start();
+    await Utils.timeout(10);
   }
 }
 

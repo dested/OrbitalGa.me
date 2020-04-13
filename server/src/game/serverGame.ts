@@ -121,7 +121,11 @@ export class ServerGame extends Game {
               connection.lastAction = +new Date();
               delete noInputThisTick[user.entity.entityId];
               if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
-                console.log('User input sequence too far off');
+                console.log(
+                  'User input sequence too far off',
+                  q.message.inputSequenceNumber,
+                  user.entity.lastProcessedInputSequenceNumber
+                );
                 this.serverSocket.disconnect(connection.connectionId);
               } else {
                 user.entity.applyInput(q.message);
@@ -166,14 +170,23 @@ export class ServerGame extends Game {
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
     if (!GameConstants.singlePlayer) {
+      const groupings = this.entityClusterer.getGroupings('player');
+      const groups = Utils.groupBy(this.entities.array, (a) => a.entityType);
+      const memoryUsage = process.memoryUsage();
       console.log(
-        `#${tickIndex}, Users: ${this.users.length}, Spectators: ${this.spectators.length}, Entities: ${
-          this.entities.length
-        }, Messages:${this.queuedMessages.length}, Duration: ${tickTime}ms, -> ${Utils.formatBytes(
-          this.serverSocket.totalBytesSent
-        )}, -> ${Utils.formatBytes(this.serverSocket.totalBytesSentPerSecond)}/s, <- ${Utils.formatBytes(
-          this.serverSocket.totalBytesReceived
-        )}`
+        `#${tickIndex}, Con: ${this.serverSocket.connections.length}, Us: ${this.users.length}, Sp ${
+          this.spectators.length
+        }, Eny: ${this.entities.length}, Mes:${
+          this.queuedMessages.length
+        }, Duration: ${tickTime}ms, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, -> ${Utils.formatBytes(
+          this.serverSocket.totalBytesSentPerSecond
+        )}/s, <- ${Utils.formatBytes(this.serverSocket.totalBytesReceived)}, Wdt: ${
+          groupings[groupings.length - 1].x1 - groupings[0].x0
+        }, Mem:${Utils.formatBytes(memoryUsage.heapUsed)}/${Utils.formatBytes(
+          memoryUsage.heapTotal
+        )}/${Utils.formatBytes(memoryUsage.external)} ${Utils.safeKeys(groups)
+          .map((a) => `${a}: ${groups[a].length}`)
+          .join(', ')}`
       );
     }
 
@@ -195,7 +208,7 @@ export class ServerGame extends Game {
 
     if (tickIndex === 50) {
       const groupings = this.entityClusterer.getGroupings('player');
-      new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
+      // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
     if (tickIndex % 50 === 0) {
       for (const grouping of this.entityClusterer.getGroupings('player')) {

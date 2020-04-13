@@ -38,6 +38,7 @@ export class ServerSocket implements IServerSocket {
   totalBytesSent = 0;
   wss?: WebServer.Server;
   private serverSocketOptions?: ServerSocketOptions;
+
   get totalBytesSentPerSecond() {
     return Math.round(this.totalBytesSent / ((+new Date() - this.time) / 1000));
   }
@@ -95,7 +96,7 @@ export class ServerSocket implements IServerSocket {
         lastPing: +new Date(),
       };
       this.connections.push(me);
-      console.log('opened: connections', this.connections.length);
+      // console.log('opened: connections', this.connections.length);
       ws.on('error', (a: any, b: any) => {
         console.error('ws error', a, b);
       });
@@ -126,7 +127,7 @@ export class ServerSocket implements IServerSocket {
           return;
         }
         this.connections.remove(connection);
-        console.log('closed: connections', this.connections.length);
+        // console.log('closed: connections', this.connections.length);
         onLeave(me.connectionId);
       };
       onJoin(me.connectionId);
