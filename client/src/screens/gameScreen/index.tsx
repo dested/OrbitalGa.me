@@ -9,6 +9,49 @@ import {GoFullScreen} from '../../components/goFullScreen';
 import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
 import {GameData} from '../../game/gameData';
 import {Weapons} from '../../components/weapons';
+import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from '../loginScreen/index.styles';
+
+const leftJoystickOptions = {
+  mode: 'static',
+  color: 'white',
+  size: 70,
+  position: {
+    top: '50%',
+    left: '50%',
+  },
+} as const;
+const rightJoystickOptions = {
+  mode: 'static',
+  color: 'white',
+  size: 70,
+  position: {
+    top: '50%',
+    left: '50%',
+  },
+  lockX: true,
+  lockY: true,
+} as const;
+
+const styles = {
+  canvas: {width: '100vw', height: '100vh', position: 'absolute', zIndex: -99},
+  label: {fontSize: '2rem', color: 'white'},
+  leftJoyStick: {
+    position: 'absolute',
+    height: '30%',
+    width: '30%',
+    bottom: 0,
+    left: 0,
+    background: 'transparent',
+  },
+  rightJoystick: {
+    position: 'absolute',
+    height: '30%',
+    width: '30%',
+    bottom: 0,
+    right: 0,
+    background: 'transparent',
+  },
+} as const;
 
 export const GameScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
@@ -20,7 +63,7 @@ export const GameScreen: React.FC = observer((props) => {
     connect();
   }, []);
 
-  function connect() {
+  const connect = useCallback(() => {
     GameData.instance.joinGame(uiStore.serverPath!, {
       onDied: () => {
         setDied(true);
@@ -35,11 +78,12 @@ export const GameScreen: React.FC = observer((props) => {
         setDisconnected(true);
       },
     });
-  }
-  const revive = () => {
+  }, [uiStore.serverPath]);
+
+  const revive = useCallback(() => {
     setDied(false);
     connect();
-  };
+  }, []);
 
   const managerListenerMove = useCallback((manager: JoystickManager) => {
     const onMove = (evt: EventData, stick: JoystickOutputData) => {
@@ -103,97 +147,43 @@ export const GameScreen: React.FC = observer((props) => {
         id={'game'}
         width={GameConstants.screenSize.width}
         height={GameConstants.screenSize.height}
-        style={{width: '100vw', height: '100vh', position: 'absolute', zIndex: -99}}
+        style={styles.canvas}
       />
       <Weapons tick={tick} />
-      {disconnected && (
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            top: 0,
-            color: 'white',
-          }}
-        >
-          <span style={{fontSize: '3rem'}}>DISCONNECTED</span>
-          <button
-            onClick={() => {
-              connect();
-              setDisconnected(false);
-            }}
-          >
-            Reconnect
-          </button>
-        </div>
-      )}
-      {died && (
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            top: 0,
-            color: 'white',
-          }}
-        >
-          <span style={{fontSize: '3rem'}}>You died</span>
-          <button style={{fontSize: '3rem'}} onClick={revive}>
-            Revive
-          </button>
-        </div>
-      )}
+      <Wrapper>
+        {disconnected && (
+          <LoginBox>
+            <Logo>Orbital</Logo>
+            <span style={styles.label}>DISCONNECTED</span>
+            <JoinButton
+              onClick={() => {
+                connect();
+                setDisconnected(false);
+              }}
+            >
+              Reconnect
+            </JoinButton>
+          </LoginBox>
+        )}
+        {died && (
+          <LoginBox>
+            <Logo>Orbital</Logo>
+            <span style={styles.label}>You Died</span>
+            <JoinButton onClick={revive}>Revive</JoinButton>
+          </LoginBox>
+        )}
+      </Wrapper>
       <GoFullScreen />
       {Utils.isMobile() && (
         <>
           <JoyStick
-            options={{
-              mode: 'static',
-              color: 'white',
-              size: 70,
-              position: {
-                top: '50%',
-                left: '50%',
-              },
-            }}
-            containerStyle={{
-              position: 'absolute',
-              height: '30%',
-              width: '30%',
-              bottom: 0,
-              left: 0,
-              background: 'transparent',
-            }}
+            options={leftJoystickOptions}
+            containerStyle={styles.leftJoyStick}
             managerListener={managerListenerMove}
           />
           <JoyStick
-            options={{
-              mode: 'static',
-              color: 'white',
-              size: 70,
-              position: {
-                top: '50%',
-                left: '50%',
-              },
-              lockX: true,
-              lockY: true,
-            }}
-            containerStyle={{
-              position: 'absolute',
-              height: '30%',
-              width: '30%',
-              bottom: 0,
-              right: 0,
-              background: 'transparent',
-            }}
+            options={rightJoystickOptions}
+            containerStyle={styles.rightJoystick}
             managerListener={managerListenerShoot}
           />
         </>

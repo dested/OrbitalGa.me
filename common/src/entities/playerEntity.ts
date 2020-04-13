@@ -25,11 +25,11 @@ export type PlayerInput = {
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
-export type AvailableWeapon = {ammo: number; weapon: PlayerWeapon};
+export type AvailablePlayerWeapon = {ammo: number; weapon: PlayerWeapon};
 
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
-  availableWeapons: AvailableWeapon[] = [
+  availableWeapons: AvailablePlayerWeapon[] = [
     {ammo: 100, weapon: 'laser'},
     {ammo: 5, weapon: 'rocket'},
     {ammo: 3, weapon: 'torpedo'},
