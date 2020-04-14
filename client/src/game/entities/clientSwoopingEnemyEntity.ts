@@ -3,6 +3,7 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
+import {GameRules} from '@common/game/gameRules';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
@@ -48,6 +49,21 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     context.translate(this.drawX, this.drawY);
     context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
     context.restore();
+    this.drawHealth(context);
   }
+
+  drawHealth(context: CanvasRenderingContext2D) {
+    const ship = this.ship;
+    context.fillStyle = 'rgba(255,255,255,0.4)';
+    context.fillRect(this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2 - 8, ship.size.width, 5);
+    context.fillStyle = 'rgba(254,0,0,0.4)';
+    context.fillRect(
+      this.drawX - ship.size.width / 2 + 1,
+      this.drawY - ship.size.height / 2 + 1 - 8,
+      (ship.size.width - 2) * (Math.max(this.health, 0) / GameRules.enemies.swoopingEnemy.startingHealth),
+      3
+    );
+  }
+
   tick() {}
 }

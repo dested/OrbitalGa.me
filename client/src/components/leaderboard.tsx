@@ -23,7 +23,12 @@ export const Leaderboard = (props: {tick: number}) => {
       {client?.leaderboardScores.map((score) => (
         <li
           key={score.userId}
-          style={{color: 'white', fontWeight: score.userId === liveEntity?.entityId ? 'bold' : 'initial'}}
+          style={{
+            fontFamily: 'kenney_spaceregular',
+            fontSize: '0.6rem',
+            color: 'white',
+            fontWeight: score.userId === liveEntity?.entityId ? 'bold' : 'initial',
+          }}
         >
           {score.rank}: {score.username} - {score.calculatedScore} {/*JSON.stringify(score, null, 2)*/}
         </li>

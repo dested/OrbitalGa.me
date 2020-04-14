@@ -87,6 +87,7 @@ export class PlayerEntity extends Entity implements Weapon {
           case 'laser':
             break;
           case 'torpedo':
+            myWeapon.ammo += drop.ammo;
             break;
           default:
             unreachable(drop.weapon);

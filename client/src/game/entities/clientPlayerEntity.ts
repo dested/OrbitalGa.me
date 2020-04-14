@@ -57,16 +57,16 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     context.restore();
 
     context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
-    // this.drawHealth(context);
+    this.drawHealth(context);
   }
 
   tick() {}
 
   private drawHealth(context: CanvasRenderingContext2D) {
     const ship = this.ship;
-    context.fillStyle = 'white';
+    context.fillStyle = 'rgba(255,255,255,0.4)';
     context.fillRect(this.drawX - ship.size.width / 2, this.drawY + ship.size.height / 2, ship.size.width, 5);
-    context.fillStyle = 'red';
+    context.fillStyle = 'rgba(254,0,0,0.4)';
     context.fillRect(
       this.drawX - ship.size.width / 2 + 1,
       this.drawY + ship.size.height / 2 + 1,

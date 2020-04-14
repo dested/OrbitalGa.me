@@ -26,10 +26,6 @@ async function main() {
           onError: () => {},
           onOpen: (me: ClientGame) => {
             me.sendMessageToServer({type: 'join', name: Math.random().toFixed(8)});
-            setTimeout(async () => {
-              me.disconnect();
-              await Utils.timeout(1000);
-            }, 5000 + Math.random() * 10000);
           },
           onUIUpdate: () => {},
           onDied: (me: ClientGame) => {

@@ -176,7 +176,7 @@ export class ServerGame extends Game {
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
     if (!GameConstants.singlePlayer) {
-      const groupings = this.entityClusterer.getGroupings('player');
+      const groupings = this.entityClusterer.getGroupings((a) => a.entityType === 'player');
       const groups = Utils.groupBy(this.entities.array, (a) => a.entityType);
       const memoryUsage = process.memoryUsage();
       console.log(
@@ -198,26 +198,29 @@ export class ServerGame extends Game {
 
     this.processInputs();
 
-    const enemyCount = this.entities.filter((a) => a.entityType === 'swoopingEnemy').length;
-    const playerCount = this.users.length;
-
-    if (enemyCount < playerCount * 2) {
-      for (let i = 0; i < playerCount * 2 - enemyCount; i++) {
-        const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), SwoopingEnemyEntity.randomEnemyColor());
-        swoopingEnemyEntity.start(
-          this.entityClusterer.getNewEnemyXPosition(),
-          -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
-        );
-        this.entities.push(swoopingEnemyEntity);
+    for (const grouping of this.entityClusterer.getGroupings(
+      (a) => a.entityType === 'player' || a.entityType === 'swoopingEnemy'
+    )) {
+      const enemies = grouping.entities.filter((a) => a.entityType === 'swoopingEnemy').length;
+      const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.entityType === 'player').length, 4) * 1.5);
+      if (enemies < players) {
+        for (let i = enemies; i < players; i++) {
+          const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), SwoopingEnemyEntity.randomEnemyColor());
+          swoopingEnemyEntity.start(
+            this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
+            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+          );
+          this.entities.push(swoopingEnemyEntity);
+        }
       }
     }
 
     if (tickIndex === 50) {
-      const groupings = this.entityClusterer.getGroupings('player');
+      const groupings = this.entityClusterer.getGroupings((a) => a.entityType === 'player');
       // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
     if (tickIndex % 50 === 0) {
-      for (const grouping of this.entityClusterer.getGroupings('player')) {
+      for (const grouping of this.entityClusterer.getGroupings((a) => a.entityType === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
           const meteor = new MeteorEntity(this, nextId(), meteorColor, size, type);
@@ -230,7 +233,7 @@ export class ServerGame extends Game {
       }
     }
 
-    this.entityGroupingsThisTick = this.entityClusterer.getGroupings('player');
+    this.entityGroupingsThisTick = this.entityClusterer.getGroupings((a) => a.entityType === 'player');
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
       entity.gameTick(duration);
