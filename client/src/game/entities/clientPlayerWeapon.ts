@@ -9,9 +9,9 @@ import {unreachable} from '@common/utils/unreachable';
 export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(game: ClientGame, messageModel: ShotModel) {
+  constructor(private clientGame: ClientGame, messageModel: ShotModel) {
     super(
-      game,
+      clientGame,
       messageModel.entityId,
       messageModel.ownerEntityId,
       messageModel.offsetX,
@@ -22,7 +22,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     this.x = messageModel.x;
     this.y = messageModel.y;
     if (messageModel.create) {
-      if (this.owner && this.owner === game.liveEntity && game.liveEntity) {
+      if (this.owner && this.owner === clientGame.liveEntity && clientGame.liveEntity) {
         this.x = this.owner.x + this.offsetX;
       }
       this.y = messageModel.startY;
@@ -64,8 +64,37 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     const asset = this.asset;
     context.save();
     context.translate(this.drawX, this.drawY);
+    this.drawFire(context);
     context.drawImage(asset.image, -asset.size.width / 2, -asset.size.height / 2);
     context.restore();
   }
+
+  drawFire(context: CanvasRenderingContext2D) {
+    const asset = this.asset;
+    switch (this.weaponType) {
+      case 'rocket': {
+        const fire =
+          this.clientGame.drawTick % 8 < 4
+            ? OrbitalAssets.assets['Effects.fire14']
+            : OrbitalAssets.assets['Effects.fire15'];
+        context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
+        break;
+      }
+      case 'laser':
+        break;
+      case 'torpedo': {
+        const fire =
+          this.clientGame.drawTick % 8 < 4
+            ? OrbitalAssets.assets['Effects.fire14']
+            : OrbitalAssets.assets['Effects.fire15'];
+        context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
+        break;
+      }
+      default:
+        unreachable(this.weaponType);
+        break;
+    }
+  }
+
   tick() {}
 }
