@@ -7,8 +7,8 @@ import {OrbitalAssets} from '../../utils/assetManager';
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
 
-  constructor(game: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
-    super(game, messageModel.entityId, messageModel.playerColor);
+  constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
+    super(clientGame, messageModel.entityId, messageModel.playerColor);
     this.x = messageModel.x;
     this.y = messageModel.y;
   }
@@ -36,8 +36,28 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
 
   draw(context: CanvasRenderingContext2D): void {
     const ship = this.ship;
+    context.save();
+
+    if (this.lastPlayerInput?.up) {
+      const fire =
+        this.clientGame.drawTick % 8 < 4
+          ? OrbitalAssets.assets['Effects.fire16']
+          : OrbitalAssets.assets['Effects.fire17'];
+      context.drawImage(fire.image, this.drawX - 30, this.drawY + 20);
+      context.drawImage(fire.image, this.drawX + 16, this.drawY + 20);
+    } else if (this.lastPlayerInput?.down || this.lastPlayerInput?.left || this.lastPlayerInput?.right) {
+      const fire =
+        this.clientGame.drawTick % 8 < 4
+          ? OrbitalAssets.assets['Effects.fire16']
+          : OrbitalAssets.assets['Effects.fire17'];
+      context.drawImage(fire.image, this.drawX - 30, this.drawY + 10);
+      context.drawImage(fire.image, this.drawX + 16, this.drawY + 10);
+    }
+
+    context.restore();
+
     context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
-    this.drawHealth(context);
+    // this.drawHealth(context);
   }
 
   tick() {}

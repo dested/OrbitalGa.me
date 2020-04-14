@@ -22,7 +22,7 @@ export class ClientToServerMessageParser {
         buff.addUint8(4);
         buff.addUint32(message.inputSequenceNumber);
         PlayerEntity.addBufferWeaponOptional(buff, message.weapon);
-        buff.addUint8(Utils.bitsToInt(message.up, message.down, message.left, message.right, message.shoot));
+        buff.addBits(message.up, message.down, message.left, message.right, message.shoot);
         break;
       default:
         throw unreachable(message);
@@ -51,7 +51,7 @@ export class ClientToServerMessageParser {
             inputSequenceNumber: reader.readUint32(),
             weapon: PlayerEntity.readBufferWeaponOptional(reader),
             ...(() => {
-              const [up, down, left, right, shoot] = Utils.intToBits(reader.readUint8());
+              const [up, down, left, right, shoot] = reader.readBits();
               return {up, down, left, right, shoot};
             })(),
           };

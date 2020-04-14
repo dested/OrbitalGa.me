@@ -101,13 +101,7 @@ export class Utils {
 
     return maps;
   }
-  static intToBits(int: number): boolean[] {
-    return int
-      .toString(2)
-      .split('')
-      .map((a) => a === '1')
-      .slice(1);
-  }
+
   static isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
   }

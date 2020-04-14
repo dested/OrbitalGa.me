@@ -9,18 +9,20 @@ import {WallEntity} from './wallEntity';
 import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
-import {Utils} from '../utils/utils';
+import {assertType, Utils} from '../utils/utils';
 import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 
-export type PlayerInput = {
+export type PlayerInputKeys = {
   down: boolean;
-  inputSequenceNumber: number;
   left: boolean;
   right: boolean;
   shoot: boolean;
   up: boolean;
+};
+export type PlayerInput = PlayerInputKeys & {
+  inputSequenceNumber: number;
   weapon?: PlayerWeapon;
 };
 
@@ -51,7 +53,7 @@ export class PlayerEntity extends Entity implements Weapon {
   weaponSide = 'player' as const;
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
-
+  protected lastPlayerInput?: PlayerInputKeys;
   private shieldEntityId?: number;
 
   constructor(game: Game, entityId: number, public playerColor: PlayerColor) {
@@ -108,6 +110,7 @@ export class PlayerEntity extends Entity implements Weapon {
 
   applyInput(input: PlayerInput) {
     this.aliveTick++;
+    this.lastPlayerInput = input;
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
     if (input.weapon) {
@@ -154,29 +157,29 @@ export class PlayerEntity extends Entity implements Weapon {
     if (input.left) {
       this.xInputsThisTick = true;
       this.momentumX -= ramp;
-      if (this.momentumX < -GameRules.player.base.maxSpeed) {
-        this.momentumX = -GameRules.player.base.maxSpeed;
+      if (this.momentumX < -GameRules.player.base.maxSideSpeed) {
+        this.momentumX = -GameRules.player.base.maxSideSpeed;
       }
     }
     if (input.right) {
       this.xInputsThisTick = true;
       this.momentumX += ramp;
-      if (this.momentumX > GameRules.player.base.maxSpeed) {
-        this.momentumX = GameRules.player.base.maxSpeed;
+      if (this.momentumX > GameRules.player.base.maxSideSpeed) {
+        this.momentumX = GameRules.player.base.maxSideSpeed;
       }
     }
     if (input.up) {
       this.yInputsThisTick = true;
       this.momentumY -= ramp;
-      if (this.momentumY < -GameRules.player.base.maxSpeed) {
-        this.momentumY = -GameRules.player.base.maxSpeed;
+      if (this.momentumY < -GameRules.player.base.maxForwardSpeed) {
+        this.momentumY = -GameRules.player.base.maxForwardSpeed;
       }
     }
     if (input.down) {
       this.yInputsThisTick = true;
       this.momentumY += ramp;
-      if (this.momentumY > GameRules.player.base.maxSpeed) {
-        this.momentumY = GameRules.player.base.maxSpeed;
+      if (this.momentumY > GameRules.player.base.maxReverseSpeed) {
+        this.momentumY = GameRules.player.base.maxReverseSpeed;
       }
     }
   }
@@ -250,6 +253,7 @@ export class PlayerEntity extends Entity implements Weapon {
     super.reconcileFromServer(messageModel);
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
+    this.lastPlayerInput = messageModel.playerInputKeys;
   }
 
   reconcileFromServerLive(messageModel: LivePlayerModel) {
@@ -270,6 +274,7 @@ export class PlayerEntity extends Entity implements Weapon {
       ...super.serialize(),
       health: this.health,
       playerColor: this.playerColor,
+      playerInputKeys: this.lastPlayerInput ?? {down: false, left: false, right: false, shoot: false, up: false},
       entityType: 'player',
     };
   }
@@ -319,29 +324,37 @@ export class PlayerEntity extends Entity implements Weapon {
     }
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerModel | LivePlayerModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.health);
-    buff.addSwitch(entity.playerColor, {
+  static addBuffer(buff: ArrayBufferBuilder, model: PlayerModel | LivePlayerModel) {
+    assertType<PlayerModel>(model);
+    Entity.addBuffer(buff, model);
+    buff.addUint8(model.health);
+    buff.addSwitch(model.playerColor, {
       blue: 1,
       green: 2,
       orange: 3,
       red: 4,
     });
+    buff.addBits(
+      model.playerInputKeys.up,
+      model.playerInputKeys.down,
+      model.playerInputKeys.left,
+      model.playerInputKeys.right,
+      model.playerInputKeys.shoot
+    );
   }
-  static addBufferLive(buff: ArrayBufferBuilder, entity: LivePlayerModel) {
-    PlayerEntity.addBuffer(buff, entity);
-    buff.addFloat32(entity.momentumX);
-    buff.addFloat32(entity.momentumY);
-    buff.addBoolean(entity.dead);
-    buff.addUint32(entity.lastProcessedInputSequenceNumber);
-    buff.addSwitch(entity.selectedWeapon, {
+  static addBufferLive(buff: ArrayBufferBuilder, model: LivePlayerModel) {
+    PlayerEntity.addBuffer(buff, model);
+    buff.addFloat32(model.momentumX);
+    buff.addFloat32(model.momentumY);
+    buff.addBoolean(model.dead);
+    buff.addUint32(model.lastProcessedInputSequenceNumber);
+    buff.addSwitch(model.selectedWeapon, {
       rocket: 1,
       laser: 2,
       torpedo: 3,
     });
-    buff.addUint8(entity.availableWeapons.length);
-    for (const availableWeapon of entity.availableWeapons) {
+    buff.addUint8(model.availableWeapons.length);
+    for (const availableWeapon of model.availableWeapons) {
       PlayerEntity.addBufferWeapon(buff, availableWeapon.weapon);
       buff.addUint16(availableWeapon.ammo);
     }
@@ -381,6 +394,10 @@ export class PlayerEntity extends Entity implements Weapon {
         3: 'orange' as const,
         4: 'red' as const,
       }),
+      playerInputKeys: (() => {
+        const [up, down, left, right, shoot] = reader.readBits();
+        return {up, down, left, right, shoot};
+      })(),
     };
   }
   static readBufferLive(reader: ArrayBufferReader): LivePlayerModel {
@@ -426,6 +443,7 @@ export type PlayerModel = EntityModel & {
   entityType: 'player';
   health: number;
   playerColor: PlayerColor;
+  playerInputKeys: PlayerInputKeys;
 };
 
 export type LivePlayerModel = EntityModel & {

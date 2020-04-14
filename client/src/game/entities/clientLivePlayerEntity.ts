@@ -18,7 +18,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};
   zIndex = DrawZIndex.Player;
-  constructor(private clientGame: ClientGame, public messageModel: LivePlayerModel) {
+  constructor(clientGame: ClientGame, public messageModel: LivePlayerModel) {
     super(clientGame, messageModel);
     this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
   }

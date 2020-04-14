@@ -8,6 +8,10 @@ export class ArrayBufferBuilder {
     this.buffer = new ArrayBuffer(initialBufferSize);
     this.view = new DataView(this.buffer);
   }
+
+  addBits(...bools: boolean[]) {
+    this.addUint8(parseInt('1' + bools.map((a) => (a ? '1' : '0')).join(''), 2));
+  }
   addBoolean(value: boolean) {
     this.testSize(1);
     this.view.setUint8(this.curPosition, value ? 1 : 0);
@@ -131,6 +135,15 @@ export class ArrayBufferReader {
       items.push(callback());
     }
     return items;
+  }
+
+  readBits(): boolean[] {
+    const int = this.readUint8();
+    return int
+      .toString(2)
+      .split('')
+      .map((a) => a === '1')
+      .slice(1);
   }
 
   readBoolean() {
