@@ -1,4 +1,4 @@
-import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
+import {ClientToServerMessage, ErrorMessage, ServerToClientMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
@@ -11,11 +11,14 @@ import {WorldModelCastToEntityModel} from '@common/models/entityTypeModels';
 import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
 import {RollingAverage} from '@common/utils/rollingAverage';
+import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
   onDisconnect: (me: ClientGame) => void;
+  onError: (client: ClientGame, error: ErrorMessage) => void;
   onOpen: (me: ClientGame) => void;
+  onReady: (me: ClientGame) => void;
   onUIUpdate: (me: ClientGame) => void;
 };
 
@@ -25,6 +28,7 @@ export class ClientGame extends Game {
   isDead: boolean = false;
   lagAverage = new RollingAverage();
   lastXY?: {x: number; y: number};
+  leaderboardScores: LeaderboardEntryRanked[] = [];
   liveEntity?: ClientLivePlayerEntity;
   spectatorEntity?: SpectatorEntity;
   protected spectatorMode: boolean = false;
@@ -81,9 +85,9 @@ export class ClientGame extends Game {
     this.liveEntity?.checkCollisions();
   }
 
-  joinGame() {
+  joinGame(name: string) {
     this.lastXY = undefined;
-    this.sendMessageToServer({type: 'join'});
+    this.sendMessageToServer({type: 'join', name});
   }
 
   sendInput(input: ClientLivePlayerEntity['keys'] & {inputSequenceNumber: number}) {
@@ -141,12 +145,25 @@ export class ClientGame extends Game {
           this.spectatorMode = false;
           this.liveEntity = clientEntity;
           this.entities.push(clientEntity);
+          this.options.onReady(this);
+          break;
+        case 'error':
+          switch (message.reason) {
+            case 'nameInUse':
+              this.options.onError(this, message);
+              break;
+            default:
+              unreachable(message.reason);
+          }
           break;
         case 'spectating':
           this.serverVersion = message.serverVersion;
           this.lastXY = undefined;
           this.spectatorMode = true;
           console.log('Server version', this.serverVersion);
+          break;
+        case 'leaderboard':
+          this.leaderboardScores = message.scores;
           break;
         case 'worldState':
           this.lagAverage.push(GameConstants.serverTickRate - (+new Date() - this.lastWorldStateTick));

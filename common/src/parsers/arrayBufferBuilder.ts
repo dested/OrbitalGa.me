@@ -55,6 +55,12 @@ export class ArrayBufferBuilder {
       this.addInt8(value);
     }
   }
+  addLoop<T>(items: T[], callback: (t: T) => void) {
+    this.addUint16(items.length);
+    for (const item of items) {
+      callback(item);
+    }
+  }
 
   addOptionalInt32(value?: number) {
     if (value === undefined) {

@@ -5,6 +5,8 @@ export interface Weapon {
   explosionIntensity: number;
   isWeapon: true;
   weaponSide: 'player' | 'enemy';
+  causedDamage(damage: number, otherEntity: Entity): void;
+  causedKill(otherEntity: Entity): void;
   hurt(damage: number, otherEntity: Entity, overlapX: number, overlap: number): void;
 }
 

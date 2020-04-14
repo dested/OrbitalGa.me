@@ -1,12 +1,12 @@
 import {Result} from 'collisions';
-import {Utils} from '../utils/utils';
+import {assertType, Utils} from '../utils/utils';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {GameRules} from '../game/gameRules';
+import {GameRules, PlayerWeapon} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
@@ -87,6 +87,8 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   get realY() {
     return this.y;
   }
+  causedDamage(damage: number, otherEntity: Entity): void {}
+  causedKill(otherEntity: Entity): void {}
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (isPlayerWeapon(otherEntity)) {
@@ -127,17 +129,24 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+    if (!isPlayerWeapon(otherEntity)) {
+      return;
+    }
+
     if (this.markToDestroy) {
       return;
     }
+
     this.health -= damage;
     this.momentumX += x;
     this.momentumY += y;
+    otherEntity.causedDamage(otherEntity.damage, this);
 
     const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
     explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
+      otherEntity.causedKill(this);
       const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
       drop.start(this.x, this.y);
       this.game.entities.push(drop);

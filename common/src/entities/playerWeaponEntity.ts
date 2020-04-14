@@ -37,6 +37,14 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
     return this.y;
   }
 
+  causedDamage(damage: number, otherEntity: Entity): void {
+    this.game.gameLeaderboard.increaseEntry(this.ownerEntityId, 'damageGiven', damage);
+  }
+
+  causedKill(otherEntity: Entity): void {
+    this.game.gameLeaderboard.increaseEntry(this.ownerEntityId, 'enemiesKilled', 1);
+  }
+
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
       this.destroy();

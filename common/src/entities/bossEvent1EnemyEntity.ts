@@ -18,7 +18,6 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   explosionIntensity = 4;
   isWeapon = true as const;
   weaponSide = 'enemy' as const;
-
   constructor(
     game: Game,
     entityId: number,
@@ -40,6 +39,8 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   get realY() {
     return this.y + this.yOffset;
   }
+  causedDamage(damage: number, otherEntity: Entity): void {}
+  causedKill(otherEntity: Entity): void {}
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     /* if (isPlayerWeapon(otherEntity)) {
@@ -150,8 +151,8 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
 
 export type BossEvent1EnemyModel = EntityModel & {
   entityType: 'bossEvent1Enemy';
-  pieceType: BossEvent1PieceType;
   ownerEntityId: number;
+  pieceType: BossEvent1PieceType;
   rotate: number;
   xOffset: number;
   yOffset: number;

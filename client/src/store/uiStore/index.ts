@@ -8,6 +8,10 @@ export class UIStore {
   @observable
   jwt?: string;
 
+  @persist
+  @observable
+  playerName: string = '';
+
   @observable
   screen: Screens = 'loading';
 
@@ -18,9 +22,14 @@ export class UIStore {
     this.jwt = jwt;
   }
 
+  @action setPlayerName(playerName: string) {
+    this.playerName = playerName;
+  }
+
   @action setScreen(newScreen: Screens) {
     this.screen = newScreen;
   }
+
   @action setServerPath(serverPath: string) {
     this.serverPath = serverPath;
   }

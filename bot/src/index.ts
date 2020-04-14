@@ -22,8 +22,10 @@ async function main() {
           onDisconnect: () => {
             start();
           },
+          onReady: () => {},
+          onError: () => {},
           onOpen: (me: ClientGame) => {
-            me.sendMessageToServer({type: 'join'});
+            me.sendMessageToServer({type: 'join', name: Math.random().toFixed(8)});
             setTimeout(async () => {
               me.disconnect();
               await Utils.timeout(1000);
@@ -31,7 +33,7 @@ async function main() {
           },
           onUIUpdate: () => {},
           onDied: (me: ClientGame) => {
-            me.joinGame();
+            me.joinGame(Math.random().toFixed(8));
           },
         },
         new ClientSocket()

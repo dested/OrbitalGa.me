@@ -4,12 +4,14 @@ import {ArrayHash} from '../utils/arrayHash';
 import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
+import {GameLeaderboard} from './gameLeaderboard';
 
 export abstract class Game {
   collisionEngine: Collisions;
   readonly collisionResult: Result;
   entities = new ArrayHash<Entity>('entityId');
   entityClusterer: EntityClusterer;
+  gameLeaderboard = new GameLeaderboard();
 
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();

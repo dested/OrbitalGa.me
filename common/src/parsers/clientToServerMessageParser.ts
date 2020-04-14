@@ -11,6 +11,10 @@ export class ClientToServerMessageParser {
     switch (message.type) {
       case 'join':
         buff.addUint8(1);
+        if (message.name.length > 10) {
+          throw new Error('bad');
+        }
+        buff.addString(message.name);
         break;
       case 'spectate':
         buff.addUint8(2);
@@ -37,7 +41,7 @@ export class ClientToServerMessageParser {
       const type = reader.readUint8();
       switch (type) {
         case 1:
-          result = {type: 'join'};
+          result = {type: 'join', name: reader.readString()};
           break;
         case 2:
           result = {type: 'spectate'};

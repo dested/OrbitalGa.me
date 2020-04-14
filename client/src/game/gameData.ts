@@ -6,7 +6,8 @@ import {ServerGame} from '../../../server/src/game/serverGame';
 import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
 import {BotClientGame} from './botClientGame';
-import {ClientGameOptions} from './clientGame';
+import {ClientGame, ClientGameOptions} from './clientGame';
+import {ErrorMessage} from '@common/models/messages';
 
 export class GameData {
   static instance = new GameData();
@@ -34,12 +35,14 @@ export class GameData {
         new BotClientGame(
           '1',
           {
+            onError: (client: ClientGame, error: ErrorMessage) => {},
             onDied: (client) => {
-              client.joinGame();
+              client.joinGame(Math.random().toFixed(8));
             },
             onUIUpdate: () => {},
+            onReady: () => {},
             onOpen: (client) => {
-              client.joinGame();
+              client.joinGame(Math.random().toFixed(8));
             },
             onDisconnect: () => {},
           },
@@ -57,7 +60,7 @@ export class GameData {
     }
   }
 
-  joinGame(serverPath: string, options: ClientGameOptions) {
+  joinGame(serverPath: string, name: string, options: ClientGameOptions) {
     if (!this.client || this.serverPath !== serverPath) {
       this.client?.disconnect();
       this.serverPath = serverPath;
@@ -68,9 +71,13 @@ export class GameData {
         this.client.connect();
       } else {
         this.client.setOptions(options);
-        this.client.joinGame();
+        this.client.joinGame(name);
       }
     }
+  }
+
+  setOptions(options: ClientGameOptions) {
+    this.client?.setOptions(options);
   }
 
   spectateGame(serverPath: string) {
@@ -78,8 +85,10 @@ export class GameData {
     this.client = new ClientGameUI(
       this.serverPath,
       {
+        onError: (client: ClientGame, error: ErrorMessage) => {},
         onDied: () => {},
         onUIUpdate: () => {},
+        onReady: () => {},
         onOpen: () => {
           this.client!.spectateGame();
         },

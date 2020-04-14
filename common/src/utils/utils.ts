@@ -210,6 +210,10 @@ export class Utils {
     return Object.keys(obj) as (keyof T)[];
   }
 
+  static safeKeysExclude<T, TExclude extends keyof T>(obj: T, exclude: TExclude): Exclude<keyof T, TExclude>[] {
+    return Object.keys(obj).filter((key) => key !== exclude) as Exclude<keyof T, TExclude>[];
+  }
+
   static sort<T>(array: T[], callback: (t: T) => number): T[] {
     const sorted = [...array];
     sorted.sort((a, b) => callback(a) - callback(b));

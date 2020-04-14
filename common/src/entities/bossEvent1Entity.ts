@@ -9,7 +9,7 @@ import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';
-export class BossEvent1Entity extends Entity implements Weapon {
+export class BossEvent1Entity extends Entity {
   aliveTick: number = 0;
   alwaysPresent = true;
   boundingBoxes = [

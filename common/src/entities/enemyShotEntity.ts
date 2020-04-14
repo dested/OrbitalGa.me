@@ -33,6 +33,9 @@ export class EnemyShotEntity extends Entity implements Weapon {
     return false;
   }
 
+  causedDamage(damage: number, otherEntity: Entity): void {}
+  causedKill(otherEntity: Entity): void {}
+
   gameTick(duration: number) {
     this.y += GameRules.enemyShots.base.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;

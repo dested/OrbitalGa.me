@@ -10,6 +10,9 @@ import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
 import {GameData} from '../../game/gameData';
 import {Weapons} from '../../components/weapons';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from '../loginScreen/index.styles';
+import {ClientGame} from '../../game/clientGame';
+import {ErrorMessage} from '@common/models/messages';
+import {Leaderboard} from '../../components/leaderboard';
 
 const leftJoystickOptions = {
   mode: 'static',
@@ -60,19 +63,36 @@ export const GameScreen: React.FC = observer((props) => {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    connect();
-  }, []);
-
-  const connect = useCallback(() => {
-    GameData.instance.joinGame(uiStore.serverPath!, {
+    GameData.instance.setOptions({
+      onError: (client: ClientGame, error: ErrorMessage) => {},
       onDied: () => {
         setDied(true);
       },
       onUIUpdate: () => {
         setTick(Math.random());
       },
+      onReady: () => {},
       onOpen: (client) => {
-        client.joinGame();
+        client.joinGame(uiStore.playerName!);
+      },
+      onDisconnect: () => {
+        setDisconnected(true);
+      },
+    });
+  }, []);
+
+  const connect = useCallback(() => {
+    GameData.instance.joinGame(uiStore.serverPath!, uiStore.playerName!, {
+      onError: (client: ClientGame, error: ErrorMessage) => {},
+      onDied: () => {
+        setDied(true);
+      },
+      onUIUpdate: () => {
+        setTick(Math.random());
+      },
+      onReady: () => {},
+      onOpen: (client) => {
+        client.joinGame(uiStore.playerName!);
       },
       onDisconnect: () => {
         setDisconnected(true);
@@ -174,6 +194,7 @@ export const GameScreen: React.FC = observer((props) => {
         )}
       </Wrapper>
       <GoFullScreen />
+      <Leaderboard tick={tick} />
       {Utils.isMobile() && (
         <>
           <JoyStick

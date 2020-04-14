@@ -6,29 +6,54 @@ import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styl
 import {Utils} from '@common/utils/utils';
 import {GoFullScreen} from '../../components/goFullScreen';
 import {GameConstants} from '@common/game/gameConstants';
+import {GameData} from '../../game/gameData';
+import {ClientGame} from '../../game/clientGame';
+import {ErrorMessage} from '@common/models/messages';
+import {unreachable} from '@common/utils/unreachable';
+import {Leaderboard} from '../../components/leaderboard';
 
 const styles = {
   buttonList: {display: 'flex', width: '100%'},
   canvas: {width: '100vw', height: '100vh', position: 'absolute', zIndex: -99},
+  label: {fontSize: '1rem', color: 'white'},
 } as const;
 
 export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
-  const [name, setName] = useState('');
-  const [connectStatus, setConnectingStatus] = useState<'none' | 'fail' | 'connecting' | 'joining' | 'joined'>('none');
+  const [connectStatus, setConnectingStatus] = useState<'none' | 'connecting'>('none');
+  const [error, setError] = useState('');
+
   useEffect(() => {
-    onJoin('1')
+    // onJoin('1')
   }, []);
 
   const servers = ['1' /*, '2', '3', '4', '11'*/];
 
   const onJoin = useCallback(async (server: string) => {
     uiStore.setServerPath(server);
+    setError('');
     setConnectingStatus('connecting');
-    await Utils.timeout(100);
-    setConnectingStatus('joining');
-    await Utils.timeout(100);
-    uiStore.setScreen('game');
+    GameData.instance.joinGame(uiStore.serverPath!, uiStore.playerName!, {
+      onError: (client: ClientGame, errorMessage: ErrorMessage) => {
+        switch (errorMessage.reason) {
+          case 'nameInUse':
+            setError('This username is already taken');
+            setConnectingStatus('none');
+            break;
+          default:
+            unreachable(errorMessage.reason);
+        }
+      },
+      onDied: () => {},
+      onUIUpdate: () => {},
+      onReady: () => {
+        uiStore.setScreen('game');
+      },
+      onOpen: (client) => {
+        client.joinGame(uiStore.playerName!);
+      },
+      onDisconnect: () => {},
+    });
   }, []);
 
   return (
@@ -41,7 +66,13 @@ export const LoginScreen: React.FC = observer((props) => {
       />
       <LoginBox>
         <Logo>Orbital</Logo>
-        <NameBox placeholder={'Name'} value={name} onChange={(e: any) => setName(e.target.value)} />
+        <NameBox
+          placeholder={'Name'}
+          value={uiStore.playerName}
+          maxLength={10}
+          onChange={(e: any) => uiStore.setPlayerName(e.target.value)}
+        />
+        {error && <span style={styles.label}>{error}</span>}
         {(connectStatus === 'none' && (
           <div style={styles.buttonList}>
             {servers.map((s) => (
@@ -51,9 +82,9 @@ export const LoginScreen: React.FC = observer((props) => {
             ))}
           </div>
         )) ||
-          (connectStatus === 'connecting' && <Status>Connecting...</Status>) ||
-          (connectStatus === 'joining' && <Status>Joining...</Status>)}
+          (connectStatus === 'connecting' && <Status>Connecting...</Status>)}
       </LoginBox>
+      <Leaderboard tick={0} />
       <GoFullScreen />
     </Wrapper>
   );

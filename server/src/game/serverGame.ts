@@ -16,15 +16,21 @@ import {ArrayHash} from '@common/utils/arrayHash';
 import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {EntityGrouping} from './entityClusterer';
-import {DropEntity} from '@common/entities/dropEntity';
-import {BossEvent1Entity} from '@common/entities/bossEvent1Entity';
+import {GameLeaderboard} from '@common/game/gameLeaderboard';
 
 type Spectator = {connectionId: number};
-type User = {connectionId: number; entity: ServerPlayerEntity};
+type User = {
+  connectionId: number;
+  entity: ServerPlayerEntity;
+  name: string;
+};
 
 export class ServerGame extends Game {
   entityGroupingsThisTick: EntityGrouping[] = [];
-  queuedMessages: {connectionId: number; message: ClientToServerMessage}[] = [];
+  queuedMessages: {
+    connectionId: number;
+    message: ClientToServerMessage;
+  }[] = [];
   queuedMessagesToSend: {[connectionId: number]: ServerToClientMessage[]} = {};
   spectators = new ArrayHash<Spectator>('connectionId');
   users = new ArrayHash<User>('connectionId');
@@ -100,7 +106,7 @@ export class ServerGame extends Game {
       const q = this.queuedMessages[i];
       switch (q.message.type) {
         case 'join':
-          this.userJoin(q.connectionId);
+          this.userJoin(q.connectionId, q.message.name);
           break;
         case 'spectate':
           this.spectatorJoin(q.connectionId);
@@ -236,6 +242,10 @@ export class ServerGame extends Game {
 
     this.checkCollisions();
 
+    if (tickIndex % 10 === 0) {
+      this.sendLeaderboard();
+    }
+
     this.sendWorldState();
 
     for (const c of this.users.array) {
@@ -299,7 +309,7 @@ export class ServerGame extends Game {
     });
   }
 
-  userJoin(connectionId: number) {
+  userJoin(connectionId: number, name: string) {
     const connection = this.serverSocket.connections.lookup(connectionId);
     if (connection) {
       connection.lastAction = +new Date();
@@ -316,12 +326,26 @@ export class ServerGame extends Game {
     if (user) {
       this.users.remove(user);
     }
+    if (name.length > 10) {
+      this.serverSocket.disconnect(connectionId);
+      return;
+    }
+    if (this.users.filter((u) => u.name === name).length > 0) {
+      this.serverSocket.sendMessage(connectionId, [
+        {
+          type: 'error',
+          reason: 'nameInUse',
+        },
+      ]);
+      return;
+    }
 
     const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
+    this.gameLeaderboard.addPlayer(playerEntity.entityId);
     const startingPos = this.entityClusterer.getNewPlayerXPosition();
     playerEntity.x = startingPos;
     playerEntity.y = GameConstants.playerStartingY;
-    this.users.push({connectionId, entity: playerEntity});
+    this.users.push({name, connectionId, entity: playerEntity});
     this.entities.push(playerEntity);
 
     const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId, 'small');
@@ -340,13 +364,13 @@ export class ServerGame extends Game {
     if (spectator) {
       this.spectators.remove(spectator);
     }
-
     const user = this.users.lookup(connectionId);
     if (!user) {
       delete this.queuedMessagesToSend[connectionId];
       return;
     }
     user.entity.die();
+    this.gameLeaderboard.removePlayer(user.entity.entityId);
     this.users.remove(user);
     delete this.queuedMessagesToSend[connectionId];
   }
@@ -354,6 +378,44 @@ export class ServerGame extends Game {
   private initGame() {
     this.entities.push(new SpectatorEntity(this, nextId()));
     this.updateSpectatorPosition();
+  }
+
+  private sendLeaderboard() {
+    if (this.users.array.length === 0 && this.spectators.array.length === 0) return;
+
+    const scores = this.gameLeaderboard.updateScores();
+    for (const score of scores) {
+      score.username = this.users.array.find((a) => a.entity.entityId === score.userId)?.name ?? '';
+    }
+
+    const topTen = [...scores].slice(0, 10);
+    for (const user of this.users.array) {
+      if (!user.entity) {
+        continue;
+      }
+
+      if (topTen.find((a) => a.userId === user.entity.entityId)) {
+        this.sendMessageToClient(user.connectionId, {
+          type: 'leaderboard',
+          scores: topTen,
+        });
+      } else {
+        const myScore = scores.find((a) => a.userId === user.entity.entityId)!;
+        this.sendMessageToClient(user.connectionId, {
+          type: 'leaderboard',
+          scores: [...topTen, myScore],
+        });
+      }
+    }
+
+    for (const c of this.spectators.array) {
+      this.serverSocket.sendMessage(c.connectionId, [
+        {
+          type: 'leaderboard',
+          scores: topTen,
+        },
+      ]);
+    }
   }
 
   private sendSpectatorWorldState() {
