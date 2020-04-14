@@ -75,7 +75,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     context.fillRect(
       this.drawX - ship.size.width / 2 + 1,
       this.drawY + ship.size.height / 2 + 1,
-      (ship.size.width - 2) * (Math.max(this.health, 0) / GameRules.player.base.startingHealth),
+      (ship.size.width - 2) * (this.health / GameRules.player.base.startingHealth),
       3
     );
   }

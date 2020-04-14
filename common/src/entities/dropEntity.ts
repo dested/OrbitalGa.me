@@ -97,9 +97,9 @@ export class DropEntity extends Entity {
 
   static randomDrop(size: Size): DropType {
     const type = Utils.randomWeightedElement<DropType['type']>([
-      {item: 'weapon', weight: 30},
+      {item: 'weapon', weight: 40},
       {item: 'shield', weight: 10},
-      {item: 'health', weight: 60},
+      {item: 'health', weight: 50},
     ]);
     let amount;
     switch (size) {
@@ -118,11 +118,12 @@ export class DropEntity extends Entity {
     }
     switch (type) {
       case 'weapon':
-        const weapon = Utils.randomWeightedElement<PlayerWeapon>([
-          {item: 'rocket' as const, weight: 60},
-          {item: 'torpedo' as const, weight: 40},
+        const weapon = Utils.randomWeightedElement<{ammo: number; weapon: PlayerWeapon}>([
+          {item: {ammo: amount * 1000, weapon: 'laser2' as const}, weight: 20},
+          {item: {ammo: amount, weapon: 'rocket' as const}, weight: 50},
+          {item: {ammo: amount, weapon: 'torpedo' as const}, weight: 30},
         ]);
-        return {type: 'weapon', ammo: amount, weapon};
+        return {type: 'weapon', weapon: weapon.weapon, ammo: weapon.ammo};
       case 'health':
         return {type: 'health', amount};
       case 'shield':

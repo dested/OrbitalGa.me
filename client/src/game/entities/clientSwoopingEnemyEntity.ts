@@ -60,7 +60,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     context.fillRect(
       this.drawX - ship.size.width / 2 + 1,
       this.drawY - ship.size.height / 2 + 1 - 8,
-      (ship.size.width - 2) * (Math.max(this.health, 0) / GameRules.enemies.swoopingEnemy.startingHealth),
+      (ship.size.width - 2) * (this.health / GameRules.enemies.swoopingEnemy.startingHealth),
       3
     );
   }

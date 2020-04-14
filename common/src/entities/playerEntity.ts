@@ -32,10 +32,11 @@ export type AvailablePlayerWeapon = {ammo: number; weapon: PlayerWeapon};
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
   availableWeapons: AvailablePlayerWeapon[] = [
-    {ammo: 100, weapon: 'laser'},
+    {ammo: 0, weapon: 'laser1'},
     {ammo: 5, weapon: 'rocket'},
     {ammo: 3, weapon: 'torpedo'},
   ];
+
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
@@ -47,7 +48,7 @@ export class PlayerEntity extends Entity implements Weapon {
   momentumX = 0;
   momentumY = 0;
   pendingInputs: PlayerInput[] = [];
-  selectedWeapon: PlayerWeapon = 'laser';
+  selectedWeapon: PlayerWeapon = 'laser1';
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
   weaponSide = 'player' as const;
@@ -78,20 +79,23 @@ export class PlayerEntity extends Entity implements Weapon {
       case 'weapon':
         let myWeapon = this.availableWeapons.find((a) => a.weapon === drop.weapon);
         if (!myWeapon) {
-          this.availableWeapons.push((myWeapon = {weapon: drop.weapon, ammo: 0}));
+          switch (drop.weapon) {
+            case 'laser1':
+              return;
+            case 'laser2':
+              this.availableWeapons = this.availableWeapons.filter((w) => w.weapon !== 'laser1');
+              if (this.selectedWeapon === 'laser1') this.selectedWeapon = 'laser2';
+              this.availableWeapons.unshift((myWeapon = {weapon: drop.weapon, ammo: 0}));
+              break;
+            case 'rocket':
+            case 'torpedo':
+              this.availableWeapons.push((myWeapon = {weapon: drop.weapon, ammo: 0}));
+              break;
+            default:
+              throw unreachable(drop.weapon);
+          }
         }
-        switch (drop.weapon) {
-          case 'rocket':
-            myWeapon.ammo += drop.ammo;
-            break;
-          case 'laser':
-            break;
-          case 'torpedo':
-            myWeapon.ammo += drop.ammo;
-            break;
-          default:
-            unreachable(drop.weapon);
-        }
+        myWeapon.ammo = Math.min(myWeapon.ammo + drop.ammo, WeaponConfigs[drop.weapon].maxAmmo);
         break;
       case 'shield':
         const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
@@ -121,33 +125,59 @@ export class PlayerEntity extends Entity implements Weapon {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
           const availableWeapon = this.availableWeapons.find((w) => w.weapon === this.selectedWeapon);
-          if (availableWeapon && availableWeapon.ammo > 0) {
-            this.game.gameLeaderboard.increaseEntry(this.entityId, 'shotsFired', 1);
-            const config = WeaponConfigs[this.selectedWeapon];
-            let offsetX = 0;
-            if (config.alternateSide) {
-              offsetX = this.shotSide === 'left' ? -42 : 42;
+          const config = WeaponConfigs[this.selectedWeapon];
+          if (availableWeapon) {
+            let canFire = false;
+            switch (config.ammoType) {
+              case 'infinite':
+                canFire = true;
+                break;
+              case 'per-shot':
+                if (availableWeapon.ammo > 0) {
+                  canFire = true;
+                }
+                break;
+              case 'time':
+                if (availableWeapon.ammo > 0) {
+                  canFire = true;
+                }
+
+                break;
             }
-            const playerWeaponEntity = new PlayerWeaponEntity(
-              this.game,
-              nextId(),
-              this.entityId,
-              offsetX,
-              this.y - 6,
-              this.selectedWeapon
-            );
-            playerWeaponEntity.start(this.x + offsetX, this.y - 6);
-            this.game.entities.push(playerWeaponEntity);
-            if (config.alternateSide) {
-              this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
-            }
-            this.shootTimer = config.resetShootTimer;
-            if (!config.infinite) {
-              availableWeapon.ammo--;
-              if (availableWeapon.ammo <= 0) {
-                const index = this.availableWeapons.findIndex((a) => a.weapon === this.selectedWeapon);
-                this.selectedWeapon = this.availableWeapons[(index + 1) % this.availableWeapons.length].weapon;
-                this.availableWeapons.splice(this.availableWeapons.indexOf(availableWeapon), 1);
+            if (canFire) {
+              this.game.gameLeaderboard.increaseEntry(this.entityId, 'shotsFired', 1);
+              let offsetX = 0;
+              if (config.alternateSide) {
+                offsetX = this.shotSide === 'left' ? -42 : 42;
+              }
+              const playerWeaponEntity = new PlayerWeaponEntity(
+                this.game,
+                nextId(),
+                this.entityId,
+                offsetX,
+                this.y - 6,
+                this.selectedWeapon
+              );
+              playerWeaponEntity.start(this.x + offsetX, this.y - 6);
+              this.game.entities.push(playerWeaponEntity);
+              if (config.alternateSide) {
+                this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
+              }
+              this.shootTimer = config.resetShootTimer;
+
+              switch (config.ammoType) {
+                case 'infinite':
+                  break;
+                case 'per-shot':
+                  availableWeapon.ammo--;
+                  if (availableWeapon.ammo <= 0) {
+                    const index = this.availableWeapons.findIndex((a) => a.weapon === this.selectedWeapon);
+                    this.selectedWeapon = this.availableWeapons[(index + 1) % this.availableWeapons.length].weapon;
+                    this.availableWeapons.splice(this.availableWeapons.indexOf(availableWeapon), 1);
+                  }
+                  break;
+                case 'time':
+                  break;
               }
             }
           }
@@ -224,6 +254,7 @@ export class PlayerEntity extends Entity implements Weapon {
   }
 
   die() {
+    this.health = 0;
     this.dead = true;
     if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId)?.destroy();
     this.game.explode(this, 'big');
@@ -264,6 +295,25 @@ export class PlayerEntity extends Entity implements Weapon {
   postTick() {
     super.postTick();
     this.game.gameLeaderboard.increaseEntry(this.entityId, 'aliveTime', GameConstants.serverTickRate);
+
+    for (const availableWeapon of this.availableWeapons) {
+      if (WeaponConfigs[availableWeapon.weapon].ammoType === 'time') {
+        availableWeapon.ammo -= GameConstants.serverTickRate;
+        if (availableWeapon.ammo <= 0) {
+          if (availableWeapon.weapon === 'laser2') {
+            this.availableWeapons = this.availableWeapons.filter((w) => w.weapon !== 'laser2');
+            this.availableWeapons.unshift({weapon: 'laser1', ammo: 0});
+            if (this.selectedWeapon === 'laser2') {
+              this.selectedWeapon = 'laser1';
+            }
+          } else {
+            const index = this.availableWeapons.findIndex((a) => a.weapon === this.selectedWeapon);
+            this.selectedWeapon = this.availableWeapons[(index + 1) % this.availableWeapons.length].weapon;
+            this.availableWeapons.splice(this.availableWeapons.indexOf(availableWeapon), 1);
+          }
+        }
+      }
+    }
   }
 
   reconcileFromServer(messageModel: PlayerModel) {
@@ -295,6 +345,7 @@ export class PlayerEntity extends Entity implements Weapon {
       entityType: 'player',
     };
   }
+
   serializeLive(): LivePlayerModel {
     return {
       ...this.serialize(),
@@ -366,9 +417,10 @@ export class PlayerEntity extends Entity implements Weapon {
     buff.addBoolean(model.dead);
     buff.addUint32(model.lastProcessedInputSequenceNumber);
     buff.addSwitch(model.selectedWeapon, {
-      rocket: 1,
-      laser: 2,
-      torpedo: 3,
+      laser1: 1,
+      laser2: 2,
+      rocket: 3,
+      torpedo: 4,
     });
     buff.addUint8(model.availableWeapons.length);
     for (const availableWeapon of model.availableWeapons) {
@@ -379,18 +431,21 @@ export class PlayerEntity extends Entity implements Weapon {
 
   static addBufferWeapon(buff: ArrayBufferBuilder, weapon: PlayerWeapon) {
     buff.addSwitch(weapon, {
-      rocket: 1,
-      laser: 2,
-      torpedo: 3,
+      laser1: 1,
+      laser2: 2,
+      rocket: 3,
+      torpedo: 4,
     });
   }
+
   static addBufferWeaponOptional(buff: ArrayBufferBuilder, weapon?: PlayerWeapon) {
     buff.addInt8Optional(
       weapon === undefined
         ? undefined
         : Utils.switchType(weapon, {
-            rocket: 1,
-            laser: 2,
+            laser1: 1,
+            laser2: 2,
+            rocket: 3,
             torpedo: 3,
           })
     );
@@ -438,9 +493,10 @@ export class PlayerEntity extends Entity implements Weapon {
 
   static readBufferWeapon(reader: ArrayBufferReader): PlayerWeapon {
     return Utils.switchNumber(reader.readUint8(), {
-      1: 'rocket' as const,
-      2: 'laser' as const,
-      3: 'torpedo' as const,
+      1: 'laser1' as const,
+      2: 'laser2' as const,
+      3: 'rocket' as const,
+      4: 'torpedo' as const,
     });
   }
   static readBufferWeaponOptional(reader: ArrayBufferReader): PlayerWeapon | undefined {
@@ -449,9 +505,10 @@ export class PlayerEntity extends Entity implements Weapon {
       return undefined;
     }
     return Utils.switchNumber(weapon, {
-      1: 'rocket' as const,
-      2: 'laser' as const,
-      3: 'torpedo' as const,
+      1: 'laser1' as const,
+      2: 'laser2' as const,
+      3: 'rocket' as const,
+      4: 'torpedo' as const,
     });
   }
 }

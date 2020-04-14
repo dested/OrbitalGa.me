@@ -30,7 +30,9 @@ export class ClientDropEntity extends DropEntity implements ClientEntity {
         switch (this.drop.weapon) {
           case 'rocket':
             return OrbitalAssets.assets['Missiles.spaceMissiles_001'];
-          case 'laser':
+          case 'laser1':
+            return OrbitalAssets.assets['Lasers.laserBlue03'];
+          case 'laser2':
             return OrbitalAssets.assets['Lasers.laserBlue02'];
           case 'torpedo':
             return OrbitalAssets.assets['Missiles.spaceMissiles_004'];

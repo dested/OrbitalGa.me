@@ -146,6 +146,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
+      this.health = 0;
       otherEntity.causedKill(this);
       const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
       drop.start(this.x, this.y);

@@ -73,7 +73,9 @@
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event?
 - [ ] add 5 second sustained laser
-- [ ] add smoke to rockets
+- [x] add time based weapons
+- [x] add laser upgrade
+- [x] add fire to rockets
 - [x] add fire to player ships
 - [x] drop power-ups from enemy
 - [x] drop power-ups from debris

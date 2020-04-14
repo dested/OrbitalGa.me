@@ -60,6 +60,5 @@ for (let i = 0; i < 50; i++) {
 }
 *!/
 const g=cluster.getGroupings('player')
-debugger;
 cluster.getNewPlayerXPosition();
 */
