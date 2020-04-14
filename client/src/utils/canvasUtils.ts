@@ -1,3 +1,5 @@
+import {Asset} from './assetManager';
+
 export class CanvasUtils {
   static circle(context: CanvasRenderingContext2D, x: number, y: number, radius: number) {
     context.beginPath();
@@ -36,5 +38,24 @@ export class CanvasUtils {
     if (stroke) {
       ctx.stroke();
     }
+  }
+
+  static whiteVersion(asset: Asset) {
+    const canvas = document.createElement('canvas');
+    canvas.width = asset.size.width;
+    canvas.height = asset.size.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(asset.image, 0, 0);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const a = imageData.data[i + 3];
+      if (a !== 0) {
+        imageData.data[i] = imageData.data[i];
+        imageData.data[i + 1] = 0;
+        imageData.data[i + 2] = 0;
+      }
+    }
+    context.putImageData(imageData, 0, 0);
+    return canvas;
   }
 }

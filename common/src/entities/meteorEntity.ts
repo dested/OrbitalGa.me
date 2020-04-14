@@ -13,6 +13,8 @@ export type Size = 'big' | 'med' | 'small' | 'tiny';
 
 export class MeteorEntity extends Entity {
   health: number;
+
+  hit = false;
   meteorColor: 'brown' | 'grey';
   momentumX = Math.random() * 10 - 5;
   momentumY: number;
@@ -116,8 +118,8 @@ export class MeteorEntity extends Entity {
         otherEntity.hurt(
           1,
           this,
-          collisionResult.overlap * collisionResult.overlap_x*2,
-          collisionResult.overlap * collisionResult.overlap_y*2
+          collisionResult.overlap * collisionResult.overlap_x * 2,
+          collisionResult.overlap * collisionResult.overlap_y * 2
         );
         this.hurt(
           otherEntity.damage,
@@ -176,12 +178,18 @@ export class MeteorEntity extends Entity {
     }
   }
 
+  postTick() {
+    super.postTick();
+    this.hit = false;
+  }
+
   reconcileFromServer(messageModel: MeteorModel) {
     super.reconcileFromServer(messageModel);
     this.positionBuffer[this.positionBuffer.length - 1].rotate = messageModel.rotate;
     this.meteorColor = messageModel.meteorColor;
     this.size = messageModel.size;
     this.type = messageModel.type;
+    this.hit = messageModel.hit;
   }
 
   serialize(): MeteorModel {
@@ -192,6 +200,7 @@ export class MeteorEntity extends Entity {
       size: this.size,
       rotate: this.rotate,
       entityType: 'meteor',
+      hit: this.hit,
     };
   }
 
@@ -203,6 +212,7 @@ export class MeteorEntity extends Entity {
   private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
     if (this.markToDestroy) return;
     this.health -= damage;
+    this.hit = true;
     const explosionEntity = new ExplosionEntity(this.game, nextId(), 1, this.entityId);
     explosionEntity.start(x, y);
     this.game.entities.push(explosionEntity);
@@ -235,6 +245,7 @@ export class MeteorEntity extends Entity {
       3: 3,
       4: 4,
     });
+    buff.addBoolean(entity.hit);
   }
 
   static randomMeteor() {
@@ -269,12 +280,14 @@ export class MeteorEntity extends Entity {
         3: 3 as const,
         4: 4 as const,
       }),
+      hit: reader.readBoolean(),
     };
   }
 }
 
 export type MeteorModel = EntityModel & {
   entityType: 'meteor';
+  hit: boolean;
   meteorColor: 'brown' | 'grey';
   rotate: number;
   size: 'big' | 'med' | 'small' | 'tiny';

@@ -1,6 +1,6 @@
 import {AssetKeys} from '../assets';
 
-export interface Asset<TKeys> {
+export interface Asset<TKeys=string> {
   animated: boolean;
   base: {x: number; y: number};
   image: HTMLImageElement;
