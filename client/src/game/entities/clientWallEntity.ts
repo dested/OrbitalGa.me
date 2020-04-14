@@ -7,10 +7,6 @@ export class ClientWallEntity extends WallEntity implements ClientEntity {
 
   constructor(game: ClientGame, messageModel: WallModel) {
     super(game, messageModel.entityId, messageModel.width, messageModel.height);
-
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    this.updatePolygon();
   }
   get drawX() {
     return this.realX;

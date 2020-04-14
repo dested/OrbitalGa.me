@@ -75,9 +75,12 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this
   );
 
-  constructor(game: Game, entityId: number, public enemyColor: EnemyColor) {
+  constructor(game: Game, entityId: number, x: number, y: number, public enemyColor: EnemyColor) {
     super(game, entityId, 'swoopingEnemy');
+    this.x = x;
+    this.y = y;
     this.createPolygon();
+    this.path.setStartPosition(x, y);
   }
 
   get realX() {
@@ -116,8 +119,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       this.aliveTick % 4 === 0 &&
       (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
     ) {
-      const shotEntity = new EnemyShotEntity(this.game, nextId());
-      shotEntity.start(this.x, this.y - 6);
+      const shotEntity = new EnemyShotEntity(this.game, nextId(), this.x, this.y - 6);
       this.game.entities.push(shotEntity);
     }
 
@@ -142,14 +144,19 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this.momentumY += y;
     otherEntity.causedDamage(otherEntity.damage, this);
 
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
-    explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
+    const explosionEntity = new ExplosionEntity(
+      this.game,
+      nextId(),
+      otherEntity.x - this.x,
+      otherEntity.y - this.y,
+      this.explosionIntensity,
+      this.entityId
+    );
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
       this.health = 0;
       otherEntity.causedKill(this);
-      const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
-      drop.start(this.x, this.y);
+      const drop = new DropEntity(this.game, nextId(), this.x, this.y, DropEntity.randomDrop('big'));
       this.game.entities.push(drop);
       this.game.explode(this, 'medium');
     }
@@ -168,11 +175,6 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       entityType: 'swoopingEnemy',
       enemyColor: this.enemyColor,
     };
-  }
-
-  start(x: number, y: number) {
-    super.start(x, y);
-    this.path.setStartPosition(x, y);
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {

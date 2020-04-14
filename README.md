@@ -12,9 +12,9 @@
 
 ## Features/Bugs
 
+- [ ] make game ui better
 - [ ] add arrows to direct you to where the action is
 - [ ] improve bot logic
-- [ ] fix explosion animation
 - [ ] add latency tracking
 - [ ] add audio
 - [ ] hard to go straight left with nipplejs
@@ -26,6 +26,8 @@
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
 - [ ] fix momentum for player, should be additive not replacing
+- [ ] fix explosion animation
+- [ ] get rid of explosion and make things light up when hit?
 - [x] cluster size never scales back down after 400 users?
 - [x] figure out ghost players
 - [x] make keyboard wasd
@@ -34,8 +36,8 @@
 - [x] only send data for livePlayer vs non
 - [x] validate input sequence number, assure they can't send garbage negative, etc
 - [x] add ping
-- [x] disconnect player for prolonged inactivity 
-- [x] disconnect player for delayed pingpong 
+- [x] disconnect player for prolonged inactivity
+- [x] disconnect player for delayed pingpong
 - [x] test server version
 - [x] import all assets
 - [x] add momentum to rocks
@@ -43,13 +45,13 @@
 - [x] abstract shield better, player keeps taking damage
 - [x] make collision more abstracted
 - [x] fix shots being tied to entity xy
-- [x] revive does not work 
+- [x] revive does not work
 - [x] abstract interpolate entities
 - [x] better death animation
 - [x] moving goes out of sync on mobile, i think its moving faster
-- [x] figure out mobile jitter, https://bugs.chromium.org/p/chromium/issues/detail?id=1068769 
-- [x] add death animation 
-- [x] fix shot offset in shot to be x,y and owner 
+- [x] figure out mobile jitter, https://bugs.chromium.org/p/chromium/issues/detail?id=1068769
+- [x] add death animation
+- [x] fix shot offset in shot to be x,y and owner
 - [x] add bots to client
 - [x] take damage
   - [x] die
@@ -67,8 +69,8 @@
 - [ ] watch other shmups
 - [ ] come up with more enemies
 - [ ] come up with realtime events
-  - [ ] big bosses every 5 min?
-  - [ ] build big enemy like in top left of Kenney expansion
+  - [ ] big bosses every 5 min
+  - [ ] countdown to next boss event
 - [ ] abstract game events into a class
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event?
@@ -96,7 +98,8 @@
 
 ## Infrastructure
 
-- [x] leaderboard
+- [x] server level leaderboard
+- [ ] global leaderboard
   - [ ] redis
 - [ ] add lambda for join/etc, checks redis for servers, spins one up?
 - [ ] add login register
@@ -104,8 +107,10 @@
 - [ ] test what happens if server crashes on aws
 - [ ] add analytics to server to see users connected, enemies, etc
 - [ ] add monitoring server to watch things happen
-- [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation 
+- [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation
 - [x] make sure disconnect and kill work
+- [ ] If you use this code let me know! it's not required I'm just curious
+- [ ] write better readme describe architecture
 
 ## Money
 
@@ -113,39 +118,39 @@
   - [ ] how do other guys do it itch.io
 - [ ] let streamers create their own server and send their own waves of enemies until everyone dies?????????
 - [ ] for huge streamers 500 people play across 10 servers, same script tho
-
+- [ ] Add analytics
+- [ ] buy ads
 
 ### old
 
-* [x] figure out multiplayer jumpiness on move
-* [x] validate buffer so client get send garbage, try catch and boot user
-* [x] move byte buffer code into individual entity
-* [x] refactor clientGame to be more dynamic and support adding entities easier
-* [x] determine screen size
+- [x] figure out multiplayer jumpiness on move
+- [x] validate buffer so client get send garbage, try catch and boot user
+- [x] move byte buffer code into individual entity
+- [x] refactor clientGame to be more dynamic and support adding entities easier
+- [x] determine screen size
   - [x] scaling
   - [x] cant go off the screen
-* [x] better kenney assets
-* [x] shot explode effect
-* [x] gun shooting offcenter when youre moving
-* [x] add momentum to movement
-* [x] alternate left right on shot
-* [x] better mobile support
+- [x] better kenney assets
+- [x] shot explode effect
+- [x] gun shooting offcenter when youre moving
+- [x] add momentum to movement
+- [x] alternate left right on shot
+- [x] better mobile support
   - [x] add mouse movement
   - [x] add full screen rotate code
-* [x] binary transfer
-* [x] better background
-* [x] refactor code
+- [x] binary transfer
+- [x] better background
+- [x] refactor code
   - [x] better separation
   - [x] proper draw
   - [x] add better bounding box for collisions
-* [x] clean up serialize, worldstate, buffer builder
-* [x] make it easier to add things add entities and sync fields
-* [x] add worldstate filtering
-* [x] build bots
-* [x] load test
-* [x] deploy to beanstalk
-* [x] determine how to scale up servers dynamically
-
+- [x] clean up serialize, worldstate, buffer builder
+- [x] make it easier to add things add entities and sync fields
+- [x] add worldstate filtering
+- [x] build bots
+- [x] load test
+- [x] deploy to beanstalk
+- [x] determine how to scale up servers dynamically
 
 ## Groupings
 

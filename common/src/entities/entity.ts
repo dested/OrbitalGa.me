@@ -3,6 +3,7 @@ import {Game} from '../game/game';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {EntityModels} from '../models/entityTypeModels';
 import {nextId} from '../utils/uuid';
+import {GameConstants} from '../game/gameConstants';
 
 type BoundingBox = {
   height: number;
@@ -130,6 +131,15 @@ export abstract class Entity {
   }
 
   reconcileFromServer(messageModel: EntityModel) {
+    if (messageModel.create) {
+      this.x = messageModel.x;
+      this.y = messageModel.y;
+      this.positionBuffer.push({
+        time: +new Date() - GameConstants.serverTickRate,
+        x: messageModel.x,
+        y: messageModel.y,
+      });
+    }
     this.positionBuffer.push({time: +new Date(), x: messageModel.x, y: messageModel.y});
   }
 
@@ -140,12 +150,6 @@ export abstract class Entity {
       y: this.y,
       create: this.create,
     };
-  }
-
-  start(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.updatePolygon();
   }
 
   updatePolygon() {

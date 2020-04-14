@@ -9,8 +9,8 @@ import {boxMargin, boxSize, SelectWeaponBox} from './weapons.styles';
 import {Utils} from '@common/utils/utils';
 
 const images: {[key in PlayerWeapon]: string} = {
-  laser1: laserBlue02,
-  laser2: laserBlue03,
+  laser1: laserBlue03,
+  laser2: laserBlue02,
   torpedo: spaceMissiles_004,
   rocket: spaceMissiles_001,
 };

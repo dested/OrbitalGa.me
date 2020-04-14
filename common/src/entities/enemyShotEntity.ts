@@ -14,8 +14,10 @@ export class EnemyShotEntity extends Entity implements Weapon {
   isWeapon = true as const;
   weaponSide = 'enemy' as const;
 
-  constructor(game: Game, entityId: number) {
+  constructor(game: Game, entityId: number, x: number, y: number) {
     super(game, entityId, 'enemyShot');
+    this.x = x;
+    this.y = y;
     this.createPolygon();
   }
   get realX() {
@@ -25,6 +27,9 @@ export class EnemyShotEntity extends Entity implements Weapon {
     return this.y;
   }
 
+  causedDamage(damage: number, otherEntity: Entity): void {}
+  causedKill(otherEntity: Entity): void {}
+
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
       this.destroy();
@@ -32,9 +37,6 @@ export class EnemyShotEntity extends Entity implements Weapon {
     }
     return false;
   }
-
-  causedDamage(damage: number, otherEntity: Entity): void {}
-  causedKill(otherEntity: Entity): void {}
 
   gameTick(duration: number) {
     this.y += GameRules.enemyShots.base.shotSpeedPerSecond * (duration / 1000);

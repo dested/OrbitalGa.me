@@ -40,7 +40,7 @@ export class CanvasUtils {
     }
   }
 
-  static whiteVersion(asset: Asset) {
+  static mask(asset: Asset, red: number, green: number, blue: number) {
     const canvas = document.createElement('canvas');
     canvas.width = asset.size.width;
     canvas.height = asset.size.height;
@@ -50,9 +50,9 @@ export class CanvasUtils {
     for (let i = 0; i < imageData.data.length; i += 4) {
       const a = imageData.data[i + 3];
       if (a !== 0) {
-        imageData.data[i] = imageData.data[i];
-        imageData.data[i + 1] = 0;
-        imageData.data[i + 2] = 0;
+        imageData.data[i] = red;
+        imageData.data[i + 1] = green;
+        imageData.data[i + 2] = blue;
       }
     }
     context.putImageData(imageData, 0, 0);

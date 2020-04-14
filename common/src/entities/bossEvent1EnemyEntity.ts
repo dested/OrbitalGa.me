@@ -109,10 +109,6 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
     };
   }
 
-  start(x: number, y: number) {
-    super.start(x, y);
-  }
-
   static addBuffer(buff: ArrayBufferBuilder, entity: BossEvent1EnemyModel) {
     Entity.addBuffer(buff, entity);
     buff.addSwitch(entity.pieceType, {

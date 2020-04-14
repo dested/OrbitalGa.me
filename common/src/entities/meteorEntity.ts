@@ -28,11 +28,16 @@ export class MeteorEntity extends Entity {
   constructor(
     game: Game,
     entityId: number,
+    x: number,
+    y: number,
     meteorColor: MeteorEntity['meteorColor'],
     size: MeteorEntity['size'],
     type: MeteorEntity['type']
   ) {
     super(game, entityId, 'meteor');
+
+    this.x = x;
+    this.y = y;
     this.meteorColor = meteorColor;
     this.size = size;
     this.type = type;
@@ -113,22 +118,20 @@ export class MeteorEntity extends Entity {
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (!this.game.isClient) {
-      if (isPlayerWeapon(otherEntity)) {
-        otherEntity.hurt(
-          1,
-          this,
-          collisionResult.overlap * collisionResult.overlap_x * 2,
-          collisionResult.overlap * collisionResult.overlap_y * 2
-        );
-        this.hurt(
-          otherEntity.damage,
-          otherEntity,
-          -collisionResult.overlap * collisionResult.overlap_x,
-          -collisionResult.overlap * collisionResult.overlap_y
-        );
-        return true;
-      }
+    if (isPlayerWeapon(otherEntity)) {
+      otherEntity.hurt(
+        1,
+        this,
+        collisionResult.overlap * collisionResult.overlap_x * 2,
+        collisionResult.overlap * collisionResult.overlap_y * 2
+      );
+      this.hurt(
+        otherEntity.damage,
+        otherEntity,
+        -collisionResult.overlap * collisionResult.overlap_x,
+        -collisionResult.overlap * collisionResult.overlap_y
+      );
+      return true;
     }
     return false;
   }
@@ -184,8 +187,22 @@ export class MeteorEntity extends Entity {
   }
 
   reconcileFromServer(messageModel: MeteorModel) {
-    super.reconcileFromServer(messageModel);
-    this.positionBuffer[this.positionBuffer.length - 1].rotate = messageModel.rotate;
+    if (messageModel.create) {
+      this.x = messageModel.x;
+      this.y = messageModel.y;
+      this.positionBuffer.push({
+        time: +new Date() - GameConstants.serverTickRate,
+        x: messageModel.x,
+        y: messageModel.y,
+        rotate: messageModel.rotate,
+      });
+    }
+    this.positionBuffer.push({
+      time: +new Date(),
+      x: messageModel.x,
+      y: messageModel.y,
+      rotate: messageModel.rotate,
+    });
     this.meteorColor = messageModel.meteorColor;
     this.size = messageModel.size;
     this.type = messageModel.type;
@@ -213,16 +230,16 @@ export class MeteorEntity extends Entity {
     if (this.markToDestroy) return;
     this.health -= damage;
     this.hit = true;
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), 1, this.entityId);
-    explosionEntity.start(x, y);
+    const explosionEntity = new ExplosionEntity(this.game, nextId(), x, y, 1, this.entityId);
     this.game.entities.push(explosionEntity);
     this.momentumX += x;
     this.momentumY += y;
-    if (this.health <= 0) {
-      const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop(this.size));
-      drop.start(this.x, this.y);
-      this.game.entities.push(drop);
-      this.game.explode(this, 'small');
+    if (!this.game.isClient) {
+      if (this.health <= 0) {
+        const drop = new DropEntity(this.game, nextId(), this.x, this.y, DropEntity.randomDrop(this.size));
+        this.game.entities.push(drop);
+        this.game.explode(this, 'small');
+      }
     }
   }
 

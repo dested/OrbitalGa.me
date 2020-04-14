@@ -26,8 +26,11 @@ export type DropType =
 export class DropEntity extends Entity {
   boundingBoxes = [{width: 50, height: 50}];
 
-  constructor(game: Game, entityId: number, public drop: DropType) {
+  constructor(game: Game, entityId: number, x: number, y: number, public drop: DropType) {
     super(game, entityId, 'drop');
+
+    this.x = x;
+    this.y = y;
     this.createPolygon();
   }
 

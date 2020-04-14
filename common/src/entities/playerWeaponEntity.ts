@@ -6,6 +6,7 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {PlayerEntity} from './playerEntity';
+import {GameConstants} from '../game/gameConstants';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -18,12 +19,16 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   constructor(
     game: Game,
     entityId: number,
+    x: number,
+    y: number,
     public ownerEntityId: number,
     public offsetX: number,
     public startY: number,
     public weaponType: PlayerWeapon
   ) {
     super(game, entityId, 'playerWeapon');
+    this.x = x;
+    this.y = y;
     this.damage = WeaponConfigs[weaponType].damage;
     this.explosionIntensity = WeaponConfigs[weaponType].explosionIntensity;
     this.createPolygon();

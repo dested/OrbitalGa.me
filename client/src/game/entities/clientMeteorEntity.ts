@@ -5,6 +5,8 @@ import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {AssetKeys} from '../../assets';
+import {GameConstants} from '@common/game/gameConstants';
+import {ShakeGame} from '../../utils/shakeUtils';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
@@ -12,10 +14,15 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   zIndex = DrawZIndex.Scenery;
 
   constructor(private clientGame: ClientGame, messageModel: MeteorModel) {
-    super(clientGame, messageModel.entityId, messageModel.meteorColor, messageModel.size, messageModel.type);
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    this.updatePolygon();
+    super(
+      clientGame,
+      messageModel.entityId,
+      messageModel.x,
+      messageModel.y,
+      messageModel.meteorColor,
+      messageModel.size,
+      messageModel.type
+    );
   }
 
   get drawX() {
@@ -59,7 +66,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
 
   static whiteMeteor(asset: AssetKeys) {
     if (!this._whiteMeteor[asset]) {
-      this._whiteMeteor[asset] = CanvasUtils.whiteVersion(OrbitalAssets.assets[asset]);
+      this._whiteMeteor[asset] = CanvasUtils.mask(OrbitalAssets.assets[asset], 255, 255, 255);
     }
     return this._whiteMeteor[asset]!;
   }

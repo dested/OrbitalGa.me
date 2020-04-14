@@ -10,18 +10,6 @@ export class ClientBossEvent1Entity extends BossEvent1Entity implements ClientEn
 
   constructor(game: ClientGame, messageModel: BossEvent1Model) {
     super(game, messageModel.entityId, messageModel.health);
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    this.health = messageModel.health;
-    if (messageModel.create) {
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: messageModel.x,
-        y: messageModel.y,
-      });
-    }
-
-    this.updatePolygon();
   }
   get drawX() {
     return this.x;

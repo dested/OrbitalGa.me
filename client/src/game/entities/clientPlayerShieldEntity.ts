@@ -11,17 +11,6 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
 
   constructor(game: ClientGame, messageModel: PlayerShieldModel) {
     super(game, messageModel.entityId, messageModel.ownerEntityId, messageModel.shieldStrength);
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    this.health = messageModel.health;
-    if (messageModel.create) {
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: this.x,
-        y: this.y,
-      });
-    }
-    this.updatePolygon();
   }
   get drawX() {
     const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);

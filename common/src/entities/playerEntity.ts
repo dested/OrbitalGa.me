@@ -153,12 +153,13 @@ export class PlayerEntity extends Entity implements Weapon {
               const playerWeaponEntity = new PlayerWeaponEntity(
                 this.game,
                 nextId(),
+                this.x + offsetX,
+                this.y - 6,
                 this.entityId,
                 offsetX,
                 this.y - 6,
                 this.selectedWeapon
               );
-              playerWeaponEntity.start(this.x + offsetX, this.y - 6);
               this.game.entities.push(playerWeaponEntity);
               if (config.alternateSide) {
                 this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
@@ -276,7 +277,9 @@ export class PlayerEntity extends Entity implements Weapon {
     const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
     this.momentumX += x;
     this.momentumY += y;
-    this.game.gameLeaderboard.increaseEntry(this.entityId, 'damageTaken', damage);
+    if (!this.game.isClient) {
+      this.game.gameLeaderboard.increaseEntry(this.entityId, 'damageTaken', damage);
+    }
     if (shield && !shield.depleted) {
       const damageLeft = shield.hurt(damage, otherEntity, x, y);
       if (damageLeft === 0) {
@@ -287,8 +290,7 @@ export class PlayerEntity extends Entity implements Weapon {
     }
 
     this.health -= damage;
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
-    explosionEntity.start(x, y);
+    const explosionEntity = new ExplosionEntity(this.game, nextId(), x, y, this.explosionIntensity, this.entityId);
     this.game.entities.push(explosionEntity);
   }
 

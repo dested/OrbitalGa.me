@@ -8,16 +8,6 @@ export class ClientSpectatorEntity extends SpectatorEntity implements ClientEnti
   constructor(game: ClientGame, messageModel: SpectatorModel) {
     super(game, messageModel.entityId);
     game.spectatorEntity = this;
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    if (messageModel.create) {
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: this.x,
-        y: this.y,
-      });
-    }
-    this.updatePolygon();
   }
   get drawX() {
     return this.x;

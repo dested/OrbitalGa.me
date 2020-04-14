@@ -10,16 +10,7 @@ export class ClientDropEntity extends DropEntity implements ClientEntity {
   zIndex = DrawZIndex.Scenery;
 
   constructor(game: ClientGame, messageModel: DropModel) {
-    super(game, messageModel.entityId, messageModel.drop);
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    if (messageModel.create) {
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: this.x,
-        y: this.y,
-      });
-    }
+    super(game, messageModel.entityId, messageModel.x, messageModel.y, messageModel.drop);
   }
 
   get asset() {

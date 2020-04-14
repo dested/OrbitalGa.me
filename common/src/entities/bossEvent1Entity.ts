@@ -164,12 +164,17 @@ export class BossEvent1Entity extends Entity {
     this.momentumX += x;
     this.momentumY += y;
 
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
-    explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
+    const explosionEntity = new ExplosionEntity(
+      this.game,
+      nextId(),
+      otherEntity.x - this.x,
+      otherEntity.y - this.y,
+      this.explosionIntensity,
+      this.entityId
+    );
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
-      const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
-      drop.start(this.x, this.y);
+      const drop = new DropEntity(this.game, nextId(), this.x, this.y, DropEntity.randomDrop('big'));
       this.game.entities.push(drop);
       this.game.explode(this, 'medium');
     }
@@ -186,10 +191,6 @@ export class BossEvent1Entity extends Entity {
       health: this.health,
       entityType: 'bossEvent1',
     };
-  }
-
-  start(x: number, y: number) {
-    super.start(x, y);
   }
 
   static addBuffer(buff: ArrayBufferBuilder, entity: BossEvent1Model) {

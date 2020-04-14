@@ -9,8 +9,6 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
     super(clientGame, messageModel.entityId, messageModel.playerColor);
-    this.x = messageModel.x;
-    this.y = messageModel.y;
   }
 
   get drawX() {

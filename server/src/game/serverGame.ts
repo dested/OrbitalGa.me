@@ -203,10 +203,12 @@ export class ServerGame extends Game {
       const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.entityType === 'player').length, 4) * 1.5);
       if (enemies < players) {
         for (let i = enemies; i < players; i++) {
-          const swoopingEnemyEntity = new SwoopingEnemyEntity(this, nextId(), SwoopingEnemyEntity.randomEnemyColor());
-          swoopingEnemyEntity.start(
+          const swoopingEnemyEntity = new SwoopingEnemyEntity(
+            this,
+            nextId(),
             this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
-            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+            SwoopingEnemyEntity.randomEnemyColor()
           );
           this.entities.push(swoopingEnemyEntity);
         }
@@ -221,11 +223,16 @@ export class ServerGame extends Game {
       for (const grouping of this.entityClusterer.getGroupings((a) => a.entityType === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
-          const meteor = new MeteorEntity(this, nextId(), meteorColor, size, type);
-          meteor.start(
+          const meteor = new MeteorEntity(
+            this,
+            nextId(),
             Utils.randomInRange(grouping.x0, grouping.x1),
-            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+            meteorColor,
+            size,
+            type
           );
+
           this.entities.push(meteor);
         }
       }

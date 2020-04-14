@@ -34,10 +34,12 @@ export abstract class Game {
         break;
     }
     for (let i = 0; i < size; i++) {
-      const deathExplosion = new ExplosionEntity(this, nextId(), 2);
-      deathExplosion.start(
+      const deathExplosion = new ExplosionEntity(
+        this,
+        nextId(),
         entity.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
-        entity.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height
+        entity.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
+        2
       );
       this.entities.push(deathExplosion);
     }

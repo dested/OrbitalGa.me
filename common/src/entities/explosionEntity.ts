@@ -7,8 +7,17 @@ export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
   aliveDuration = ExplosionEntity.totalAliveDuration;
 
-  constructor(game: Game, entityId: number, public intensity: number, public ownerEntityId?: number) {
+  constructor(
+    game: Game,
+    entityId: number,
+    x: number,
+    y: number,
+    public intensity: number,
+    public ownerEntityId?: number
+  ) {
     super(game, entityId, 'explosion');
+    this.x = x;
+    this.y = y;
     this.createPolygon();
   }
 

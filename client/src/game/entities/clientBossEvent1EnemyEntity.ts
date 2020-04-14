@@ -21,16 +21,6 @@ export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implement
       messageModel.yOffset,
       messageModel.rotate
     );
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    if (messageModel.create) {
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: messageModel.x,
-        y: messageModel.y,
-      });
-    }
-
     this.updatePolygon();
   }
   get drawX() {

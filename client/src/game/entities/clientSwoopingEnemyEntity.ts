@@ -9,23 +9,13 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {
-    super(game, messageModel.entityId, messageModel.enemyColor);
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    this.health = messageModel.health;
-    if (messageModel.create) {
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: messageModel.x,
-        y: messageModel.y,
-      });
-    }
-
-    this.updatePolygon();
+    super(game, messageModel.entityId, messageModel.x, messageModel.y, messageModel.enemyColor);
   }
+
   get drawX() {
     return this.x;
   }
+
   get drawY() {
     return this.y;
   }

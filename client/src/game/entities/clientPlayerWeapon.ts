@@ -13,26 +13,13 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     super(
       clientGame,
       messageModel.entityId,
+      messageModel.x,
+      messageModel.y,
       messageModel.ownerEntityId,
       messageModel.offsetX,
       messageModel.startY,
       messageModel.weaponType
     );
-
-    this.x = messageModel.x;
-    this.y = messageModel.y;
-    if (messageModel.create) {
-      if (this.owner && this.owner === clientGame.liveEntity && clientGame.liveEntity) {
-        this.x = this.owner.x + this.offsetX;
-      }
-      this.y = messageModel.startY;
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: this.x,
-        y: messageModel.startY,
-      });
-    }
-    this.updatePolygon();
   }
 
   get asset() {
@@ -96,6 +83,17 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
       default:
         unreachable(this.weaponType);
         break;
+    }
+  }
+
+  reconcileFromServer(messageModel: ShotModel) {
+    super.reconcileFromServer(messageModel);
+    if (messageModel.create) {
+      if (this.owner && this.owner === this.clientGame.liveEntity && this.clientGame.liveEntity) {
+        this.x = this.owner.x + this.offsetX;
+      }
+      this.y = messageModel.startY;
+      this.positionBuffer[0].y = messageModel.startY;
     }
   }
 
