@@ -14,7 +14,6 @@
 
 - [ ] add arrows to direct you to where the action is
 - [ ] improve bot logic
-- [ ] make keyboard wasd
 - [ ] fix explosion animation
 - [ ] add latency tracking
 - [ ] add audio
@@ -22,12 +21,14 @@
 - [ ] add server kill switch to boot everyone out
 - [ ] support multiple bounding boxes
   - [ ] fix boundingbox not being from center
+  - [ ] add client side collisions better
   - [x] add rotate to bounding box
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
 - [ ] fix momentum for player, should be additive not replacing
-- [ ] figure out ghost players
-- [ ] cluster size never scales back down after 400 users?
+- [x] cluster size never scales back down after 400 users?
+- [x] figure out ghost players
+- [x] make keyboard wasd
 - [x] better grouping of players and enemies
 - [x] optimize server
 - [x] only send data for livePlayer vs non
@@ -73,6 +74,7 @@
   - [ ] puzzles solve together like a maze blow up walls game event?
 - [ ] add 5 second sustained laser
 - [ ] add smoke to rockets
+- [x] add fire to player ships
 - [x] drop power-ups from enemy
 - [x] drop power-ups from debris
 - [x] add power-ups
@@ -92,7 +94,7 @@
 
 ## Infrastructure
 
-- [ ] leaderboard
+- [x] leaderboard
   - [ ] redis
 - [ ] add lambda for join/etc, checks redis for servers, spins one up?
 - [ ] add login register

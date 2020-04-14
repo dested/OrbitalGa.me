@@ -5,8 +5,7 @@ import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
-import {unreachable} from '@common/utils/unreachable';
-import {OrbitalAssets} from '../utils/assetManager';
+import keyboardJS from 'keyboardjs';
 
 export class ClientGameUI extends ClientGame {
   drawTick = 0;
@@ -29,48 +28,32 @@ export class ClientGameUI extends ClientGame {
       true
     );
 
-    document.onkeydown = (e) => {
-      const player = this.liveEntity;
-      if (!player) {
-        return;
-      }
-      if (e.keyCode === 65) {
-        player.setKey('shoot', true);
-      }
-      if (e.keyCode === 66) {
-        const index = player.availableWeapons.findIndex((a) => a.weapon === player.selectedWeapon);
-        player.setKey('weapon', player.availableWeapons[(index + 1) % player.availableWeapons.length].weapon!);
-      }
-      if (e.keyCode === 38) {
-        player.setKey('up', true);
-      } else if (e.keyCode === 40) {
-        player.setKey('down', true);
-      } else if (e.keyCode === 37) {
-        player.setKey('left', true);
-      } else if (e.keyCode === 39) {
-        player.setKey('right', true);
-      }
-      // e.preventDefault();
-    };
-    document.onkeyup = (e) => {
-      const player = this.liveEntity;
-      if (!player) {
-        return;
-      }
-      if (e.keyCode === 65) {
-        player.setKey('shoot', false);
-      }
+    keyboardJS.bind(
+      'w',
+      () => this.liveEntity?.setKey('up', true),
+      () => this.liveEntity?.setKey('up', false)
+    );
+    keyboardJS.bind(
+      'a',
+      () => this.liveEntity?.setKey('left', true),
+      () => this.liveEntity?.setKey('left', false)
+    );
+    keyboardJS.bind(
+      's',
+      () => this.liveEntity?.setKey('down', true),
+      () => this.liveEntity?.setKey('down', false)
+    );
 
-      if (e.keyCode === 38) {
-        player.setKey('up', false);
-      } else if (e.keyCode === 40) {
-        player.setKey('down', false);
-      } else if (e.keyCode === 37) {
-        player.setKey('left', false);
-      } else if (e.keyCode === 39) {
-        player.setKey('right', false);
-      }
-    };
+    keyboardJS.bind(
+      'd',
+      () => this.liveEntity?.setKey('right', true),
+      () => this.liveEntity?.setKey('right', false)
+    );
+    keyboardJS.bind(
+      'space',
+      () => this.liveEntity?.setKey('shoot', true),
+      () => this.liveEntity?.setKey('shoot', false)
+    );
 
     const requestNextFrame = () => {
       requestAnimationFrame(() => {
