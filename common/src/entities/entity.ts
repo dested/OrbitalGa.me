@@ -45,7 +45,7 @@ export abstract class Entity {
       }
       const potentials = polygon.potentials();
       for (const body of potentials) {
-        if (polygon && polygon.collides(body, this.game.collisionResult)) {
+        if (polygon.collides(body, this.game.collisionResult)) {
           const collided = this.collide(body.entity, this.game.collisionResult);
           if (collided) {
             return true;

@@ -116,8 +116,8 @@ export class MeteorEntity extends Entity {
         otherEntity.hurt(
           1,
           this,
-          collisionResult.overlap * collisionResult.overlap_x,
-          collisionResult.overlap * collisionResult.overlap_y
+          collisionResult.overlap * collisionResult.overlap_x*2,
+          collisionResult.overlap * collisionResult.overlap_y*2
         );
         this.hurt(
           otherEntity.damage,

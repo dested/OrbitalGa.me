@@ -120,14 +120,14 @@ export class ServerGame extends Game {
             if (user && connection) {
               connection.lastAction = +new Date();
               delete noInputThisTick[user.entity.entityId];
-              if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
+              /*if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
                 console.log(
                   'User input sequence too far off',
                   q.message.inputSequenceNumber,
                   user.entity.lastProcessedInputSequenceNumber
                 );
                 this.serverSocket.disconnect(connection.connectionId);
-              } else {
+              } else*/ {
                 user.entity.applyInput(q.message);
               }
             }
@@ -174,9 +174,9 @@ export class ServerGame extends Game {
       const groups = Utils.groupBy(this.entities.array, (a) => a.entityType);
       const memoryUsage = process.memoryUsage();
       console.log(
-        `#${tickIndex}, Con: ${this.serverSocket.connections.length}, Us: ${this.users.length}, Sp ${
+        `#${tickIndex}, Con: ${this.serverSocket.connections.length}, Usr: ${this.users.length}, Spc ${
           this.spectators.length
-        }, Eny: ${this.entities.length}, Mes:${
+        }, Ents: ${this.entities.length}, Msg:${
           this.queuedMessages.length
         }, Duration: ${tickTime}ms, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, -> ${Utils.formatBytes(
           this.serverSocket.totalBytesSentPerSecond

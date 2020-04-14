@@ -27,7 +27,7 @@ async function main() {
             setTimeout(async () => {
               me.disconnect();
               await Utils.timeout(1000);
-            }, 4000 + Math.random() * 1000);
+            }, 5000 + Math.random() * 10000);
           },
           onUIUpdate: () => {},
           onDied: (me: ClientGame) => {

@@ -34,7 +34,7 @@ const rightJoystickOptions = {
 
 const styles = {
   canvas: {width: '100vw', height: '100vh', position: 'absolute', zIndex: -99},
-  label: {fontSize: '2rem', color: 'white'},
+  label: {fontSize: '1rem', color: 'white'},
   leftJoyStick: {
     position: 'absolute',
     height: '30%',

@@ -17,13 +17,18 @@ const styles = {
     width: '100%',
     position: 'absolute',
     bottom: 0,
-    padding: 30,
     display: 'flex',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
   f1: {flex: 1, display: 'flex'},
-  image: {height: `calc(${boxSize} - 10px * 2px)`, margin: 10},
-  ammo: {fontFamily: 'kenney_spaceregular', fontSize: '1.3rem', marginBottom: 10, color: 'rgb(45,59,112)'},
+  image: {height: `calc(${boxSize} - 2rem)`, margin: '0.5rem'},
+  ammo: {
+    fontFamily: 'kenney_spaceregular',
+    fontSize: '0.6rem',
+    margin: 10,
+    color: 'rgb(45,59,112)',
+  },
 } as const;
 
 export const Weapons = (props: {tick: number}) => {
