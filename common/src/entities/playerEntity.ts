@@ -186,6 +186,14 @@ export class PlayerEntity extends Entity implements Weapon {
     }
   }
 
+  causedDamage(damage: number, otherEntity: Entity): void {
+    this.game.gameLeaderboard.increaseEntry(this.entityId, 'damageGiven', damage);
+  }
+
+  causedKill(otherEntity: Entity): void {
+    this.game.gameLeaderboard.increaseEntry(this.entityId, 'enemiesKilled', 1);
+  }
+
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
       this.x -= collisionResult.overlap * collisionResult.overlap_x;
@@ -215,18 +223,11 @@ export class PlayerEntity extends Entity implements Weapon {
     return false;
   }
 
-  causedDamage(damage: number, otherEntity: Entity): void {
-    this.game.gameLeaderboard.increaseEntry(this.entityId, 'damageGiven', damage);
-  }
-
-  causedKill(otherEntity: Entity): void {
-    this.game.gameLeaderboard.increaseEntry(this.entityId, 'enemiesKilled', 1);
-  }
-
   die() {
     this.dead = true;
     if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId)?.destroy();
     this.game.explode(this, 'big');
+    this.game.gameLeaderboard.removePlayer(this.entityId);
   }
 
   gameTick(): void {

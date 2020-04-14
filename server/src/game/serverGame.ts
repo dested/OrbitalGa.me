@@ -373,7 +373,6 @@ export class ServerGame extends Game {
       return;
     }
     user.entity.die();
-    this.gameLeaderboard.removePlayer(user.entity.entityId);
     this.users.remove(user);
     delete this.queuedMessagesToSend[connectionId];
   }
@@ -404,10 +403,12 @@ export class ServerGame extends Game {
         });
       } else {
         const myScore = scores.find((a) => a.userId === user.entity.entityId)!;
-        this.sendMessageToClient(user.connectionId, {
-          type: 'leaderboard',
-          scores: [...topTen, myScore],
-        });
+        if (myScore) {
+          this.sendMessageToClient(user.connectionId, {
+            type: 'leaderboard',
+            scores: [...topTen, myScore],
+          });
+        }
       }
     }
 
