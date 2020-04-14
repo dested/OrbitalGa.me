@@ -120,13 +120,12 @@ export class ServerGame extends Game {
           }
           break;
         case 'playerInput': {
-          {
-            const user = this.users.lookup(q.connectionId);
-            const connection = this.serverSocket.connections.lookup(q.connectionId);
-            if (user && connection) {
-              connection.lastAction = +new Date();
-              delete noInputThisTick[user.entity.entityId];
-              /*if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
+          const user = this.users.lookup(q.connectionId);
+          const connection = this.serverSocket.connections.lookup(q.connectionId);
+          if (user && connection) {
+            connection.lastAction = +new Date();
+            delete noInputThisTick[user.entity.entityId];
+            /*if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
                 console.log(
                   'User input sequence too far off',
                   q.message.inputSequenceNumber,
@@ -134,8 +133,7 @@ export class ServerGame extends Game {
                 );
                 this.serverSocket.disconnect(connection.connectionId);
               } else*/ {
-                user.entity.applyInput(q.message);
-              }
+              user.entity.applyInput(q.message);
             }
           }
           break;
@@ -327,7 +325,7 @@ export class ServerGame extends Game {
     }
     const user = this.users.lookup(connectionId);
     if (user) {
-      this.users.remove(user);
+      this.userLeave(connectionId);
     }
     if (name.length > 10) {
       this.serverSocket.disconnect(connectionId);

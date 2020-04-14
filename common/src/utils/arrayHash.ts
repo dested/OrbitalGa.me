@@ -23,14 +23,16 @@ export class ArrayHash<T> {
 
   push(item: T) {
     this.array.push(item);
+    if (this.hash[(item[this.primaryKey] as unknown) as number]) {
+      throw new Error('Array hash primary key must be unique');
+    }
     this.hash[(item[this.primaryKey] as unknown) as number] = item;
   }
 
   remove(item: T) {
     delete this.hash[(item[this.primaryKey] as unknown) as number];
     if (this.array.indexOf(item) === -1) {
-      console.error('BAD REMOVE FROM ARRAY HASH', item);
-      throw new Error('BAD REMOVE FROM ARRAY HASH');
+      throw new Error('Array hash primary key must be unique');
     }
     this.array.splice(this.array.indexOf(item), 1);
   }

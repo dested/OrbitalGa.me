@@ -81,6 +81,7 @@ export class ServerSocket implements IServerSocket {
         res.end();
       }
     });
+
     this.wss = new WebServer.Server({server, perMessageDeflate: false});
     this.wss.on('error', (a: any, b: any) => {
       console.error('error', a, b);
@@ -95,11 +96,18 @@ export class ServerSocket implements IServerSocket {
         lastAction: +new Date(),
         lastPing: +new Date(),
       };
+
       this.connections.push(me);
+      const disconnect = () => {
+        const connection = this.connections.lookup(me.connectionId);
+        if (!connection) {
+          return;
+        }
+        this.connections.remove(connection);
+        // console.log('closed: connections', this.connections.length);
+        onLeave(me.connectionId);
+      };
       // console.log('opened: connections', this.connections.length);
-      ws.on('error', (a: any, b: any) => {
-        console.error('ws error', a, b);
-      });
       ws.on('message', (message) => {
         if (GameConstants.binaryTransport) {
           // console.log('got message', (message as ArrayBuffer).byteLength);
@@ -119,16 +127,13 @@ export class ServerSocket implements IServerSocket {
           onMessage(me.connectionId, JSON.parse(message as string));
         }
       });
-      ws.on('error', (e) => console.log('errored', e));
+      ws.on('error', (e) => {
+        console.log('errored', e);
+        disconnect();
+      });
 
       ws.onclose = () => {
-        const connection = this.connections.lookup(me.connectionId);
-        if (!connection) {
-          return;
-        }
-        this.connections.remove(connection);
-        // console.log('closed: connections', this.connections.length);
-        onLeave(me.connectionId);
+        disconnect();
       };
       onJoin(me.connectionId);
     });
