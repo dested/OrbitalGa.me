@@ -11,8 +11,8 @@ import {GameData} from '../../game/gameData';
 import {Weapons} from '../../components/weapons';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from '../loginScreen/index.styles';
 import {ClientGame} from '../../game/clientGame';
-import {ErrorMessage} from '@common/models/messages';
 import {Leaderboard} from '../../components/leaderboard';
+import {ErrorMessage} from '@common/models/serverToClientMessages';
 
 const leftJoystickOptions = {
   mode: 'static',

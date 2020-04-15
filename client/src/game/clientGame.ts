@@ -1,4 +1,3 @@
-import {ClientToServerMessage, ErrorMessage, ServerToClientMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
@@ -12,6 +11,8 @@ import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
 import {RollingAverage} from '@common/utils/rollingAverage';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
+import {ErrorMessage, ServerToClientMessage} from '@common/models/serverToClientMessages';
+import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -93,8 +94,8 @@ export class ClientGame extends Game {
     this.sendMessageToServer({type: 'join', name});
   }
 
-  sendInput(input: ClientLivePlayerEntity['keys'] & {inputSequenceNumber: number}) {
-    this.sendMessageToServer({type: 'playerInput', ...input});
+  sendInput(input: ClientLivePlayerEntity['keys'], inputSequenceNumber: number) {
+    this.sendMessageToServer({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input});
   }
 
   sendMessageToServer(message: ClientToServerMessage) {

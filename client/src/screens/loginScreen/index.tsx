@@ -8,9 +8,9 @@ import {GoFullScreen} from '../../components/goFullScreen';
 import {GameConstants} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
 import {ClientGame} from '../../game/clientGame';
-import {ErrorMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {Leaderboard} from '../../components/leaderboard';
+import {ErrorMessage} from '@common/models/serverToClientMessages';
 
 const styles = {
   buttonList: {display: 'flex', width: '100%'},

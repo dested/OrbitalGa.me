@@ -17,6 +17,7 @@ export class MeteorEntity extends Entity {
   health: number;
   hit = false;
   meteorColor: 'brown' | 'grey';
+  meteorType: '1' | '2' | '3' | '4';
   momentumX = Math.random() * 10 - 5;
   momentumY: number;
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
@@ -24,61 +25,60 @@ export class MeteorEntity extends Entity {
   rotateSpeed = Math.round(1 + Math.random() * 3);
   size: Size;
   startingMomentumY: number;
-  type: 1 | 2 | 3 | 4;
 
   constructor(game: Game, messageModel: ImpliedEntityType<MeteorModel>) {
     super(game, messageModel);
 
     this.meteorColor = messageModel.meteorColor;
     this.size = messageModel.size;
-    this.type = messageModel.type;
+    this.meteorType = messageModel.meteorType;
     this.rotate = messageModel.rotate;
     this.startingMomentumY = 5 + Math.random() * 10;
     this.momentumY = this.startingMomentumY;
 
     switch (messageModel.size) {
       case 'big':
-        switch (messageModel.type) {
-          case 1:
+        switch (messageModel.meteorType) {
+          case '1':
             this.boundingBoxes = [{width: 101, height: 84}];
             break;
-          case 2:
+          case '2':
             this.boundingBoxes = [{width: 120, height: 98}];
             break;
-          case 3:
+          case '3':
             this.boundingBoxes = [{width: 89, height: 82}];
             break;
-          case 4:
+          case '4':
             this.boundingBoxes = [{width: 98, height: 96}];
             break;
         }
         break;
       case 'med':
-        switch (messageModel.type) {
-          case 1:
+        switch (messageModel.meteorType) {
+          case '1':
             this.boundingBoxes = [{width: 43, height: 43}];
             break;
-          case 2:
+          case '2':
             this.boundingBoxes = [{width: 45, height: 40}];
             break;
         }
         break;
       case 'small':
-        switch (messageModel.type) {
-          case 1:
+        switch (messageModel.meteorType) {
+          case '1':
             this.boundingBoxes = [{width: 28, height: 28}];
             break;
-          case 2:
+          case '2':
             this.boundingBoxes = [{width: 29, height: 26}];
             break;
         }
         break;
       case 'tiny':
-        switch (messageModel.type) {
-          case 1:
+        switch (messageModel.meteorType) {
+          case '1':
             this.boundingBoxes = [{width: 18, height: 18}];
             break;
-          case 2:
+          case '2':
             this.boundingBoxes = [{width: 16, height: 15}];
             break;
         }
@@ -197,14 +197,14 @@ export class MeteorEntity extends Entity {
     });
     this.meteorColor = messageModel.meteorColor;
     this.size = messageModel.size;
-    this.type = messageModel.type;
+    this.meteorType = messageModel.meteorType;
     this.hit = messageModel.hit;
   }
 
   serialize(): MeteorModel {
     return {
       ...super.serialize(),
-      type: this.type,
+      meteorType: this.meteorType,
       meteorColor: this.meteorColor,
       size: this.size,
       rotate: this.rotate,
@@ -259,7 +259,7 @@ export class MeteorEntity extends Entity {
       small: 3,
       tiny: 4,
     });
-    buff.addSwitch(entity.type, {
+    buff.addSwitch(entity.meteorType, {
       1: 1,
       2: 2,
       3: 3,
@@ -273,8 +273,8 @@ export class MeteorEntity extends Entity {
     const size = Utils.randomElement(['big' as const, 'med' as const, 'small' as const, 'tiny' as const]);
     const type =
       size === 'big'
-        ? Utils.randomElement([1 as const, 2 as const, 3 as const, 4 as const])
-        : Utils.randomElement([1 as const, 2 as const]);
+        ? Utils.randomElement(['1' as const, '2' as const, '3' as const, '4' as const])
+        : Utils.randomElement(['1' as const, '2' as const]);
 
     return {meteorColor, size, type};
   }
@@ -294,11 +294,11 @@ export class MeteorEntity extends Entity {
         3: 'small' as const,
         4: 'tiny' as const,
       }),
-      type: Utils.switchNumber(reader.readUint8(), {
-        1: 1 as const,
-        2: 2 as const,
-        3: 3 as const,
-        4: 4 as const,
+      meteorType: Utils.switchNumber(reader.readUint8(), {
+        1: '1' as const,
+        2: '2' as const,
+        3: '3' as const,
+        4: '4' as const,
       }),
       hit: reader.readBoolean(),
     };
@@ -309,7 +309,7 @@ export type MeteorModel = EntityModel & {
   entityType: 'meteor';
   hit: boolean;
   meteorColor: 'brown' | 'grey';
+  meteorType: '1' | '2' | '3' | '4';
   rotate: number;
   size: 'big' | 'med' | 'small' | 'tiny';
-  type: 1 | 2 | 3 | 4;
 };

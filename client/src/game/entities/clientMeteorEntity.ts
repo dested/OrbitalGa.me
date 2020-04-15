@@ -28,7 +28,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   draw(context: CanvasRenderingContext2D): void {
     const color = this.meteorColor === 'brown' ? 'Brown' : 'Grey';
 
-    const asset = `Meteors.meteor${color}_${this.size}${this.type}` as 'Meteors.meteorBrown_big1';
+    const asset = `Meteors.meteor${color}_${this.size}${this.meteorType}` as 'Meteors.meteorBrown_big1';
     const meteor = OrbitalAssets.assets[asset];
 
     context.save();

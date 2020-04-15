@@ -1,12 +1,12 @@
 ///<reference path="./types/ws.d.ts"/>
 import * as WebServer from 'ws';
-import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {GameConstants} from '@common/game/gameConstants';
-import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
-import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 import {createServer} from 'http';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
+import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
+import {ClientToServerMessage, ClientToServerSchema} from '@common/models/clientToServerMessages';
+import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
 
 export type SocketConnection = {
   connectionId: number;
@@ -59,7 +59,7 @@ export class ServerSocket implements IServerSocket {
       return;
     }
     if (GameConstants.binaryTransport) {
-      const body = ServerToClientMessageParser.fromServerToClientMessages(messages);
+      const body = ArrayBufferSchema.startAddSchemaBuffer(messages, ServerToClientSchema);
       this.totalBytesSent += body.byteLength;
       client.socket.send(body);
     } else {
@@ -117,7 +117,7 @@ export class ServerSocket implements IServerSocket {
             ws.close();
             return;
           }
-          const messageData = ClientToServerMessageParser.toClientToServerMessage(message as ArrayBuffer);
+          const messageData = ArrayBufferSchema.startReadSchemaBuffer(message as ArrayBuffer, ClientToServerSchema);
           if (messageData === null) {
             ws.close();
             return;

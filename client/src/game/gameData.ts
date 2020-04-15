@@ -7,7 +7,7 @@ import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
 import {BotClientGame} from './botClientGame';
 import {ClientGame, ClientGameOptions} from './clientGame';
-import {ErrorMessage} from '@common/models/messages';
+import {ErrorMessage} from '@common/models/serverToClientMessages';
 
 export class GameData {
   static instance = new GameData();

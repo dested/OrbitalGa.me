@@ -1,8 +1,8 @@
 import {GameConstants} from '@common/game/gameConstants';
-import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
-import {ClientToServerMessageParser} from '@common/parsers/clientToServerMessageParser';
-import {ServerToClientMessageParser} from '@common/parsers/serverToClientMessageParser';
 import {ClientConfig} from './clientConfig';
+import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
+import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
+import {ClientToServerMessage, ClientToServerSchema} from '@common/models/clientToServerMessages';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
@@ -30,7 +30,7 @@ export class ClientSocket implements IClientSocket {
     this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         totalLength += (e.data as ArrayBuffer).byteLength;
-        options.onMessage(ServerToClientMessageParser.toServerToClientMessages(e.data));
+        options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchema));
       } else {
         totalLength += e.data.length;
         options.onMessage(JSON.parse(e.data));
@@ -52,7 +52,7 @@ export class ClientSocket implements IClientSocket {
 
   sendMessage(message: ClientToServerMessage) {
     if (GameConstants.binaryTransport) {
-      this.socketSend(ClientToServerMessageParser.fromClientToServerMessage(message));
+      this.socketSend(ArrayBufferSchema.startAddSchemaBuffer(message, ClientToServerSchema));
     } else {
       this.socketSend(JSON.stringify(message));
     }
@@ -70,7 +70,7 @@ export class ClientSocket implements IClientSocket {
         this.socket.send(data);
       }
     } catch (ex) {
-      console.error('disconnected??');
+      console.error('disconnected??', ex);
     }
   }
 }

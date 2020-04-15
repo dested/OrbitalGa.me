@@ -63,7 +63,7 @@ export class ExplosionEntity extends Entity {
   static addBuffer(buff: ArrayBufferBuilder, entity: ExplosionModel) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.intensity);
-    buff.addOptionalInt32(entity.ownerEntityId);
+    buff.addInt32Optional(entity.ownerEntityId);
   }
 
   static readBuffer(reader: ArrayBufferReader): ExplosionModel {
@@ -71,7 +71,7 @@ export class ExplosionEntity extends Entity {
       ...Entity.readBuffer(reader),
       entityType: 'explosion',
       intensity: reader.readUint8(),
-      ownerEntityId: reader.readOptionalInt32(),
+      ownerEntityId: reader.readInt32Optional(),
     };
   }
 }
