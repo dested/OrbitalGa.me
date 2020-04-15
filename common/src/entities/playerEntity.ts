@@ -4,18 +4,17 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {WallEntity, WallModel} from './wallEntity';
+import {WallEntity} from './wallEntity';
 import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
-import {assertType, Utils} from '../utils/utils';
+import {Utils} from '../utils/utils';
 import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntitySizeByType, SizeBitmask, SizeEnum} from '../parsers/arrayBufferSchema';
-import {MeteorModel} from './meteorEntity';
+import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/enums';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -429,13 +428,6 @@ export type LivePlayerModel = EntityModel & {
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon;
 };
-export const PlayerWeaponEnumSchema: SizeEnum<PlayerWeapon> = {
-  enum: true,
-  rocket: 1,
-  laser1: 2,
-  laser2: 3,
-  torpedo: 4,
-};
 
 export const LivePlayerModelSchema: EntitySizeByType<LivePlayerModel, LivePlayerModel['entityType']> = {
   entityType: 3,
@@ -461,16 +453,8 @@ export const LivePlayerModelSchema: EntitySizeByType<LivePlayerModel, LivePlayer
   selectedWeapon: PlayerWeaponEnumSchema,
 };
 
-export const PlayerInputKeyBitmask: SizeBitmask<PlayerInputKeys> = {
-  bitmask: true,
-  shoot: 0,
-  right: 1,
-  left: 2,
-  up: 3,
-  down: 4,
-};
 export const PlayerModelSchema: EntitySizeByType<PlayerModel, PlayerModel['entityType']> = {
-  entityType: 3,
+  entityType: 4,
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {

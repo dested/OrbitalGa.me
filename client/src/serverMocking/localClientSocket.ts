@@ -29,7 +29,12 @@ export class LocalClientSocket implements IClientSocket {
     };
     this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
-        options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchema));
+        try {
+          options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchema));
+        } catch (ex) {
+          console.error(ex);
+          debugger;
+        }
       } else {
         options.onMessage(JSON.parse(e.data));
       }

@@ -1,6 +1,5 @@
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 import {Utils} from '../utils/utils';
-import {ServerToClientSchema} from '../models/serverToClientMessages';
 
 export type Discriminate<T, TField extends keyof T, TValue extends T[TField]> = T extends {[field in TField]: TValue}
   ? T
@@ -63,8 +62,10 @@ export type EntitySizeKeys<TItem extends {entityType: string}> = {
 };
 
 export class ArrayBufferSchema {
+  static debug = false;
   static addSchemaBuffer(buff: ArrayBufferBuilder, value: any, schema: any) {
     if (Array.isArray(value)) {
+      this.log('array', schema.arraySize);
       switch (schema.arraySize) {
         case 'uint8':
           buff.addUint8(value.length);
@@ -78,19 +79,18 @@ export class ArrayBufferSchema {
       }
       return;
     }
+    this.log('object');
     let currentSchema = schema;
     if ('type' in value) {
+      this.log('type', (value as any).type);
       currentSchema = schema[(value as any).type];
       buff.addUint8(currentSchema.type);
     } else if ('entityType' in value) {
-      if (!((value as any).entityType in schema)) {
-        console.log((value as any).entityType);
-      }
       currentSchema = schema[(value as any).entityType];
       buff.addUint8(currentSchema.entityType);
     }
     for (const key of Object.keys(currentSchema)) {
-      if (key === 'type' || key === 'entityType') {
+      if (key === 'type' || key === 'entityType' || key === 'arraySize') {
         continue;
       }
       if (Array.isArray(value[key])) {
@@ -156,13 +156,15 @@ export class ArrayBufferSchema {
 
   static readSchemaBuffer(reader: ArrayBufferReader, schema: any, inArray: boolean = false): any {
     if (!inArray && schema.arraySize) {
+      this.log('array', schema.arraySize);
       const length = Utils.switchType(schema.arraySize, {
         uint8: () => reader.readUint8(),
         uint16: () => reader.readUint16(),
       })();
       const items = [];
       for (let i = 0; i < length; i++) {
-        items.push(this.readSchemaBuffer(reader, schema, true));
+        const item = this.readSchemaBuffer(reader, schema, true);
+        items.push(item);
       }
       return items;
     }
@@ -187,6 +189,7 @@ export class ArrayBufferSchema {
       let found = false;
       for (const key of Object.keys(currentSchema)) {
         if (currentSchema[key].entityType === entityType) {
+          this.log('entityType lookup', key);
           obj.entityType = key;
           currentSchema = currentSchema[key];
           found = true;
@@ -198,13 +201,14 @@ export class ArrayBufferSchema {
       }
     }
     for (const key of Object.keys(currentSchema)) {
-      if (key === 'type' || key === 'entityType') {
+      if (key === 'type' || key === 'entityType' || key === 'arraySize') {
         continue;
       }
-
+      this.log('field', key);
       if (currentSchema[key].arraySize) {
         obj[key] = this.readSchemaBuffer(reader, currentSchema[key]);
       } else {
+        this.log('field', key, currentSchema[key]);
         switch (currentSchema[key]) {
           case 'uint8':
             obj[key] = reader.readUint8();
@@ -253,6 +257,7 @@ export class ArrayBufferSchema {
             }
             obj[key] = maskObj;
           } else if (currentSchema[key].enum) {
+            this.log('field enum', key, currentSchema[key].enum);
             const enumValue = reader.readUint8();
             obj[key] = Object.keys(currentSchema[key]).find((enumKey) => currentSchema[key][enumKey] === enumValue);
           } else {
@@ -273,6 +278,11 @@ export class ArrayBufferSchema {
   }
 
   static startReadSchemaBuffer(buffer: ArrayBuffer | ArrayBufferLike, schema: any): any {
+    this.log('start read buffer');
     return this.readSchemaBuffer(new ArrayBufferReader(buffer), schema);
+  }
+
+  private static log(...messages: string[]) {
+    if (this.debug) console.log(...messages);
   }
 }

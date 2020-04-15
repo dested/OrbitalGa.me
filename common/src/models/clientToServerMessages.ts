@@ -1,15 +1,7 @@
-import {
-  LivePlayerModel,
-  PlayerInput,
-  PlayerInputKeyBitmask,
-  PlayerInputKeys,
-  PlayerModel,
-  PlayerWeaponEnumSchema,
-} from '../entities/playerEntity';
-import {EntityModels} from './entityTypeModels';
-import {LeaderboardEntry, LeaderboardEntryRanked} from '../game/gameLeaderboard';
+import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {Size} from '../parsers/arrayBufferSchema';
+import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
 
 export type ClientToServerMessage =
   | {

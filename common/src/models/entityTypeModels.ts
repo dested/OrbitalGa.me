@@ -6,9 +6,7 @@ import {PlayerWeaponEntity, PlayerWeaponModel} from '../entities/playerWeaponEnt
 import {WallEntity, WallModel} from '../entities/wallEntity';
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
 import {LivePlayerModel, PlayerEntity, PlayerModel} from '../entities/playerEntity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {MeteorEntity, MeteorModel} from '../entities/meteorEntity';
-import {Utils} from '../utils/utils';
 import {DropEntity, DropModel} from '../entities/dropEntity';
 import {BossEvent1Entity, BossEvent1Model} from '../entities/bossEvent1Entity';
 import {BossEvent1EnemyEntity, BossEvent1EnemyModel} from '../entities/bossEvent1EnemyEntity';

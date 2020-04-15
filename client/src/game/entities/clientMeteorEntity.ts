@@ -5,8 +5,6 @@ import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {AssetKeys} from '../../assets';
-import {GameConstants} from '@common/game/gameConstants';
-import {ShakeGame} from '../../utils/shakeUtils';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};

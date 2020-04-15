@@ -1,10 +1,8 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntitySizeByType} from '../parsers/arrayBufferSchema';
-import {WallModel} from './wallEntity';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;

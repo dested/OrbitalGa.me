@@ -1,6 +1,5 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
 import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';
 
 export class ClientSpectatorEntity extends SpectatorEntity implements ClientEntity {

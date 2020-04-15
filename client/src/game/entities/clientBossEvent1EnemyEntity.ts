@@ -1,9 +1,6 @@
-import {SwoopingEnemyEntity, SwoopingEnemyModel} from '@common/entities/swoopingEnemyEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
-import {BossEvent1Entity, BossEvent1Model} from '@common/entities/bossEvent1Entity';
 import {BossEvent1EnemyEntity, BossEvent1EnemyModel} from '@common/entities/bossEvent1EnemyEntity';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';

@@ -1,7 +1,6 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {DropEntity, DropModel} from '@common/entities/dropEntity';
-import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {unreachable} from '@common/utils/unreachable';
 import {CanvasUtils} from '../../utils/canvasUtils';

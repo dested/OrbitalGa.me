@@ -1,19 +1,10 @@
-import {Polygon, Result} from 'collisions';
-import {Utils} from '../utils/utils';
+import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ExplosionEntity} from './explosionEntity';
-import {nextId} from '../utils/uuid';
-import {EnemyShotEntity} from './enemyShotEntity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {GameRules} from '../game/gameRules';
-import {MomentumRunner} from '../utils/momentumRunner';
-import {isPlayerWeapon, Weapon} from './weapon';
-import {DropEntity} from './dropEntity';
+import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntitySizeByType} from '../parsers/arrayBufferSchema';
-import {WallModel} from './wallEntity';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;

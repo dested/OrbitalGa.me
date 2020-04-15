@@ -1,18 +1,16 @@
 import {Result} from 'collisions';
-import {assertType, Utils} from '../utils/utils';
+import {Utils} from '../utils/utils';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {GameRules, PlayerWeapon} from '../game/gameRules';
+import {GameRules} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntitySizeByType} from '../parsers/arrayBufferSchema';
-import {WallModel} from './wallEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 

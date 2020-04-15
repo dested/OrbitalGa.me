@@ -1,7 +1,6 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {ExplosionEntity} from './explosionEntity';
@@ -10,8 +9,6 @@ import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntitySizeByType} from '../parsers/arrayBufferSchema';
-import {WallModel} from './wallEntity';
-import {SpectatorModel} from './spectatorEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 

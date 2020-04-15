@@ -1,8 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {EntitySizeByType, Size} from '../parsers/arrayBufferSchema';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
 
 export class WallEntity extends Entity {
   entityType = 'wall' as const;

@@ -2,7 +2,6 @@ import {Entity} from '@common/entities/entity';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {GameConstants} from '@common/game/gameConstants';
 import {Utils} from '@common/utils/utils';
-import {EntityModels, EntityType} from '@common/models/entityTypeModels';
 
 export type EntityGrouping = {entities: Entity[]; x0: number; x1: number};
 

@@ -15,7 +15,6 @@ import {ArrayHash} from '@common/utils/arrayHash';
 import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {EntityGrouping} from './entityClusterer';
-import {GameLeaderboard} from '@common/game/gameLeaderboard';
 import {GameRules} from '@common/game/gameRules';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {ServerToClientMessage} from '@common/models/serverToClientMessages';

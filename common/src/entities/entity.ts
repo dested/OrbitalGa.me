@@ -1,11 +1,8 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {EntityModels} from '../models/entityTypeModels';
-import {nextId} from '../utils/uuid';
 import {GameConstants} from '../game/gameConstants';
-import {EntitySizeByType, Size} from '../parsers/arrayBufferSchema';
-import {WallModel} from './wallEntity';
+import {Size} from '../parsers/arrayBufferSchema';
 
 type BoundingBox = {
   height: number;

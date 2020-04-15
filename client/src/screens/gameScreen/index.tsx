@@ -9,7 +9,7 @@ import {GoFullScreen} from '../../components/goFullScreen';
 import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
 import {GameData} from '../../game/gameData';
 import {Weapons} from '../../components/weapons';
-import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from '../loginScreen/index.styles';
+import {JoinButton, LoginBox, Logo, Wrapper} from '../loginScreen/index.styles';
 import {ClientGame} from '../../game/clientGame';
 import {Leaderboard} from '../../components/leaderboard';
 import {ErrorMessage} from '@common/models/serverToClientMessages';

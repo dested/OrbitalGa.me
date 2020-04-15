@@ -1,8 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {WallEntity, WallModel} from './wallEntity';
+import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';

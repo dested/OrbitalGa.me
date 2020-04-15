@@ -1,14 +1,12 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {WallEntity, WallModel} from './wallEntity';
+import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
+import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
-import {PlayerEntity, PlayerWeaponEnumSchema} from './playerEntity';
-import {GameConstants} from '../game/gameConstants';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType, SizeEnum} from '../parsers/arrayBufferSchema';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {PlayerWeaponEnumSchema} from '../models/enums';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -103,7 +101,6 @@ export type PlayerWeaponModel = EntityModel & {
   startY: number;
   weaponType: PlayerWeapon;
 };
-
 
 export const PlayerWeaponModelSchema: EntitySizeByType<PlayerWeaponModel, PlayerWeaponModel['entityType']> = {
   entityType: 11,

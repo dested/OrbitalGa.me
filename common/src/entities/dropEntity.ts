@@ -1,19 +1,15 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
-import {ExplosionEntity} from './explosionEntity';
-import {nextId} from '../utils/uuid';
-import {isPlayerWeapon} from './weapon';
-import {PlayerEntity, PlayerWeaponEnumSchema} from './playerEntity';
+import {PlayerEntity} from './playerEntity';
 import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntitySizeByType} from '../parsers/arrayBufferSchema';
-import {WallModel} from './wallEntity';
+import {PlayerWeaponEnumSchema} from '../models/enums';
 
 export type DropType =
   | {

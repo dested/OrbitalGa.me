@@ -1,7 +1,6 @@
 import {PlayerWeaponEntity, PlayerWeaponModel} from '@common/entities/playerWeaponEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {unreachable} from '@common/utils/unreachable';

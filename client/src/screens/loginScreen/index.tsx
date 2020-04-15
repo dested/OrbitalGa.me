@@ -3,7 +3,6 @@ import './index.css';
 import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
-import {Utils} from '@common/utils/utils';
 import {GoFullScreen} from '../../components/goFullScreen';
 import {GameConstants} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
