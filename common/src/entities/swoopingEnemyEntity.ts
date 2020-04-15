@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {assertType, Utils} from '../utils/utils';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
@@ -11,6 +11,8 @@ import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {WallModel} from './wallEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -185,33 +187,8 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     };
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: SwoopingEnemyModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.health);
-    buff.addSwitch(entity.enemyColor, {
-      black: 1,
-      blue: 2,
-      green: 3,
-      red: 4,
-    });
-  }
-
   static randomEnemyColor() {
     return Utils.randomElement(['black' as const, 'blue' as const, 'red' as const, 'green' as const]);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): SwoopingEnemyModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'swoopingEnemy' as const,
-      health: reader.readUint8(),
-      enemyColor: Utils.switchNumber(reader.readUint8(), {
-        1: 'black' as const,
-        2: 'blue' as const,
-        3: 'green' as const,
-        4: 'red' as const,
-      }),
-    };
   }
 }
 
@@ -219,4 +196,17 @@ export type SwoopingEnemyModel = EntityModel & {
   enemyColor: EnemyColor;
   entityType: 'swoopingEnemy';
   health: number;
+};
+
+export const SwoopingEnemyModelSchema: EntitySizeByType<SwoopingEnemyModel, SwoopingEnemyModel['entityType']> = {
+  entityType: 7,
+  ...EntityModelSchema,
+  health: 'uint8',
+  enemyColor: {
+    enum: true,
+    red: 1,
+    green: 2,
+    blue: 3,
+    black: 4,
+  },
 };

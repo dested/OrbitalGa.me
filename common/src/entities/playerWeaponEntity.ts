@@ -1,13 +1,14 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {WallEntity} from './wallEntity';
-import {Entity, EntityModel} from './entity';
+import {WallEntity, WallModel} from './wallEntity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
-import {PlayerEntity} from './playerEntity';
+import {PlayerEntity, PlayerWeaponEnumSchema} from './playerEntity';
 import {GameConstants} from '../game/gameConstants';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType, SizeEnum} from '../parsers/arrayBufferSchema';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -93,25 +94,6 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
       entityType: 'playerWeapon',
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerWeaponModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint32(entity.ownerEntityId);
-    buff.addInt32(entity.offsetX);
-    buff.addInt32(entity.startY);
-    PlayerEntity.addBufferWeapon(buff, entity.weaponType);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): PlayerWeaponModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'playerWeapon',
-      ownerEntityId: reader.readUint32(),
-      offsetX: reader.readInt32(),
-      startY: reader.readInt32(),
-      weaponType: PlayerEntity.readBufferWeapon(reader),
-    };
-  }
 }
 
 export type PlayerWeaponModel = EntityModel & {
@@ -120,4 +102,14 @@ export type PlayerWeaponModel = EntityModel & {
   ownerEntityId: number;
   startY: number;
   weaponType: PlayerWeapon;
+};
+
+
+export const PlayerWeaponModelSchema: EntitySizeByType<PlayerWeaponModel, PlayerWeaponModel['entityType']> = {
+  entityType: 11,
+  ...EntityModelSchema,
+  weaponType: PlayerWeaponEnumSchema,
+  startY: 'int32',
+  offsetX: 'int32',
+  ownerEntityId: 'uint32',
 };

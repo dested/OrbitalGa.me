@@ -1,8 +1,10 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {WallModel} from './wallEntity';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
@@ -59,25 +61,17 @@ export class ExplosionEntity extends Entity {
       entityType: 'explosion',
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: ExplosionModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.intensity);
-    buff.addInt32Optional(entity.ownerEntityId);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): ExplosionModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'explosion',
-      intensity: reader.readUint8(),
-      ownerEntityId: reader.readInt32Optional(),
-    };
-  }
 }
 
 export type ExplosionModel = EntityModel & {
   entityType: 'explosion';
   intensity: number;
   ownerEntityId?: number;
+};
+
+export const ExplosionModelSchema: EntitySizeByType<ExplosionModel, ExplosionModel['entityType']> = {
+  entityType: 9,
+  ...EntityModelSchema,
+  intensity: 'uint8',
+  ownerEntityId: 'int32Optional',
 };

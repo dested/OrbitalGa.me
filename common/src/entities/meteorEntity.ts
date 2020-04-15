@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
@@ -9,6 +9,9 @@ import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {WallModel} from './wallEntity';
+import {SpectatorModel} from './spectatorEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
@@ -246,28 +249,6 @@ export class MeteorEntity extends Entity {
     }
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: MeteorModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.rotate);
-    buff.addSwitch(entity.meteorColor, {
-      brown: 1,
-      grey: 2,
-    });
-    buff.addSwitch(entity.size, {
-      big: 1,
-      med: 2,
-      small: 3,
-      tiny: 4,
-    });
-    buff.addSwitch(entity.meteorType, {
-      1: 1,
-      2: 2,
-      3: 3,
-      4: 4,
-    });
-    buff.addBoolean(entity.hit);
-  }
-
   static randomMeteor() {
     const meteorColor = Utils.randomElement(['brown' as const, 'grey' as const]);
     const size = Utils.randomElement(['big' as const, 'med' as const, 'small' as const, 'tiny' as const]);
@@ -279,30 +260,6 @@ export class MeteorEntity extends Entity {
     return {meteorColor, size, type};
   }
 
-  static readBuffer(reader: ArrayBufferReader): MeteorModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'meteor',
-      rotate: reader.readUint8(),
-      meteorColor: Utils.switchNumber(reader.readUint8(), {
-        1: 'brown' as const,
-        2: 'grey' as const,
-      }),
-      size: Utils.switchNumber(reader.readUint8(), {
-        1: 'big' as const,
-        2: 'med' as const,
-        3: 'small' as const,
-        4: 'tiny' as const,
-      }),
-      meteorType: Utils.switchNumber(reader.readUint8(), {
-        1: '1' as const,
-        2: '2' as const,
-        3: '3' as const,
-        4: '4' as const,
-      }),
-      hit: reader.readBoolean(),
-    };
-  }
 }
 
 export type MeteorModel = EntityModel & {
@@ -312,4 +269,29 @@ export type MeteorModel = EntityModel & {
   meteorType: '1' | '2' | '3' | '4';
   rotate: number;
   size: 'big' | 'med' | 'small' | 'tiny';
+};
+export const MeteorModelSchema: EntitySizeByType<MeteorModel, MeteorModel['entityType']> = {
+  entityType: 2,
+  ...EntityModelSchema,
+  rotate: 'uint8',
+  hit: 'boolean',
+  size: {
+    enum: true,
+    big: 1,
+    small: 2,
+    tiny: 3,
+    med: 4,
+  },
+  meteorColor: {
+    enum: true,
+    brown: 1,
+    grey: 2,
+  },
+  meteorType: {
+    enum: true,
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '4': 4,
+  },
 };

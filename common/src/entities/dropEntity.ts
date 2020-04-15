@@ -1,17 +1,19 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
-import {PlayerEntity} from './playerEntity';
+import {PlayerEntity, PlayerWeaponEnumSchema} from './playerEntity';
 import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {WallModel} from './wallEntity';
 
 export type DropType =
   | {
@@ -73,32 +75,6 @@ export class DropEntity extends Entity {
     };
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: DropModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addSwitch(entity.drop.type, {
-      health: 1,
-      weapon: 2,
-      shield: 3,
-    });
-    switch (entity.drop.type) {
-      case 'health':
-        buff.addUint8(entity.drop.amount);
-        break;
-      case 'shield':
-        buff.addSwitch(entity.drop.level, {
-          medium: 2,
-          big: 3,
-        });
-        break;
-      case 'weapon':
-        PlayerEntity.addBufferWeapon(buff, entity.drop.weapon);
-        buff.addUint8(entity.drop.ammo);
-        break;
-      default:
-        unreachable(entity.drop);
-    }
-  }
-
   static randomDrop(size: Size): DropType {
     const type = Utils.randomWeightedElement<DropType['type']>([
       {item: 'weapon', weight: 40},
@@ -136,37 +112,34 @@ export class DropEntity extends Entity {
         throw unreachable(type);
     }
   }
-
-  static readBuffer(reader: ArrayBufferReader): DropModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'drop',
-      drop: Utils.switchNumber(reader.readUint8(), {
-        1: () =>
-          ({
-            type: 'health',
-            amount: reader.readUint8(),
-          } as DropType),
-        2: () =>
-          ({
-            type: 'weapon',
-            weapon: PlayerEntity.readBufferWeapon(reader),
-            ammo: reader.readUint8(),
-          } as DropType),
-        3: () =>
-          ({
-            type: 'shield',
-            level: Utils.switchNumber(reader.readUint8(), {
-              2: 'medium',
-              3: 'big',
-            }),
-          } as DropType),
-      })(),
-    };
-  }
 }
 
 export type DropModel = EntityModel & {
   drop: DropType;
   entityType: 'drop';
+};
+
+export const DropModelSchema: EntitySizeByType<DropModel, DropModel['entityType']> = {
+  entityType: 5,
+  ...EntityModelSchema,
+  drop: {
+    typeLookup: true,
+    weapon: {
+      type: 1,
+      ammo: 'uint8',
+      weapon: PlayerWeaponEnumSchema,
+    },
+    health: {
+      type: 2,
+      amount: 'uint8',
+    },
+    shield: {
+      type: 3,
+      level: {
+        enum: true,
+        medium: 1,
+        big: 2,
+      },
+    },
+  },
 };

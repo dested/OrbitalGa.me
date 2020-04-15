@@ -1,11 +1,11 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {WallEntity} from './wallEntity';
+import {WallEntity, WallModel} from './wallEntity';
 import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
@@ -14,6 +14,8 @@ import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType, SizeBitmask, SizeEnum} from '../parsers/arrayBufferSchema';
+import {MeteorModel} from './meteorEntity';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -404,124 +406,8 @@ export class PlayerEntity extends Entity implements Weapon {
     }
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, model: PlayerModel | LivePlayerModel) {
-    assertType<PlayerModel>(model);
-    Entity.addBuffer(buff, model);
-    buff.addUint8(model.health);
-    buff.addSwitch(model.playerColor, {
-      blue: 1,
-      green: 2,
-      orange: 3,
-      red: 4,
-    });
-    buff.addBits(
-      model.playerInputKeys.up,
-      model.playerInputKeys.down,
-      model.playerInputKeys.left,
-      model.playerInputKeys.right,
-      model.playerInputKeys.shoot
-    );
-  }
-  static addBufferLive(buff: ArrayBufferBuilder, model: LivePlayerModel) {
-    PlayerEntity.addBuffer(buff, model);
-    buff.addFloat32(model.momentumX);
-    buff.addFloat32(model.momentumY);
-    buff.addBoolean(model.dead);
-    buff.addUint32(model.lastProcessedInputSequenceNumber);
-    buff.addSwitch(model.selectedWeapon, {
-      laser1: 1,
-      laser2: 2,
-      rocket: 3,
-      torpedo: 4,
-    });
-    buff.addUint8(model.availableWeapons.length);
-    for (const availableWeapon of model.availableWeapons) {
-      PlayerEntity.addBufferWeapon(buff, availableWeapon.weapon);
-      buff.addUint16(availableWeapon.ammo);
-    }
-  }
-
-  static addBufferWeapon(buff: ArrayBufferBuilder, weapon: PlayerWeapon) {
-    buff.addSwitch(weapon, {
-      laser1: 1,
-      laser2: 2,
-      rocket: 3,
-      torpedo: 4,
-    });
-  }
-
-  static addBufferWeaponOptional(buff: ArrayBufferBuilder, weapon?: PlayerWeapon) {
-    buff.addInt8Optional(
-      weapon === undefined
-        ? undefined
-        : Utils.switchType(weapon, {
-            laser1: 1,
-            laser2: 2,
-            rocket: 3,
-            torpedo: 4,
-          })
-    );
-  }
-
   static randomEnemyColor() {
     return Utils.randomElement(['blue' as const, 'green' as const, 'orange' as const, 'red' as const]);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): PlayerModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'player',
-      health: reader.readUint8(),
-      playerColor: Utils.switchNumber(reader.readUint8(), {
-        1: 'blue' as const,
-        2: 'green' as const,
-        3: 'orange' as const,
-        4: 'red' as const,
-      }),
-      playerInputKeys: (() => {
-        const [up, down, left, right, shoot] = reader.readBits();
-        return {up, down, left, right, shoot};
-      })(),
-    };
-  }
-  static readBufferLive(reader: ArrayBufferReader): LivePlayerModel {
-    return {
-      ...PlayerEntity.readBuffer(reader),
-      entityType: 'livePlayer',
-      momentumX: reader.readFloat32(),
-      momentumY: reader.readFloat32(),
-      dead: reader.readBoolean(),
-      lastProcessedInputSequenceNumber: reader.readUint32(),
-      selectedWeapon: PlayerEntity.readBufferWeapon(reader),
-      availableWeapons: reader.loop(
-        () => ({
-          weapon: PlayerEntity.readBufferWeapon(reader),
-          ammo: reader.readUint16(),
-        }),
-        '8'
-      ),
-    };
-  }
-
-  static readBufferWeapon(reader: ArrayBufferReader): PlayerWeapon {
-    return Utils.switchNumber(reader.readUint8(), {
-      1: 'laser1' as const,
-      2: 'laser2' as const,
-      3: 'rocket' as const,
-      4: 'torpedo' as const,
-    });
-  }
-  static readBufferWeaponOptional(reader: ArrayBufferReader): PlayerWeapon | undefined {
-    const weapon = reader.readInt8Optional();
-    if (weapon === undefined) {
-      return undefined;
-    }
-    return Utils.switchNumber(weapon, {
-      1: 'laser1' as const,
-      2: 'laser2' as const,
-      3: 'rocket' as const,
-      4: 'torpedo' as const,
-    });
   }
 }
 
@@ -542,4 +428,58 @@ export type LivePlayerModel = EntityModel & {
   momentumY: number;
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon;
+};
+export const PlayerWeaponEnumSchema: SizeEnum<PlayerWeapon> = {
+  enum: true,
+  rocket: 1,
+  laser1: 2,
+  laser2: 3,
+  torpedo: 4,
+};
+
+export const LivePlayerModelSchema: EntitySizeByType<LivePlayerModel, LivePlayerModel['entityType']> = {
+  entityType: 3,
+  ...EntityModelSchema,
+  health: 'uint8',
+  playerColor: {
+    enum: true,
+    blue: 1,
+    green: 2,
+    orange: 3,
+    red: 4,
+  },
+  create: 'boolean',
+  availableWeapons: {
+    arraySize: 'uint8',
+    ammo: 'uint16',
+    weapon: PlayerWeaponEnumSchema,
+  },
+  dead: 'boolean',
+  lastProcessedInputSequenceNumber: 'uint32',
+  momentumX: 'float32',
+  momentumY: 'float32',
+  selectedWeapon: PlayerWeaponEnumSchema,
+};
+
+export const PlayerInputKeyBitmask: SizeBitmask<PlayerInputKeys> = {
+  bitmask: true,
+  shoot: 0,
+  right: 1,
+  left: 2,
+  up: 3,
+  down: 4,
+};
+export const PlayerModelSchema: EntitySizeByType<PlayerModel, PlayerModel['entityType']> = {
+  entityType: 3,
+  ...EntityModelSchema,
+  health: 'uint8',
+  playerColor: {
+    enum: true,
+    blue: 1,
+    green: 2,
+    orange: 3,
+    red: 4,
+  },
+  create: 'boolean',
+  playerInputKeys: PlayerInputKeyBitmask,
 };

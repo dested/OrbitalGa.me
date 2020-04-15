@@ -1,7 +1,8 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {EntitySizeByType, Size} from '../parsers/arrayBufferSchema';
 
 export class WallEntity extends Entity {
   entityType = 'wall' as const;
@@ -38,24 +39,16 @@ export class WallEntity extends Entity {
       entityType: 'wall',
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: WallModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint16(entity.width);
-    buff.addUint16(entity.height);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): WallModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'wall' as const,
-      width: reader.readUint16(),
-      height: reader.readUint16(),
-    };
-  }
 }
 export type WallModel = EntityModel & {
   entityType: 'wall';
   height: number;
   width: number;
+};
+
+export const WallModelSchema: EntitySizeByType<WallModel, 'wall'> = {
+  entityType: 6,
+  ...EntityModelSchema,
+  width: 'uint16',
+  height: 'uint16',
 };

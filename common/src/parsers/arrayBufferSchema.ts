@@ -5,12 +5,13 @@ import {ServerToClientSchema} from '../models/serverToClientMessages';
 export type Discriminate<T, TField extends keyof T, TValue extends T[TField]> = T extends {[field in TField]: TValue}
   ? T
   : never;
-
+export type SizeEnum<T extends string> = {[key in T]: number} & {enum: true};
+export type SizeBitmask<T> = {[keyT in keyof T]-?: number} & {bitmask: true};
 export type SizeArray = {arraySize: 'uint8' | 'uint16'};
 export type SizeTypeLookup = {typeLookup: true};
 export type SizeEntityTypeLookup = {entityTypeLookup: true};
 export type Size<T> = T extends string
-  ? 'string' | ({[key in T]: number} & {enum: true})
+  ? 'string' | SizeEnum<T>
   : T extends number
   ?
       | 'uint8'
@@ -32,7 +33,7 @@ export type Size<T> = T extends string
     ? SizeKeys<T[number]> & SizeArray & SizeTypeLookup
     : SizeObj<T[number]> & SizeArray
   : T extends {[key in keyof T]: boolean}
-  ? BitObject<T> & {bitmask: true}
+  ? SizeBitmask<T>
   : T extends {type: string}
   ? SizeKeys<T> & SizeTypeLookup
   : T extends {entityType: string}
@@ -40,10 +41,6 @@ export type Size<T> = T extends string
   : T extends {}
   ? SizeObj<T>
   : never;
-
-export type BitObject<T> = {
-  [keyT in keyof T]-?: number;
-};
 
 export type SizeObj<TItem> = {
   [keyT in keyof TItem]: Size<TItem[keyT]>;

@@ -1,7 +1,7 @@
 import {Polygon, Result} from 'collisions';
 import {Utils} from '../utils/utils';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
@@ -12,6 +12,8 @@ import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {WallModel} from './wallEntity';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
@@ -112,41 +114,6 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
       rotate: this.rotate,
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: BossEvent1EnemyModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addSwitch(entity.pieceType, {
-      nose: 1,
-      body1: 2,
-      body2: 3,
-      body3: 4,
-      bodyBack1: 5,
-      bodyBack2: 6,
-    });
-    buff.addInt32(entity.ownerEntityId);
-    buff.addInt32(entity.xOffset);
-    buff.addInt32(entity.yOffset);
-    buff.addInt32(entity.rotate);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): BossEvent1EnemyModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'bossEvent1Enemy' as const,
-      pieceType: reader.switch({
-        1: () => 'nose' as const,
-        2: () => 'body1' as const,
-        3: () => 'body2' as const,
-        4: () => 'body3' as const,
-        5: () => 'bodyBack1' as const,
-        6: () => 'bodyBack2' as const,
-      }),
-      ownerEntityId: reader.readInt32(),
-      xOffset: reader.readInt32(),
-      yOffset: reader.readInt32(),
-      rotate: reader.readInt32(),
-    };
-  }
 }
 
 export type BossEvent1EnemyModel = EntityModel & {
@@ -156,4 +123,22 @@ export type BossEvent1EnemyModel = EntityModel & {
   rotate: number;
   xOffset: number;
   yOffset: number;
+};
+
+export const BossEvent1EnemyModelSchema: EntitySizeByType<BossEvent1EnemyModel, 'bossEvent1Enemy'> = {
+    entityType: 13,
+  ...EntityModelSchema,
+  xOffset: 'int32',
+  yOffset: 'int32',
+  ownerEntityId: 'uint32',
+  rotate: 'int32',
+  pieceType: {
+    enum: true,
+    bodyBack1: 1,
+    body1: 2,
+    body2: 3,
+    body3: 4,
+    bodyBack2: 5,
+    nose: 6,
+  },
 };

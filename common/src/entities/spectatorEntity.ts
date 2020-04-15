@@ -1,8 +1,11 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {WallModel} from './wallEntity';
+import {DropModel} from './dropEntity';
 
 export class SpectatorEntity extends Entity {
   entityType = 'spectator' as const;
@@ -32,18 +35,13 @@ export class SpectatorEntity extends Entity {
     };
   }
 
-  static addBuffer(buff: ArrayBufferBuilder, entity: SpectatorModel) {
-    Entity.addBuffer(buff, entity);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): SpectatorModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'spectator',
-    };
-  }
 }
 
 export type SpectatorModel = EntityModel & {
   entityType: 'spectator';
+};
+
+export const SpectatorModelSchema: EntitySizeByType<SpectatorModel, SpectatorModel['entityType']> = {
+  entityType: 1,
+  ...EntityModelSchema,
 };
