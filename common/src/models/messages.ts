@@ -4,13 +4,14 @@ import {LeaderboardEntry, LeaderboardEntryRanked} from '../game/gameLeaderboard'
 
 export type ClientToServerMessage =
   | {
-      type: 'join';
       name: string;
+      type: 'join';
     }
   | {
       type: 'spectate';
     }
   | {
+      ping: number;
       type: 'ping';
     }
   | ({
@@ -30,6 +31,7 @@ export type ServerToClientMessage =
       serverVersion: number;
       type: 'spectating';
     }
+  | {ping: number; type: 'pong'}
   | ErrorMessage
   | {
       entities: EntityModels[];

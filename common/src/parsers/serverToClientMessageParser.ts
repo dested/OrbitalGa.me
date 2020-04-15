@@ -24,8 +24,12 @@ export class ServerToClientMessageParser {
           buff.addUint8(3);
           buff.addSwitch(message.reason, {nameInUse: 1});
           break;
-        case 'leaderboard':
+        case 'pong':
           buff.addUint8(4);
+          buff.addUint32(message.ping);
+          break;
+        case 'leaderboard':
+          buff.addUint8(5);
           buff.addLoop(message.scores, (score) => {
             for (const key of LeaderboardEntryRankedKeys) {
               buff.addUint16(score[key]);
@@ -34,7 +38,7 @@ export class ServerToClientMessageParser {
           });
           break;
         case 'worldState':
-          buff.addUint8(5);
+          buff.addUint8(6);
           buff.addLoop(message.entities, (entity) => {
             const type = EntityBufferType[entity.entityType];
             buff.addUint8(type.value);
@@ -51,7 +55,7 @@ export class ServerToClientMessageParser {
   static toServerToClientMessages(buffer: ArrayBuffer): ServerToClientMessage[] {
     const reader = new ArrayBufferReader(buffer);
     const result: ServerToClientMessage[] = reader.loop(() => {
-      return reader.switch<1 | 2 | 3 | 4 | 5, ServerToClientMessage>({
+      return reader.switch<1 | 2 | 3 | 4 | 5 | 6, ServerToClientMessage>({
         1: () => ({
           type: 'joined',
           ...EntityBufferType.livePlayer.readBuffer(reader),
@@ -66,6 +70,10 @@ export class ServerToClientMessageParser {
           reason: reader.switch({1: () => 'nameInUse' as const}),
         }),
         4: () => ({
+          type: 'pong',
+          ping: reader.readUint32(),
+        }),
+        5: () => ({
           type: 'leaderboard',
           scores: reader.loop(() => {
             const score: {[key in keyof LeaderboardEntryRanked]?: LeaderboardEntryRanked[key]} = {};
@@ -76,7 +84,7 @@ export class ServerToClientMessageParser {
             return score as Required<typeof score>;
           }),
         }),
-        5: () => ({
+        6: () => ({
           type: 'worldState',
           entities: reader.loop(() => {
             const option = reader.readUint8();

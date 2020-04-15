@@ -30,7 +30,10 @@ export class ClientGame extends Game {
   lastXY?: {x: number; y: number};
   leaderboardScores: LeaderboardEntryRanked[] = [];
   liveEntity?: ClientLivePlayerEntity;
+  pingIndex = 0;
+  pings: {[pingIndex: number]: number} = {};
   spectatorEntity?: SpectatorEntity;
+  protected latency: number = 0;
   protected spectatorMode: boolean = false;
   private connected = false;
   private lastWorldStateTick: number = +new Date();
@@ -165,6 +168,14 @@ export class ClientGame extends Game {
         case 'leaderboard':
           this.leaderboardScores = message.scores;
           break;
+        case 'pong':
+          if (!(message.ping in this.pings)) {
+            throw new Error('Unmatched ping.');
+          }
+          const time = this.pings[message.ping];
+          this.latency = Math.max(+new Date() - time - GameConstants.serverTickRate, 0);
+          delete this.pings[message.ping];
+          break;
         case 'worldState':
           this.lagAverage.push(GameConstants.serverTickRate - (+new Date() - this.lastWorldStateTick));
           this.lastWorldStateTick = +new Date();
@@ -247,7 +258,9 @@ export class ClientGame extends Game {
         clearInterval(pingInterval);
         return;
       }
-      this.socket.sendMessage({type: 'ping'});
+      this.pingIndex++;
+      this.pings[this.pingIndex] = +new Date();
+      this.socket.sendMessage({type: 'ping', ping: this.pingIndex});
     }, GameConstants.pingInterval);
   }
 }

@@ -21,6 +21,7 @@ export class ClientToServerMessageParser {
         break;
       case 'ping':
         buff.addUint8(3);
+        buff.addUint32(message.ping);
         break;
       case 'playerInput':
         buff.addUint8(4);
@@ -47,7 +48,7 @@ export class ClientToServerMessageParser {
           result = {type: 'spectate'};
           break;
         case 3:
-          result = {type: 'ping'};
+          result = {type: 'ping', ping: reader.readUint32()};
           break;
         case 4:
           result = {

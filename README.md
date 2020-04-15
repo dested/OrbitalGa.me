@@ -15,7 +15,7 @@
 - [ ] make game ui better
 - [ ] add arrows to direct you to where the action is
 - [ ] improve bot logic
-- [ ] add latency tracking
+- [ ] why do things get so jumpy when it lags
 - [ ] add audio
 - [ ] hard to go straight left with nipplejs
 - [ ] add server kill switch to boot everyone out
@@ -28,6 +28,7 @@
 - [ ] fix momentum for player, should be additive not replacing
 - [ ] fix explosion animation
 - [ ] get rid of explosion and make things light up when hit?
+- [x] add latency tracking
 - [x] refactor entity constructor to make easier entity creation
 - [x] cluster size never scales back down after 400 users?
 - [x] figure out ghost players

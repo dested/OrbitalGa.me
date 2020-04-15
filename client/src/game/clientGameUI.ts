@@ -167,7 +167,8 @@ export class ClientGameUI extends ClientGame {
         this.canvas.width * 0.8,
         debugY
       );
-
+      debugY += 22;
+      context.fillText(`Latency: ${this.latency.toFixed(1)}ms`, this.canvas.width * 0.8, debugY);
       context.restore();
     }
 

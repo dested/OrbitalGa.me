@@ -118,6 +118,7 @@ export class ServerGame extends Game {
             if (connection) {
               connection.lastPing = +new Date();
             }
+            this.sendMessageToClient(q.connectionId, {type: 'pong', ping: q.message.ping});
           }
           break;
         case 'playerInput': {
