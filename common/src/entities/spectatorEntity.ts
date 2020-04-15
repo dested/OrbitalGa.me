@@ -2,10 +2,12 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export class SpectatorEntity extends Entity {
-  constructor(game: Game, entityId: number) {
-    super(game, entityId, 'spectator');
+  entityType = 'spectator' as const;
+  constructor(game: Game, messageModel: ImpliedEntityType<SpectatorModel>) {
+    super(game, messageModel);
     this.createPolygon();
   }
 

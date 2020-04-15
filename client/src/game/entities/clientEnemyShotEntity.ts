@@ -8,7 +8,7 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
   zIndex = DrawZIndex.Ordinance;
 
   constructor(game: ClientGame, messageModel: EnemyShotModel) {
-    super(game, messageModel.entityId, messageModel.x, messageModel.y);
+    super(game, messageModel);
   }
   get drawX() {
     return this.x;

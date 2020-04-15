@@ -28,6 +28,7 @@
 - [ ] fix momentum for player, should be additive not replacing
 - [ ] fix explosion animation
 - [ ] get rid of explosion and make things light up when hit?
+- [x] refactor entity constructor to make easier entity creation
 - [x] cluster size never scales back down after 400 users?
 - [x] figure out ghost players
 - [x] make keyboard wasd

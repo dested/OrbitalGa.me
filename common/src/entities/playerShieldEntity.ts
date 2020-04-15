@@ -7,21 +7,26 @@ import {nextId} from '../utils/uuid';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
 import {Utils} from '../utils/utils';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
 export class PlayerShieldEntity extends Entity {
   boundingBoxes = [];
-  depleted = false;
+  depleted: boolean;
+  entityType = 'playerShield' as const;
   health: number;
   lastHit = 0;
+  ownerEntityId: number;
   shieldStrength: ShieldStrength;
   tickIndex = 0;
 
-  constructor(game: Game, entityId: number, public ownerEntityId: number, shieldStrength: ShieldStrength) {
-    super(game, entityId, 'playerShield');
-    this.shieldStrength = shieldStrength;
-    this.health = this.shieldConfig.maxHealth;
+  constructor(game: Game, messageModel: ImpliedEntityType<PlayerShieldModel>) {
+    super(game, messageModel);
+    this.ownerEntityId = messageModel.ownerEntityId;
+    this.shieldStrength = messageModel.shieldStrength;
+    this.health = messageModel.health;
+    this.depleted = messageModel.depleted;
     this.createPolygon();
   }
 
@@ -83,7 +88,13 @@ export class PlayerShieldEntity extends Entity {
       this.health -= damage;
     }
     this.lastHit = 10;
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), x, y, 3, this.entityId);
+    const explosionEntity = new ExplosionEntity(this.game, {
+      entityId: nextId(),
+      x,
+      y,
+      intensity: 3,
+      ownerEntityId: this.entityId,
+    });
     this.game.entities.push(explosionEntity);
     return damageLeft;
   }

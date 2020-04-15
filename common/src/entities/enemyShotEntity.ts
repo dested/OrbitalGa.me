@@ -5,24 +5,26 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
   damage = 1;
+  entityType = 'enemyShot' as const;
   explosionIntensity = 2;
   isWeapon = true as const;
   weaponSide = 'enemy' as const;
 
-  constructor(game: Game, entityId: number, x: number, y: number) {
-    super(game, entityId, 'enemyShot');
-    this.x = x;
-    this.y = y;
+  constructor(game: Game, messageModel: ImpliedEntityType<EnemyShotModel>) {
+    super(game, messageModel);
     this.createPolygon();
   }
+
   get realX() {
     return this.x;
   }
+
   get realY() {
     return this.y;
   }

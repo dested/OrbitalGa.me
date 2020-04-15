@@ -14,15 +14,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   zIndex = DrawZIndex.Scenery;
 
   constructor(private clientGame: ClientGame, messageModel: MeteorModel) {
-    super(
-      clientGame,
-      messageModel.entityId,
-      messageModel.x,
-      messageModel.y,
-      messageModel.meteorColor,
-      messageModel.size,
-      messageModel.type
-    );
+    super(clientGame, messageModel);
   }
 
   get drawX() {

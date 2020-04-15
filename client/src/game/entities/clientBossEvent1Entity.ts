@@ -9,7 +9,7 @@ export class ClientBossEvent1Entity extends BossEvent1Entity implements ClientEn
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: BossEvent1Model) {
-    super(game, messageModel.entityId, messageModel.health);
+    super(game, messageModel);
   }
   get drawX() {
     return this.x;

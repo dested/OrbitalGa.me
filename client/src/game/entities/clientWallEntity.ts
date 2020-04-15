@@ -6,7 +6,7 @@ export class ClientWallEntity extends WallEntity implements ClientEntity {
   zIndex = DrawZIndex.Scenery;
 
   constructor(game: ClientGame, messageModel: WallModel) {
-    super(game, messageModel.entityId, messageModel.width, messageModel.height);
+    super(game, messageModel);
   }
   get drawX() {
     return this.realX;

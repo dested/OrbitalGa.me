@@ -9,7 +9,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {
-    super(game, messageModel.entityId, messageModel.x, messageModel.y, messageModel.enemyColor);
+    super(game, messageModel);
   }
 
   get drawX() {

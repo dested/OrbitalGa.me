@@ -10,7 +10,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
   zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageModel: PlayerShieldModel) {
-    super(game, messageModel.entityId, messageModel.ownerEntityId, messageModel.shieldStrength);
+    super(game, messageModel);
   }
   get drawX() {
     const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);

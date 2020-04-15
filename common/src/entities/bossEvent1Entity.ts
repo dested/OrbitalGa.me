@@ -7,6 +7,7 @@ import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuild
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';
 export class BossEvent1Entity extends Entity {
@@ -17,6 +18,7 @@ export class BossEvent1Entity extends Entity {
     {width: 57, height: 41, offsetX: 35},
   ];
   damage = 2;
+  entityType = 'bossEvent1' as const;
   explosionIntensity = 4;
   health: number = 1000;
   isWeapon = true as const;
@@ -24,102 +26,154 @@ export class BossEvent1Entity extends Entity {
   momentumY = 0;
   weaponSide = 'enemy' as const;
 
-  constructor(game: Game, entityId: number, width: number) {
-    super(game, entityId, 'bossEvent1');
-    console.log('WIDTH', width);
-    const nose = {name: 'Rocket_parts.spaceRocketParts_008', width: 136, height: 156};
-    const body1 = {name: 'Rocket_parts.spaceRocketParts_026', width: 136, height: 128};
-    const body2 = {name: 'Rocket_parts.spaceRocketParts_027', width: 136, height: 128};
-    const body3 = {name: 'Rocket_parts.spaceRocketParts_028', width: 136, height: 128};
-    const bodyBack1 = {name: 'Rocket_parts.spaceRocketParts_032', width: 136, height: 128};
-    const bodyBack2 = {name: 'Rocket_parts.spaceRocketParts_033', width: 136, height: 128};
-    const noseOffsetX = nose.width / 2;
-    const bodyOffsetX = body1.width / 2;
-    const bodyBackOffsetY = bodyBack1.height - 10;
-    const bodyOffsetY = bodyBackOffsetY + body1.height * 2 - nose.height;
-    const noseOffsetY = bodyOffsetY + nose.height;
+  constructor(game: Game, messageModel: ImpliedEntityType<BossEvent1Model>) {
+    super(game, messageModel);
+    this.health = messageModel.health;
+    this.width = messageModel.width;
 
-    const entityWidth = noseOffsetX + nose.width * 14;
-    const items: {asset: any; offsetX: number; offsetY: number; rotate: number; type: BossEvent1PieceType}[] = [
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 2, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 4, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 6, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 8, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 10, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 12, offsetY: noseOffsetY},
-      {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 14, offsetY: noseOffsetY},
-      {type: 'body1', asset: body1, rotate: 180, offsetX: bodyOffsetX, offsetY: bodyOffsetY},
-      {type: 'body2', asset: body2, rotate: 180, offsetX: bodyOffsetX + body1.width * 2, offsetY: bodyOffsetY},
-      {type: 'body3', asset: body3, rotate: 180, offsetX: bodyOffsetX + body1.width * 4, offsetY: bodyOffsetY},
-      {type: 'body1', asset: body1, rotate: 180, offsetX: bodyOffsetX + body1.width * 6, offsetY: bodyOffsetY},
-      {type: 'body2', asset: body2, rotate: 180, offsetX: bodyOffsetX + body1.width * 8, offsetY: bodyOffsetY},
-      {type: 'body3', asset: body3, rotate: 180, offsetX: bodyOffsetX + body1.width * 10, offsetY: bodyOffsetY},
-      {type: 'body3', asset: body3, rotate: 180, offsetX: bodyOffsetX + body1.width * 12, offsetY: bodyOffsetY},
-      {type: 'body1', asset: body1, rotate: 180, offsetX: bodyOffsetX + body1.width * 14, offsetY: bodyOffsetY},
-      {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX + nose.width, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX + nose.width * 2, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack2', asset: bodyBack2, rotate: 0, offsetX: noseOffsetX + nose.width * 3, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack2', asset: bodyBack2, rotate: 0, offsetX: noseOffsetX + nose.width * 4, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX + nose.width * 5, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack2', asset: bodyBack2, rotate: 0, offsetX: noseOffsetX + nose.width * 6, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX + nose.width * 7, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX + nose.width * 8, offsetY: bodyBackOffsetY},
-      {type: 'bodyBack2', asset: bodyBack2, rotate: 0, offsetX: noseOffsetX + nose.width * 9, offsetY: bodyBackOffsetY},
-      {
-        type: 'bodyBack2',
-        asset: bodyBack2,
-        rotate: 0,
-        offsetX: noseOffsetX + nose.width * 10,
-        offsetY: bodyBackOffsetY,
-      },
-      {
-        type: 'bodyBack2',
-        asset: bodyBack2,
-        rotate: 0,
-        offsetX: noseOffsetX + nose.width * 11,
-        offsetY: bodyBackOffsetY,
-      },
-      {
-        type: 'bodyBack1',
-        asset: bodyBack1,
-        rotate: 0,
-        offsetX: noseOffsetX + nose.width * 12,
-        offsetY: bodyBackOffsetY,
-      },
-      {
-        type: 'bodyBack2',
-        asset: bodyBack2,
-        rotate: 0,
-        offsetX: noseOffsetX + nose.width * 13,
-        offsetY: bodyBackOffsetY,
-      },
-      {
-        type: 'bodyBack2',
-        asset: bodyBack2,
-        rotate: 0,
-        offsetX: noseOffsetX + nose.width * 14,
-        offsetY: bodyBackOffsetY,
-      },
-    ];
+    if (!game.isClient) {
+      const nose = {name: 'Rocket_parts.spaceRocketParts_008', width: 136, height: 156};
+      const body1 = {name: 'Rocket_parts.spaceRocketParts_026', width: 136, height: 128};
+      const body2 = {name: 'Rocket_parts.spaceRocketParts_027', width: 136, height: 128};
+      const body3 = {name: 'Rocket_parts.spaceRocketParts_028', width: 136, height: 128};
+      const bodyBack1 = {name: 'Rocket_parts.spaceRocketParts_032', width: 136, height: 128};
+      const bodyBack2 = {name: 'Rocket_parts.spaceRocketParts_033', width: 136, height: 128};
+      const noseOffsetX = nose.width / 2;
+      const bodyOffsetX = body1.width / 2;
+      const bodyBackOffsetY = bodyBack1.height - 10;
+      const bodyOffsetY = bodyBackOffsetY + body1.height * 2 - nose.height;
+      const noseOffsetY = bodyOffsetY + nose.height;
 
-    for (let x = 0; x < width; x += entityWidth) {
-      for (const item of items) {
-        this.game.entities.push(
-          new BossEvent1EnemyEntity(
-            this.game,
-            nextId(),
-            this.entityId,
-            item.type,
-            item.offsetX + x,
-            item.offsetY,
-            item.rotate
-          )
-        );
+      const entityWidth = noseOffsetX + nose.width * 14;
+      const items: {asset: any; offsetX: number; offsetY: number; rotate: number; type: BossEvent1PieceType}[] = [
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 2, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 4, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 6, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 8, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 10, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 12, offsetY: noseOffsetY},
+        {type: 'nose', asset: nose, rotate: 180, offsetX: noseOffsetX + nose.width * 14, offsetY: noseOffsetY},
+        {type: 'body1', asset: body1, rotate: 180, offsetX: bodyOffsetX, offsetY: bodyOffsetY},
+        {type: 'body2', asset: body2, rotate: 180, offsetX: bodyOffsetX + body1.width * 2, offsetY: bodyOffsetY},
+        {type: 'body3', asset: body3, rotate: 180, offsetX: bodyOffsetX + body1.width * 4, offsetY: bodyOffsetY},
+        {type: 'body1', asset: body1, rotate: 180, offsetX: bodyOffsetX + body1.width * 6, offsetY: bodyOffsetY},
+        {type: 'body2', asset: body2, rotate: 180, offsetX: bodyOffsetX + body1.width * 8, offsetY: bodyOffsetY},
+        {type: 'body3', asset: body3, rotate: 180, offsetX: bodyOffsetX + body1.width * 10, offsetY: bodyOffsetY},
+        {type: 'body3', asset: body3, rotate: 180, offsetX: bodyOffsetX + body1.width * 12, offsetY: bodyOffsetY},
+        {type: 'body1', asset: body1, rotate: 180, offsetX: bodyOffsetX + body1.width * 14, offsetY: bodyOffsetY},
+        {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX, offsetY: bodyBackOffsetY},
+        {type: 'bodyBack1', asset: bodyBack1, rotate: 0, offsetX: noseOffsetX + nose.width, offsetY: bodyBackOffsetY},
+        {
+          type: 'bodyBack1',
+          asset: bodyBack1,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 2,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 3,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 4,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack1',
+          asset: bodyBack1,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 5,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 6,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack1',
+          asset: bodyBack1,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 7,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack1',
+          asset: bodyBack1,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 8,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 9,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 10,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 11,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack1',
+          asset: bodyBack1,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 12,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 13,
+          offsetY: bodyBackOffsetY,
+        },
+        {
+          type: 'bodyBack2',
+          asset: bodyBack2,
+          rotate: 0,
+          offsetX: noseOffsetX + nose.width * 14,
+          offsetY: bodyBackOffsetY,
+        },
+      ];
+
+      for (let x = 0; x < messageModel.width; x += entityWidth) {
+        for (const item of items) {
+          this.game.entities.push(
+            new BossEvent1EnemyEntity(this.game, {
+              entityId: nextId(),
+              ownerEntityId: this.entityId,
+              pieceType: item.type,
+              xOffset: item.offsetX + x,
+              yOffset: item.offsetY,
+              rotate: item.rotate,
+              x: 0,
+              y: 0,
+            })
+          );
+        }
       }
     }
-
     this.createPolygon();
   }
 
@@ -164,17 +218,21 @@ export class BossEvent1Entity extends Entity {
     this.momentumX += x;
     this.momentumY += y;
 
-    const explosionEntity = new ExplosionEntity(
-      this.game,
-      nextId(),
-      otherEntity.x - this.x,
-      otherEntity.y - this.y,
-      this.explosionIntensity,
-      this.entityId
-    );
+    const explosionEntity = new ExplosionEntity(this.game, {
+      entityId: nextId(),
+      x: otherEntity.x - this.x,
+      y: otherEntity.y - this.y,
+      intensity: this.explosionIntensity,
+      ownerEntityId: this.entityId,
+    });
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
-      const drop = new DropEntity(this.game, nextId(), this.x, this.y, DropEntity.randomDrop('big'));
+      const drop = new DropEntity(this.game, {
+        entityId: nextId(),
+        x: this.x,
+        y: this.y,
+        drop: DropEntity.randomDrop('big'),
+      });
       this.game.entities.push(drop);
       this.game.explode(this, 'medium');
     }
@@ -183,12 +241,14 @@ export class BossEvent1Entity extends Entity {
   reconcileFromServer(messageModel: BossEvent1Model) {
     super.reconcileFromServer(messageModel);
     this.health = messageModel.health;
+    this.width = messageModel.width;
   }
 
   serialize(): BossEvent1Model {
     return {
       ...super.serialize(),
       health: this.health,
+      width: this.width,
       entityType: 'bossEvent1',
     };
   }
@@ -196,6 +256,7 @@ export class BossEvent1Entity extends Entity {
   static addBuffer(buff: ArrayBufferBuilder, entity: BossEvent1Model) {
     Entity.addBuffer(buff, entity);
     buff.addUint8(entity.health);
+    buff.addInt32(entity.health);
   }
 
   static readBuffer(reader: ArrayBufferReader): BossEvent1Model {
@@ -203,6 +264,7 @@ export class BossEvent1Entity extends Entity {
       ...Entity.readBuffer(reader),
       entityType: 'bossEvent1' as const,
       health: reader.readUint8(),
+      width: reader.readInt32(),
     };
   }
 }
@@ -210,4 +272,5 @@ export class BossEvent1Entity extends Entity {
 export type BossEvent1Model = EntityModel & {
   entityType: 'bossEvent1';
   health: number;
+  width: number;
 };

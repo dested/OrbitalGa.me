@@ -2,22 +2,19 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
   aliveDuration = ExplosionEntity.totalAliveDuration;
+  entityType = 'explosion' as const;
+  intensity: number;
+  ownerEntityId?: number;
 
-  constructor(
-    game: Game,
-    entityId: number,
-    x: number,
-    y: number,
-    public intensity: number,
-    public ownerEntityId?: number
-  ) {
-    super(game, entityId, 'explosion');
-    this.x = x;
-    this.y = y;
+  constructor(game: Game, messageModel: ImpliedEntityType<ExplosionModel>) {
+    super(game, messageModel);
+    this.intensity = messageModel.intensity;
+    this.ownerEntityId = messageModel.ownerEntityId;
     this.createPolygon();
   }
 

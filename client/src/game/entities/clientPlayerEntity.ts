@@ -8,7 +8,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
-    super(clientGame, messageModel.entityId, messageModel.playerColor);
+    super(clientGame, messageModel);
   }
 
   get drawX() {

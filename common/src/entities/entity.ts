@@ -18,6 +18,7 @@ export abstract class Entity {
   boundingBoxes: BoundingBox[] = [];
   create: boolean = true;
   entityId: number;
+  abstract entityType: EntityModels['entityType'];
   height: number = 0;
   markToDestroy: boolean = false;
   momentumX = 0;
@@ -27,8 +28,10 @@ export abstract class Entity {
   x: number = 0;
   y: number = 0;
 
-  constructor(protected game: Game, entityId: number, public entityType: EntityModels['entityType']) {
-    this.entityId = entityId;
+  constructor(protected game: Game, messageModel: EntityModel) {
+    this.entityId = messageModel.entityId;
+    this.x = messageModel.x;
+    this.y = messageModel.y;
   }
 
   abstract get realX(): number;
@@ -131,16 +134,18 @@ export abstract class Entity {
   }
 
   reconcileFromServer(messageModel: EntityModel) {
-    if (messageModel.create) {
-      this.x = messageModel.x;
-      this.y = messageModel.y;
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: messageModel.x,
-        y: messageModel.y,
-      });
+    if (this.game.isClient) {
+      if (messageModel.create) {
+        this.x = messageModel.x;
+        this.y = messageModel.y;
+        this.positionBuffer.push({
+          time: +new Date() - GameConstants.serverTickRate,
+          x: messageModel.x,
+          y: messageModel.y,
+        });
+      }
+      this.positionBuffer.push({time: +new Date(), x: messageModel.x, y: messageModel.y});
     }
-    this.positionBuffer.push({time: +new Date(), x: messageModel.x, y: messageModel.y});
   }
 
   serialize(): EntityModel {
@@ -168,7 +173,7 @@ export abstract class Entity {
     buff.addFloat32(entity.x);
     buff.addFloat32(entity.y);
     buff.addUint32(entity.entityId);
-    buff.addBoolean(entity.create);
+    buff.addBoolean(!!entity.create);
   }
 
   static readBuffer(reader: ArrayBufferReader): EntityModel {
@@ -182,7 +187,7 @@ export abstract class Entity {
 }
 
 export type EntityModel = {
-  create: boolean;
+  create?: boolean;
   entityId: number;
   x: number;
   y: number;

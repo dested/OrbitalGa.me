@@ -4,10 +4,11 @@ import {Entity, EntityModel} from './entity';
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 export class WallEntity extends Entity {
-  constructor(game: Game, entityId: number, width: number, height: number) {
-    super(game, entityId, 'wall');
-    this.width = width;
-    this.height = height;
+  entityType = 'wall' as const;
+  constructor(game: Game, messageModel: WallModel) {
+    super(game, messageModel);
+    this.width = messageModel.width;
+    this.height = messageModel.height;
     this.boundingBoxes.push({
       width: this.width,
       height: this.height,

@@ -10,6 +10,7 @@ import {GameRules, PlayerWeapon} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -22,6 +23,8 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     {width: 57, height: 41, offsetX: 35},
   ];
   damage = 2;
+  enemyColor: EnemyColor;
+  entityType = 'swoopingEnemy' as const;
   explosionIntensity = 4;
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   isWeapon = true as const;
@@ -74,13 +77,14 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     ],
     this
   );
-
-  constructor(game: Game, entityId: number, x: number, y: number, public enemyColor: EnemyColor) {
-    super(game, entityId, 'swoopingEnemy');
-    this.x = x;
-    this.y = y;
+  constructor(game: Game, messageModel: ImpliedEntityType<SwoopingEnemyModel>) {
+    super(game, messageModel);
+    this.health = messageModel.health;
+    this.enemyColor = messageModel.enemyColor;
     this.createPolygon();
-    this.path.setStartPosition(x, y);
+    if (!this.game.isClient) {
+      this.path.setStartPosition(this.x, this.y);
+    }
   }
 
   get realX() {
@@ -119,7 +123,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       this.aliveTick % 4 === 0 &&
       (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
     ) {
-      const shotEntity = new EnemyShotEntity(this.game, nextId(), this.x, this.y - 6);
+      const shotEntity = new EnemyShotEntity(this.game, {entityId: nextId(), x: this.x, y: this.y - 6});
       this.game.entities.push(shotEntity);
     }
 
@@ -144,19 +148,23 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this.momentumY += y;
     otherEntity.causedDamage(otherEntity.damage, this);
 
-    const explosionEntity = new ExplosionEntity(
-      this.game,
-      nextId(),
-      otherEntity.x - this.x,
-      otherEntity.y - this.y,
-      this.explosionIntensity,
-      this.entityId
-    );
+    const explosionEntity = new ExplosionEntity(this.game, {
+      entityId: nextId(),
+      x: otherEntity.x - this.x,
+      y: otherEntity.y - this.y,
+      intensity: this.explosionIntensity,
+      ownerEntityId: this.entityId,
+    });
     this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
       this.health = 0;
       otherEntity.causedKill(this);
-      const drop = new DropEntity(this.game, nextId(), this.x, this.y, DropEntity.randomDrop('big'));
+      const drop = new DropEntity(this.game, {
+        entityId: nextId(),
+        x: this.x,
+        y: this.y,
+        drop: DropEntity.randomDrop('big'),
+      });
       this.game.entities.push(drop);
       this.game.explode(this, 'medium');
     }

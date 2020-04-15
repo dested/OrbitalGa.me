@@ -6,7 +6,7 @@ import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity'
 export class ClientSpectatorEntity extends SpectatorEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
   constructor(game: ClientGame, messageModel: SpectatorModel) {
-    super(game, messageModel.entityId);
+    super(game, messageModel);
     game.spectatorEntity = this;
   }
   get drawX() {

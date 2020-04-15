@@ -8,45 +8,37 @@ import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
 export class MeteorEntity extends Entity {
+  entityType = 'meteor' as const;
   health: number;
-
   hit = false;
   meteorColor: 'brown' | 'grey';
   momentumX = Math.random() * 10 - 5;
   momentumY: number;
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
-  rotate = Math.random() * 255;
+  rotate: number;
   rotateSpeed = Math.round(1 + Math.random() * 3);
   size: Size;
   startingMomentumY: number;
   type: 1 | 2 | 3 | 4;
 
-  constructor(
-    game: Game,
-    entityId: number,
-    x: number,
-    y: number,
-    meteorColor: MeteorEntity['meteorColor'],
-    size: MeteorEntity['size'],
-    type: MeteorEntity['type']
-  ) {
-    super(game, entityId, 'meteor');
+  constructor(game: Game, messageModel: ImpliedEntityType<MeteorModel>) {
+    super(game, messageModel);
 
-    this.x = x;
-    this.y = y;
-    this.meteorColor = meteorColor;
-    this.size = size;
-    this.type = type;
+    this.meteorColor = messageModel.meteorColor;
+    this.size = messageModel.size;
+    this.type = messageModel.type;
+    this.rotate = messageModel.rotate;
     this.startingMomentumY = 5 + Math.random() * 10;
     this.momentumY = this.startingMomentumY;
 
-    switch (size) {
+    switch (messageModel.size) {
       case 'big':
-        switch (type) {
+        switch (messageModel.type) {
           case 1:
             this.boundingBoxes = [{width: 101, height: 84}];
             break;
@@ -62,7 +54,7 @@ export class MeteorEntity extends Entity {
         }
         break;
       case 'med':
-        switch (type) {
+        switch (messageModel.type) {
           case 1:
             this.boundingBoxes = [{width: 43, height: 43}];
             break;
@@ -72,7 +64,7 @@ export class MeteorEntity extends Entity {
         }
         break;
       case 'small':
-        switch (type) {
+        switch (messageModel.type) {
           case 1:
             this.boundingBoxes = [{width: 28, height: 28}];
             break;
@@ -82,7 +74,7 @@ export class MeteorEntity extends Entity {
         }
         break;
       case 'tiny':
-        switch (type) {
+        switch (messageModel.type) {
           case 1:
             this.boundingBoxes = [{width: 18, height: 18}];
             break;
@@ -92,7 +84,7 @@ export class MeteorEntity extends Entity {
         }
         break;
     }
-    switch (size) {
+    switch (messageModel.size) {
       case 'big':
         this.health = Math.ceil(5 + Math.random() * 5);
         break;
@@ -230,13 +222,24 @@ export class MeteorEntity extends Entity {
     if (this.markToDestroy) return;
     this.health -= damage;
     this.hit = true;
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), x, y, 1, this.entityId);
+    const explosionEntity = new ExplosionEntity(this.game, {
+      entityId: nextId(),
+      x,
+      y,
+      intensity: 1,
+      ownerEntityId: this.entityId,
+    });
     this.game.entities.push(explosionEntity);
     this.momentumX += x;
     this.momentumY += y;
     if (!this.game.isClient) {
       if (this.health <= 0) {
-        const drop = new DropEntity(this.game, nextId(), this.x, this.y, DropEntity.randomDrop(this.size));
+        const drop = new DropEntity(this.game, {
+          entityId: nextId(),
+          x: this.x,
+          y: this.y,
+          drop: DropEntity.randomDrop(this.size),
+        });
         this.game.entities.push(drop);
         this.game.explode(this, 'small');
       }

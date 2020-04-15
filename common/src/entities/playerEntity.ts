@@ -13,6 +13,7 @@ import {assertType, Utils} from '../utils/utils';
 import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -40,6 +41,7 @@ export class PlayerEntity extends Entity implements Weapon {
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
+  entityType = 'player' as const;
   explosionIntensity = 2;
   health = GameRules.player.base.startingHealth;
   inputSequenceNumber: number = 1;
@@ -48,6 +50,7 @@ export class PlayerEntity extends Entity implements Weapon {
   momentumX = 0;
   momentumY = 0;
   pendingInputs: PlayerInput[] = [];
+  playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon = 'laser1';
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
@@ -57,8 +60,10 @@ export class PlayerEntity extends Entity implements Weapon {
   protected lastPlayerInput?: PlayerInputKeys;
   private shieldEntityId?: number;
 
-  constructor(game: Game, entityId: number, public playerColor: PlayerColor) {
-    super(game, entityId, 'player');
+  constructor(game: Game, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
+    super(game, messageModel);
+    this.health = messageModel.health;
+    this.playerColor = messageModel.playerColor;
     this.createPolygon();
   }
 
@@ -150,16 +155,15 @@ export class PlayerEntity extends Entity implements Weapon {
               if (config.alternateSide) {
                 offsetX = this.shotSide === 'left' ? -42 : 42;
               }
-              const playerWeaponEntity = new PlayerWeaponEntity(
-                this.game,
-                nextId(),
-                this.x + offsetX,
-                this.y - 6,
-                this.entityId,
+              const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
+                entityId: nextId(),
+                x: this.x + offsetX,
+                y: this.y - 6,
+                ownerEntityId: this.entityId,
                 offsetX,
-                this.y - 6,
-                this.selectedWeapon
-              );
+                startY: this.y - 6,
+                weaponType: this.selectedWeapon,
+              });
               this.game.entities.push(playerWeaponEntity);
               if (config.alternateSide) {
                 this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
@@ -290,7 +294,13 @@ export class PlayerEntity extends Entity implements Weapon {
     }
 
     this.health -= damage;
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), x, y, this.explosionIntensity, this.entityId);
+    const explosionEntity = new ExplosionEntity(this.game, {
+      entityId: nextId(),
+      x,
+      y,
+      intensity: this.explosionIntensity,
+      ownerEntityId: this.entityId,
+    });
     this.game.entities.push(explosionEntity);
   }
 
@@ -448,7 +458,7 @@ export class PlayerEntity extends Entity implements Weapon {
             laser1: 1,
             laser2: 2,
             rocket: 3,
-            torpedo: 3,
+            torpedo: 4,
           })
     );
   }

@@ -1,4 +1,4 @@
-import {PlayerWeaponEntity, ShotModel} from '@common/entities/playerWeaponEntity';
+import {PlayerWeaponEntity, PlayerWeaponModel} from '@common/entities/playerWeaponEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameConstants} from '@common/game/gameConstants';
@@ -9,17 +9,8 @@ import {unreachable} from '@common/utils/unreachable';
 export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(private clientGame: ClientGame, messageModel: ShotModel) {
-    super(
-      clientGame,
-      messageModel.entityId,
-      messageModel.x,
-      messageModel.y,
-      messageModel.ownerEntityId,
-      messageModel.offsetX,
-      messageModel.startY,
-      messageModel.weaponType
-    );
+  constructor(private clientGame: ClientGame, messageModel: PlayerWeaponModel) {
+    super(clientGame, messageModel);
   }
 
   get asset() {
@@ -86,7 +77,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     }
   }
 
-  reconcileFromServer(messageModel: ShotModel) {
+  reconcileFromServer(messageModel: PlayerWeaponModel) {
     super.reconcileFromServer(messageModel);
     if (messageModel.create) {
       if (this.owner && this.owner === this.clientGame.liveEntity && this.clientGame.liveEntity) {

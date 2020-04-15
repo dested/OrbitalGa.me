@@ -17,6 +17,7 @@ import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {EntityGrouping} from './entityClusterer';
 import {GameLeaderboard} from '@common/game/gameLeaderboard';
+import {GameRules} from '@common/game/gameRules';
 
 type Spectator = {connectionId: number};
 type User = {
@@ -203,13 +204,13 @@ export class ServerGame extends Game {
       const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.entityType === 'player').length, 4) * 1.5);
       if (enemies < players) {
         for (let i = enemies; i < players; i++) {
-          const swoopingEnemyEntity = new SwoopingEnemyEntity(
-            this,
-            nextId(),
-            this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
-            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
-            SwoopingEnemyEntity.randomEnemyColor()
-          );
+          const swoopingEnemyEntity = new SwoopingEnemyEntity(this, {
+            entityId: nextId(),
+            x: this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
+            y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+            enemyColor: SwoopingEnemyEntity.randomEnemyColor(),
+            health: GameRules.enemies.swoopingEnemy.startingHealth,
+          });
           this.entities.push(swoopingEnemyEntity);
         }
       }
@@ -223,15 +224,16 @@ export class ServerGame extends Game {
       for (const grouping of this.entityClusterer.getGroupings((a) => a.entityType === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
-          const meteor = new MeteorEntity(
-            this,
-            nextId(),
-            Utils.randomInRange(grouping.x0, grouping.x1),
-            -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+          const meteor = new MeteorEntity(this, {
+            entityId: nextId(),
+            x: Utils.randomInRange(grouping.x0, grouping.x1),
+            y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
             meteorColor,
             size,
-            type
-          );
+            type,
+            hit: false,
+            rotate: Math.random() * 255,
+          });
 
           this.entities.push(meteor);
         }
@@ -348,15 +350,27 @@ export class ServerGame extends Game {
       return;
     }
 
-    const playerEntity = new ServerPlayerEntity(this, nextId(), PlayerEntity.randomEnemyColor());
-    this.gameLeaderboard.addPlayer(playerEntity.entityId);
     const startingPos = this.entityClusterer.getNewPlayerXPosition();
-    playerEntity.x = startingPos;
-    playerEntity.y = GameConstants.playerStartingY;
+    const playerEntity = new ServerPlayerEntity(this, {
+      entityId: nextId(),
+      playerColor: PlayerEntity.randomEnemyColor(),
+      health: GameRules.player.base.startingHealth,
+      x: startingPos,
+      y: GameConstants.playerStartingY,
+    });
+    this.gameLeaderboard.addPlayer(playerEntity.entityId);
     this.users.push({name, connectionId, entity: playerEntity});
     this.entities.push(playerEntity);
 
-    const playerShieldEntity = new PlayerShieldEntity(this, nextId(), playerEntity.entityId, 'small');
+    const playerShieldEntity = new PlayerShieldEntity(this, {
+      entityId: nextId(),
+      ownerEntityId: playerEntity.entityId,
+      shieldStrength: 'small',
+      health: GameRules.playerShield.small.maxHealth,
+      depleted: false,
+      x: 0,
+      y: 0,
+    });
     this.entities.push(playerShieldEntity);
     playerEntity.setShieldEntity(playerShieldEntity.entityId);
 
@@ -383,7 +397,7 @@ export class ServerGame extends Game {
   }
 
   private initGame() {
-    this.entities.push(new SpectatorEntity(this, nextId()));
+    this.entities.push(new SpectatorEntity(this, {entityId: nextId(), x: 0, y: 0}));
     this.updateSpectatorPosition();
   }
 

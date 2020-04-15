@@ -2,7 +2,7 @@ import {SpectatorEntity, SpectatorModel} from '../entities/spectatorEntity';
 import {PlayerShieldEntity, PlayerShieldModel} from '../entities/playerShieldEntity';
 import {ExplosionEntity, ExplosionModel} from '../entities/explosionEntity';
 import {EnemyShotEntity, EnemyShotModel} from '../entities/enemyShotEntity';
-import {PlayerWeaponEntity, ShotModel} from '../entities/playerWeaponEntity';
+import {PlayerWeaponEntity, PlayerWeaponModel} from '../entities/playerWeaponEntity';
 import {WallEntity, WallModel} from '../entities/wallEntity';
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '../entities/swoopingEnemyEntity';
 import {LivePlayerModel, PlayerEntity, PlayerModel} from '../entities/playerEntity';
@@ -19,7 +19,7 @@ export type EntityType = {
   meteor: {entity: MeteorEntity; index: 2; model: MeteorModel};
   enemyShot: {entity: EnemyShotEntity; index: 3; model: EnemyShotModel};
   playerShield: {entity: PlayerShieldEntity; index: 4; model: PlayerShieldModel};
-  playerWeapon: {entity: PlayerWeaponEntity; index: 5; model: ShotModel};
+  playerWeapon: {entity: PlayerWeaponEntity; index: 5; model: PlayerWeaponModel};
   explosion: {entity: ExplosionEntity; index: 6; model: ExplosionModel};
   spectator: {entity: SpectatorEntity; index: 7; model: SpectatorModel};
   swoopingEnemy: {entity: SwoopingEnemyEntity; index: 8; model: SwoopingEnemyModel};
@@ -113,3 +113,5 @@ export const EntityBufferType: {
     readBuffer: BossEvent1EnemyEntity.readBuffer,
   },
 };
+
+export type ImpliedEntityType<T> = Omit<T, 'entityType'>;

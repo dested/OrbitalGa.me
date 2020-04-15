@@ -11,6 +11,7 @@ import {PlayerEntity} from './playerEntity';
 import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export type DropType =
   | {
@@ -25,12 +26,12 @@ export type DropType =
 
 export class DropEntity extends Entity {
   boundingBoxes = [{width: 50, height: 50}];
+  drop: DropType;
+  entityType = 'drop' as const;
 
-  constructor(game: Game, entityId: number, x: number, y: number, public drop: DropType) {
-    super(game, entityId, 'drop');
-
-    this.x = x;
-    this.y = y;
+  constructor(game: Game, messageModel: ImpliedEntityType<DropModel>) {
+    super(game, messageModel);
+    this.drop = messageModel.drop;
     this.createPolygon();
   }
 

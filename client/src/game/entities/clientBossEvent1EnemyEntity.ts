@@ -12,15 +12,7 @@ export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implement
   zIndex = DrawZIndex.Player;
 
   constructor(public clientGame: ClientGame, messageModel: BossEvent1EnemyModel) {
-    super(
-      clientGame,
-      messageModel.entityId,
-      messageModel.ownerEntityId,
-      messageModel.pieceType,
-      messageModel.xOffset,
-      messageModel.yOffset,
-      messageModel.rotate
-    );
+    super(clientGame, messageModel);
     this.updatePolygon();
   }
   get drawX() {

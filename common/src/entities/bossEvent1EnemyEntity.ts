@@ -11,24 +11,28 @@ import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1PieceType} from './bossEvent1Entity';
+import {ImpliedEntityType} from '../models/entityTypeModels';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
   damage = 2;
+  entityType = 'bossEvent1Enemy' as const;
   explosionIntensity = 4;
   isWeapon = true as const;
+  ownerEntityId: number;
+  pieceType: BossEvent1PieceType;
+  rotate: number;
   weaponSide = 'enemy' as const;
-  constructor(
-    game: Game,
-    entityId: number,
-    public ownerEntityId: number,
-    public pieceType: BossEvent1PieceType,
-    public xOffset: number,
-    public yOffset: number,
-    public rotate: number
-  ) {
-    super(game, entityId, 'bossEvent1Enemy');
+  xOffset: number;
+  yOffset: number;
 
+  constructor(game: Game, messageModel: ImpliedEntityType<BossEvent1EnemyModel>) {
+    super(game, messageModel);
+    this.xOffset = messageModel.xOffset;
+    this.yOffset = messageModel.yOffset;
+    this.rotate = messageModel.rotate;
+    this.pieceType = messageModel.pieceType;
+    this.ownerEntityId = messageModel.ownerEntityId;
     this.createPolygon();
   }
 

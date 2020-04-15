@@ -13,14 +13,7 @@ export class ClientExplosionEntity extends ExplosionEntity implements ClientEnti
   zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageModel: ExplosionModel) {
-    super(
-      game,
-      messageModel.entityId,
-      messageModel.x,
-      messageModel.y,
-      messageModel.intensity,
-      messageModel.ownerEntityId
-    );
+    super(game, messageModel);
     if (messageModel.create) {
       if (!('isBot' in game)) {
         ShakeGame(messageModel.intensity);

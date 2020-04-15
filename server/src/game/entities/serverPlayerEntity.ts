@@ -1,9 +1,10 @@
-import {PlayerInput, PlayerEntity, PlayerColor} from '@common/entities/playerEntity';
+import {PlayerInput, PlayerEntity, PlayerColor, PlayerModel} from '@common/entities/playerEntity';
 import {ServerGame} from '../serverGame';
+import {ImpliedEntityType} from '@common/models/entityTypeModels';
 
 export class ServerPlayerEntity extends PlayerEntity {
-  constructor(private serverGame: ServerGame, entityId: number, playerColor: PlayerColor) {
-    super(serverGame, entityId, playerColor);
+  constructor(private serverGame: ServerGame, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
+    super(serverGame, messageModel);
   }
   applyInput(input: PlayerInput) {
     super.applyInput(input);
