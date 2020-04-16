@@ -25,7 +25,8 @@ export type ABScalars =
 export type ABFlags =
   | {flag: 'enum'}
   | {flag: 'bitmask'}
-  | {elements: any; flag: 'array-uint8' | 'array-uint16'}
+  | {elements: any; flag: 'array-uint16'}
+  | {elements: any; flag: 'array-uint8'}
   | {elements: {[key: string]: AnyAndKey<'type', number>}; flag: 'type-lookup'}
   | {elements: {[key: string]: AnyAndKey<'entityType', number>}; flag: 'entity-type-lookup'}
   | {flag: undefined};
