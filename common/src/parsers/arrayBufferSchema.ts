@@ -6,9 +6,6 @@ import {unreachable} from '../utils/unreachable';
 export class ArrayBufferSchema {
   static debug = false;
   static addSchemaBuffer(buff: ArrayBufferBuilder, value: any, schema: ABFlags) {
-    if (!schema) {
-      debugger;
-    }
     switch (schema.flag) {
       case 'array-uint8':
         buff.addUint8(value.length);
@@ -25,11 +22,11 @@ export class ArrayBufferSchema {
     }
     let currentSchema = schema as any;
     if (currentSchema.flag === 'type-lookup') {
-      buff.addUint8(currentSchema[value.type].type);
-      currentSchema = currentSchema[value.type] as ABFlags;
+      buff.addUint8(currentSchema.elements[value.type].type);
+      currentSchema = currentSchema.elements[value.type] as ABFlags;
     } else if (currentSchema.flag === 'entity-type-lookup') {
-      buff.addUint8(currentSchema[value.entityType].entityType);
-      currentSchema = currentSchema[value.entityType] as ABFlags;
+      buff.addUint8(currentSchema.elements[value.entityType].entityType);
+      currentSchema = currentSchema.elements[value.entityType] as ABFlags;
     }
     for (const key of Object.keys(currentSchema)) {
       if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
@@ -140,49 +137,20 @@ export class ArrayBufferSchema {
           return items;
         }
         case 'type-lookup': {
-          let found = false;
           const type = reader.readUint8();
-          const obj: any = {};
-          for (const key of Object.keys(schema)) {
-            if (schema[key].type === type) {
-              found = true;
-              obj.type = key;
-              schema = schema[key] as ABFlags;
-              break;
+          for (const key of Object.keys(schema.elements)) {
+            if (schema.elements[key].type === type) {
+              return {type: key, ...this.readSchemaBuffer(reader, schema.elements[key] as any)};
             }
-          }
-          if (found) {
-            for (const key of Object.keys(schema)) {
-              if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
-                continue;
-              }
-              obj[key] = this.readSchemaBuffer(reader, (schema as any)[key] as ABFlags);
-            }
-            return obj;
           }
           throw new Error('Schema not found: Type ' + type);
         }
         case 'entity-type-lookup': {
           const entityType = reader.readUint8();
-          const obj: any = {};
-          let found = false;
-          for (const key of Object.keys(schema)) {
-            if (schema[key].entityType === entityType) {
-              obj.entityType = key;
-              schema = schema[key] as ABFlags;
-              found = true;
-              break;
+          for (const key of Object.keys(schema.elements)) {
+            if (schema.elements[key].entityType === entityType) {
+              return {entityType: key, ...this.readSchemaBuffer(reader, schema.elements[key] as any)};
             }
-          }
-
-          if (found) {
-            for (const key of Object.keys(schema)) {
-              if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
-                continue;
-              }
-              obj[key] = this.readSchemaBuffer(reader, (schema as any)[key] as ABFlags);
-            }
-            return obj;
           }
           throw new Error('Schema not found: Entity Type ' + entityType);
         }

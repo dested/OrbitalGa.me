@@ -120,21 +120,23 @@ export const DropModelSchema: EntityModelSchemaType<'drop'> = {
   ...EntityModelSchema,
   drop: {
     flag: 'type-lookup',
-    weapon: {
-      type: 1,
-      ammo: 'uint8',
-      weapon: PlayerWeaponEnumSchema,
-    },
-    health: {
-      type: 2,
-      amount: 'uint8',
-    },
-    shield: {
-      type: 3,
-      level: {
-        flag: 'enum',
-        medium: 1,
-        big: 2,
+    elements: {
+      weapon: {
+        type: 1,
+        ammo: 'uint8',
+        weapon: PlayerWeaponEnumSchema,
+      },
+      health: {
+        type: 2,
+        amount: 'uint8',
+      },
+      shield: {
+        type: 3,
+        level: {
+          flag: 'enum',
+          medium: 1,
+          big: 2,
+        },
       },
     },
   },

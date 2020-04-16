@@ -32,8 +32,10 @@ const CTOSPlayerInputSchema: ABByType<ClientToServerMessage, 'playerInput'> = {
 };
 export const ClientToServerSchema: AB<ClientToServerMessage> = {
   flag: 'type-lookup',
-  ping: CTOSPingSchema,
-  join: CTOSJoinSchema,
-  spectate: CTOSSpectateSchema,
-  playerInput: CTOSPlayerInputSchema,
+  elements: {
+    ping: CTOSPingSchema,
+    join: CTOSJoinSchema,
+    spectate: CTOSSpectateSchema,
+    playerInput: CTOSPlayerInputSchema,
+  },
 };

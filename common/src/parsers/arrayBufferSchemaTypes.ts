@@ -4,9 +4,8 @@ export type Discriminate<T, TField extends keyof T, TValue extends T[TField]> = 
 export type ABEnum<T extends string> = {[key in T]: number} & {flag: 'enum'};
 export type ABBitmask<T> = {[keyT in keyof T]-?: number} & {flag: 'bitmask'};
 export type ABArray<TElements> = {elements: TElements; flag: 'array-uint8' | 'array-uint16'};
-export type ABTypeLookup = {flag: 'type-lookup'};
-export type ABEntityTypeLookup = {flag: 'entity-type-lookup'};
-
+export type ABTypeLookup<TElements> = {elements: TElements; flag: 'type-lookup'};
+export type ABEntityTypeLookup<TElements> = {elements: TElements; flag: 'entity-type-lookup'};
 export type AnyAndKey<TKey extends string, TValue> = {[key: string]: any} & {[key in TKey]: TValue};
 
 export type ABScalars =
@@ -27,8 +26,8 @@ export type ABFlags =
   | {flag: 'enum'}
   | {flag: 'bitmask'}
   | {elements: any; flag: 'array-uint8' | 'array-uint16'}
-  | ({[key: string]: AnyAndKey<'type', number>} & {flag: 'type-lookup'; type: number})
-  | ({[key: string]: AnyAndKey<'entityType', number>} & {entityType: number; flag: 'entity-type-lookup'})
+  | {elements: {[key: string]: AnyAndKey<'type', number>}; flag: 'type-lookup'}
+  | {elements: {[key: string]: AnyAndKey<'entityType', number>}; flag: 'entity-type-lookup'}
   | {flag: undefined};
 
 export type AB<T> = T extends string
@@ -49,16 +48,16 @@ export type AB<T> = T extends string
   ? 'boolean'
   : T extends Array<any>
   ? T[number] extends {entityType: string}
-    ? ABArray<ABSizeKeys<T[number]> & ABEntityTypeLookup>
+    ? ABArray<ABEntityTypeLookup<ABSizeKeys<T[number]>>>
     : T[number] extends {type: string}
-    ? ABArray<ABKeys<T[number]> & ABTypeLookup>
+    ? ABArray<ABTypeLookup<ABKeys<T[number]>>>
     : ABArray<ABObj<T[number]>>
   : T extends {[key in keyof T]: boolean}
   ? ABBitmask<T>
   : T extends {type: string}
-  ? ABKeys<T> & ABTypeLookup
+  ? ABTypeLookup<ABKeys<T>>
   : T extends {entityType: string}
-  ? ABSizeKeys<T> & ABEntityTypeLookup
+  ? ABEntityTypeLookup<ABSizeKeys<T>>
   : T extends {}
   ? ABObj<T>
   : never;
