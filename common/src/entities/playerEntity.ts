@@ -26,7 +26,7 @@ export type PlayerInputKeys = {
 };
 export type PlayerInput = PlayerInputKeys & {
   inputSequenceNumber: number;
-  weapon?: PlayerWeapon;
+  weapon: PlayerWeapon | 'unset';
 };
 
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
@@ -125,7 +125,7 @@ export class PlayerEntity extends Entity implements Weapon {
     this.lastPlayerInput = input;
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
-    if (input.weapon) {
+    if (input.weapon !== 'unset') {
       this.selectedWeapon = input.weapon;
     }
     if (input.shoot) {

@@ -2,82 +2,145 @@ import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 import {assertType, Utils} from '../utils/utils';
 import {AB, ABFlags, ABScalars, Discriminate} from './arrayBufferSchemaTypes';
 import {unreachable} from '../utils/unreachable';
-const writerScalarLookup = {
-  uint8: (buff: ArrayBufferBuilder, value: any) => buff.addUint8(value),
-  uint16: (buff: ArrayBufferBuilder, value: any) => buff.addUint16(value),
-  uint32: (buff: ArrayBufferBuilder, value: any) => buff.addUint32(value),
-  int8: (buff: ArrayBufferBuilder, value: any) => buff.addInt8(value),
-  int16: (buff: ArrayBufferBuilder, value: any) => buff.addInt16(value),
-  int32: (buff: ArrayBufferBuilder, value: any) => buff.addInt32(value),
-  float32: (buff: ArrayBufferBuilder, value: any) => buff.addFloat32(value),
-  float64: (buff: ArrayBufferBuilder, value: any) => buff.addFloat64(value),
-  boolean: (buff: ArrayBufferBuilder, value: any) => buff.addBoolean(value),
-  string: (buff: ArrayBufferBuilder, value: any) => buff.addString(value),
-  int32Optional: (buff: ArrayBufferBuilder, value: any) => buff.addInt32Optional(value),
-  int8Optional: (buff: ArrayBufferBuilder, value: any) => buff.addInt8Optional(value),
-};
-
-const writerFlagLookup = {
-  bitmask: (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    const bitmask: boolean[] = [];
-    for (const maskKey of Object.keys(schema)) {
-      if (maskKey === 'flag') continue;
-      bitmask.push(value[maskKey]);
-    }
-    buff.addBits(...bitmask);
-  },
-  'array-uint8': (buff: ArrayBufferBuilder, schema: Discriminate<ABFlags, 'flag', 'array-uint8'>, value: any) => {
-    buff.addUint8(value.length);
-    for (const valueElement of value) {
-      ArrayBufferSchema.addSchemaBuffer(buff, valueElement, schema.elements);
-    }
-  },
-  'array-uint16': (buff: ArrayBufferBuilder, schema: Discriminate<ABFlags, 'flag', 'array-uint16'>, value: any) => {
-    buff.addUint16(value.length);
-    for (const valueElement of value) {
-      ArrayBufferSchema.addSchemaBuffer(buff, valueElement, schema.elements);
-    }
-  },
-  enum: (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    buff.addUint8(((schema as any)[value] as any) as number);
-  },
-  'type-lookup': (buff: ArrayBufferBuilder, schema: Discriminate<ABFlags, 'flag', 'type-lookup'>, value: any) => {
-    buff.addUint8(schema.elements[value.type].type);
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema.elements[value.type] as any);
-  },
-  'entity-type-lookup': (
-    buff: ArrayBufferBuilder,
-    schema: Discriminate<ABFlags, 'flag', 'entity-type-lookup'>,
-    value: any
-  ) => {
-    buff.addUint8(schema.elements[value.entityType].entityType);
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema.elements[value.entityType] as any);
-  },
-};
 
 export class ArrayBufferSchemaBuilder {
-  static debug = false;
-  static addSchemaBuffer(buff: ArrayBufferBuilder, value: any, schemaO: ABFlags) {
-    assertType<ABScalars>(schemaO);
-    if (schemaO in writerScalarLookup) {
-      return (writerScalarLookup as any)[schemaO](buff, value);
+  static addSchemaBuffer(schema: any, fieldName: string, addMap: (code: string) => string) {
+    const adderScalarLookup = {
+      uint8: `buff.addUint8(${fieldName});`,
+      uint16: `buff.addUint16(${fieldName});`,
+      uint32: `buff.addUint32(${fieldName});`,
+      int8: `buff.addInt8(${fieldName});`,
+      int16: `buff.addInt16(${fieldName});`,
+      int32: `buff.addInt32(${fieldName});`,
+      float32: `buff.addFloat32(${fieldName});`,
+      float64: `buff.addFloat64(${fieldName});`,
+      boolean: `buff.addBoolean(${fieldName});`,
+      string: `buff.addString(${fieldName});`,
+      int32Optional: `buff.addInt32Optional(${fieldName});`,
+      int8Optional: `buff.addInt8Optional(${fieldName});`,
+    };
+    const adderFlagLookup = {
+      enum: (innerSchema: ABFlags) => {
+        let str = '';
+        str += `lookup(${fieldName},\r\n`;
+        str += '{\r\n';
+        for (const key of Object.keys(innerSchema)) {
+          if (key === 'flag') continue;
+          str += `${key}:()=>buff.addUint8(${(innerSchema as any)[key]}),\r\n`;
+        }
+        str += '});\r\n';
+
+        return str;
+      },
+      bitmask: (innerSchema: ABFlags) => {
+        const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+        let str = `buff.addBits(...[\r\n`;
+        for (const key of Object.keys(innerSchema)) {
+          if (key === 'flag') continue;
+          str += `${fieldName}['${key}'],\r\n`;
+        }
+        str += `]);\r\n`;
+        return str;
+      },
+      'array-uint8': (innerSchema: Discriminate<ABFlags, 'flag', 'array-uint8'>) => {
+        const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+        return `
+           buff.addUint8(${fieldName}.length);
+    for (const ${noPeriodsFieldName}Element of ${fieldName}) {
+      ${ArrayBufferSchemaBuilder.addSchemaBuffer(innerSchema.elements, noPeriodsFieldName + 'Element', addMap)}
+    }`;
+      },
+      'array-uint16': (innerSchema: Discriminate<ABFlags, 'flag', 'array-uint16'>) => {
+        const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+        return `
+           buff.addUint16(${fieldName}.length);
+    for (const ${noPeriodsFieldName}Element of ${fieldName}) {
+      ${ArrayBufferSchemaBuilder.addSchemaBuffer(innerSchema.elements, noPeriodsFieldName + 'Element', addMap)}
+    }`;
+      },
+      'type-lookup': (innerSchema: Discriminate<ABFlags, 'flag', 'type-lookup'>) => {
+        let map = '{\r\n';
+        for (const key of Object.keys(innerSchema.elements)) {
+          map += `${key}:()=>{\r\n`;
+          map += `buff.addUint8(${innerSchema.elements[key].type});\r\n`;
+          map += `${ArrayBufferSchemaBuilder.addSchemaBuffer(innerSchema.elements[key] as any, fieldName, addMap)}\r\n`;
+          map += `},\r\n`;
+        }
+        map += '}\r\n';
+        // const newMapId = addMap(map);
+
+        let str = '';
+        str += `lookup(${fieldName}.type,\r\n`;
+        str += map + '\r\n';
+        str += ');\r\n';
+        return str;
+      },
+      'entity-type-lookup': (innerSchema: Discriminate<ABFlags, 'flag', 'entity-type-lookup'>) => {
+        let map = '{\r\n';
+        for (const key of Object.keys(innerSchema.elements)) {
+          map += `${key}:()=>{\r\n`;
+          map += `buff.addUint8(${innerSchema.elements[key].entityType});\r\n`;
+          map += `${ArrayBufferSchemaBuilder.addSchemaBuffer(innerSchema.elements[key] as any, fieldName, addMap)}\r\n`;
+          map += `},\r\n`;
+        }
+        map += '}\r\n';
+        // const newMapId = addMap(map);
+
+        let str = '';
+        str += `lookup(${fieldName}.entityType,\r\n`;
+        str += map + '\r\n';
+        str += ')\r\n';
+        return str;
+      },
+    };
+
+    if (schema in adderScalarLookup) {
+      return (adderScalarLookup as any)[schema] + '\r\n';
     } else {
-      if (!schemaO.flag) {
-        const obj: any = {};
-        for (const key of Object.keys(schemaO)) {
+      if (!schema.flag) {
+        let str = '';
+        for (const key of Object.keys(schema)) {
           if (key === 'type' || key === 'entityType') {
             continue;
           }
-          const currentSchemaElement = (schemaO as any)[key] as ABFlags;
-          obj[key] = this.addSchemaBuffer(buff, value[key], currentSchemaElement);
+          const currentSchemaElement = (schema as any)[key];
+          str += this.addSchemaBuffer(currentSchemaElement, fieldName + '.' + key, addMap) + '\r\n';
         }
-        return obj;
+        str += '';
+        return str;
       }
-      if (schemaO.flag in writerFlagLookup) {
-        return writerFlagLookup[schemaO.flag](buff, schemaO as any, value);
+      if (schema.flag in adderFlagLookup) {
+        return (adderFlagLookup as any)[schema.flag](schema as any);
       }
       throw new Error('bad ');
     }
+  }
+
+  static generateAdderFunction(schema: any): any {
+    const objectMaps: string[] = [];
+
+    let code = this.addSchemaBuffer(schema, 'value', (map) => {
+      const id = objectMaps.length;
+      objectMaps.push(`const map${id}=${map}`);
+      return `map${id}`;
+    });
+
+    // language=JavaScript
+    code = `
+function lookup(id, obj) {
+  if(typeof  obj[id] !=='function'){
+    console.log(id,obj)
+    debugger;
+  }
+  return obj[id]();
+}
+(buff, value)=>{
+${objectMaps.join(';\r\n')}
+${code}
+return buff.buildBuffer()
+}`;
+    // tslint:disable no-eval
+    return eval(code);
   }
 
   static generateReaderFunction(schema: any): any {
@@ -120,9 +183,7 @@ return (${code})
     return eval(code);
   }
 
-  static readSchemaBuffer(schemaO: ABFlags, addMap: (code: string) => string, injectField?: string): any {
-    assertType<ABScalars>(schemaO);
-
+  static readSchemaBuffer(schema: any, addMap: (code: string) => string, injectField?: string): any {
     const readerScalarLookup = {
       uint8: 'reader.readUint8()',
       uint16: 'reader.readUint16()',
@@ -138,46 +199,46 @@ return (${code})
       int8Optional: 'reader.readInt8Optional()',
     };
     const readerFlagLookup = {
-      enum: (schema: ABFlags) => {
+      enum: (innerSchema: ABFlags) => {
         let str = '';
         str += 'lookupEnum(reader.readUint8(),\r\n';
         str += '{\r\n';
-        for (const key of Object.keys(schema)) {
+        for (const key of Object.keys(innerSchema)) {
           if (key === 'flag') continue;
-          str += `${(schema as any)[key]}:'${key}',\r\n`;
+          str += `${(innerSchema as any)[key]}:'${key}',\r\n`;
         }
         str += '})\r\n';
         return str;
       },
-      bitmask: (schema: ABFlags) => {
+      bitmask: (innerSchema: ABFlags) => {
         let str = '';
         str += 'bitmask(reader.readBits(),\r\n';
         str += '{\r\n';
-        for (const key of Object.keys(schema)) {
+        for (const key of Object.keys(innerSchema)) {
           if (key === 'flag') continue;
-          str += `${(schema as any)[key]}:'${key}',\r\n`;
+          str += `${(innerSchema as any)[key]}:'${key}',\r\n`;
         }
         str += '})\r\n';
         return str;
       },
-      'array-uint8': (schema: Discriminate<ABFlags, 'flag', 'array-uint8'>) => {
+      'array-uint8': (innerSchema: Discriminate<ABFlags, 'flag', 'array-uint8'>) => {
         let str = 'range(reader.readUint8(),()=>(\r\n';
-        str += `${ArrayBufferSchemaBuilder.readSchemaBuffer(schema.elements, addMap)}\r\n`;
+        str += `${ArrayBufferSchemaBuilder.readSchemaBuffer(innerSchema.elements, addMap)}\r\n`;
         str += `))\r\n`;
         return str;
       },
-      'array-uint16': (schema: Discriminate<ABFlags, 'flag', 'array-uint16'>) => {
+      'array-uint16': (innerSchema: Discriminate<ABFlags, 'flag', 'array-uint16'>) => {
         let str = 'range(reader.readUint16(),()=>(\r\n';
-        str += `${ArrayBufferSchemaBuilder.readSchemaBuffer(schema.elements, addMap)}\r\n`;
+        str += `${ArrayBufferSchemaBuilder.readSchemaBuffer(innerSchema.elements, addMap)}\r\n`;
         str += `))\r\n`;
         return str;
       },
-      'type-lookup': (schema: Discriminate<ABFlags, 'flag', 'type-lookup'>) => {
+      'type-lookup': (innerSchema: Discriminate<ABFlags, 'flag', 'type-lookup'>) => {
         let map = '{\r\n';
-        for (const key of Object.keys(schema.elements)) {
-          map += `${schema.elements[key].type}:()=>(\r\n`;
+        for (const key of Object.keys(innerSchema.elements)) {
+          map += `${innerSchema.elements[key].type}:()=>(\r\n`;
           map += `${ArrayBufferSchemaBuilder.readSchemaBuffer(
-            schema.elements[key] as any,
+            innerSchema.elements[key] as any,
             addMap,
             `type: '${key}'`
           )}\r\n`;
@@ -192,12 +253,12 @@ return (${code})
         str += ')\r\n';
         return str;
       },
-      'entity-type-lookup': (schema: Discriminate<ABFlags, 'flag', 'entity-type-lookup'>) => {
+      'entity-type-lookup': (innerSchema: Discriminate<ABFlags, 'flag', 'entity-type-lookup'>) => {
         let map = '{\r\n';
-        for (const key of Object.keys(schema.elements)) {
-          map += `${schema.elements[key].entityType}:()=>(\r\n`;
+        for (const key of Object.keys(innerSchema.elements)) {
+          map += `${innerSchema.elements[key].entityType}:()=>(\r\n`;
           map += `${ArrayBufferSchemaBuilder.readSchemaBuffer(
-            schema.elements[key] as any,
+            innerSchema.elements[key] as any,
             addMap,
             `entityType: '${key}'`
           )}\r\n`;
@@ -214,32 +275,28 @@ return (${code})
       },
     };
 
-    if (schemaO in readerScalarLookup) {
-      return (readerScalarLookup as any)[schemaO] + '\r\n';
+    if (schema in readerScalarLookup) {
+      return (readerScalarLookup as any)[schema] + '\r\n';
     } else {
-      if (!schemaO.flag) {
+      if (!schema.flag) {
         let str = '{';
         if (injectField) {
           str += `${injectField},\r\n`;
         }
-        for (const key of Object.keys(schemaO)) {
+        for (const key of Object.keys(schema)) {
           if (key === 'type' || key === 'entityType') {
             continue;
           }
-          const currentSchemaElement = (schemaO as any)[key] as ABFlags;
+          const currentSchemaElement = (schema as any)[key];
           str += `` + key + ' : ' + this.readSchemaBuffer(currentSchemaElement, addMap) + ',\r\n';
         }
         str += '}';
         return str;
       }
-      if (schemaO.flag in readerFlagLookup) {
-        return readerFlagLookup[schemaO.flag](schemaO as any);
+      if (schema.flag in readerFlagLookup) {
+        return (readerFlagLookup as any)[schema.flag](schema as any);
       }
       throw new Error('bad ');
     }
-  }
-
-  private static log(...messages: string[]) {
-    if (this.debug) console.log(...messages);
   }
 }

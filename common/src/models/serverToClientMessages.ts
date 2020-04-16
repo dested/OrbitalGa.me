@@ -104,7 +104,7 @@ const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
   },
 };
 
-export const ServerToClientSchema: AB<ServerToClientMessage[]> = {
+const ServerToClientSchema: AB<ServerToClientMessage[]> = {
   flag: 'array-uint16',
   elements: {
     flag: 'type-lookup',
@@ -119,3 +119,4 @@ export const ServerToClientSchema: AB<ServerToClientMessage[]> = {
   },
 };
 export const ServerToClientSchemaReaderFunction = ArrayBufferSchemaBuilder.generateReaderFunction(ServerToClientSchema);
+export const ServerToClientSchemaAdderFunction = ArrayBufferSchemaBuilder.generateAdderFunction(ServerToClientSchema);

@@ -13,6 +13,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     left: false,
     right: false,
     shoot: false,
+    weapon: 'unset',
   };
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};
@@ -85,7 +86,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
       this.clientGame.sendInput(input, input.inputSequenceNumber);
     }
-    this.keys.weapon = undefined;
+    this.keys.weapon = 'unset';
   }
 
   reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {

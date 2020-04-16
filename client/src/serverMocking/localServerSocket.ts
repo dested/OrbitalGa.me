@@ -4,8 +4,8 @@ import {GameConstants} from '@common/game/gameConstants';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
-import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
-import {ClientToServerSchema, ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
+import {ServerToClientMessage, ServerToClientSchemaAdderFunction} from '@common/models/serverToClientMessages';
+import {ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
 
 export class LocalServerSocket implements IServerSocket {
   connections = new ArrayHash<SocketConnection>('connectionId');
@@ -35,7 +35,7 @@ export class LocalServerSocket implements IServerSocket {
       return;
     }
     if (GameConstants.binaryTransport) {
-      const body = ArrayBufferSchema.startAddSchemaBuffer(messages, ServerToClientSchema);
+      const body = ArrayBufferSchema.startAddSchemaBuffer(messages, ServerToClientSchemaAdderFunction);
       this.totalBytesSent += body.byteLength;
       client.socket.send(body);
     } else {
