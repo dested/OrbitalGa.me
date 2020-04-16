@@ -1,6 +1,6 @@
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 import {assertType, Utils} from '../utils/utils';
-import {ABFlags, ABScalars} from './arrayBufferSchemaTypes';
+import {AB, ABFlags, ABScalars} from './arrayBufferSchemaTypes';
 import {unreachable} from '../utils/unreachable';
 
 export class ArrayBufferSchema {
@@ -91,110 +91,114 @@ export class ArrayBufferSchema {
   }
 
   static readSchemaBuffer(reader: ArrayBufferReader, schema: ABFlags): any {
-    if (schema.flag === 'array-uint8' || schema.flag === 'array-uint16') {
-      const length = Utils.switchType(schema.flag, {
-        'array-uint8': () => reader.readUint8(),
-        'array-uint16': () => reader.readUint16(),
-      })();
-      const items = [];
-      for (let i = 0; i < length; i++) {
-        debugger;
-        const item = this.readSchemaBuffer(reader, schema.elements);
-        items.push(item);
-      }
-      return items;
-    }
-    const obj: any = {};
-    let currentSchema = schema;
-    if (currentSchema.flag === 'type-lookup') {
-      const type = reader.readUint8();
-      let found = false;
-      for (const key of Object.keys(currentSchema)) {
-        if (currentSchema[key].type === type) {
-          obj.type = key;
-          currentSchema = currentSchema[key] as ABFlags;
-          found = true;
-          break;
+    assertType<ABScalars>(schema);
+    const lookup = {
+      uint8: () => reader.readUint8(),
+      uint16: () => reader.readUint16(),
+      uint32: () => reader.readUint32(),
+      int8: () => reader.readInt8(),
+      int16: () => reader.readInt16(),
+      int32: () => reader.readInt32(),
+      float32: () => reader.readFloat32(),
+      float64: () => reader.readFloat64(),
+      boolean: () => reader.readBoolean(),
+      string: () => reader.readString(),
+      int32Optional: () => reader.readInt32Optional(),
+      int8Optional: () => reader.readInt8Optional(),
+    };
+    if (schema in lookup) {
+      return (lookup as any)[schema]();
+    } else {
+      switch (schema.flag) {
+        case 'enum':
+          const enumValue = reader.readUint8();
+          return Object.keys(schema).find((enumKey) => (schema as any)[enumKey] === enumValue);
+        case 'bitmask':
+          const maskObj: any = {};
+          const bits = reader.readBits();
+          for (const maskKey of Object.keys(schema)) {
+            if (maskKey === 'flag') continue;
+            maskObj[maskKey] = bits[(schema as any)[maskKey]];
+          }
+          return maskObj;
+        case 'array-uint8': {
+          const length = reader.readUint8();
+          const items = [];
+          for (let i = 0; i < length; i++) {
+            const item = this.readSchemaBuffer(reader, schema.elements);
+            items.push(item);
+          }
+          return items;
         }
-      }
-      if (!found) {
-        throw new Error('Schema not found: Type ' + type);
-      }
-    } else if (currentSchema.flag === 'entity-type-lookup') {
-      const entityType = reader.readUint8();
-      let found = false;
-      for (const key of Object.keys(currentSchema)) {
-        if (currentSchema[key].entityType === entityType) {
-          obj.entityType = key;
-          currentSchema = currentSchema[key] as ABFlags;
-          found = true;
-          break;
+        case 'array-uint16': {
+          const length = reader.readUint16();
+          const items = [];
+          for (let i = 0; i < length; i++) {
+            const item = this.readSchemaBuffer(reader, schema.elements);
+            items.push(item);
+          }
+          return items;
         }
-      }
-      if (!found) {
-        throw new Error('Schema not found: Entity Type ' + entityType);
-      }
-    }
-    for (const key of Object.keys(currentSchema)) {
-      if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
-        continue;
-      }
-      const currentSchemaElement = (currentSchema as any)[key] as ABFlags;
-
-      assertType<ABScalars>(currentSchemaElement);
-      const lookup = {
-        uint8: () => reader.readUint8(),
-        uint16: () => reader.readUint16(),
-        uint32: () => reader.readUint32(),
-        int8: () => reader.readInt8(),
-        int16: () => reader.readInt16(),
-        int32: () => reader.readInt32(),
-        float32: () => reader.readFloat32(),
-        float64: () => reader.readFloat64(),
-        boolean: () => reader.readBoolean(),
-        string: () => reader.readString(),
-        int32Optional: () => reader.readInt32Optional(),
-        int8Optional: () => reader.readInt8Optional(),
-      };
-      if (currentSchemaElement in lookup) {
-        obj[key] = (lookup as any)[currentSchemaElement]();
-      } else {
-        const flagLookup = {
-          bitmask: () => {
-            const maskObj: any = {};
-            const bits = reader.readBits();
-            for (const maskKey of Object.keys(currentSchemaElement)) {
-              if (maskKey === 'flag') continue;
-              maskObj[maskKey] = bits[(currentSchemaElement as any)[maskKey]];
+        case 'type-lookup': {
+          let found = false;
+          const type = reader.readUint8();
+          const obj: any = {};
+          for (const key of Object.keys(schema)) {
+            if (schema[key].type === type) {
+              found = true;
+              obj.type = key;
+              schema = schema[key] as ABFlags;
+              break;
             }
-            obj[key] = maskObj;
-          },
-          enum: () => {
-            const enumValue = reader.readUint8();
-            obj[key] = Object.keys(currentSchemaElement).find(
-              (enumKey) => (currentSchemaElement[enumKey as any] as any) === enumValue
-            );
-          },
-          undefined: () => {
-            obj[key] = this.readSchemaBuffer(reader, (currentSchema as any)[key as any]);
-          },
-          'array-uint8': () => {
+          }
+          if (found) {
+            for (const key of Object.keys(schema)) {
+              if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
+                continue;
+              }
+              obj[key] = this.readSchemaBuffer(reader, (schema as any)[key] as ABFlags);
+            }
+            return obj;
+          }
+          throw new Error('Schema not found: Type ' + type);
+        }
+        case 'entity-type-lookup': {
+          const entityType = reader.readUint8();
+          const obj: any = {};
+          let found = false;
+          for (const key of Object.keys(schema)) {
+            if (schema[key].entityType === entityType) {
+              obj.entityType = key;
+              schema = schema[key] as ABFlags;
+              found = true;
+              break;
+            }
+          }
+
+          if (found) {
+            for (const key of Object.keys(schema)) {
+              if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
+                continue;
+              }
+              obj[key] = this.readSchemaBuffer(reader, (schema as any)[key] as ABFlags);
+            }
+            return obj;
+          }
+          throw new Error('Schema not found: Entity Type ' + entityType);
+        }
+        default: {
+          const obj: any = {};
+          for (const key of Object.keys(schema)) {
+            if (key === 'type' || key === 'flag' || key === 'entityType' || key === 'arraySize') {
+              continue;
+            }
+            const currentSchemaElement = (schema as any)[key] as ABFlags;
             obj[key] = this.readSchemaBuffer(reader, currentSchemaElement);
-          },
-          'array-uint16': () => {
-            obj[key] = this.readSchemaBuffer(reader, currentSchemaElement);
-          },
-          'type-lookup': () => {
-            obj[key] = this.readSchemaBuffer(reader, (currentSchema as any)[key as any]);
-          },
-          'entity-type-lookup': () => {
-            obj[key] = this.readSchemaBuffer(reader, (currentSchema as any)[key as any]);
-          },
-        };
-        (flagLookup as any)[currentSchemaElement.flag as any]();
+          }
+          return obj;
+        }
       }
     }
-    return obj;
   }
 
   static startAddSchemaBuffer(value: any, schema: any) {
