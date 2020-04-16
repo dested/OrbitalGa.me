@@ -10,7 +10,7 @@ import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
@@ -201,7 +201,7 @@ export const SwoopingEnemyModelSchema: EntityModelSchemaType<'swoopingEnemy'> = 
   ...EntityModelSchema,
   health: 'uint8',
   enemyColor: {
-    enum: true,
+    flag: 'enum',
     red: 1,
     green: 2,
     blue: 3,

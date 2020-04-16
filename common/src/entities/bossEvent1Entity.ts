@@ -7,7 +7,7 @@ import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';

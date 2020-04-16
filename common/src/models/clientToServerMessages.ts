@@ -1,26 +1,13 @@
 import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
-import {AB, ABByType} from '../parsers/arrayBufferSchema';
+import {AB, ABByType} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
 import {ServerToClientMessage, STOCError} from './serverToClientMessages';
 
-type CTOSJoin = {
-  name: string;
-  type: 'join';
-};
-type CTOSSpectate = {
-  type: 'spectate';
-};
-type CTOSPing = {
-  ping: number;
-  type: 'ping';
-};
-type CTOSPlayerInput = {
-  inputSequenceNumber: number;
-  keys: PlayerInputKeys;
-  type: 'playerInput';
-  weapon?: PlayerWeapon;
-};
+type CTOSJoin = {name: string; type: 'join'};
+type CTOSSpectate = {type: 'spectate'};
+type CTOSPing = {ping: number; type: 'ping'};
+type CTOSPlayerInput = {inputSequenceNumber: number; keys: PlayerInputKeys; type: 'playerInput'; weapon?: PlayerWeapon};
 
 export type ClientToServerMessage = CTOSJoin | CTOSSpectate | CTOSPing | CTOSPlayerInput;
 
@@ -32,8 +19,11 @@ const CTOSTypes: {[key in ClientToServerMessage['type']]: number} = {
 };
 
 const CTOSPingSchema: ABByType<ClientToServerMessage, 'ping'> = {type: CTOSTypes.ping, ping: 'uint32'};
+
 const CTOSJoinSchema: ABByType<ClientToServerMessage, 'join'> = {type: CTOSTypes.join, name: 'string'};
+
 const CTOSSpectateSchema: ABByType<ClientToServerMessage, 'spectate'> = {type: CTOSTypes.spectate};
+
 const CTOSPlayerInputSchema: ABByType<ClientToServerMessage, 'playerInput'> = {
   type: CTOSTypes.playerInput,
   inputSequenceNumber: 'uint32',
@@ -41,7 +31,7 @@ const CTOSPlayerInputSchema: ABByType<ClientToServerMessage, 'playerInput'> = {
   weapon: PlayerWeaponEnumSchema,
 };
 export const ClientToServerSchema: AB<ClientToServerMessage> = {
-  typeLookup: true,
+  flag: 'type-lookup',
   ping: CTOSPingSchema,
   join: CTOSJoinSchema,
   spectate: CTOSSpectateSchema,

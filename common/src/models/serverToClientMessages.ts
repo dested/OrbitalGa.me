@@ -1,7 +1,7 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
 import {EntityBufferValue, EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
-import {AB, ABByType, ABSizeByType} from '../parsers/arrayBufferSchema';
+import {AB, ABByType, ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {WallModelSchema} from '../entities/wallEntity';
 import {BossEvent1EnemyModelSchema} from '../entities/bossEvent1EnemyEntity';
 import {BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
@@ -14,28 +14,12 @@ import {DropModelSchema} from '../entities/dropEntity';
 import {SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity';
 import {MeteorModelSchema} from '../entities/meteorEntity';
 
-type STOCJoined = {
-  serverVersion: number;
-  type: 'joined';
-} & LivePlayerModel;
-type STOCSpectating = {
-  serverVersion: number;
-  type: 'spectating';
-};
+type STOCJoined = {serverVersion: number; type: 'joined'} & LivePlayerModel;
+type STOCSpectating = {serverVersion: number; type: 'spectating'};
 type STOCPong = {ping: number; type: 'pong'};
-export type STOCError = {
-  reason: 'nameInUse';
-  type: 'error';
-};
-
-type STOCWorldState = {
-  entities: EntityModels[];
-  type: 'worldState';
-};
-type STOCLeaderboard = {
-  scores: LeaderboardEntryRanked[];
-  type: 'leaderboard';
-};
+export type STOCError = {reason: 'nameInUse'; type: 'error'};
+type STOCWorldState = {entities: EntityModels[]; type: 'worldState'};
+type STOCLeaderboard = {scores: LeaderboardEntryRanked[]; type: 'leaderboard'};
 
 export type ServerToClientMessage =
   | STOCJoined
@@ -57,7 +41,7 @@ const STOCTypes: {[key in ServerToClientMessage['type']]: number} = {
 const STOCPongSchema: ABByType<ServerToClientMessage, 'pong'> = {type: STOCTypes.pong, ping: 'uint8'};
 const STOCErrorSchema: ABByType<ServerToClientMessage, 'error'> = {
   type: STOCTypes.error,
-  reason: {enum: true, nameInUse: 1},
+  reason: {flag: 'enum', nameInUse: 1},
 };
 const STOCJoinedSchema: ABByType<ServerToClientMessage, 'joined'> = {
   type: STOCTypes.joined,
@@ -95,7 +79,7 @@ const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
   type: STOCTypes.worldState,
   entities: {
     arraySize: 'uint16',
-    entityTypeLookup: true,
+    flag: 'entity-type-lookup',
     spectator: {entityType: EntityBufferValue.spectator, ...SpectatorModelSchema},
     meteor: {entityType: EntityBufferValue.meteor, ...MeteorModelSchema},
     livePlayer: {entityType: EntityBufferValue.livePlayer, ...LivePlayerModelSchema},
@@ -114,7 +98,7 @@ const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
 
 export const ServerToClientSchema: AB<ServerToClientMessage[]> = {
   arraySize: 'uint16',
-  typeLookup: true,
+  flag: 'type-lookup',
   pong: STOCPongSchema,
   error: STOCErrorSchema,
   joined: STOCJoinedSchema,

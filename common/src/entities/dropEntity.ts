@@ -8,7 +8,7 @@ import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerWeaponEnumSchema} from '../models/enums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
@@ -119,7 +119,7 @@ export type DropModel = EntityModel & {
 export const DropModelSchema: EntityModelSchemaType<'drop'> = {
   ...EntityModelSchema,
   drop: {
-    typeLookup: true,
+    flag: 'type-lookup',
     weapon: {
       type: 1,
       ammo: 'uint8',
@@ -132,7 +132,7 @@ export const DropModelSchema: EntityModelSchemaType<'drop'> = {
     shield: {
       type: 3,
       level: {
-        enum: true,
+        flag: 'enum',
         medium: 1,
         big: 2,
       },

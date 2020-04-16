@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class WallEntity extends Entity {

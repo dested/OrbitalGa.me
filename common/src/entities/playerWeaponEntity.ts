@@ -5,7 +5,7 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerWeaponEnumSchema} from '../models/enums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 

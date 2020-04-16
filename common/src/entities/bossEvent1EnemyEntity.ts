@@ -4,7 +4,7 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
@@ -124,7 +124,7 @@ export const BossEvent1EnemyModelSchema: EntityModelSchemaType<'bossEvent1Enemy'
   ownerEntityId: 'uint32',
   rotate: 'int32',
   pieceType: {
-    enum: true,
+    flag: 'enum',
     bodyBack1: 1,
     body1: 2,
     body2: 3,

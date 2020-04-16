@@ -6,7 +6,7 @@ import {nextId} from '../utils/uuid';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
@@ -133,7 +133,7 @@ export const PlayerShieldModelSchema: EntityModelSchemaType<'playerShield'> = {
   depleted: 'boolean',
   ownerEntityId: 'uint32',
   shieldStrength: {
-    enum: true,
+    flag: 'enum',
     small: 1,
     medium: 2,
     big: 3,

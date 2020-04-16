@@ -2,7 +2,7 @@ import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {EntityModels} from '../models/entityTypeModels';
 import {GameConstants} from '../game/gameConstants';
-import {AB} from '../parsers/arrayBufferSchema';
+import {AB} from '../parsers/arrayBufferSchemaTypes';
 
 type BoundingBox = {
   height: number;

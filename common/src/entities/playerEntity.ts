@@ -13,7 +13,7 @@ import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType, ABBitmask, ABEnum} from '../parsers/arrayBufferSchema';
+import {ABSizeByType, ABBitmask, ABEnum} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/enums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
@@ -434,7 +434,7 @@ export const LivePlayerModelSchema: EntityModelSchemaType<'livePlayer'> = {
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {
-    enum: true,
+    flag: 'enum',
     blue: 1,
     green: 2,
     orange: 3,
@@ -457,7 +457,7 @@ export const PlayerModelSchema: EntityModelSchemaType<'player'> = {
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {
-    enum: true,
+    flag: 'enum',
     blue: 1,
     green: 2,
     orange: 3,
