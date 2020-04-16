@@ -5,7 +5,8 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -63,7 +64,6 @@ export type EnemyShotModel = EntityModel & {
   entityType: 'enemyShot';
 };
 
-export const EnemyShotModelSchema: EntitySizeByType<EnemyShotModel, EnemyShotModel['entityType']> = {
-  entityType: 10,
+export const EnemyShotModelSchema: EntityModelSchemaType<'enemyShot'> = {
   ...EntityModelSchema,
 };

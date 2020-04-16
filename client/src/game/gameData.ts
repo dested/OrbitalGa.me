@@ -7,7 +7,7 @@ import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
 import {BotClientGame} from './botClientGame';
 import {ClientGame, ClientGameOptions} from './clientGame';
-import {ErrorMessage} from '@common/models/serverToClientMessages';
+import {STOCError} from '@common/models/serverToClientMessages';
 
 export class GameData {
   static instance = new GameData();
@@ -35,7 +35,7 @@ export class GameData {
         new BotClientGame(
           '1',
           {
-            onError: (client: ClientGame, error: ErrorMessage) => {},
+            onError: (client: ClientGame, error: STOCError) => {},
             onDied: (client) => {
               client.joinGame(Math.random().toFixed(8));
             },
@@ -85,7 +85,7 @@ export class GameData {
     this.client = new ClientGameUI(
       this.serverPath,
       {
-        onError: (client: ClientGame, error: ErrorMessage) => {},
+        onError: (client: ClientGame, error: STOCError) => {},
         onDied: () => {},
         onUIUpdate: () => {},
         onReady: () => {},

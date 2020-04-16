@@ -1,36 +1,49 @@
 import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
-import {Size} from '../parsers/arrayBufferSchema';
+import {AB, ABByType} from '../parsers/arrayBufferSchema';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
+import {ServerToClientMessage, STOCError} from './serverToClientMessages';
 
-export type ClientToServerMessage =
-  | {
-      name: string;
-      type: 'join';
-    }
-  | {
-      type: 'spectate';
-    }
-  | {
-      ping: number;
-      type: 'ping';
-    }
-  | {
-      inputSequenceNumber: number;
-      keys: PlayerInputKeys;
-      type: 'playerInput';
-      weapon?: PlayerWeapon;
-    };
+type CTOSJoin = {
+  name: string;
+  type: 'join';
+};
+type CTOSSpectate = {
+  type: 'spectate';
+};
+type CTOSPing = {
+  ping: number;
+  type: 'ping';
+};
+type CTOSPlayerInput = {
+  inputSequenceNumber: number;
+  keys: PlayerInputKeys;
+  type: 'playerInput';
+  weapon?: PlayerWeapon;
+};
 
-export const ClientToServerSchema: Size<ClientToServerMessage> = {
+export type ClientToServerMessage = CTOSJoin | CTOSSpectate | CTOSPing | CTOSPlayerInput;
+
+const CTOSTypes: {[key in ClientToServerMessage['type']]: number} = {
+  playerInput: 1,
+  join: 2,
+  ping: 3,
+  spectate: 4,
+};
+
+const CTOSPingSchema: ABByType<ClientToServerMessage, 'ping'> = {type: CTOSTypes.ping, ping: 'uint32'};
+const CTOSJoinSchema: ABByType<ClientToServerMessage, 'join'> = {type: CTOSTypes.join, name: 'string'};
+const CTOSSpectateSchema: ABByType<ClientToServerMessage, 'spectate'> = {type: CTOSTypes.spectate};
+const CTOSPlayerInputSchema: ABByType<ClientToServerMessage, 'playerInput'> = {
+  type: CTOSTypes.playerInput,
+  inputSequenceNumber: 'uint32',
+  keys: PlayerInputKeyBitmask,
+  weapon: PlayerWeaponEnumSchema,
+};
+export const ClientToServerSchema: AB<ClientToServerMessage> = {
   typeLookup: true,
-  ping: {type: 1, ping: 'uint32'},
-  join: {type: 2, name: 'string'},
-  spectate: {type: 3},
-  playerInput: {
-    type: 4,
-    inputSequenceNumber: 'uint32',
-    keys: PlayerInputKeyBitmask,
-    weapon: PlayerWeaponEnumSchema,
-  },
+  ping: CTOSPingSchema,
+  join: CTOSJoinSchema,
+  spectate: CTOSSpectateSchema,
+  playerInput: CTOSPlayerInputSchema,
 };

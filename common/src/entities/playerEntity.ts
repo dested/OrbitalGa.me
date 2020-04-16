@@ -13,8 +13,9 @@ import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType, SizeBitmask, SizeEnum} from '../parsers/arrayBufferSchema';
+import {ABSizeByType, ABBitmask, ABEnum} from '../parsers/arrayBufferSchema';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/enums';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -429,8 +430,7 @@ export type LivePlayerModel = EntityModel & {
   selectedWeapon: PlayerWeapon;
 };
 
-export const LivePlayerModelSchema: EntitySizeByType<LivePlayerModel, LivePlayerModel['entityType']> = {
-  entityType: 3,
+export const LivePlayerModelSchema: EntityModelSchemaType<'livePlayer'> = {
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {
@@ -453,8 +453,7 @@ export const LivePlayerModelSchema: EntitySizeByType<LivePlayerModel, LivePlayer
   selectedWeapon: PlayerWeaponEnumSchema,
 };
 
-export const PlayerModelSchema: EntitySizeByType<PlayerModel, PlayerModel['entityType']> = {
-  entityType: 4,
+export const PlayerModelSchema: EntityModelSchemaType<'player'> = {
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {

@@ -9,7 +9,7 @@ import {GameData} from '../../game/gameData';
 import {ClientGame} from '../../game/clientGame';
 import {unreachable} from '@common/utils/unreachable';
 import {Leaderboard} from '../../components/leaderboard';
-import {ErrorMessage} from '@common/models/serverToClientMessages';
+import {STOCError} from '@common/models/serverToClientMessages';
 
 const styles = {
   buttonList: {display: 'flex', width: '100%'},
@@ -33,7 +33,7 @@ export const LoginScreen: React.FC = observer((props) => {
     setError('');
     setConnectingStatus('connecting');
     GameData.instance.joinGame(uiStore.serverPath!, uiStore.playerName!, {
-      onError: (client: ClientGame, errorMessage: ErrorMessage) => {
+      onError: (client: ClientGame, errorMessage: STOCError) => {
         switch (errorMessage.reason) {
           case 'nameInUse':
             setError('This username is already taken');

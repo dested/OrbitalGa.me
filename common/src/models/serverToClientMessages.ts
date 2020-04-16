@@ -1,7 +1,7 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
-import {EntityModels} from './entityTypeModels';
+import {EntityBufferValue, EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
-import {Size} from '../parsers/arrayBufferSchema';
+import {AB, ABByType, ABSizeByType} from '../parsers/arrayBufferSchema';
 import {WallModelSchema} from '../entities/wallEntity';
 import {BossEvent1EnemyModelSchema} from '../entities/bossEvent1EnemyEntity';
 import {BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
@@ -11,75 +11,114 @@ import {ExplosionModelSchema} from '../entities/explosionEntity';
 import {PlayerShieldModelSchema} from '../entities/playerShieldEntity';
 import {SwoopingEnemyModelSchema} from '../entities/swoopingEnemyEntity';
 import {DropModelSchema} from '../entities/dropEntity';
-import {SpectatorModelSchema} from '../entities/spectatorEntity';
+import {SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity';
 import {MeteorModelSchema} from '../entities/meteorEntity';
 
-export type ErrorMessage = {
+type STOCJoined = {
+  serverVersion: number;
+  type: 'joined';
+} & LivePlayerModel;
+type STOCSpectating = {
+  serverVersion: number;
+  type: 'spectating';
+};
+type STOCPong = {ping: number; type: 'pong'};
+export type STOCError = {
   reason: 'nameInUse';
   type: 'error';
 };
 
-export type ServerToClientMessage =
-  | ({
-      serverVersion: number;
-      type: 'joined';
-    } & LivePlayerModel)
-  | {
-      serverVersion: number;
-      type: 'spectating';
-    }
-  | {ping: number; type: 'pong'}
-  | ErrorMessage
-  | {
-      entities: EntityModels[];
-      type: 'worldState';
-    }
-  | {
-      scores: LeaderboardEntryRanked[];
-      type: 'leaderboard';
-    };
+type STOCWorldState = {
+  entities: EntityModels[];
+  type: 'worldState';
+};
+type STOCLeaderboard = {
+  scores: LeaderboardEntryRanked[];
+  type: 'leaderboard';
+};
 
-export const ServerToClientSchema: Size<ServerToClientMessage[]> = {
+export type ServerToClientMessage =
+  | STOCJoined
+  | STOCSpectating
+  | STOCPong
+  | STOCError
+  | STOCWorldState
+  | STOCLeaderboard;
+
+const STOCTypes: {[key in ServerToClientMessage['type']]: number} = {
+  spectating: 1,
+  leaderboard: 2,
+  joined: 3,
+  error: 4,
+  pong: 5,
+  worldState: 6,
+};
+
+const STOCPongSchema: ABByType<ServerToClientMessage, 'pong'> = {type: STOCTypes.pong, ping: 'uint8'};
+const STOCErrorSchema: ABByType<ServerToClientMessage, 'error'> = {
+  type: STOCTypes.error,
+  reason: {enum: true, nameInUse: 1},
+};
+const STOCJoinedSchema: ABByType<ServerToClientMessage, 'joined'> = {
+  type: STOCTypes.joined,
+  serverVersion: 'uint8',
+  ...LivePlayerModelSchema,
+  entityType: 'string',
+};
+const STOCLeaderboardSchema: ABByType<ServerToClientMessage, 'leaderboard'> = {
+  type: STOCTypes.leaderboard,
+  scores: {
+    arraySize: 'uint16',
+    aliveTime: 'uint32',
+    calculatedScore: 'uint32',
+    damageGiven: 'uint32',
+    damageTaken: 'uint32',
+    enemiesKilled: 'uint32',
+    eventsParticipatedIn: 'uint32',
+    shotsFired: 'uint32',
+    userId: 'uint32',
+    username: 'string',
+    rank: 'uint16',
+  },
+};
+const STOCSpectatingSchema: ABByType<ServerToClientMessage, 'spectating'> = {
+  type: STOCTypes.spectating,
+  serverVersion: 'uint8',
+};
+
+export type EntityModelSchemaType<TEntityModelType extends EntityModels['entityType']> = Omit<
+  ABSizeByType<EntityModels, TEntityModelType>,
+  'entityType'
+>;
+
+const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
+  type: STOCTypes.worldState,
+  entities: {
+    arraySize: 'uint16',
+    entityTypeLookup: true,
+    spectator: {entityType: EntityBufferValue.spectator, ...SpectatorModelSchema},
+    meteor: {entityType: EntityBufferValue.meteor, ...MeteorModelSchema},
+    livePlayer: {entityType: EntityBufferValue.livePlayer, ...LivePlayerModelSchema},
+    player: {entityType: EntityBufferValue.player, ...PlayerModelSchema},
+    drop: {entityType: EntityBufferValue.drop, ...DropModelSchema},
+    wall: {entityType: EntityBufferValue.wall, ...WallModelSchema},
+    swoopingEnemy: {entityType: EntityBufferValue.swoopingEnemy, ...SwoopingEnemyModelSchema},
+    playerShield: {entityType: EntityBufferValue.playerShield, ...PlayerShieldModelSchema},
+    explosion: {entityType: EntityBufferValue.explosion, ...ExplosionModelSchema},
+    enemyShot: {entityType: EntityBufferValue.enemyShot, ...EnemyShotModelSchema},
+    playerWeapon: {entityType: EntityBufferValue.playerWeapon, ...PlayerWeaponModelSchema},
+    bossEvent1: {entityType: EntityBufferValue.bossEvent1, ...BossEvent1ModelSchema},
+    bossEvent1Enemy: {entityType: EntityBufferValue.bossEvent1Enemy, ...BossEvent1EnemyModelSchema},
+  },
+};
+
+export const ServerToClientSchema: AB<ServerToClientMessage[]> = {
   arraySize: 'uint16',
   typeLookup: true,
-  pong: {type: 1, ping: 'uint8'},
-  error: {type: 2, reason: {enum: true, nameInUse: 1}},
-  joined: {type: 3, serverVersion: 'uint8', ...LivePlayerModelSchema, entityType: 'string'},
-  leaderboard: {
-    type: 4,
-    scores: {
-      arraySize: 'uint16',
-      aliveTime: 'uint32',
-      calculatedScore: 'uint32',
-      damageGiven: 'uint32',
-      damageTaken: 'uint32',
-      enemiesKilled: 'uint32',
-      eventsParticipatedIn: 'uint32',
-      shotsFired: 'uint32',
-      userId: 'uint32',
-      username: 'string',
-      rank: 'uint16',
-    },
-  },
-  spectating: {type: 5, serverVersion: 'uint8'},
-  worldState: {
-    type: 6,
-    entities: {
-      arraySize: 'uint16',
-      entityTypeLookup: true,
-      spectator: SpectatorModelSchema,
-      meteor: MeteorModelSchema,
-      livePlayer: LivePlayerModelSchema,
-      player: PlayerModelSchema,
-      drop: DropModelSchema,
-      wall: WallModelSchema,
-      swoopingEnemy: SwoopingEnemyModelSchema,
-      playerShield: PlayerShieldModelSchema,
-      explosion: ExplosionModelSchema,
-      enemyShot: EnemyShotModelSchema,
-      playerWeapon: PlayerWeaponModelSchema,
-      bossEvent1: BossEvent1ModelSchema,
-      bossEvent1Enemy: BossEvent1EnemyModelSchema,
-    },
-  },
+  pong: STOCPongSchema,
+  error: STOCErrorSchema,
+  joined: STOCJoinedSchema,
+  leaderboard: STOCLeaderboardSchema,
+  spectating: STOCSpectatingSchema,
+  worldState: STOCWorldStateSchema,
 };

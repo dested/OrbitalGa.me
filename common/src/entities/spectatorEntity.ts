@@ -2,7 +2,8 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class SpectatorEntity extends Entity {
   entityType = 'spectator' as const;
@@ -31,14 +32,12 @@ export class SpectatorEntity extends Entity {
       entityType: 'spectator',
     };
   }
-
 }
 
 export type SpectatorModel = EntityModel & {
   entityType: 'spectator';
 };
 
-export const SpectatorModelSchema: EntitySizeByType<SpectatorModel, SpectatorModel['entityType']> = {
-  entityType: 1,
+export const SpectatorModelSchema: EntityModelSchemaType<'spectator'> = {
   ...EntityModelSchema,
 };

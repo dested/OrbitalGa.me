@@ -33,3 +33,21 @@ export type EntityModels = EntityType[keyof EntityType]['model'];
 export type WorldModelCastToEntityModel = any;
 
 export type ImpliedEntityType<T> = Omit<T, 'entityType'>;
+
+export const EntityBufferValue: {
+  [key in EntityModels['entityType']]: EntityType[keyof EntityType]['index'];
+} = {
+  player: 1,
+  meteor: 2,
+  enemyShot: 3,
+  playerShield: 4,
+  playerWeapon: 5,
+  explosion: 6,
+  spectator: 7,
+  swoopingEnemy: 8,
+  wall: 9,
+  livePlayer: 10,
+  drop: 11,
+  bossEvent1: 12,
+  bossEvent1Enemy: 13,
+};

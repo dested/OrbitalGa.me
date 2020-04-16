@@ -8,8 +8,9 @@ import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
 import {PlayerWeaponEnumSchema} from '../models/enums';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type DropType =
   | {
@@ -115,8 +116,7 @@ export type DropModel = EntityModel & {
   entityType: 'drop';
 };
 
-export const DropModelSchema: EntitySizeByType<DropModel, DropModel['entityType']> = {
-  entityType: 5,
+export const DropModelSchema: EntityModelSchemaType<'drop'> = {
   ...EntityModelSchema,
   drop: {
     typeLookup: true,

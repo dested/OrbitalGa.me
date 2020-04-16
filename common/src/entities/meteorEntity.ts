@@ -8,7 +8,8 @@ import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
@@ -256,7 +257,6 @@ export class MeteorEntity extends Entity {
 
     return {meteorColor, size, type};
   }
-
 }
 
 export type MeteorModel = EntityModel & {
@@ -267,8 +267,7 @@ export type MeteorModel = EntityModel & {
   rotate: number;
   size: 'big' | 'med' | 'small' | 'tiny';
 };
-export const MeteorModelSchema: EntitySizeByType<MeteorModel, MeteorModel['entityType']> = {
-  entityType: 2,
+export const MeteorModelSchema: EntityModelSchemaType<'meteor'> = {
   ...EntityModelSchema,
   rotate: 'uint8',
   hit: 'boolean',

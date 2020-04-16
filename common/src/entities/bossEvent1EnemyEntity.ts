@@ -4,7 +4,8 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
@@ -116,8 +117,7 @@ export type BossEvent1EnemyModel = EntityModel & {
   yOffset: number;
 };
 
-export const BossEvent1EnemyModelSchema: EntitySizeByType<BossEvent1EnemyModel, 'bossEvent1Enemy'> = {
-    entityType: 13,
+export const BossEvent1EnemyModelSchema: EntityModelSchemaType<'bossEvent1Enemy'> = {
   ...EntityModelSchema,
   xOffset: 'int32',
   yOffset: 'int32',

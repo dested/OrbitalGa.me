@@ -12,7 +12,7 @@ import {Weapons} from '../../components/weapons';
 import {JoinButton, LoginBox, Logo, Wrapper} from '../loginScreen/index.styles';
 import {ClientGame} from '../../game/clientGame';
 import {Leaderboard} from '../../components/leaderboard';
-import {ErrorMessage} from '@common/models/serverToClientMessages';
+import {STOCError} from '@common/models/serverToClientMessages';
 
 const leftJoystickOptions = {
   mode: 'static',
@@ -64,7 +64,7 @@ export const GameScreen: React.FC = observer((props) => {
 
   useEffect(() => {
     GameData.instance.setOptions({
-      onError: (client: ClientGame, error: ErrorMessage) => {},
+      onError: (client: ClientGame, error: STOCError) => {},
       onDied: () => {
         setDied(true);
       },
@@ -83,7 +83,7 @@ export const GameScreen: React.FC = observer((props) => {
 
   const connect = useCallback(() => {
     GameData.instance.joinGame(uiStore.serverPath!, uiStore.playerName!, {
-      onError: (client: ClientGame, error: ErrorMessage) => {},
+      onError: (client: ClientGame, error: STOCError) => {},
       onDied: () => {
         setDied(true);
       },

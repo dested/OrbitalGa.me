@@ -11,13 +11,13 @@ import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
 import {RollingAverage} from '@common/utils/rollingAverage';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
-import {ErrorMessage, ServerToClientMessage} from '@common/models/serverToClientMessages';
+import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
   onDisconnect: (me: ClientGame) => void;
-  onError: (client: ClientGame, error: ErrorMessage) => void;
+  onError: (client: ClientGame, error: STOCError) => void;
   onOpen: (me: ClientGame) => void;
   onReady: (me: ClientGame) => void;
   onUIUpdate: (me: ClientGame) => void;

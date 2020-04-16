@@ -4,13 +4,13 @@ import {Utils} from '../utils/utils';
 export type Discriminate<T, TField extends keyof T, TValue extends T[TField]> = T extends {[field in TField]: TValue}
   ? T
   : never;
-export type SizeEnum<T extends string> = {[key in T]: number} & {enum: true};
-export type SizeBitmask<T> = {[keyT in keyof T]-?: number} & {bitmask: true};
-export type SizeArray = {arraySize: 'uint8' | 'uint16'};
-export type SizeTypeLookup = {typeLookup: true};
-export type SizeEntityTypeLookup = {entityTypeLookup: true};
-export type Size<T> = T extends string
-  ? 'string' | SizeEnum<T>
+export type ABEnum<T extends string> = {[key in T]: number} & {enum: true};
+export type ABBitmask<T> = {[keyT in keyof T]-?: number} & {bitmask: true};
+export type ABArray = {arraySize: 'uint8' | 'uint16'};
+export type ABTypeLookup = {typeLookup: true};
+export type ABEntityTypeLookup = {entityTypeLookup: true};
+export type AB<T> = T extends string
+  ? 'string' | ABEnum<T>
   : T extends number
   ?
       | 'uint8'
@@ -27,38 +27,38 @@ export type Size<T> = T extends string
   ? 'boolean'
   : T extends Array<any>
   ? T[number] extends {entityType: string}
-    ? EntitySizeKeys<T[number]> & SizeArray & SizeEntityTypeLookup
+    ? ABSizeKeys<T[number]> & ABArray & ABEntityTypeLookup
     : T[number] extends {type: string}
-    ? SizeKeys<T[number]> & SizeArray & SizeTypeLookup
-    : SizeObj<T[number]> & SizeArray
+    ? ABKeys<T[number]> & ABArray & ABTypeLookup
+    : ABObj<T[number]> & ABArray
   : T extends {[key in keyof T]: boolean}
-  ? SizeBitmask<T>
+  ? ABBitmask<T>
   : T extends {type: string}
-  ? SizeKeys<T> & SizeTypeLookup
+  ? ABKeys<T> & ABTypeLookup
   : T extends {entityType: string}
-  ? EntitySizeKeys<T> & SizeEntityTypeLookup
+  ? ABSizeKeys<T> & ABEntityTypeLookup
   : T extends {}
-  ? SizeObj<T>
+  ? ABObj<T>
   : never;
 
-export type SizeObj<TItem> = {
-  [keyT in keyof TItem]: Size<TItem[keyT]>;
+export type ABObj<TItem> = {
+  [keyT in keyof TItem]: AB<TItem[keyT]>;
 };
 
-export type SizeByType<TItem extends {type: string}, TKey extends TItem['type']> = SizeObj<
+export type ABByType<TItem extends {type: string}, TKey extends TItem['type']> = ABObj<
   Omit<Discriminate<TItem, 'type', TKey>, 'type'>
 > & {type: number};
 
-export type EntitySizeByType<TItem extends {entityType: string}, TKey extends TItem['entityType']> = SizeObj<
+export type ABSizeByType<TItem extends {entityType: string}, TKey extends TItem['entityType']> = ABObj<
   Omit<Discriminate<TItem, 'entityType', TKey>, 'entityType'>
 > & {entityType: number};
 
-export type SizeKeys<TItem extends {type: string}> = {
-  [key in TItem['type']]: SizeByType<TItem, key>;
+export type ABKeys<TItem extends {type: string}> = {
+  [key in TItem['type']]: ABByType<TItem, key>;
 };
 
-export type EntitySizeKeys<TItem extends {entityType: string}> = {
-  [key in TItem['entityType']]: EntitySizeByType<TItem, key>;
+export type ABSizeKeys<TItem extends {entityType: string}> = {
+  [key in TItem['entityType']]: ABSizeByType<TItem, key>;
 };
 
 export class ArrayBufferSchema {

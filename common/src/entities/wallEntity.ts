@@ -1,7 +1,8 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class WallEntity extends Entity {
   entityType = 'wall' as const;
@@ -45,8 +46,7 @@ export type WallModel = EntityModel & {
   width: number;
 };
 
-export const WallModelSchema: EntitySizeByType<WallModel, 'wall'> = {
-  entityType: 6,
+export const WallModelSchema: EntityModelSchemaType<'wall'> = {
   ...EntityModelSchema,
   width: 'uint16',
   height: 'uint16',

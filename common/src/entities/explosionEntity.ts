@@ -2,7 +2,8 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntitySizeByType} from '../parsers/arrayBufferSchema';
+import {ABSizeByType} from '../parsers/arrayBufferSchema';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
@@ -67,8 +68,7 @@ export type ExplosionModel = EntityModel & {
   ownerEntityId?: number;
 };
 
-export const ExplosionModelSchema: EntitySizeByType<ExplosionModel, ExplosionModel['entityType']> = {
-  entityType: 9,
+export const ExplosionModelSchema: EntityModelSchemaType<'explosion'> = {
   ...EntityModelSchema,
   intensity: 'uint8',
   ownerEntityId: 'int32Optional',

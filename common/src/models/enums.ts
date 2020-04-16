@@ -1,15 +1,15 @@
-import {SizeBitmask, SizeEnum} from '../parsers/arrayBufferSchema';
+import {ABBitmask, ABEnum} from '../parsers/arrayBufferSchema';
 import {PlayerWeapon} from '../game/gameRules';
 import {PlayerInputKeys} from '../entities/playerEntity';
 
-export const PlayerWeaponEnumSchema: SizeEnum<PlayerWeapon> = {
+export const PlayerWeaponEnumSchema: ABEnum<PlayerWeapon> = {
   enum: true,
   rocket: 1,
   laser1: 2,
   laser2: 3,
   torpedo: 4,
 };
-export const PlayerInputKeyBitmask: SizeBitmask<PlayerInputKeys> = {
+export const PlayerInputKeyBitmask: ABBitmask<PlayerInputKeys> = {
   bitmask: true,
   shoot: 0,
   right: 1,
