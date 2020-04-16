@@ -2,6 +2,8 @@ import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
 import {assertType, Utils} from '../utils/utils';
 import {AB, ABFlags, ABScalars, Discriminate} from './arrayBufferSchemaTypes';
 import {unreachable} from '../utils/unreachable';
+import {ArrayBufferSchemaBuilder} from './arrayBufferSchemaBuilder';
+import {ServerToClientSchema} from '../models/serverToClientMessages';
 const readerScalarLookup = {
   uint8: (reader: ArrayBufferReader) => reader.readUint8(),
   uint16: (reader: ArrayBufferReader) => reader.readUint16(),
@@ -174,9 +176,11 @@ export class ArrayBufferSchema {
     return buf.buildBuffer();
   }
 
-  static startReadSchemaBuffer(buffer: ArrayBuffer | ArrayBufferLike, schema: any): any {
-    this.log('start read buffer');
-    return this.readSchemaBuffer(new ArrayBufferReader(buffer), schema);
+  static startReadSchemaBuffer(
+    buffer: ArrayBuffer | ArrayBufferLike,
+    readerFunction: (reader: ArrayBufferReader) => any
+  ): any {
+    return readerFunction(new ArrayBufferReader(buffer));
   }
 
   private static log(...messages: string[]) {

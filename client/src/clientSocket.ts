@@ -1,7 +1,11 @@
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientConfig} from './clientConfig';
 import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
-import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
+import {
+  ServerToClientMessage,
+  ServerToClientSchema,
+  ServerToClientSchemaReaderFunction,
+} from '@common/models/serverToClientMessages';
 import {ClientToServerMessage, ClientToServerSchema} from '@common/models/clientToServerMessages';
 
 export class ClientSocket implements IClientSocket {
@@ -30,7 +34,7 @@ export class ClientSocket implements IClientSocket {
     this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         totalLength += (e.data as ArrayBuffer).byteLength;
-        options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchema));
+        options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction));
       } else {
         totalLength += e.data.length;
         options.onMessage(JSON.parse(e.data));

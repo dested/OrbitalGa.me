@@ -2,7 +2,8 @@ import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {AB, ABByType} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
-import {ServerToClientMessage, STOCError} from './serverToClientMessages';
+import {ServerToClientMessage, ServerToClientSchema, STOCError} from './serverToClientMessages';
+import {ArrayBufferSchemaBuilder} from '../parsers/arrayBufferSchemaBuilder';
 
 type CTOSJoin = {name: string; type: 'join'};
 type CTOSSpectate = {type: 'spectate'};
@@ -39,3 +40,5 @@ export const ClientToServerSchema: AB<ClientToServerMessage> = {
     playerInput: CTOSPlayerInputSchema,
   },
 };
+
+export const ClientToServerSchemaReaderFunction = ArrayBufferSchemaBuilder.generateReaderFunction(ClientToServerSchema);

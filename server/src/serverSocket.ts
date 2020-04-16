@@ -5,7 +5,11 @@ import {createServer} from 'http';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
-import {ClientToServerMessage, ClientToServerSchema} from '@common/models/clientToServerMessages';
+import {
+  ClientToServerMessage,
+  ClientToServerSchema,
+  ClientToServerSchemaReaderFunction,
+} from '@common/models/clientToServerMessages';
 import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
 
 export type SocketConnection = {
@@ -117,7 +121,10 @@ export class ServerSocket implements IServerSocket {
             ws.close();
             return;
           }
-          const messageData = ArrayBufferSchema.startReadSchemaBuffer(message as ArrayBuffer, ClientToServerSchema);
+          const messageData = ArrayBufferSchema.startReadSchemaBuffer(
+            message as ArrayBuffer,
+            ClientToServerSchemaReaderFunction
+          );
           if (messageData === null) {
             ws.close();
             return;

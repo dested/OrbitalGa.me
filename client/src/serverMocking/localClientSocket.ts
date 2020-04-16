@@ -4,7 +4,11 @@ import {GameConstants} from '@common/game/gameConstants';
 import {WebSocketClient} from './webSocketClient';
 import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
 import {ClientToServerMessage, ClientToServerSchema} from '@common/models/clientToServerMessages';
-import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
+import {
+  ServerToClientMessage,
+  ServerToClientSchema,
+  ServerToClientSchemaReaderFunction,
+} from '@common/models/serverToClientMessages';
 
 export class LocalClientSocket implements IClientSocket {
   private socket?: WebSocketClient;
@@ -30,7 +34,7 @@ export class LocalClientSocket implements IClientSocket {
     this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         try {
-          options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchema));
+          options.onMessage(ArrayBufferSchema.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction));
         } catch (ex) {
           console.error(ex);
           debugger;

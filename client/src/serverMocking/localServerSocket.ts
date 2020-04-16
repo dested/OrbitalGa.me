@@ -5,7 +5,7 @@ import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 import {ArrayBufferSchema} from '@common/parsers/arrayBufferSchema';
 import {ServerToClientMessage, ServerToClientSchema} from '@common/models/serverToClientMessages';
-import {ClientToServerSchema} from '@common/models/clientToServerMessages';
+import {ClientToServerSchema, ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
 
 export class LocalServerSocket implements IServerSocket {
   connections = new ArrayHash<SocketConnection>('connectionId');
@@ -67,7 +67,10 @@ export class LocalServerSocket implements IServerSocket {
       ws.onmessage((message) => {
         if (GameConstants.binaryTransport) {
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
-          const messageData = ArrayBufferSchema.startReadSchemaBuffer(message as ArrayBuffer, ClientToServerSchema);
+          const messageData = ArrayBufferSchema.startReadSchemaBuffer(
+            message as ArrayBuffer,
+            ClientToServerSchemaReaderFunction
+          );
           if (messageData === null) {
             ws.close();
             return;

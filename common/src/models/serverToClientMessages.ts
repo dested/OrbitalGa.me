@@ -13,6 +13,8 @@ import {SwoopingEnemyModelSchema} from '../entities/swoopingEnemyEntity';
 import {DropModelSchema} from '../entities/dropEntity';
 import {SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity';
 import {MeteorModelSchema} from '../entities/meteorEntity';
+import {ArrayBufferSchemaBuilder} from '../parsers/arrayBufferSchemaBuilder';
+import {ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 
 type STOCJoined = {serverVersion: number; type: 'joined'} & LivePlayerModel;
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
@@ -116,3 +118,4 @@ export const ServerToClientSchema: AB<ServerToClientMessage[]> = {
     },
   },
 };
+export const ServerToClientSchemaReaderFunction = ArrayBufferSchemaBuilder.generateReaderFunction(ServerToClientSchema);
