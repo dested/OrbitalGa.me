@@ -67,6 +67,20 @@ const readerFlagLookup = {
     throw new Error('Schema not found: Entity Type ' + entityType);
   },
 };
+const writerScalarLookup = {
+  uint8: (buff: ArrayBufferBuilder, value: any) => buff.addUint8(value),
+  uint16: (buff: ArrayBufferBuilder, value: any) => buff.addUint16(value),
+  uint32: (buff: ArrayBufferBuilder, value: any) => buff.addUint32(value),
+  int8: (buff: ArrayBufferBuilder, value: any) => buff.addInt8(value),
+  int16: (buff: ArrayBufferBuilder, value: any) => buff.addInt16(value),
+  int32: (buff: ArrayBufferBuilder, value: any) => buff.addInt32(value),
+  float32: (buff: ArrayBufferBuilder, value: any) => buff.addFloat32(value),
+  float64: (buff: ArrayBufferBuilder, value: any) => buff.addFloat64(value),
+  boolean: (buff: ArrayBufferBuilder, value: any) => buff.addBoolean(value),
+  string: (buff: ArrayBufferBuilder, value: any) => buff.addString(value),
+  int32Optional: (buff: ArrayBufferBuilder, value: any) => buff.addInt32Optional(value),
+  int8Optional: (buff: ArrayBufferBuilder, value: any) => buff.addInt8Optional(value),
+};
 
 const writerFlagLookup = {
   bitmask: (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
@@ -77,82 +91,57 @@ const writerFlagLookup = {
     }
     buff.addBits(...bitmask);
   },
-  'array-uint8': (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema);
+  'array-uint8': (buff: ArrayBufferBuilder, schema: Discriminate<ABFlags, 'flag', 'array-uint8'>, value: any) => {
+    buff.addUint8(value.length);
+    for (const valueElement of value) {
+      ArrayBufferSchema.addSchemaBuffer(buff, valueElement, schema.elements);
+    }
   },
-  'array-uint16': (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema);
+  'array-uint16': (buff: ArrayBufferBuilder, schema: Discriminate<ABFlags, 'flag', 'array-uint16'>, value: any) => {
+    buff.addUint16(value.length);
+    for (const valueElement of value) {
+      ArrayBufferSchema.addSchemaBuffer(buff, valueElement, schema.elements);
+    }
   },
   enum: (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
     buff.addUint8(((schema as any)[value] as any) as number);
   },
-  undefined: (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema);
+  'type-lookup': (buff: ArrayBufferBuilder, schema: Discriminate<ABFlags, 'flag', 'type-lookup'>, value: any) => {
+    buff.addUint8(schema.elements[value.type].type);
+    ArrayBufferSchema.addSchemaBuffer(buff, value, schema.elements[value.type] as any);
   },
-  'type-lookup': (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema);
-  },
-  'entity-type-lookup': (buff: ArrayBufferBuilder, schema: ABFlags, value: any) => {
-    ArrayBufferSchema.addSchemaBuffer(buff, value, schema);
+  'entity-type-lookup': (
+    buff: ArrayBufferBuilder,
+    schema: Discriminate<ABFlags, 'flag', 'entity-type-lookup'>,
+    value: any
+  ) => {
+    buff.addUint8(schema.elements[value.entityType].entityType);
+    ArrayBufferSchema.addSchemaBuffer(buff, value, schema.elements[value.entityType] as any);
   },
 };
 
 export class ArrayBufferSchema {
   static debug = false;
-  static addSchemaBuffer(buff: ArrayBufferBuilder, value: any, schema: ABFlags) {
-    if (!schema) {
-      debugger;
-    }
-    switch (schema.flag) {
-      case 'array-uint8':
-        buff.addUint8(value.length);
-        for (const valueElement of value) {
-          this.addSchemaBuffer(buff, valueElement, schema.elements);
+  static addSchemaBuffer(buff: ArrayBufferBuilder, value: any, schemaO: ABFlags) {
+    assertType<ABScalars>(schemaO);
+    if (schemaO in writerScalarLookup) {
+      return (writerScalarLookup as any)[schemaO](buff, value);
+    } else {
+      if (!schemaO.flag) {
+        const obj: any = {};
+        for (const key of Object.keys(schemaO)) {
+          if (key === 'type' || key === 'entityType') {
+            continue;
+          }
+          const currentSchemaElement = (schemaO as any)[key] as ABFlags;
+          obj[key] = this.addSchemaBuffer(buff, value[key], currentSchemaElement);
         }
-        return;
-      case 'array-uint16':
-        buff.addUint16(value.length);
-        for (const valueElement of value) {
-          this.addSchemaBuffer(buff, valueElement, schema.elements);
-        }
-        return;
-    }
-    let currentSchema = schema as any;
-    if (currentSchema.flag === 'type-lookup') {
-      buff.addUint8(currentSchema.elements[value.type].type);
-      currentSchema = currentSchema.elements[value.type] as ABFlags;
-    } else if (currentSchema.flag === 'entity-type-lookup') {
-      buff.addUint8(currentSchema.elements[value.entityType].entityType);
-      currentSchema = currentSchema.elements[value.entityType] as ABFlags;
-    }
-    for (const key of Object.keys(currentSchema)) {
-      if (key === 'type' || key === 'entityType') {
-        continue;
+        return obj;
       }
-      const currentSchemaElement = (currentSchema as any)[key] as ABFlags;
-
-      assertType<ABScalars>(currentSchemaElement);
-
-      const lookup = {
-        uint8: () => buff.addUint8(value[key]),
-        uint16: () => buff.addUint16(value[key]),
-        uint32: () => buff.addUint32(value[key]),
-        int8: () => buff.addInt8(value[key]),
-        int16: () => buff.addInt16(value[key]),
-        int32: () => buff.addInt32(value[key]),
-        float32: () => buff.addFloat32(value[key]),
-        float64: () => buff.addFloat64(value[key]),
-        boolean: () => buff.addBoolean(value[key]),
-        string: () => buff.addString(value[key]),
-        int32Optional: () => buff.addInt32Optional(value[key]),
-        int8Optional: () => buff.addInt8Optional(value[key]),
-      };
-
-      if (currentSchemaElement in lookup) {
-        (lookup as any)[currentSchemaElement]();
-      } else {
-        (writerFlagLookup as any)[currentSchemaElement.flag as any](buff, currentSchemaElement, value[key]);
+      if (schemaO.flag in writerFlagLookup) {
+        return writerFlagLookup[schemaO.flag](buff, schemaO as any, value);
       }
+      throw new Error('bad ');
     }
   }
 
