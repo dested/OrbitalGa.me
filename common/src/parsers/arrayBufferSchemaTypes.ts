@@ -3,7 +3,7 @@ export type Discriminate<T, TField extends keyof T, TValue extends T[TField]> = 
   : never;
 export type ABEnum<T extends string> = {[key in T]: number} & {flag: 'enum'};
 export type ABBitmask<T> = {[keyT in keyof T]-?: number} & {flag: 'bitmask'};
-export type ABArray = {arraySize: 'uint8' | 'uint16'};
+export type ABArray<TElements> = {elements: TElements; flag: 'array-uint8' | 'array-uint16'};
 export type ABTypeLookup = {flag: 'type-lookup'};
 export type ABEntityTypeLookup = {flag: 'entity-type-lookup'};
 
@@ -23,13 +23,13 @@ export type ABScalars =
   | 'string'
   | 'boolean';
 
-export type ABFlags = (
+export type ABFlags =
   | {flag: 'enum'}
   | {flag: 'bitmask'}
+  | {elements: any; flag: 'array-uint8' | 'array-uint16'}
   | ({[key: string]: AnyAndKey<'type', number>} & {flag: 'type-lookup'; type: number})
   | ({[key: string]: AnyAndKey<'entityType', number>} & {entityType: number; flag: 'entity-type-lookup'})
-  | {flag: undefined}
-) & {arraySize?: 'uint8' | 'uint16'};
+  | {flag: undefined};
 
 export type AB<T> = T extends string
   ? 'string' | ABEnum<T>
@@ -49,10 +49,10 @@ export type AB<T> = T extends string
   ? 'boolean'
   : T extends Array<any>
   ? T[number] extends {entityType: string}
-    ? ABSizeKeys<T[number]> & ABArray & ABEntityTypeLookup
+    ? ABArray<ABSizeKeys<T[number]> & ABEntityTypeLookup>
     : T[number] extends {type: string}
-    ? ABKeys<T[number]> & ABArray & ABTypeLookup
-    : ABObj<T[number]> & ABArray
+    ? ABArray<ABKeys<T[number]> & ABTypeLookup>
+    : ABArray<ABObj<T[number]>>
   : T extends {[key in keyof T]: boolean}
   ? ABBitmask<T>
   : T extends {type: string}

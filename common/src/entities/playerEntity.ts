@@ -442,9 +442,8 @@ export const LivePlayerModelSchema: EntityModelSchemaType<'livePlayer'> = {
   },
   create: 'boolean',
   availableWeapons: {
-    arraySize: 'uint8',
-    ammo: 'uint16',
-    weapon: PlayerWeaponEnumSchema,
+    flag: 'array-uint8',
+    elements: {ammo: 'uint16', weapon: PlayerWeaponEnumSchema},
   },
   dead: 'boolean',
   lastProcessedInputSequenceNumber: 'uint32',
