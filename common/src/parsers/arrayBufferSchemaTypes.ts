@@ -27,9 +27,10 @@ export type ABFlags =
   | {flag: 'bitmask'}
   | {elements: any; flag: 'array-uint16'}
   | {elements: any; flag: 'array-uint8'}
-  | {elements: {[key: string]: AnyAndKey<'type', number>}; flag: 'type-lookup'}
-  | {elements: {[key: string]: AnyAndKey<'entityType', number>}; flag: 'entity-type-lookup'}
-  | {flag: undefined};
+  | {elements: {[key: string]: ABSchemaDef & {type: number}}; flag: 'type-lookup'}
+  | {elements: {[key: string]: ABSchemaDef & {entityType: number}}; flag: 'entity-type-lookup'}
+  | ({flag: undefined} & {[key: string]: any});
+export type ABSchemaDef = ABFlags | string;
 
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 type StringUnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
