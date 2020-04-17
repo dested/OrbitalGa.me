@@ -1,7 +1,5 @@
 import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
-import {assertType, Utils} from '../utils/utils';
-import {AB, ABFlags, ABScalars, Discriminate} from './arrayBufferSchemaTypes';
-import {unreachable} from '../utils/unreachable';
+import {ABFlags, Discriminate} from './arrayBufferSchemaTypes';
 
 export class ArrayBufferSchemaBuilder {
   static addSchemaBuffer(schema: any, fieldName: string, addMap: (code: string) => string) {
@@ -298,5 +296,16 @@ return (${code})
       }
       throw new Error('bad ');
     }
+  }
+  static startAddSchemaBuffer(value: any, adderFunction: (buff: ArrayBufferBuilder, value: any) => ArrayBuffer) {
+    const arrayBufferBuilder = new ArrayBufferBuilder(1000);
+    return adderFunction(arrayBufferBuilder, value);
+  }
+
+  static startReadSchemaBuffer(
+    buffer: ArrayBuffer | ArrayBufferLike,
+    readerFunction: (reader: ArrayBufferReader) => any
+  ): any {
+    return readerFunction(new ArrayBufferReader(buffer));
   }
 }
