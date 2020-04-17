@@ -1,5 +1,5 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
-import {EntityBufferValue, EntityModels} from './entityTypeModels';
+import {EntityTypeLookup, EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
 import {SDElement, SDArray, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
 import {WallModelSchema} from '../entities/wallEntity';
@@ -84,19 +84,19 @@ const STOCWorldStateSchema: SDTypeLookup<ServerToClientMessage, 'worldState'> = 
     elements: {
       flag: 'type-lookup',
       elements: {
-        spectator: {type: EntityBufferValue.spectator, ...SpectatorModelSchema},
-        meteor: {type: EntityBufferValue.meteor, ...MeteorModelSchema},
-        livePlayer: {type: EntityBufferValue.livePlayer, ...LivePlayerModelSchema},
-        player: {type: EntityBufferValue.player, ...PlayerModelSchema},
-        drop: {type: EntityBufferValue.drop, ...DropModelSchema},
-        wall: {type: EntityBufferValue.wall, ...WallModelSchema},
-        swoopingEnemy: {type: EntityBufferValue.swoopingEnemy, ...SwoopingEnemyModelSchema},
-        playerShield: {type: EntityBufferValue.playerShield, ...PlayerShieldModelSchema},
-        explosion: {type: EntityBufferValue.explosion, ...ExplosionModelSchema},
-        enemyShot: {type: EntityBufferValue.enemyShot, ...EnemyShotModelSchema},
-        playerWeapon: {type: EntityBufferValue.playerWeapon, ...PlayerWeaponModelSchema},
-        bossEvent1: {type: EntityBufferValue.bossEvent1, ...BossEvent1ModelSchema},
-        bossEvent1Enemy: {type: EntityBufferValue.bossEvent1Enemy, ...BossEvent1EnemyModelSchema},
+        spectator: {type: EntityTypeLookup.spectator, ...SpectatorModelSchema},
+        meteor: {type: EntityTypeLookup.meteor, ...MeteorModelSchema},
+        livePlayer: {type: EntityTypeLookup.livePlayer, ...LivePlayerModelSchema},
+        player: {type: EntityTypeLookup.player, ...PlayerModelSchema},
+        drop: {type: EntityTypeLookup.drop, ...DropModelSchema},
+        wall: {type: EntityTypeLookup.wall, ...WallModelSchema},
+        swoopingEnemy: {type: EntityTypeLookup.swoopingEnemy, ...SwoopingEnemyModelSchema},
+        playerShield: {type: EntityTypeLookup.playerShield, ...PlayerShieldModelSchema},
+        explosion: {type: EntityTypeLookup.explosion, ...ExplosionModelSchema},
+        enemyShot: {type: EntityTypeLookup.enemyShot, ...EnemyShotModelSchema},
+        playerWeapon: {type: EntityTypeLookup.playerWeapon, ...PlayerWeaponModelSchema},
+        bossEvent1: {type: EntityTypeLookup.bossEvent1, ...BossEvent1ModelSchema},
+        bossEvent1Enemy: {type: EntityTypeLookup.bossEvent1Enemy, ...BossEvent1EnemyModelSchema},
       },
     },
   },

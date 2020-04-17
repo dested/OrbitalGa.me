@@ -8,7 +8,7 @@ import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {PlayerWeaponEnumSchema} from '../models/enums';
+import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type DropType =

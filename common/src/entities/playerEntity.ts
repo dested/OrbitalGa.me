@@ -13,7 +13,7 @@ import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/enums';
+import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type PlayerInputKeys = {

@@ -34,7 +34,7 @@ export type WorldModelCastToEntityModel = any;
 
 export type ImpliedEntityType<T> = Omit<T, 'type'>;
 
-export const EntityBufferValue: {
+export const EntityTypeLookup: {
   [key in EntityModels['type']]: number;
 } = {
   player: 1,

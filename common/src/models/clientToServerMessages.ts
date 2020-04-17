@@ -1,7 +1,7 @@
 import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {SDElement, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
-import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
+import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './schemaEnums';
 import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 
 type CTOSJoin = {name: string; type: 'join'};

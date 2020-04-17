@@ -5,7 +5,7 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {PlayerWeaponEnumSchema} from '../models/enums';
+import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
