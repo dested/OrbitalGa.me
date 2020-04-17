@@ -4,9 +4,10 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {GameRules} from '../game/gameRules';
-import {PlayerEntity} from './playerEntity';
+import {LivePlayerModel, PlayerEntity} from './playerEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
@@ -126,7 +127,7 @@ export type PlayerShieldModel = EntityModel & {
   type: 'playerShield';
 };
 
-export const PlayerShieldModelSchema: EntityModelSchemaType<'playerShield'> = {
+export const PlayerShieldModelSchema: SDTypeElement<PlayerShieldModel> = {
   ...EntityModelSchema,
   health: 'uint8',
   depleted: 'boolean',

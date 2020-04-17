@@ -3,6 +3,8 @@ import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {EnemyShotModel} from './enemyShotEntity';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
@@ -67,7 +69,7 @@ export type ExplosionModel = EntityModel & {
   type: 'explosion';
 };
 
-export const ExplosionModelSchema: EntityModelSchemaType<'explosion'> = {
+export const ExplosionModelSchema: SDTypeElement<ExplosionModel> = {
   ...EntityModelSchema,
   intensity: 'uint8',
   ownerEntityId: 'int32Optional',

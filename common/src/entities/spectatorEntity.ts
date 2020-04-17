@@ -1,8 +1,10 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntityModels, ImpliedEntityType} from '../models/entityTypeModels';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement, SDTypeLookup} from '../schemaDefiner/schemaDefinerTypes';
+import {PlayerWeaponModel} from './playerWeaponEntity';
 
 export class SpectatorEntity extends Entity {
   type = 'spectator' as const;
@@ -37,6 +39,6 @@ export type SpectatorModel = EntityModel & {
   type: 'spectator';
 };
 
-export const SpectatorModelSchema: EntityModelSchemaType<'spectator'> = {
+export const SpectatorModelSchema: SDTypeElement<SpectatorModel> = {
   ...EntityModelSchema,
 };

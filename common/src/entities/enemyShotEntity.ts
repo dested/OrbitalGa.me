@@ -6,6 +6,8 @@ import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {DropModel} from './dropEntity';
 
 export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -63,6 +65,6 @@ export type EnemyShotModel = EntityModel & {
   type: 'enemyShot';
 };
 
-export const EnemyShotModelSchema: EntityModelSchemaType<'enemyShot'> = {
+export const EnemyShotModelSchema: SDTypeElement<EnemyShotModel> = {
   ...EntityModelSchema,
 };

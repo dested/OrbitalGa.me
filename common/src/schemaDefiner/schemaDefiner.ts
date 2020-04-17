@@ -137,26 +137,16 @@ ${Utils.safeKeysExclude(schema, 'flag')
           }
           case 'type-lookup': {
             let map = '{\n';
+            let index = 0;
             for (const key of Object.keys(schema.elements)) {
               map += `${key}:()=>{
-              buff.addUint8(${schema.elements[key].type});
+              buff.addUint8(${index});
               ${SchemaDefiner.buildAdderFunction(schema.elements[key], fieldName, addMap)}
               },`;
+              index++;
             }
             map += '}\n';
             return `(${map})[${fieldName}.type]();`;
-          }
-          case 'entity-type-lookup': {
-            let map = '{\n';
-            for (const key of Object.keys(schema.elements)) {
-              map += `${key}:()=>{
-              buff.addUint8(${schema.elements[key].entityType});
-              ${SchemaDefiner.buildAdderFunction(schema.elements[key], fieldName, addMap)}
-              },
-              `;
-            }
-            map += '}\n';
-            return `(${map})[${fieldName}.entityType]()`;
           }
           case undefined:
             let result = '';
@@ -221,21 +211,12 @@ ${Utils.safeKeysExclude(schema, 'flag')
           }
           case 'type-lookup': {
             let map = '{\n';
+            let index = 0;
             for (const key of Object.keys(schema.elements)) {
-              map += `${schema.elements[key].type}:()=>(
+              map += `${index}:()=>(
               ${SchemaDefiner.buildReaderFunction(schema.elements[key], addMap, `type: '${key}'`)}
               ),\n`;
-            }
-            map += '}\n';
-            const newMapId = addMap(map);
-            return `lookup(reader.readUint8(),${newMapId})\n`;
-          }
-          case 'entity-type-lookup': {
-            let map = '{\n';
-            for (const key of Object.keys(schema.elements)) {
-              map += `${schema.elements[key].entityType}:()=>(
-              ${SchemaDefiner.buildReaderFunction(schema.elements[key], addMap, `entityType: '${key}'`)}
-              ),\n`;
+              index++;
             }
             map += '}\n';
             const newMapId = addMap(map);

@@ -3,8 +3,9 @@ import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {EntityModels, ImpliedEntityType} from '../models/entityTypeModels';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDSimpleObject, SDTypeElement, SDTypeLookup} from '../schemaDefiner/schemaDefinerTypes';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
@@ -116,7 +117,7 @@ export type BossEvent1EnemyModel = EntityModel & {
   yOffset: number;
 };
 
-export const BossEvent1EnemyModelSchema: EntityModelSchemaType<'bossEvent1Enemy'> = {
+export const BossEvent1EnemyModelSchema: SDTypeElement<BossEvent1EnemyModel> = {
   ...EntityModelSchema,
   xOffset: 'int32',
   yOffset: 'int32',

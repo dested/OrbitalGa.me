@@ -2,6 +2,8 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {SwoopingEnemyModel} from './swoopingEnemyEntity';
 
 export class WallEntity extends Entity {
   type = 'wall' as const;
@@ -45,7 +47,7 @@ export type WallModel = EntityModel & {
   width: number;
 };
 
-export const WallModelSchema: EntityModelSchemaType<'wall'> = {
+export const WallModelSchema: SDTypeElement<WallModel> = {
   ...EntityModelSchema,
   width: 'uint16',
   height: 'uint16',

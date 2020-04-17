@@ -7,6 +7,8 @@ import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PlayerShieldModel} from './playerShieldEntity';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -102,7 +104,7 @@ export type PlayerWeaponModel = EntityModel & {
   weaponType: PlayerWeapon;
 };
 
-export const PlayerWeaponModelSchema: EntityModelSchemaType<'playerWeapon'> = {
+export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
   ...EntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
   startY: 'int32',

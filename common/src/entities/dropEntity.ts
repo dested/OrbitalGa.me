@@ -10,6 +10,8 @@ import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {BossEvent1Model} from './bossEvent1Entity';
 
 export type DropType =
   | {
@@ -115,22 +117,19 @@ export type DropModel = EntityModel & {
   type: 'drop';
 };
 
-export const DropModelSchema: EntityModelSchemaType<'drop'> = {
+export const DropModelSchema: SDTypeElement<DropModel> = {
   ...EntityModelSchema,
   drop: {
     flag: 'type-lookup',
     elements: {
       weapon: {
-        type: 1,
         ammo: 'uint8',
         weapon: PlayerWeaponEnumSchema,
       },
       health: {
-        type: 2,
         amount: 'uint8',
       },
       shield: {
-        type: 3,
         level: {
           flag: 'enum',
           medium: 1,

@@ -16,21 +16,13 @@ type CTOSPlayerInput = {
 
 export type ClientToServerMessage = CTOSJoin | CTOSSpectate | CTOSPing | CTOSPlayerInput;
 
-const CTOSTypes: {[key in ClientToServerMessage['type']]: number} = {
-  playerInput: 1,
-  join: 2,
-  ping: 3,
-  spectate: 4,
-};
+const CTOSPingSchema: SDTypeLookup<ClientToServerMessage, 'ping'> = {ping: 'uint32'};
 
-const CTOSPingSchema: SDTypeLookup<ClientToServerMessage, 'ping'> = {type: CTOSTypes.ping, ping: 'uint32'};
+const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {name: 'string'};
 
-const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {type: CTOSTypes.join, name: 'string'};
-
-const CTOSSpectateSchema: SDTypeLookup<ClientToServerMessage, 'spectate'> = {type: CTOSTypes.spectate};
+const CTOSSpectateSchema: SDTypeLookup<ClientToServerMessage, 'spectate'> = {};
 
 const CTOSPlayerInputSchema: SDTypeLookup<ClientToServerMessage, 'playerInput'> = {
-  type: CTOSTypes.playerInput,
   inputSequenceNumber: 'uint32',
   keys: PlayerInputKeyBitmask,
   weapon: {...PlayerWeaponEnumSchema, unset: 0},

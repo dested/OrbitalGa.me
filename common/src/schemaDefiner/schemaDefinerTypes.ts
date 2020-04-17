@@ -12,7 +12,10 @@ export type SDTypeLookupElements<TElements extends {type: string}> = {
 };
 export type SDTypeLookup<TItem extends {type: string}, TKey extends TItem['type']> = SDSimpleObject<
   Omit<Discriminate<TItem, 'type', TKey>, 'type'>
-> & {type: number};
+> ;
+export type SDTypeElement<TItem extends {type: string}> = SDSimpleObject<
+  Omit<TItem, 'type'>
+> ;
 
 export type SDSimpleObject<TItem> = {
   [keyT in keyof Required<TItem>]: SDElement<Required<TItem>, keyT>;
@@ -51,7 +54,6 @@ export type ABFlags =
   | {flag: 'bitmask'}
   | {elements: any; flag: 'array-uint16'}
   | {elements: any; flag: 'array-uint8'}
-  | {elements: {[key: string]: ABSchemaDef & {type: number}}; flag: 'type-lookup'}
-  | {elements: {[key: string]: ABSchemaDef & {entityType: number}}; flag: 'entity-type-lookup'}
+  | {elements: {[key: string]: ABSchemaDef }; flag: 'type-lookup'}
   | ({flag: undefined} & {[key: string]: any});
 export type ABSchemaDef = ABFlags | string;

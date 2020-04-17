@@ -11,6 +11,8 @@ import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {SpectatorModel} from './spectatorEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -196,7 +198,7 @@ export type SwoopingEnemyModel = EntityModel & {
   type: 'swoopingEnemy';
 };
 
-export const SwoopingEnemyModelSchema: EntityModelSchemaType<'swoopingEnemy'> = {
+export const SwoopingEnemyModelSchema: SDTypeElement<SwoopingEnemyModel> = {
   ...EntityModelSchema,
   health: 'uint8',
   enemyColor: {

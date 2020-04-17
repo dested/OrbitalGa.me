@@ -1,5 +1,5 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
-import {EntityTypeLookup, EntityModels} from './entityTypeModels';
+import {EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
 import {SDElement, SDArray, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
 import {WallModelSchema} from '../entities/wallEntity';
@@ -30,27 +30,15 @@ export type ServerToClientMessage =
   | STOCWorldState
   | STOCLeaderboard;
 
-const STOCTypes: {[key in ServerToClientMessage['type']]: number} = {
-  spectating: 1,
-  leaderboard: 2,
-  joined: 3,
-  error: 4,
-  pong: 5,
-  worldState: 6,
-};
-
-const STOCPongSchema: SDTypeLookup<ServerToClientMessage, 'pong'> = {type: STOCTypes.pong, ping: 'uint8'};
+const STOCPongSchema: SDTypeLookup<ServerToClientMessage, 'pong'> = {ping: 'uint8'};
 const STOCErrorSchema: SDTypeLookup<ServerToClientMessage, 'error'> = {
-  type: STOCTypes.error,
   reason: {flag: 'enum', nameInUse: 1, '500': 2},
 };
 const STOCJoinedSchema: SDTypeLookup<ServerToClientMessage, 'joined'> = {
-  type: STOCTypes.joined,
   serverVersion: 'uint8',
   player: LivePlayerModelSchema,
 };
 const STOCLeaderboardSchema: SDTypeLookup<ServerToClientMessage, 'leaderboard'> = {
-  type: STOCTypes.leaderboard,
   scores: {
     flag: 'array-uint16',
     elements: {
@@ -68,35 +56,33 @@ const STOCLeaderboardSchema: SDTypeLookup<ServerToClientMessage, 'leaderboard'> 
   },
 };
 const STOCSpectatingSchema: SDTypeLookup<ServerToClientMessage, 'spectating'> = {
-  type: STOCTypes.spectating,
   serverVersion: 'uint8',
 };
 
-export type EntityModelSchemaType<TEntityModelType extends EntityModels['type']> = Omit<
-  SDTypeLookup<EntityModels, TEntityModelType>,
-  'type'
+export type EntityModelSchemaType<TEntityModelType extends EntityModels['type']> = SDTypeLookup<
+  EntityModels,
+  TEntityModelType
 >;
 
 const STOCWorldStateSchema: SDTypeLookup<ServerToClientMessage, 'worldState'> = {
-  type: STOCTypes.worldState,
   entities: {
     flag: 'array-uint16',
     elements: {
       flag: 'type-lookup',
       elements: {
-        spectator: {type: EntityTypeLookup.spectator, ...SpectatorModelSchema},
-        meteor: {type: EntityTypeLookup.meteor, ...MeteorModelSchema},
-        livePlayer: {type: EntityTypeLookup.livePlayer, ...LivePlayerModelSchema},
-        player: {type: EntityTypeLookup.player, ...PlayerModelSchema},
-        drop: {type: EntityTypeLookup.drop, ...DropModelSchema},
-        wall: {type: EntityTypeLookup.wall, ...WallModelSchema},
-        swoopingEnemy: {type: EntityTypeLookup.swoopingEnemy, ...SwoopingEnemyModelSchema},
-        playerShield: {type: EntityTypeLookup.playerShield, ...PlayerShieldModelSchema},
-        explosion: {type: EntityTypeLookup.explosion, ...ExplosionModelSchema},
-        enemyShot: {type: EntityTypeLookup.enemyShot, ...EnemyShotModelSchema},
-        playerWeapon: {type: EntityTypeLookup.playerWeapon, ...PlayerWeaponModelSchema},
-        bossEvent1: {type: EntityTypeLookup.bossEvent1, ...BossEvent1ModelSchema},
-        bossEvent1Enemy: {type: EntityTypeLookup.bossEvent1Enemy, ...BossEvent1EnemyModelSchema},
+        spectator: SpectatorModelSchema,
+        meteor: MeteorModelSchema,
+        livePlayer: LivePlayerModelSchema,
+        player: PlayerModelSchema,
+        drop: DropModelSchema,
+        wall: WallModelSchema,
+        swoopingEnemy: SwoopingEnemyModelSchema,
+        playerShield: PlayerShieldModelSchema,
+        explosion: ExplosionModelSchema,
+        enemyShot: EnemyShotModelSchema,
+        playerWeapon: PlayerWeaponModelSchema,
+        bossEvent1: BossEvent1ModelSchema,
+        bossEvent1Enemy: BossEvent1EnemyModelSchema,
       },
     },
   },

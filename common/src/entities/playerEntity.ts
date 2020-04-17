@@ -5,7 +5,7 @@ import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
 import {WallEntity} from './wallEntity';
-import {ExplosionEntity} from './explosionEntity';
+import {ExplosionEntity, ExplosionModel} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Utils} from '../utils/utils';
@@ -15,6 +15,7 @@ import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -429,7 +430,7 @@ export type LivePlayerModel = EntityModel & {
   type: 'livePlayer';
 };
 
-export const LivePlayerModelSchema: EntityModelSchemaType<'livePlayer'> = {
+export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {
@@ -451,7 +452,7 @@ export const LivePlayerModelSchema: EntityModelSchemaType<'livePlayer'> = {
   selectedWeapon: PlayerWeaponEnumSchema,
 };
 
-export const PlayerModelSchema: EntityModelSchemaType<'player'> = {
+export const PlayerModelSchema: SDTypeElement<PlayerModel> = {
   ...EntityModelSchema,
   health: 'uint8',
   playerColor: {
