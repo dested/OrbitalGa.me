@@ -137,7 +137,7 @@ export class ClientGame extends Game {
     for (const message of messages) {
       switch (message.type) {
         case 'joined':
-          const clientEntity = new ClientLivePlayerEntity(this, message);
+          const clientEntity = new ClientLivePlayerEntity(this, {...message.player, type: 'livePlayer'});
           this.serverVersion = message.serverVersion;
           if (this.serverVersion !== GameConstants.serverVersion) {
             alert('Sorry, this client is out of date, please refresh this window.');
@@ -195,10 +195,7 @@ export class ClientGame extends Game {
           for (const messageModel of message.entities) {
             let foundEntity = this.entities.lookup(messageModel.entityId);
             if (!foundEntity) {
-              foundEntity = new ClientEntityTypes[messageModel.entityType](
-                this,
-                messageModel as WorldModelCastToEntityModel
-              );
+              foundEntity = new ClientEntityTypes[messageModel.type](this, messageModel as WorldModelCastToEntityModel);
               this.entities.push(foundEntity);
             }
             foundEntity.reconcileFromServer(messageModel);

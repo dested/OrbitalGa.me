@@ -10,7 +10,6 @@ import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
@@ -25,7 +24,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   ];
   damage = 2;
   enemyColor: EnemyColor;
-  entityType = 'swoopingEnemy' as const;
+  type = 'swoopingEnemy' as const;
   explosionIntensity = 4;
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   isWeapon = true as const;
@@ -181,7 +180,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     return {
       ...super.serialize(),
       health: this.health,
-      entityType: 'swoopingEnemy',
+      type: 'swoopingEnemy',
       enemyColor: this.enemyColor,
     };
   }
@@ -193,7 +192,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
 
 export type SwoopingEnemyModel = EntityModel & {
   enemyColor: EnemyColor;
-  entityType: 'swoopingEnemy';
+  type: 'swoopingEnemy';
   health: number;
 };
 

@@ -15,7 +15,7 @@ import {ClientBossEvent1Entity} from './clientBossEvent1Entity';
 import {ClientBossEvent1EnemyEntity} from './clientBossEvent1EnemyEntity';
 
 export const ClientEntityTypes: {
-  [key in EntityModels['entityType']]: new (
+  [key in EntityModels['type']]: new (
     game: ClientGame,
     messageModel: EntityType[key]['model']
   ) => EntityType[key]['entity'];

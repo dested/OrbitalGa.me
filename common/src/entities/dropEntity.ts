@@ -8,7 +8,6 @@ import {Size} from './meteorEntity';
 import {PlayerWeapon} from '../game/gameRules';
 import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerWeaponEnumSchema} from '../models/enums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
@@ -26,7 +25,7 @@ export type DropType =
 export class DropEntity extends Entity {
   boundingBoxes = [{width: 50, height: 50}];
   drop: DropType;
-  entityType = 'drop' as const;
+  type = 'drop' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<DropModel>) {
     super(game, messageModel);
@@ -68,7 +67,7 @@ export class DropEntity extends Entity {
     return {
       ...super.serialize(),
       drop: this.drop,
-      entityType: 'drop',
+      type: 'drop',
     };
   }
 
@@ -113,7 +112,7 @@ export class DropEntity extends Entity {
 
 export type DropModel = EntityModel & {
   drop: DropType;
-  entityType: 'drop';
+  type: 'drop';
 };
 
 export const DropModelSchema: EntityModelSchemaType<'drop'> = {

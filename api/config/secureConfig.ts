@@ -4,6 +4,9 @@ import {SSM} from 'aws-sdk';
 let envDetails: any;
 
 export class SecureConfig {
+  static getKey(key: string): string {
+    return envDetails[key];
+  }
   static async setup() {
     if (envDetails) {
       return;
@@ -15,8 +18,5 @@ export class SecureConfig {
       const result = await ssm.getParameter({Name: process.env.ENVKEY!, WithDecryption: true}).promise();
       envDetails = JSON.parse(result.Parameter!.Value!);
     }
-  }
-  static getKey(key: string): string {
-    return envDetails[key];
   }
 }

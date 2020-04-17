@@ -2,7 +2,7 @@ import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {EntityModels} from '../models/entityTypeModels';
 import {GameConstants} from '../game/gameConstants';
-import {AB, ABObj, ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
+import {ABObj} from '../parsers/arrayBufferSchemaTypes';
 
 type BoundingBox = {
   height: number;
@@ -17,7 +17,7 @@ export abstract class Entity {
   boundingBoxes: BoundingBox[] = [];
   create: boolean = true;
   entityId: number;
-  abstract entityType: EntityModels['entityType'];
+  abstract type: EntityModels['type'];
   height: number = 0;
   markToDestroy: boolean = false;
   momentumX = 0;

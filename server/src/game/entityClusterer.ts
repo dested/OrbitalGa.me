@@ -51,9 +51,9 @@ export class EntityClusterer {
   getNewEnemyXPosition(): number {
     const padding = 300;
     const groups = Utils.randomizeArray(
-      this.getGroupings((a) => a.entityType === 'player').filter((a) => a.entities.length < this.idealSize)
+      this.getGroupings((a) => a.type === 'player').filter((a) => a.entities.length < this.idealSize)
     );
-    const enemyXs = this.entities.filter((a) => a.entityType === 'swoopingEnemy').map((a) => a.x);
+    const enemyXs = this.entities.filter((a) => a.type === 'swoopingEnemy').map((a) => a.x);
     const enemyMultiple = 2;
     if (groups.length === 0) {
       return 0;
@@ -82,7 +82,7 @@ export class EntityClusterer {
   getNewEnemyXPositionInGroup(group: EntityGrouping): number {
     const padding = 150;
     const ranges: {x0: number; x1: number}[] = [{x0: group.x0 + padding, x1: 0}];
-    for (const entity of group.entities.filter((a) => a.entityType === 'swoopingEnemy')) {
+    for (const entity of group.entities.filter((a) => a.type === 'swoopingEnemy')) {
       ranges[ranges.length - 1].x1 = entity.x - padding;
       ranges.push({x0: entity.x + padding, x1: 0});
     }
@@ -98,7 +98,7 @@ export class EntityClusterer {
 
   getNewPlayerXPosition(): number {
     const padding = 300;
-    const groups = this.getGroupings((a) => a.entityType === 'player');
+    const groups = this.getGroupings((a) => a.type === 'player');
     while (true) {
       const bestGroup = Utils.randomElement(groups.filter((a) => a.entities.length < this.idealSize));
       const ranges: {x0: number; x1: number}[] = [{x0: bestGroup.x0 + padding, x1: 0}];

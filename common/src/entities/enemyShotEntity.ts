@@ -5,14 +5,13 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
   damage = 1;
-  entityType = 'enemyShot' as const;
+  type = 'enemyShot' as const;
   explosionIntensity = 2;
   isWeapon = true as const;
   weaponSide = 'enemy' as const;
@@ -55,13 +54,13 @@ export class EnemyShotEntity extends Entity implements Weapon {
   serialize(): EnemyShotModel {
     return {
       ...super.serialize(),
-      entityType: 'enemyShot',
+      type: 'enemyShot',
     };
   }
 }
 
 export type EnemyShotModel = EntityModel & {
-  entityType: 'enemyShot';
+  type: 'enemyShot';
 };
 
 export const EnemyShotModelSchema: EntityModelSchemaType<'enemyShot'> = {

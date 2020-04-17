@@ -6,7 +6,6 @@ import {nextId} from '../utils/uuid';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
@@ -14,7 +13,7 @@ export type ShieldStrength = 'small' | 'medium' | 'big';
 export class PlayerShieldEntity extends Entity {
   boundingBoxes = [];
   depleted: boolean;
-  entityType = 'playerShield' as const;
+  type = 'playerShield' as const;
   health: number;
   lastHit = 0;
   ownerEntityId: number;
@@ -114,14 +113,14 @@ export class PlayerShieldEntity extends Entity {
       depleted: this.depleted,
       ownerEntityId: this.ownerEntityId,
       shieldStrength: this.shieldStrength,
-      entityType: 'playerShield',
+      type: 'playerShield',
     };
   }
 }
 
 export type PlayerShieldModel = EntityModel & {
   depleted: boolean;
-  entityType: 'playerShield';
+  type: 'playerShield';
   health: number;
   ownerEntityId: number;
   shieldStrength: ShieldStrength;

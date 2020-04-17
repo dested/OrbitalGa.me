@@ -2,13 +2,12 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
   aliveDuration = ExplosionEntity.totalAliveDuration;
-  entityType = 'explosion' as const;
+  type = 'explosion' as const;
   intensity: number;
   ownerEntityId?: number;
 
@@ -57,13 +56,13 @@ export class ExplosionEntity extends Entity {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
       intensity: this.intensity,
-      entityType: 'explosion',
+      type: 'explosion',
     };
   }
 }
 
 export type ExplosionModel = EntityModel & {
-  entityType: 'explosion';
+  type: 'explosion';
   intensity: number;
   ownerEntityId?: number;
 };

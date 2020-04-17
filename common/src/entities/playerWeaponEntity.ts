@@ -5,7 +5,6 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerWeaponEnumSchema} from '../models/enums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
@@ -13,7 +12,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
   damage: number;
-  entityType = 'playerWeapon' as const;
+  type = 'playerWeapon' as const;
   explosionIntensity: number;
   isWeapon = true as const;
   offsetX: number;
@@ -90,13 +89,13 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
       offsetX: this.offsetX,
       startY: this.startY,
       weaponType: this.weaponType,
-      entityType: 'playerWeapon',
+      type: 'playerWeapon',
     };
   }
 }
 
 export type PlayerWeaponModel = EntityModel & {
-  entityType: 'playerWeapon';
+  type: 'playerWeapon';
   offsetX: number;
   ownerEntityId: number;
   startY: number;

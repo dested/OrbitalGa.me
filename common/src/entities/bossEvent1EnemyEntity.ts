@@ -4,13 +4,12 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
   damage = 2;
-  entityType = 'bossEvent1Enemy' as const;
+  type = 'bossEvent1Enemy' as const;
   explosionIntensity = 4;
   isWeapon = true as const;
   ownerEntityId: number;
@@ -98,7 +97,7 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   serialize(): BossEvent1EnemyModel {
     return {
       ...super.serialize(),
-      entityType: 'bossEvent1Enemy',
+      type: 'bossEvent1Enemy',
       xOffset: this.xOffset,
       ownerEntityId: this.ownerEntityId,
       pieceType: this.pieceType,
@@ -109,7 +108,7 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
 }
 
 export type BossEvent1EnemyModel = EntityModel & {
-  entityType: 'bossEvent1Enemy';
+  type: 'bossEvent1Enemy';
   ownerEntityId: number;
   pieceType: BossEvent1PieceType;
   rotate: number;

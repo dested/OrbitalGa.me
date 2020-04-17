@@ -4,13 +4,13 @@ export interface RequestHeaders {
   authorization?: string;
 }
 export interface LambdaRequestEvent<T> {
-  queryStringParameters: T;
-  pathParameters: T;
   body: T;
-  params: T;
   headers: RequestHeaders;
   httpMethod: string;
+  params: T;
   path: string;
+  pathParameters: T;
+  queryStringParameters: T;
 }
 
 export function handlerWrapper<TRequest, TResponse>(

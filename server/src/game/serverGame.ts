@@ -181,8 +181,8 @@ export class ServerGame extends Game {
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
     if (!GameConstants.singlePlayer) {
-      const groupings = this.entityClusterer.getGroupings((a) => a.entityType === 'player');
-      const groups = Utils.groupBy(this.entities.array, (a) => a.entityType);
+      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
+      const groups = Utils.groupBy(this.entities.array, (a) => a.type);
       const memoryUsage = process.memoryUsage();
       console.log(
         `#${tickIndex}, Con: ${this.serverSocket.connections.length}, Usr: ${this.users.length}, Spc ${
@@ -204,10 +204,10 @@ export class ServerGame extends Game {
     this.processInputs();
 
     for (const grouping of this.entityClusterer.getGroupings(
-      (a) => a.entityType === 'player' || a.entityType === 'swoopingEnemy'
+      (a) => a.type === 'player' || a.type === 'swoopingEnemy'
     )) {
-      const enemies = grouping.entities.filter((a) => a.entityType === 'swoopingEnemy').length;
-      const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.entityType === 'player').length, 4) * 1.5);
+      const enemies = grouping.entities.filter((a) => a.type === 'swoopingEnemy').length;
+      const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.type === 'player').length, 4) * 1.5);
       if (enemies < players) {
         for (let i = enemies; i < players; i++) {
           const swoopingEnemyEntity = new SwoopingEnemyEntity(this, {
@@ -223,11 +223,11 @@ export class ServerGame extends Game {
     }
 
     if (tickIndex === 50) {
-      const groupings = this.entityClusterer.getGroupings((a) => a.entityType === 'player');
+      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
       // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
     if (tickIndex % 50 === 0) {
-      for (const grouping of this.entityClusterer.getGroupings((a) => a.entityType === 'player')) {
+      for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
           const meteor = new MeteorEntity(this, {
@@ -246,7 +246,7 @@ export class ServerGame extends Game {
       }
     }
 
-    this.entityGroupingsThisTick = this.entityClusterer.getGroupings((a) => a.entityType === 'player');
+    this.entityGroupingsThisTick = this.entityClusterer.getGroupings((a) => a.type === 'player');
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
       entity.gameTick(duration);
@@ -363,6 +363,7 @@ export class ServerGame extends Game {
       health: GameRules.player.base.startingHealth,
       x: startingPos,
       y: GameConstants.playerStartingY,
+      playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
     });
     this.gameLeaderboard.addPlayer(playerEntity.entityId);
     this.users.push({name, connectionId, entity: playerEntity});
@@ -382,8 +383,8 @@ export class ServerGame extends Game {
 
     this.sendMessageToClient(connectionId, {
       type: 'joined',
-      ...playerEntity.serializeLive(),
       serverVersion: GameConstants.serverVersion,
+      player: playerEntity.serializeLive(),
     });
   }
 

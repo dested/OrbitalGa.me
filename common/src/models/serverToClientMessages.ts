@@ -1,16 +1,7 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
 import {EntityBufferValue, EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
-import {
-  AB,
-  ABArray,
-  ABByType,
-  ABEntityTypeLookup,
-  ABKeys,
-  ABSizeByType,
-  ABSizeKeys,
-  ABTypeLookup,
-} from '../parsers/arrayBufferSchemaTypes';
+import {AB, ABArray, ABByType, ABEntityTypeLookup, ABKeys, ABTypeLookup} from '../parsers/arrayBufferSchemaTypes';
 import {WallModelSchema} from '../entities/wallEntity';
 import {BossEvent1EnemyModelSchema} from '../entities/bossEvent1EnemyEntity';
 import {BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
@@ -23,10 +14,8 @@ import {DropModelSchema} from '../entities/dropEntity';
 import {SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity';
 import {MeteorModelSchema} from '../entities/meteorEntity';
 import {ArrayBufferSchemaBuilder} from '../parsers/arrayBufferSchemaBuilder';
-import {ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {ClientToServerMessage} from './clientToServerMessages';
 
-type STOCJoined = {serverVersion: number; type: 'joined'} & LivePlayerModel;
+type STOCJoined = {player: Omit<LivePlayerModel, 'type'>; serverVersion: number; type: 'joined'};
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
 type STOCPong = {ping: number; type: 'pong'};
 export type STOCError = {reason: 'nameInUse'; type: 'error'} | {reason: '500'; type: 'error'};
@@ -58,8 +47,7 @@ const STOCErrorSchema: ABByType<ServerToClientMessage, 'error'> = {
 const STOCJoinedSchema: ABByType<ServerToClientMessage, 'joined'> = {
   type: STOCTypes.joined,
   serverVersion: 'uint8',
-  ...LivePlayerModelSchema,
-  entityType: 'string',
+  player: LivePlayerModelSchema,
 };
 const STOCLeaderboardSchema: ABByType<ServerToClientMessage, 'leaderboard'> = {
   type: STOCTypes.leaderboard,
@@ -84,9 +72,9 @@ const STOCSpectatingSchema: ABByType<ServerToClientMessage, 'spectating'> = {
   serverVersion: 'uint8',
 };
 
-export type EntityModelSchemaType<TEntityModelType extends EntityModels['entityType']> = Omit<
-  ABSizeByType<EntityModels, TEntityModelType>,
-  'entityType'
+export type EntityModelSchemaType<TEntityModelType extends EntityModels['type']> = Omit<
+  ABByType<EntityModels, TEntityModelType>,
+  'type'
 >;
 
 const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
@@ -94,21 +82,21 @@ const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
   entities: {
     flag: 'array-uint16',
     elements: {
-      flag: 'entity-type-lookup',
+      flag: 'type-lookup',
       elements: {
-        spectator: {entityType: EntityBufferValue.spectator, ...SpectatorModelSchema},
-        meteor: {entityType: EntityBufferValue.meteor, ...MeteorModelSchema},
-        livePlayer: {entityType: EntityBufferValue.livePlayer, ...LivePlayerModelSchema},
-        player: {entityType: EntityBufferValue.player, ...PlayerModelSchema},
-        drop: {entityType: EntityBufferValue.drop, ...DropModelSchema},
-        wall: {entityType: EntityBufferValue.wall, ...WallModelSchema},
-        swoopingEnemy: {entityType: EntityBufferValue.swoopingEnemy, ...SwoopingEnemyModelSchema},
-        playerShield: {entityType: EntityBufferValue.playerShield, ...PlayerShieldModelSchema},
-        explosion: {entityType: EntityBufferValue.explosion, ...ExplosionModelSchema},
-        enemyShot: {entityType: EntityBufferValue.enemyShot, ...EnemyShotModelSchema},
-        playerWeapon: {entityType: EntityBufferValue.playerWeapon, ...PlayerWeaponModelSchema},
-        bossEvent1: {entityType: EntityBufferValue.bossEvent1, ...BossEvent1ModelSchema},
-        bossEvent1Enemy: {entityType: EntityBufferValue.bossEvent1Enemy, ...BossEvent1EnemyModelSchema},
+        spectator: {type: EntityBufferValue.spectator, ...SpectatorModelSchema},
+        meteor: {type: EntityBufferValue.meteor, ...MeteorModelSchema},
+        livePlayer: {type: EntityBufferValue.livePlayer, ...LivePlayerModelSchema},
+        player: {type: EntityBufferValue.player, ...PlayerModelSchema},
+        drop: {type: EntityBufferValue.drop, ...DropModelSchema},
+        wall: {type: EntityBufferValue.wall, ...WallModelSchema},
+        swoopingEnemy: {type: EntityBufferValue.swoopingEnemy, ...SwoopingEnemyModelSchema},
+        playerShield: {type: EntityBufferValue.playerShield, ...PlayerShieldModelSchema},
+        explosion: {type: EntityBufferValue.explosion, ...ExplosionModelSchema},
+        enemyShot: {type: EntityBufferValue.enemyShot, ...EnemyShotModelSchema},
+        playerWeapon: {type: EntityBufferValue.playerWeapon, ...PlayerWeaponModelSchema},
+        bossEvent1: {type: EntityBufferValue.bossEvent1, ...BossEvent1ModelSchema},
+        bossEvent1Enemy: {type: EntityBufferValue.bossEvent1Enemy, ...BossEvent1EnemyModelSchema},
       },
     },
   },

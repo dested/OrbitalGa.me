@@ -48,12 +48,12 @@ const arrayHash = new ArrayHash<Entity>('entityId');
 const cluster = new EntityClusterer(arrayHash, 3);
 for (let i = 0; i < 50; i++) {
   const x = cluster.getNewPlayerXPosition();
-  arrayHash.push({x, y: 100, entityType: 'player', entityId: i} as Entity);
+  arrayHash.push({x, y: 100, type: 'player', entityId: i} as Entity);
 }
 /!*
 for (let i = 0; i < 50; i++) {
   const x = cluster.getNewEnemyXPosition();
-  arrayHash.push({x, y: 100, entityType: 'swoopingEnemy', entityId: i} as Entity);
+  arrayHash.push({x, y: 100, type: 'swoopingEnemy', entityId: i} as Entity);
 }
 *!/
 const g=cluster.getGroupings('player')

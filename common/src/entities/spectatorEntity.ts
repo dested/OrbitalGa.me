@@ -2,11 +2,10 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class SpectatorEntity extends Entity {
-  entityType = 'spectator' as const;
+  type = 'spectator' as const;
   constructor(game: Game, messageModel: ImpliedEntityType<SpectatorModel>) {
     super(game, messageModel);
     this.createPolygon();
@@ -29,13 +28,13 @@ export class SpectatorEntity extends Entity {
   serialize(): SpectatorModel {
     return {
       ...super.serialize(),
-      entityType: 'spectator',
+      type: 'spectator',
     };
   }
 }
 
 export type SpectatorModel = EntityModel & {
-  entityType: 'spectator';
+  type: 'spectator';
 };
 
 export const SpectatorModelSchema: EntityModelSchemaType<'spectator'> = {

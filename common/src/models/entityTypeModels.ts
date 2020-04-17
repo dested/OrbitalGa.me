@@ -32,10 +32,10 @@ export type EntityModels = EntityType[keyof EntityType]['model'];
 
 export type WorldModelCastToEntityModel = any;
 
-export type ImpliedEntityType<T> = Omit<T, 'entityType'>;
+export type ImpliedEntityType<T> = Omit<T, 'type'>;
 
 export const EntityBufferValue: {
-  [key in EntityModels['entityType']]: number;
+  [key in EntityModels['type']]: number;
 } = {
   player: 1,
   meteor: 2,

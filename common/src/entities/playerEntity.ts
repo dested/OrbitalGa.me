@@ -13,7 +13,6 @@ import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType, ABBitmask, ABEnum} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/enums';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
@@ -43,7 +42,6 @@ export class PlayerEntity extends Entity implements Weapon {
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
-  entityType = 'player' as const;
   explosionIntensity = 2;
   health = GameRules.player.base.startingHealth;
   inputSequenceNumber: number = 1;
@@ -56,6 +54,7 @@ export class PlayerEntity extends Entity implements Weapon {
   selectedWeapon: PlayerWeapon = 'laser1';
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
+  type = 'player' as const;
   weaponSide = 'player' as const;
   xInputsThisTick: boolean = false;
   yInputsThisTick: boolean = false;
@@ -356,7 +355,7 @@ export class PlayerEntity extends Entity implements Weapon {
       health: this.health,
       playerColor: this.playerColor,
       playerInputKeys: this.lastPlayerInput ?? {down: false, left: false, right: false, shoot: false, up: false},
-      entityType: 'player',
+      type: 'player',
     };
   }
 
@@ -367,7 +366,7 @@ export class PlayerEntity extends Entity implements Weapon {
       momentumY: this.momentumY,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       dead: this.dead,
-      entityType: 'livePlayer',
+      type: 'livePlayer',
       selectedWeapon: this.selectedWeapon,
       availableWeapons: this.availableWeapons.map((w) => ({weapon: w.weapon, ammo: w.ammo})),
     };
@@ -412,22 +411,22 @@ export class PlayerEntity extends Entity implements Weapon {
 }
 
 export type PlayerModel = EntityModel & {
-  entityType: 'player';
   health: number;
   playerColor: PlayerColor;
   playerInputKeys: PlayerInputKeys;
+  type: 'player';
 };
 
 export type LivePlayerModel = EntityModel & {
   availableWeapons: {ammo: number; weapon: PlayerWeapon}[];
   dead: boolean;
-  entityType: 'livePlayer';
   health: number;
   lastProcessedInputSequenceNumber: number;
   momentumX: number;
   momentumY: number;
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon;
+  type: 'livePlayer';
 };
 
 export const LivePlayerModelSchema: EntityModelSchemaType<'livePlayer'> = {

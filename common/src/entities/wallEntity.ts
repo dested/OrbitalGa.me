@@ -1,11 +1,10 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class WallEntity extends Entity {
-  entityType = 'wall' as const;
+  type = 'wall' as const;
   constructor(game: Game, messageModel: WallModel) {
     super(game, messageModel);
     this.width = messageModel.width;
@@ -36,12 +35,12 @@ export class WallEntity extends Entity {
       ...super.serialize(),
       width: this.width,
       height: this.height,
-      entityType: 'wall',
+      type: 'wall',
     };
   }
 }
 export type WallModel = EntityModel & {
-  entityType: 'wall';
+  type: 'wall';
   height: number;
   width: number;
 };

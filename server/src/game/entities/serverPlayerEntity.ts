@@ -3,7 +3,7 @@ import {ServerGame} from '../serverGame';
 import {ImpliedEntityType} from '@common/models/entityTypeModels';
 
 export class ServerPlayerEntity extends PlayerEntity {
-  constructor(private serverGame: ServerGame, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
+  constructor(private serverGame: ServerGame, messageModel: ImpliedEntityType<PlayerModel>) {
     super(serverGame, messageModel);
   }
   applyInput(input: PlayerInput) {

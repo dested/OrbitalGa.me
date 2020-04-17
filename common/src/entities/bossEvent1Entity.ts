@@ -7,7 +7,6 @@ import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';
@@ -19,7 +18,7 @@ export class BossEvent1Entity extends Entity {
     {width: 57, height: 41, offsetX: 35},
   ];
   damage = 2;
-  entityType = 'bossEvent1' as const;
+  type = 'bossEvent1' as const;
   explosionIntensity = 4;
   health: number = 1000;
   isWeapon = true as const;
@@ -250,13 +249,13 @@ export class BossEvent1Entity extends Entity {
       ...super.serialize(),
       health: this.health,
       width: this.width,
-      entityType: 'bossEvent1',
+      type: 'bossEvent1',
     };
   }
 }
 
 export type BossEvent1Model = EntityModel & {
-  entityType: 'bossEvent1';
+  type: 'bossEvent1';
   health: number;
   width: number;
 };

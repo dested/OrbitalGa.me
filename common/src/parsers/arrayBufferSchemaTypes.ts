@@ -56,17 +56,13 @@ export type AB<T, TKey extends keyof T> = T[TKey] extends string
   : T[TKey] extends boolean
   ? 'boolean'
   : T[TKey] extends Array<any>
-  ? T[TKey][number] extends {entityType: string}
-    ? ABArray<ABEntityTypeLookup<ABSizeKeys<T[TKey][number]>>>
-    : T[TKey][number] extends {type: string}
+  ? T[TKey][number] extends {type: string}
     ? ABArray<ABTypeLookup<ABKeys<T[TKey][number]>>>
     : ABArray<ABObj<T[TKey][number]>>
   : T[TKey] extends {[key in keyof T[TKey]]: boolean}
   ? ABBitmask<T[TKey]>
   : T[TKey] extends {type: string}
   ? ABTypeLookup<ABKeys<T[TKey]>>
-  : T[TKey] extends {entityType: string}
-  ? ABEntityTypeLookup<ABSizeKeys<T[TKey]>>
   : T[TKey] extends {}
   ? ABObj<T[TKey]>
   : never;
@@ -82,14 +78,6 @@ export type ABByType<TItem extends {type: string}, TKey extends TItem['type']> =
   Omit<Discriminate<TItem, 'type', TKey>, 'type'>
 > & {type: number};
 
-export type ABSizeByType<TItem extends {entityType: string}, TKey extends TItem['entityType']> = ABObj<
-  Omit<Discriminate<TItem, 'entityType', TKey>, 'entityType'>
-> & {entityType: number};
-
 export type ABKeys<TItem extends {type: string}> = {
   [key in TItem['type']]: ABByType<TItem, key>;
-};
-
-export type ABSizeKeys<TItem extends {entityType: string}> = {
-  [key in TItem['entityType']]: ABSizeByType<TItem, key>;
 };
