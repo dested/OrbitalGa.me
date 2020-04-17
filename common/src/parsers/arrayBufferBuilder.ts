@@ -42,6 +42,14 @@ export class ArrayBufferBuilder {
     this.curPosition += 4;
   }
 
+  addInt32Optional(value?: number) {
+    if (value === undefined) {
+      this.addInt32(-1);
+    } else {
+      this.addInt32(value);
+    }
+  }
+
   addInt8(value: number) {
     this.testSize(1);
     this.view.setInt8(this.curPosition, value);
@@ -59,14 +67,6 @@ export class ArrayBufferBuilder {
     this.addUint16(items.length);
     for (const item of items) {
       callback(item);
-    }
-  }
-
-  addOptionalInt32(value?: number) {
-    if (value === undefined) {
-      this.addInt32(-1);
-    } else {
-      this.addInt32(value);
     }
   }
 
@@ -180,6 +180,15 @@ export class ArrayBufferReader {
     return result;
   }
 
+  readInt32Optional(): number | undefined {
+    const result = this.dv.getInt32(this.index);
+    this.index += 4;
+    if (result === -1) {
+      return undefined;
+    }
+    return result;
+  }
+
   readInt8(): number {
     const result = this.dv.getInt8(this.index);
     this.index += 1;
@@ -188,15 +197,6 @@ export class ArrayBufferReader {
   readInt8Optional(): number | undefined {
     const result = this.dv.getInt8(this.index);
     this.index += 1;
-    if (result === -1) {
-      return undefined;
-    }
-    return result;
-  }
-
-  readOptionalInt32(): number | undefined {
-    const result = this.dv.getInt32(this.index);
-    this.index += 4;
     if (result === -1) {
       return undefined;
     }

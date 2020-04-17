@@ -1,4 +1,3 @@
-import {ClientToServerMessage, ServerToClientMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {IServerSocket} from '../serverSocket';
 import {nextId} from '@common/utils/uuid';
@@ -16,8 +15,9 @@ import {ArrayHash} from '@common/utils/arrayHash';
 import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {EntityGrouping} from './entityClusterer';
-import {GameLeaderboard} from '@common/game/gameLeaderboard';
 import {GameRules} from '@common/game/gameRules';
+import {ClientToServerMessage} from '@common/models/clientToServerMessages';
+import {ServerToClientMessage} from '@common/models/serverToClientMessages';
 
 type Spectator = {connectionId: number};
 type User = {
@@ -135,7 +135,12 @@ export class ServerGame extends Game {
                 );
                 this.serverSocket.disconnect(connection.connectionId);
               } else*/ {
-              user.entity.applyInput(q.message);
+              user.entity.applyInput({
+                // todo clean this up
+                ...q.message.keys,
+                inputSequenceNumber: q.message.inputSequenceNumber,
+                weapon: q.message.weapon,
+              });
             }
           }
           break;
@@ -231,7 +236,7 @@ export class ServerGame extends Game {
             y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
             meteorColor,
             size,
-            type,
+            meteorType: type,
             hit: false,
             rotate: Math.random() * 255,
           });

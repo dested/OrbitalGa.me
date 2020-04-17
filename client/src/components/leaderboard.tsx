@@ -1,10 +1,5 @@
-import React, {useCallback} from 'react';
+import React from 'react';
 import {GameData} from '../game/gameData';
-import spaceMissiles_001 from '../assets/Missiles/spaceMissiles_001.png';
-import spaceMissiles_004 from '../assets/Missiles/spaceMissiles_004.png';
-import laserBlue02 from '../assets/Lasers/laserBlue02.png';
-import {PlayerWeapon} from '@common/game/gameRules';
-import {boxMargin, boxSize, SelectWeaponBox} from './weapons.styles';
 
 const styles = {
   wrapper: {

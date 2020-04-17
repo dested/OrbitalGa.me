@@ -1,6 +1,6 @@
 import {IClientSocket} from '../clientSocket';
 import {ClientGame, ClientGameOptions} from './clientGame';
-import {assertType, Utils} from '@common/utils/utils';
+import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';

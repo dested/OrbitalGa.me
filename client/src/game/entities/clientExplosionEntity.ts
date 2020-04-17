@@ -1,7 +1,6 @@
 import {ExplosionEntity, ExplosionModel} from '@common/entities/explosionEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
 import {ShakeGame} from '../../utils/shakeUtils';
 import {Entity} from '@common/entities/entity';
 import {Utils} from '@common/utils/utils';

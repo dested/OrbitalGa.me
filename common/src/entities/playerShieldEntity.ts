@@ -1,13 +1,13 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
-import {Utils} from '../utils/utils';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
@@ -117,33 +117,6 @@ export class PlayerShieldEntity extends Entity {
       entityType: 'playerShield',
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: PlayerShieldModel) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.health);
-    buff.addBoolean(entity.depleted);
-    buff.addUint32(entity.ownerEntityId);
-    buff.addSwitch(entity.shieldStrength, {
-      small: 1,
-      medium: 2,
-      big: 3,
-    });
-  }
-
-  static readBuffer(reader: ArrayBufferReader): PlayerShieldModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'playerShield',
-      health: reader.readUint8(),
-      depleted: reader.readBoolean(),
-      ownerEntityId: reader.readUint32(),
-      shieldStrength: Utils.switchNumber(reader.readUint8(), {
-        1: 'small' as const,
-        2: 'medium' as const,
-        3: 'big' as const,
-      }),
-    };
-  }
 }
 
 export type PlayerShieldModel = EntityModel & {
@@ -152,4 +125,17 @@ export type PlayerShieldModel = EntityModel & {
   health: number;
   ownerEntityId: number;
   shieldStrength: ShieldStrength;
+};
+
+export const PlayerShieldModelSchema: EntityModelSchemaType<'playerShield'> = {
+  ...EntityModelSchema,
+  health: 'uint8',
+  depleted: 'boolean',
+  ownerEntityId: 'uint32',
+  shieldStrength: {
+    flag: 'enum',
+    small: 1,
+    medium: 2,
+    big: 3,
+  },
 };

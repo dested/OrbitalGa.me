@@ -1,7 +1,6 @@
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '@common/entities/swoopingEnemyEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
-import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
 

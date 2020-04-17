@@ -5,7 +5,7 @@ import spaceMissiles_004 from '../assets/Missiles/spaceMissiles_004.png';
 import laserBlue02 from '../assets/Lasers/laserBlue02.png';
 import laserBlue03 from '../assets/Lasers/laserBlue03.png';
 import {PlayerWeapon, WeaponConfigs} from '@common/game/gameRules';
-import {boxMargin, boxSize, SelectWeaponBox} from './weapons.styles';
+import {boxSize, SelectWeaponBox} from './weapons.styles';
 import {Utils} from '@common/utils/utils';
 
 const images: {[key in PlayerWeapon]: string} = {

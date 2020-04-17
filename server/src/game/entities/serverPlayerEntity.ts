@@ -1,4 +1,4 @@
-import {PlayerInput, PlayerEntity, PlayerColor, PlayerModel} from '@common/entities/playerEntity';
+import {PlayerInput, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ServerGame} from '../serverGame';
 import {ImpliedEntityType} from '@common/models/entityTypeModels';
 

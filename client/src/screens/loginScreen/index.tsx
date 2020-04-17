@@ -3,14 +3,13 @@ import './index.css';
 import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
 import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
-import {Utils} from '@common/utils/utils';
 import {GoFullScreen} from '../../components/goFullScreen';
 import {GameConstants} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
 import {ClientGame} from '../../game/clientGame';
-import {ErrorMessage} from '@common/models/messages';
 import {unreachable} from '@common/utils/unreachable';
 import {Leaderboard} from '../../components/leaderboard';
+import {STOCError} from '@common/models/serverToClientMessages';
 
 const styles = {
   buttonList: {display: 'flex', width: '100%'},
@@ -34,14 +33,18 @@ export const LoginScreen: React.FC = observer((props) => {
     setError('');
     setConnectingStatus('connecting');
     GameData.instance.joinGame(uiStore.serverPath!, uiStore.playerName!, {
-      onError: (client: ClientGame, errorMessage: ErrorMessage) => {
+      onError: (client: ClientGame, errorMessage: STOCError) => {
         switch (errorMessage.reason) {
           case 'nameInUse':
             setError('This username is already taken');
             setConnectingStatus('none');
             break;
+          case '500':
+            setError('An error has occurred');
+            setConnectingStatus('none');
+            break;
           default:
-            unreachable(errorMessage.reason);
+            unreachable(errorMessage);
         }
       },
       onDied: () => {},

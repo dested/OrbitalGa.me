@@ -1,9 +1,8 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 import {EntityModels} from '../models/entityTypeModels';
-import {nextId} from '../utils/uuid';
 import {GameConstants} from '../game/gameConstants';
+import {AB} from '../parsers/arrayBufferSchemaTypes';
 
 type BoundingBox = {
   height: number;
@@ -168,22 +167,6 @@ export abstract class Entity {
       }
     }
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: EntityModel) {
-    buff.addFloat32(entity.x);
-    buff.addFloat32(entity.y);
-    buff.addUint32(entity.entityId);
-    buff.addBoolean(!!entity.create);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): EntityModel {
-    return {
-      x: reader.readFloat32(),
-      y: reader.readFloat32(),
-      entityId: reader.readUint32(),
-      create: reader.readBoolean(),
-    };
-  }
 }
 
 export type EntityModel = {
@@ -191,4 +174,11 @@ export type EntityModel = {
   entityId: number;
   x: number;
   y: number;
+};
+
+export const EntityModelSchema: AB<EntityModel> = {
+  x: 'float32',
+  y: 'float32',
+  entityId: 'uint32',
+  create: 'boolean',
 };

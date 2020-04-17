@@ -8,12 +8,12 @@ export class GameConstants {
   static debugInvulnerable = false;
   static lastActionTimeout = 120_000;
   static lastPingTimeout = 30_000;
-  static numberOfSinglePlayerBots = 0;
+  static numberOfSinglePlayerBots = 50;
   static pingInterval = 3_000;
   static playerStartingY = screenSize.height * 0.8;
   static screenRange = screenSize.width * 1.4;
   static screenSize = screenSize;
-  static serverTickRate = 150;
+  static serverTickRate = 50;
   static serverVersion = 8;
   static singlePlayer = typeof window === 'object' && window.location.pathname.indexOf('single') >= 0;
   static throttleClient = false;

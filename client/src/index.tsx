@@ -8,9 +8,6 @@ import {unreachable} from '@common/utils/unreachable';
 import {LoadingScreen} from './screens/loadingScreen';
 import {LoginScreen} from './screens/loginScreen';
 import {StarBackground} from './components/starBackground';
-import {ArrayHash} from '@common/utils/arrayHash';
-import {EntityClusterer} from '../../server/src/game/entityClusterer';
-import {Entity} from '@common/entities/entity';
 
 const App = observer(() => {
   const {uiStore} = useStores();

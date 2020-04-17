@@ -5,8 +5,6 @@ import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {AssetKeys} from '../../assets';
-import {GameConstants} from '@common/game/gameConstants';
-import {ShakeGame} from '../../utils/shakeUtils';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
@@ -28,7 +26,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   draw(context: CanvasRenderingContext2D): void {
     const color = this.meteorColor === 'brown' ? 'Brown' : 'Grey';
 
-    const asset = `Meteors.meteor${color}_${this.size}${this.type}` as 'Meteors.meteorBrown_big1';
+    const asset = `Meteors.meteor${color}_${this.size}${this.meteorType}` as 'Meteors.meteorBrown_big1';
     const meteor = OrbitalAssets.assets[asset];
 
     context.save();

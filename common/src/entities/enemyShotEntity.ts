@@ -1,11 +1,12 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {WallEntity} from './wallEntity';
-import {Entity, EntityModel} from './entity';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -57,19 +58,12 @@ export class EnemyShotEntity extends Entity implements Weapon {
       entityType: 'enemyShot',
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: EnemyShotModel) {
-    Entity.addBuffer(buff, entity);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): EnemyShotModel {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'enemyShot',
-    };
-  }
 }
 
 export type EnemyShotModel = EntityModel & {
   entityType: 'enemyShot';
+};
+
+export const EnemyShotModelSchema: EntityModelSchemaType<'enemyShot'> = {
+  ...EntityModelSchema,
 };

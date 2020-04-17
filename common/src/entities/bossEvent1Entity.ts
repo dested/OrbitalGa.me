@@ -1,13 +1,14 @@
-import {Polygon, Result} from 'collisions';
+import {Result} from 'collisions';
 import {Game} from '../game/game';
-import {Entity, EntityModel} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
-import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {isPlayerWeapon, Weapon} from './weapon';
+import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
+import {EntityModelSchemaType} from '../models/serverToClientMessages';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';
 export class BossEvent1Entity extends Entity {
@@ -252,25 +253,16 @@ export class BossEvent1Entity extends Entity {
       entityType: 'bossEvent1',
     };
   }
-
-  static addBuffer(buff: ArrayBufferBuilder, entity: BossEvent1Model) {
-    Entity.addBuffer(buff, entity);
-    buff.addUint8(entity.health);
-    buff.addInt32(entity.health);
-  }
-
-  static readBuffer(reader: ArrayBufferReader): BossEvent1Model {
-    return {
-      ...Entity.readBuffer(reader),
-      entityType: 'bossEvent1' as const,
-      health: reader.readUint8(),
-      width: reader.readInt32(),
-    };
-  }
 }
 
 export type BossEvent1Model = EntityModel & {
   entityType: 'bossEvent1';
   health: number;
   width: number;
+};
+
+export const BossEvent1ModelSchema: EntityModelSchemaType<'bossEvent1'> = {
+  ...EntityModelSchema,
+  width: 'uint32',
+  health: 'uint16',
 };
