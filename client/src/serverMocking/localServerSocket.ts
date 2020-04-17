@@ -3,7 +3,7 @@ import {WebSocketServer} from './webSocketServer';
 import {GameConstants} from '@common/game/gameConstants';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
-import {ArrayBufferSchemaBuilder} from '@common/parsers/arrayBufferSchemaBuilder';
+import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ServerToClientMessage, ServerToClientSchemaAdderFunction} from '@common/models/serverToClientMessages';
 import {ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
 
@@ -35,7 +35,7 @@ export class LocalServerSocket implements IServerSocket {
       return;
     }
     if (GameConstants.binaryTransport) {
-      const body = ArrayBufferSchemaBuilder.startAddSchemaBuffer(messages, ServerToClientSchemaAdderFunction);
+      const body = SchemaDefiner.startAddSchemaBuffer(messages, ServerToClientSchemaAdderFunction);
       this.totalBytesSent += body.byteLength;
       client.socket.send(body);
     } else {
@@ -67,7 +67,7 @@ export class LocalServerSocket implements IServerSocket {
       ws.onmessage((message) => {
         if (GameConstants.binaryTransport) {
           this.totalBytesReceived += (message as ArrayBuffer).byteLength;
-          const messageData = ArrayBufferSchemaBuilder.startReadSchemaBuffer(
+          const messageData = SchemaDefiner.startReadSchemaBuffer(
             message as ArrayBuffer,
             ClientToServerSchemaReaderFunction
           );

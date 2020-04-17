@@ -2,7 +2,7 @@ import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {EntityModels} from '../models/entityTypeModels';
 import {GameConstants} from '../game/gameConstants';
-import {ABObj} from '../parsers/arrayBufferSchemaTypes';
+import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 
 type BoundingBox = {
   height: number;
@@ -17,12 +17,12 @@ export abstract class Entity {
   boundingBoxes: BoundingBox[] = [];
   create: boolean = true;
   entityId: number;
-  abstract type: EntityModels['type'];
   height: number = 0;
   markToDestroy: boolean = false;
   momentumX = 0;
   momentumY = 0;
   positionBuffer: {time: number; x: number; y: number}[] = [];
+  abstract type: EntityModels['type'];
   width: number = 0;
   x: number = 0;
   y: number = 0;
@@ -176,7 +176,7 @@ export type EntityModel = {
   y: number;
 };
 
-export const EntityModelSchema: ABObj<EntityModel> = {
+export const EntityModelSchema: SDSimpleObject<EntityModel> = {
   x: 'float32',
   y: 'float32',
   entityId: 'uint32',

@@ -18,12 +18,12 @@ export class BossEvent1Entity extends Entity {
     {width: 57, height: 41, offsetX: 35},
   ];
   damage = 2;
-  type = 'bossEvent1' as const;
   explosionIntensity = 4;
   health: number = 1000;
   isWeapon = true as const;
   momentumX = 0;
   momentumY = 0;
+  type = 'bossEvent1' as const;
   weaponSide = 'enemy' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<BossEvent1Model>) {
@@ -255,8 +255,8 @@ export class BossEvent1Entity extends Entity {
 }
 
 export type BossEvent1Model = EntityModel & {
-  type: 'bossEvent1';
   health: number;
+  type: 'bossEvent1';
   width: number;
 };
 

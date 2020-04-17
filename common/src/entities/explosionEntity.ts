@@ -7,9 +7,9 @@ import {EntityModelSchemaType} from '../models/serverToClientMessages';
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;
   aliveDuration = ExplosionEntity.totalAliveDuration;
-  type = 'explosion' as const;
   intensity: number;
   ownerEntityId?: number;
+  type = 'explosion' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<ExplosionModel>) {
     super(game, messageModel);
@@ -62,9 +62,9 @@ export class ExplosionEntity extends Entity {
 }
 
 export type ExplosionModel = EntityModel & {
-  type: 'explosion';
   intensity: number;
   ownerEntityId?: number;
+  type: 'explosion';
 };
 
 export const ExplosionModelSchema: EntityModelSchemaType<'explosion'> = {

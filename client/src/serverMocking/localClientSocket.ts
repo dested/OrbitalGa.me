@@ -2,7 +2,7 @@ import {IClientSocket} from '../clientSocket';
 import {ClientConfig} from '../clientConfig';
 import {GameConstants} from '@common/game/gameConstants';
 import {WebSocketClient} from './webSocketClient';
-import {ArrayBufferSchemaBuilder} from '@common/parsers/arrayBufferSchemaBuilder';
+import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ClientToServerMessage, ClientToServerSchemaAdderFunction} from '@common/models/clientToServerMessages';
 import {
   ServerToClientMessage,
@@ -34,7 +34,7 @@ export class LocalClientSocket implements IClientSocket {
     this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         try {
-          options.onMessage(ArrayBufferSchemaBuilder.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction));
+          options.onMessage(SchemaDefiner.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction));
         } catch (ex) {
           console.error(ex);
         }
@@ -61,7 +61,7 @@ export class LocalClientSocket implements IClientSocket {
     }
     try {
       if (GameConstants.binaryTransport) {
-        this.socket.send(ArrayBufferSchemaBuilder.startAddSchemaBuffer(message, ClientToServerSchemaAdderFunction));
+        this.socket.send(SchemaDefiner.startAddSchemaBuffer(message, ClientToServerSchemaAdderFunction));
       } else {
         this.socket.send(JSON.stringify(message));
       }

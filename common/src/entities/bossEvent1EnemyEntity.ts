@@ -9,12 +9,12 @@ import {EntityModelSchemaType} from '../models/serverToClientMessages';
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;
   damage = 2;
-  type = 'bossEvent1Enemy' as const;
   explosionIntensity = 4;
   isWeapon = true as const;
   ownerEntityId: number;
   pieceType: BossEvent1PieceType;
   rotate: number;
+  type = 'bossEvent1Enemy' as const;
   weaponSide = 'enemy' as const;
   xOffset: number;
   yOffset: number;
@@ -108,10 +108,10 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
 }
 
 export type BossEvent1EnemyModel = EntityModel & {
-  type: 'bossEvent1Enemy';
   ownerEntityId: number;
   pieceType: BossEvent1PieceType;
   rotate: number;
+  type: 'bossEvent1Enemy';
   xOffset: number;
   yOffset: number;
 };

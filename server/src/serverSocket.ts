@@ -4,7 +4,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {createServer} from 'http';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
-import {ArrayBufferSchemaBuilder} from '@common/parsers/arrayBufferSchemaBuilder';
+import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ClientToServerMessage, ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
 import {ServerToClientMessage, ServerToClientSchemaAdderFunction} from '@common/models/serverToClientMessages';
 
@@ -59,7 +59,7 @@ export class ServerSocket implements IServerSocket {
       return;
     }
     if (GameConstants.binaryTransport) {
-      const body = ArrayBufferSchemaBuilder.startAddSchemaBuffer(messages, ServerToClientSchemaAdderFunction);
+      const body = SchemaDefiner.startAddSchemaBuffer(messages, ServerToClientSchemaAdderFunction);
       this.totalBytesSent += body.byteLength;
       client.socket.send(body);
     } else {
@@ -117,7 +117,7 @@ export class ServerSocket implements IServerSocket {
             ws.close();
             return;
           }
-          const messageData = ArrayBufferSchemaBuilder.startReadSchemaBuffer(
+          const messageData = SchemaDefiner.startReadSchemaBuffer(
             message as ArrayBuffer,
             ClientToServerSchemaReaderFunction
           );

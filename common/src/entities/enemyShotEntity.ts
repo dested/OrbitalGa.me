@@ -11,9 +11,9 @@ export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
   damage = 1;
-  type = 'enemyShot' as const;
   explosionIntensity = 2;
   isWeapon = true as const;
+  type = 'enemyShot' as const;
   weaponSide = 'enemy' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<EnemyShotModel>) {

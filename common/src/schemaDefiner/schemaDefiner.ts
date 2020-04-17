@@ -1,9 +1,81 @@
-import {ArrayBufferBuilder, ArrayBufferReader} from './arrayBufferBuilder';
-import {ABFlags, ABSchemaDef, Discriminate} from './arrayBufferSchemaTypes';
+import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {ABFlags, ABSchemaDef, Discriminate} from './schemaDefinerTypes';
 import {assertType, Utils} from '../utils/utils';
 
-export class ArrayBufferSchemaBuilder {
-  static addSchemaBuffer(schema: ABSchemaDef, fieldName: string, addMap: (code: string) => string): string {
+export class SchemaDefiner {
+  static generateAdderFunction(schema: any): any {
+    const objectMaps: string[] = [];
+
+    let code = this.buildAdderFunction(schema, 'value', (map) => {
+      const id = objectMaps.length;
+      objectMaps.push(`const map${id}=${map}`);
+      return `map${id}`;
+    });
+
+    // language=JavaScript
+    code = `
+(buff, value)=>{
+${objectMaps.join(';\n')}
+${code}
+return buff.buildBuffer()
+}`;
+    // tslint:disable no-eval
+    return eval(code);
+  }
+
+  static generateReaderFunction(schema: any): any {
+    const objectMaps: string[] = [];
+
+    let code = this.buildReaderFunction(schema, (map) => {
+      const id = objectMaps.length;
+      objectMaps.push(`const map${id}=${map}`);
+      return `map${id}`;
+    });
+
+    // language=JavaScript
+    code = `
+    function range(len, callback) {
+  let items = [];
+  for (let i = 0; i < len; i++) {
+    items.push(callback());
+  }
+  return items;
+}
+function lookup(id, obj) {
+  return obj[id]();
+}
+function lookupEnum(id, obj) {
+  return obj[id];
+}
+function bitmask(mask, obj) {
+  const result = {};
+  for (let i = 0; i < mask.length; i++) {
+    result[obj[i]] = !!mask[i];
+  }
+  return result;
+}
+
+(reader)=>{
+${objectMaps.join(';\n')}
+return (${code})
+}`;
+    // tslint:disable no-eval
+    return eval(code);
+  }
+
+  static startAddSchemaBuffer(value: any, adderFunction: (buff: ArrayBufferBuilder, value: any) => ArrayBuffer) {
+    const arrayBufferBuilder = new ArrayBufferBuilder(1000);
+    return adderFunction(arrayBufferBuilder, value);
+  }
+
+  static startReadSchemaBuffer(
+    buffer: ArrayBuffer | ArrayBufferLike,
+    readerFunction: (reader: ArrayBufferReader) => any
+  ): any {
+    return readerFunction(new ArrayBufferReader(buffer));
+  }
+
+  private static buildAdderFunction(schema: ABSchemaDef, fieldName: string, addMap: (code: string) => string): string {
     switch (schema) {
       case 'uint8':
         return `buff.addUint8(${fieldName});\n`;
@@ -52,7 +124,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             return `
            buff.addUint8(${fieldName}.length);
     for (const ${noPeriodsFieldName}Element of ${fieldName}) {
-      ${ArrayBufferSchemaBuilder.addSchemaBuffer(schema.elements, noPeriodsFieldName + 'Element', addMap)}
+      ${SchemaDefiner.buildAdderFunction(schema.elements, noPeriodsFieldName + 'Element', addMap)}
     }`;
           }
           case 'array-uint16': {
@@ -60,7 +132,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             return `
            buff.addUint16(${fieldName}.length);
     for (const ${noPeriodsFieldName}Element of ${fieldName}) {
-      ${ArrayBufferSchemaBuilder.addSchemaBuffer(schema.elements, noPeriodsFieldName + 'Element', addMap)}
+      ${SchemaDefiner.buildAdderFunction(schema.elements, noPeriodsFieldName + 'Element', addMap)}
     }`;
           }
           case 'type-lookup': {
@@ -68,7 +140,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             for (const key of Object.keys(schema.elements)) {
               map += `${key}:()=>{
               buff.addUint8(${schema.elements[key].type});
-              ${ArrayBufferSchemaBuilder.addSchemaBuffer(schema.elements[key], fieldName, addMap)}
+              ${SchemaDefiner.buildAdderFunction(schema.elements[key], fieldName, addMap)}
               },`;
             }
             map += '}\n';
@@ -79,7 +151,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             for (const key of Object.keys(schema.elements)) {
               map += `${key}:()=>{
               buff.addUint8(${schema.elements[key].entityType});
-              ${ArrayBufferSchemaBuilder.addSchemaBuffer(schema.elements[key], fieldName, addMap)}
+              ${SchemaDefiner.buildAdderFunction(schema.elements[key], fieldName, addMap)}
               },
               `;
             }
@@ -93,7 +165,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
                 continue;
               }
               const currentSchemaElement = schema[key];
-              result += this.addSchemaBuffer(currentSchemaElement, `${fieldName}.${key}`, addMap) + '\n';
+              result += this.buildAdderFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '\n';
             }
             return result;
         }
@@ -101,67 +173,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
     throw new Error('Buffer error');
   }
 
-  static generateAdderFunction(schema: any): any {
-    const objectMaps: string[] = [];
-
-    let code = this.addSchemaBuffer(schema, 'value', (map) => {
-      const id = objectMaps.length;
-      objectMaps.push(`const map${id}=${map}`);
-      return `map${id}`;
-    });
-
-    // language=JavaScript
-    code = `
-(buff, value)=>{
-${objectMaps.join(';\n')}
-${code}
-return buff.buildBuffer()
-}`;
-    // tslint:disable no-eval
-    return eval(code);
-  }
-
-  static generateReaderFunction(schema: any): any {
-    const objectMaps: string[] = [];
-
-    let code = this.readSchemaBuffer(schema, (map) => {
-      const id = objectMaps.length;
-      objectMaps.push(`const map${id}=${map}`);
-      return `map${id}`;
-    });
-
-    // language=JavaScript
-    code = `
-    function range(len, callback) {
-  let items = [];
-  for (let i = 0; i < len; i++) {
-    items.push(callback());
-  }
-  return items;
-}
-function lookup(id, obj) {
-  return obj[id]();
-}
-function lookupEnum(id, obj) {
-  return obj[id];
-}
-function bitmask(mask, obj) {
-  const result = {};
-  for (let i = 0; i < mask.length; i++) {
-    result[obj[i]] = !!mask[i];
-  }
-  return result;
-}
-
-(reader)=>{
-${objectMaps.join(';\n')}
-return (${code})
-}`;
-    // tslint:disable no-eval
-    return eval(code);
-  }
-
-  static readSchemaBuffer(schema: ABSchemaDef, addMap: (code: string) => string, injectField?: string): any {
+  private static buildReaderFunction(schema: ABSchemaDef, addMap: (code: string) => string, injectField?: string): any {
     switch (schema) {
       case 'uint8':
         return 'reader.readUint8()';
@@ -202,22 +214,16 @@ return (${code})
           }
 
           case 'array-uint8': {
-            return `range(reader.readUint8(),()=>(${ArrayBufferSchemaBuilder.readSchemaBuffer(
-              schema.elements,
-              addMap
-            )}))`;
+            return `range(reader.readUint8(),()=>(${SchemaDefiner.buildReaderFunction(schema.elements, addMap)}))`;
           }
           case 'array-uint16': {
-            return `range(reader.readUint16(),()=>(${ArrayBufferSchemaBuilder.readSchemaBuffer(
-              schema.elements,
-              addMap
-            )}))`;
+            return `range(reader.readUint16(),()=>(${SchemaDefiner.buildReaderFunction(schema.elements, addMap)}))`;
           }
           case 'type-lookup': {
             let map = '{\n';
             for (const key of Object.keys(schema.elements)) {
               map += `${schema.elements[key].type}:()=>(
-              ${ArrayBufferSchemaBuilder.readSchemaBuffer(schema.elements[key], addMap, `type: '${key}'`)}
+              ${SchemaDefiner.buildReaderFunction(schema.elements[key], addMap, `type: '${key}'`)}
               ),\n`;
             }
             map += '}\n';
@@ -228,7 +234,7 @@ return (${code})
             let map = '{\n';
             for (const key of Object.keys(schema.elements)) {
               map += `${schema.elements[key].entityType}:()=>(
-              ${ArrayBufferSchemaBuilder.readSchemaBuffer(schema.elements[key], addMap, `entityType: '${key}'`)}
+              ${SchemaDefiner.buildReaderFunction(schema.elements[key], addMap, `entityType: '${key}'`)}
               ),\n`;
             }
             map += '}\n';
@@ -245,7 +251,7 @@ return (${code})
                 continue;
               }
               const currentSchemaElement = schema[key];
-              str += `${key} : ${this.readSchemaBuffer(currentSchemaElement, addMap)},\n`;
+              str += `${key} : ${this.buildReaderFunction(currentSchemaElement, addMap)},\n`;
             }
             str += '}';
             return str;
@@ -253,16 +259,5 @@ return (${code})
         }
     }
     throw new Error('Buffer error');
-  }
-  static startAddSchemaBuffer(value: any, adderFunction: (buff: ArrayBufferBuilder, value: any) => ArrayBuffer) {
-    const arrayBufferBuilder = new ArrayBufferBuilder(1000);
-    return adderFunction(arrayBufferBuilder, value);
-  }
-
-  static startReadSchemaBuffer(
-    buffer: ArrayBuffer | ArrayBufferLike,
-    readerFunction: (reader: ArrayBufferReader) => any
-  ): any {
-    return readerFunction(new ArrayBufferReader(buffer));
   }
 }

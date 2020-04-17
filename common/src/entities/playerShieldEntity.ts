@@ -13,12 +13,12 @@ export type ShieldStrength = 'small' | 'medium' | 'big';
 export class PlayerShieldEntity extends Entity {
   boundingBoxes = [];
   depleted: boolean;
-  type = 'playerShield' as const;
   health: number;
   lastHit = 0;
   ownerEntityId: number;
   shieldStrength: ShieldStrength;
   tickIndex = 0;
+  type = 'playerShield' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<PlayerShieldModel>) {
     super(game, messageModel);
@@ -120,10 +120,10 @@ export class PlayerShieldEntity extends Entity {
 
 export type PlayerShieldModel = EntityModel & {
   depleted: boolean;
-  type: 'playerShield';
   health: number;
   ownerEntityId: number;
   shieldStrength: ShieldStrength;
+  type: 'playerShield';
 };
 
 export const PlayerShieldModelSchema: EntityModelSchemaType<'playerShield'> = {

@@ -24,13 +24,13 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   ];
   damage = 2;
   enemyColor: EnemyColor;
-  type = 'swoopingEnemy' as const;
   explosionIntensity = 4;
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   isWeapon = true as const;
   momentumX = 0;
   momentumY = 0;
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
+  type = 'swoopingEnemy' as const;
   weaponSide = 'enemy' as const;
 
   private path = new MomentumRunner(
@@ -192,8 +192,8 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
 
 export type SwoopingEnemyModel = EntityModel & {
   enemyColor: EnemyColor;
-  type: 'swoopingEnemy';
   health: number;
+  type: 'swoopingEnemy';
 };
 
 export const SwoopingEnemyModelSchema: EntityModelSchemaType<'swoopingEnemy'> = {

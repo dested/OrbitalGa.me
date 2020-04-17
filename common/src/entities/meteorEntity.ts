@@ -13,7 +13,6 @@ import {EntityModelSchemaType} from '../models/serverToClientMessages';
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
 export class MeteorEntity extends Entity {
-  type = 'meteor' as const;
   health: number;
   hit = false;
   meteorColor: 'brown' | 'grey';
@@ -25,6 +24,7 @@ export class MeteorEntity extends Entity {
   rotateSpeed = Math.round(1 + Math.random() * 3);
   size: Size;
   startingMomentumY: number;
+  type = 'meteor' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<MeteorModel>) {
     super(game, messageModel);
@@ -259,12 +259,12 @@ export class MeteorEntity extends Entity {
 }
 
 export type MeteorModel = EntityModel & {
-  type: 'meteor';
   hit: boolean;
   meteorColor: 'brown' | 'grey';
   meteorType: '1' | '2' | '3' | '4';
   rotate: number;
   size: 'big' | 'med' | 'small' | 'tiny';
+  type: 'meteor';
 };
 export const MeteorModelSchema: EntityModelSchemaType<'meteor'> = {
   ...EntityModelSchema,

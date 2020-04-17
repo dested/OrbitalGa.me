@@ -5,6 +5,25 @@ export class CanvasUtils {
     context.beginPath();
     context.arc(x, y, Math.max(radius, 0), 0, 2 * Math.PI);
   }
+
+  static mask(asset: Asset, red: number, green: number, blue: number) {
+    const canvas = document.createElement('canvas');
+    canvas.width = asset.size.width;
+    canvas.height = asset.size.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(asset.image, 0, 0);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const a = imageData.data[i + 3];
+      if (a !== 0) {
+        imageData.data[i] = red;
+        imageData.data[i + 1] = green;
+        imageData.data[i + 2] = blue;
+      }
+    }
+    context.putImageData(imageData, 0, 0);
+    return canvas;
+  }
   static rect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
     context.beginPath();
     context.rect(x, y, width, height);
@@ -38,24 +57,5 @@ export class CanvasUtils {
     if (stroke) {
       ctx.stroke();
     }
-  }
-
-  static mask(asset: Asset, red: number, green: number, blue: number) {
-    const canvas = document.createElement('canvas');
-    canvas.width = asset.size.width;
-    canvas.height = asset.size.height;
-    const context = canvas.getContext('2d')!;
-    context.drawImage(asset.image, 0, 0);
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const a = imageData.data[i + 3];
-      if (a !== 0) {
-        imageData.data[i] = red;
-        imageData.data[i + 1] = green;
-        imageData.data[i + 2] = blue;
-      }
-    }
-    context.putImageData(imageData, 0, 0);
-    return canvas;
   }
 }

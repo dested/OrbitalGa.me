@@ -40,8 +40,8 @@ export class WallEntity extends Entity {
   }
 }
 export type WallModel = EntityModel & {
-  type: 'wall';
   height: number;
+  type: 'wall';
   width: number;
 };
 

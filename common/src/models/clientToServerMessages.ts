@@ -1,8 +1,8 @@
 import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
-import {AB, ABByType, ABKeys, ABTypeLookup} from '../parsers/arrayBufferSchemaTypes';
+import {SDElement, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
-import {ArrayBufferSchemaBuilder} from '../parsers/arrayBufferSchemaBuilder';
+import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 
 type CTOSJoin = {name: string; type: 'join'};
 type CTOSSpectate = {type: 'spectate'};
@@ -23,20 +23,20 @@ const CTOSTypes: {[key in ClientToServerMessage['type']]: number} = {
   spectate: 4,
 };
 
-const CTOSPingSchema: ABByType<ClientToServerMessage, 'ping'> = {type: CTOSTypes.ping, ping: 'uint32'};
+const CTOSPingSchema: SDTypeLookup<ClientToServerMessage, 'ping'> = {type: CTOSTypes.ping, ping: 'uint32'};
 
-const CTOSJoinSchema: ABByType<ClientToServerMessage, 'join'> = {type: CTOSTypes.join, name: 'string'};
+const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {type: CTOSTypes.join, name: 'string'};
 
-const CTOSSpectateSchema: ABByType<ClientToServerMessage, 'spectate'> = {type: CTOSTypes.spectate};
+const CTOSSpectateSchema: SDTypeLookup<ClientToServerMessage, 'spectate'> = {type: CTOSTypes.spectate};
 
-const CTOSPlayerInputSchema: ABByType<ClientToServerMessage, 'playerInput'> = {
+const CTOSPlayerInputSchema: SDTypeLookup<ClientToServerMessage, 'playerInput'> = {
   type: CTOSTypes.playerInput,
   inputSequenceNumber: 'uint32',
   keys: PlayerInputKeyBitmask,
   weapon: {...PlayerWeaponEnumSchema, unset: 0},
 };
 
-const ClientToServerSchema: ABTypeLookup<ABKeys<ClientToServerMessage>> = {
+const ClientToServerSchema: SDTypeLookupElements<ClientToServerMessage> = {
   flag: 'type-lookup',
   elements: {
     ping: CTOSPingSchema,
@@ -46,5 +46,5 @@ const ClientToServerSchema: ABTypeLookup<ABKeys<ClientToServerMessage>> = {
   },
 };
 
-export const ClientToServerSchemaReaderFunction = ArrayBufferSchemaBuilder.generateReaderFunction(ClientToServerSchema);
-export const ClientToServerSchemaAdderFunction = ArrayBufferSchemaBuilder.generateAdderFunction(ClientToServerSchema);
+export const ClientToServerSchemaReaderFunction = SchemaDefiner.generateReaderFunction(ClientToServerSchema);
+export const ClientToServerSchemaAdderFunction = SchemaDefiner.generateAdderFunction(ClientToServerSchema);

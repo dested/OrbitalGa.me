@@ -12,12 +12,12 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 57}];
   damage: number;
-  type = 'playerWeapon' as const;
   explosionIntensity: number;
   isWeapon = true as const;
   offsetX: number;
   ownerEntityId: number;
   startY: number;
+  type = 'playerWeapon' as const;
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
 
@@ -95,10 +95,10 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
 }
 
 export type PlayerWeaponModel = EntityModel & {
-  type: 'playerWeapon';
   offsetX: number;
   ownerEntityId: number;
   startY: number;
+  type: 'playerWeapon';
   weaponType: PlayerWeapon;
 };
 
