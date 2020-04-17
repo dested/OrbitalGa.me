@@ -1,7 +1,16 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
 import {EntityBufferValue, EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
-import {AB, ABByType, ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
+import {
+  AB,
+  ABArray,
+  ABByType,
+  ABEntityTypeLookup,
+  ABKeys,
+  ABSizeByType,
+  ABSizeKeys,
+  ABTypeLookup,
+} from '../parsers/arrayBufferSchemaTypes';
 import {WallModelSchema} from '../entities/wallEntity';
 import {BossEvent1EnemyModelSchema} from '../entities/bossEvent1EnemyEntity';
 import {BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
@@ -15,6 +24,7 @@ import {SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity'
 import {MeteorModelSchema} from '../entities/meteorEntity';
 import {ArrayBufferSchemaBuilder} from '../parsers/arrayBufferSchemaBuilder';
 import {ArrayBufferReader} from '../parsers/arrayBufferBuilder';
+import {ClientToServerMessage} from './clientToServerMessages';
 
 type STOCJoined = {serverVersion: number; type: 'joined'} & LivePlayerModel;
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
@@ -104,7 +114,7 @@ const STOCWorldStateSchema: ABByType<ServerToClientMessage, 'worldState'> = {
   },
 };
 
-const ServerToClientSchema: AB<ServerToClientMessage[]> = {
+const ServerToClientSchema: ABArray<ABTypeLookup<ABKeys<ServerToClientMessage>>> = {
   flag: 'array-uint16',
   elements: {
     flag: 'type-lookup',

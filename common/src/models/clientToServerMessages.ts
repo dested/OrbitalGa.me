@@ -1,6 +1,6 @@
 import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
-import {AB, ABByType} from '../parsers/arrayBufferSchemaTypes';
+import {AB, ABByType, ABKeys, ABTypeLookup} from '../parsers/arrayBufferSchemaTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './enums';
 import {ArrayBufferSchemaBuilder} from '../parsers/arrayBufferSchemaBuilder';
 
@@ -36,7 +36,7 @@ const CTOSPlayerInputSchema: ABByType<ClientToServerMessage, 'playerInput'> = {
   weapon: {...PlayerWeaponEnumSchema, unset: 0},
 };
 
-const ClientToServerSchema: AB<ClientToServerMessage> = {
+const ClientToServerSchema: ABTypeLookup<ABKeys<ClientToServerMessage>> = {
   flag: 'type-lookup',
   elements: {
     ping: CTOSPingSchema,

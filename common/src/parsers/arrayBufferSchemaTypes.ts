@@ -39,9 +39,9 @@ type StringUnionToIntersection<U> = (U extends any ? (k: U) => void : never) ext
     : never
   : never;
 
-export type AB<T> = T extends string
-  ? 'string'
-  : T extends number
+export type AB<T, TKey extends keyof T> = T[TKey] extends string
+  ? 'string' | ABEnum<T[TKey]>
+  : T[TKey] extends number
   ?
       | 'uint8'
       | 'uint16'
@@ -53,33 +53,29 @@ export type AB<T> = T extends string
       | 'float64'
       | 'int8Optional'
       | 'int32Optional'
-  : T extends boolean
+  : T[TKey] extends boolean
   ? 'boolean'
-  : T extends Array<any>
-  ? T[number] extends {entityType: string}
-    ? ABArray<ABEntityTypeLookup<ABSizeKeys<T[number]>>>
-    : T[number] extends {type: string}
-    ? ABArray<ABTypeLookup<ABKeys<T[number]>>>
-    : ABArray<ABObj<T[number]>>
-  : T extends {[key in keyof T]: boolean}
-  ? ABBitmask<T>
-  : T extends {type: string}
-  ? ABTypeLookup<ABKeys<T>>
-  : T extends {entityType: string}
-  ? ABEntityTypeLookup<ABSizeKeys<T>>
-  : T extends {}
-  ? ABObj<T>
+  : T[TKey] extends Array<any>
+  ? T[TKey][number] extends {entityType: string}
+    ? ABArray<ABEntityTypeLookup<ABSizeKeys<T[TKey][number]>>>
+    : T[TKey][number] extends {type: string}
+    ? ABArray<ABTypeLookup<ABKeys<T[TKey][number]>>>
+    : ABArray<ABObj<T[TKey][number]>>
+  : T[TKey] extends {[key in keyof T[TKey]]: boolean}
+  ? ABBitmask<T[TKey]>
+  : T[TKey] extends {type: string}
+  ? ABTypeLookup<ABKeys<T[TKey]>>
+  : T[TKey] extends {entityType: string}
+  ? ABEntityTypeLookup<ABSizeKeys<T[TKey]>>
+  : T[TKey] extends {}
+  ? ABObj<T[TKey]>
   : never;
 
 type IsUnion<T, U extends T = T> = T extends unknown ? ([U] extends [T] ? false : true) : false;
 type IsStringUnion<T> = IsUnion<T> extends true ? (T extends string ? true : false) : false;
 
 export type ABObj<TItem> = {
-  [keyT in keyof TItem]: IsStringUnion<TItem[keyT]> extends true
-    ? TItem[keyT] extends string
-      ? ABEnum<TItem[keyT]>
-      : never
-    : AB<TItem[keyT]>;
+  [keyT in keyof Required<TItem>]: AB<Required<TItem>, keyT>;
 };
 
 export type ABByType<TItem extends {type: string}, TKey extends TItem['type']> = ABObj<

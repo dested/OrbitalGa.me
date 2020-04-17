@@ -101,7 +101,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
     throw new Error('Buffer error');
   }
 
-  static generateAdderFunction(schema: ABSchemaDef): any {
+  static generateAdderFunction(schema: any): any {
     const objectMaps: string[] = [];
 
     let code = this.addSchemaBuffer(schema, 'value', (map) => {

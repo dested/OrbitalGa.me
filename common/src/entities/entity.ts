@@ -2,7 +2,7 @@ import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
 import {EntityModels} from '../models/entityTypeModels';
 import {GameConstants} from '../game/gameConstants';
-import {AB} from '../parsers/arrayBufferSchemaTypes';
+import {AB, ABObj, ABSizeByType} from '../parsers/arrayBufferSchemaTypes';
 
 type BoundingBox = {
   height: number;
@@ -176,7 +176,7 @@ export type EntityModel = {
   y: number;
 };
 
-export const EntityModelSchema: AB<EntityModel> = {
+export const EntityModelSchema: ABObj<EntityModel> = {
   x: 'float32',
   y: 'float32',
   entityId: 'uint32',
