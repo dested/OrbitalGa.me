@@ -6,7 +6,11 @@ import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ClientToServerMessage, ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
-import {ServerToClientMessage, ServerToClientSchemaAdderFunction} from '@common/models/serverToClientMessages';
+import {
+  ServerToClientMessage,
+  ServerToClientSchemaAdderFunction,
+  ServerToClientSchemaAdderSizeFunction,
+} from '@common/models/serverToClientMessages';
 
 export type SocketConnection = {
   connectionId: number;
@@ -59,7 +63,11 @@ export class ServerSocket implements IServerSocket {
       return;
     }
     if (GameConstants.binaryTransport) {
-      const body = SchemaDefiner.startAddSchemaBuffer(messages, ServerToClientSchemaAdderFunction);
+      const body = SchemaDefiner.startAddSchemaBuffer(
+        messages,
+        ServerToClientSchemaAdderSizeFunction,
+        ServerToClientSchemaAdderFunction
+      );
       this.totalBytesSent += body.byteLength;
       client.socket.send(body);
     } else {

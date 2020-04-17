@@ -22,7 +22,27 @@ return buff.buildBuffer()
     // tslint:disable no-eval
     return eval(code);
   }
+  static generateAdderSizeFunction(schema: any): any {
+    const objectMaps: string[] = [];
 
+    let code = this.buildAdderSizeFunction(schema, 'value', (map) => {
+      const id = objectMaps.length;
+      objectMaps.push(`const map${id}=${map}`);
+      return `map${id}`;
+    });
+
+    // language=JavaScript
+    code = `
+(value)=>{
+${objectMaps.join(';\n')}
+let size=0;
+${code}
+return size;
+}`;
+    console.log(code);
+    // tslint:disable no-eval
+    return eval(code);
+  }
   static generateReaderFunction(schema: any): any {
     const objectMaps: string[] = [];
 
@@ -63,8 +83,13 @@ return (${code})
     return eval(code);
   }
 
-  static startAddSchemaBuffer(value: any, adderFunction: (buff: ArrayBufferBuilder, value: any) => ArrayBuffer) {
-    const arrayBufferBuilder = new ArrayBufferBuilder(1000);
+  static startAddSchemaBuffer(
+    value: any,
+    adderSizeFunction: (value: any) => number,
+    adderFunction: (buff: ArrayBufferBuilder, value: any) => ArrayBuffer
+  ) {
+    const size = adderSizeFunction(value);
+    const arrayBufferBuilder = new ArrayBufferBuilder(size, true);
     return adderFunction(arrayBufferBuilder, value);
   }
 
@@ -156,6 +181,89 @@ ${Utils.safeKeysExclude(schema, 'flag')
               }
               const currentSchemaElement = schema[key];
               result += this.buildAdderFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '\n';
+            }
+            return result;
+        }
+    }
+    throw new Error('Buffer error');
+  }
+  private static buildAdderSizeFunction(
+    schema: ABSchemaDef,
+    fieldName: string,
+    addMap: (code: string) => string
+  ): string {
+    switch (schema) {
+      case 'uint8':
+        return `size+=1;`;
+      case 'uint16':
+        return `size+=2;`;
+      case 'uint32':
+        return `size+=4;`;
+      case 'int8':
+        return `size+=1;`;
+      case 'int16':
+        return `size+=2;`;
+      case 'int32':
+        return `size+=4;`;
+      case 'float32':
+        return `size+=4;`;
+      case 'float64':
+        return `size+=8;`;
+      case 'boolean':
+        return `size+=1;`;
+      case 'string':
+        return `size+=2+${fieldName}.length*2`;
+      case 'int32Optional':
+        return `size+=4;`;
+      case 'int8Optional':
+        return `size+=1;`;
+      default:
+        assertType<ABFlags>(schema);
+        switch (schema.flag) {
+          case 'enum': {
+            return `size+=1;`;
+          }
+          case 'bitmask': {
+            return `size+=1;`;
+          }
+
+          case 'array-uint8': {
+            const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+            return `
+           size+=1;
+    for (const ${noPeriodsFieldName}Element of ${fieldName}) {
+      ${SchemaDefiner.buildAdderSizeFunction(schema.elements, noPeriodsFieldName + 'Element', addMap)}
+    }`;
+          }
+          case 'array-uint16': {
+            const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+            return `
+           size+=2;
+    for (const ${noPeriodsFieldName}Element of ${fieldName}) {
+      ${SchemaDefiner.buildAdderSizeFunction(schema.elements, noPeriodsFieldName + 'Element', addMap)}
+    }`;
+          }
+          case 'type-lookup': {
+            let map = '{\n';
+            let index = 0;
+            for (const key of Object.keys(schema.elements)) {
+              map += `${key}:()=>{
+              size+=1;
+              ${SchemaDefiner.buildAdderSizeFunction(schema.elements[key], fieldName, addMap)}
+              },`;
+              index++;
+            }
+            map += '}\n';
+            return `(${map})[${fieldName}.type]();`;
+          }
+          case undefined:
+            let result = '';
+            for (const key of Object.keys(schema)) {
+              if (key === 'type' || key === 'entityType') {
+                continue;
+              }
+              const currentSchemaElement = schema[key];
+              result += this.buildAdderSizeFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '\n';
             }
             return result;
         }

@@ -40,3 +40,4 @@ const ClientToServerSchema: SDTypeLookupElements<ClientToServerMessage> = {
 
 export const ClientToServerSchemaReaderFunction = SchemaDefiner.generateReaderFunction(ClientToServerSchema);
 export const ClientToServerSchemaAdderFunction = SchemaDefiner.generateAdderFunction(ClientToServerSchema);
+export const ClientToServerSchemaAdderSizeFunction = SchemaDefiner.generateAdderSizeFunction(ClientToServerSchema);

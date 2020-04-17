@@ -104,3 +104,4 @@ const ServerToClientSchema: SDArray<SDTypeLookupElements<ServerToClientMessage>>
 };
 export const ServerToClientSchemaReaderFunction = SchemaDefiner.generateReaderFunction(ServerToClientSchema);
 export const ServerToClientSchemaAdderFunction = SchemaDefiner.generateAdderFunction(ServerToClientSchema);
+export const ServerToClientSchemaAdderSizeFunction = SchemaDefiner.generateAdderSizeFunction(ServerToClientSchema);

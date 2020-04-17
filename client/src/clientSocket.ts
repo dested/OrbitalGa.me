@@ -2,7 +2,11 @@ import {GameConstants} from '@common/game/gameConstants';
 import {ClientConfig} from './clientConfig';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
-import {ClientToServerMessage, ClientToServerSchemaAdderFunction} from '@common/models/clientToServerMessages';
+import {
+  ClientToServerMessage,
+  ClientToServerSchemaAdderFunction,
+  ClientToServerSchemaAdderSizeFunction,
+} from '@common/models/clientToServerMessages';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
@@ -52,7 +56,13 @@ export class ClientSocket implements IClientSocket {
 
   sendMessage(message: ClientToServerMessage) {
     if (GameConstants.binaryTransport) {
-      this.socketSend(SchemaDefiner.startAddSchemaBuffer(message, ClientToServerSchemaAdderFunction));
+      this.socketSend(
+        SchemaDefiner.startAddSchemaBuffer(
+          message,
+          ClientToServerSchemaAdderSizeFunction,
+          ClientToServerSchemaAdderFunction
+        )
+      );
     } else {
       this.socketSend(JSON.stringify(message));
     }

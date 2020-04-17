@@ -4,7 +4,7 @@ export class ArrayBufferBuilder {
   buffer: ArrayBuffer;
   curPosition = 0;
   view: DataView;
-  constructor(initialBufferSize: number = 50) {
+  constructor(initialBufferSize: number = 50, private sizeIsExact: boolean = false) {
     this.buffer = new ArrayBuffer(initialBufferSize);
     this.view = new DataView(this.buffer);
   }
@@ -13,31 +13,31 @@ export class ArrayBufferBuilder {
     this.addUint8(parseInt('1' + bools.map((a) => (a ? '1' : '0')).join(''), 2));
   }
   addBoolean(value: boolean) {
-    this.testSize(1);
+    !this.sizeIsExact && this.testSize(1);
     this.view.setUint8(this.curPosition, value ? 1 : 0);
     this.curPosition += 1;
   }
 
   addFloat32(value: number) {
-    this.testSize(4);
+    !this.sizeIsExact && this.testSize(4);
     this.view.setFloat32(this.curPosition, value);
     this.curPosition += 4;
   }
 
   addFloat64(value: number) {
-    this.testSize(8);
+    !this.sizeIsExact && this.testSize(8);
     this.view.setFloat64(this.curPosition, value);
     this.curPosition += 8;
   }
 
   addInt16(value: number) {
-    this.testSize(2);
+    !this.sizeIsExact && this.testSize(2);
     this.view.setInt16(this.curPosition, value);
     this.curPosition += 2;
   }
 
   addInt32(value: number) {
-    this.testSize(4);
+    !this.sizeIsExact && this.testSize(4);
     this.view.setInt32(this.curPosition, value);
     this.curPosition += 4;
   }
@@ -51,7 +51,7 @@ export class ArrayBufferBuilder {
   }
 
   addInt8(value: number) {
-    this.testSize(1);
+    !this.sizeIsExact && this.testSize(1);
     this.view.setInt8(this.curPosition, value);
     this.curPosition += 1;
   }
@@ -82,19 +82,19 @@ export class ArrayBufferBuilder {
   }
 
   addUint16(value: number) {
-    this.testSize(2);
+    !this.sizeIsExact && this.testSize(2);
     this.view.setUint16(this.curPosition, value);
     this.curPosition += 2;
   }
 
   addUint32(value: number) {
-    this.testSize(4);
+    !this.sizeIsExact && this.testSize(4);
     this.view.setUint32(this.curPosition, value);
     this.curPosition += 4;
   }
 
   addUint8(value: number) {
-    this.testSize(1);
+    !this.sizeIsExact && this.testSize(1);
     this.view.setUint8(this.curPosition, value);
     this.curPosition += 1;
   }
