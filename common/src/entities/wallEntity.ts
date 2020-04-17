@@ -1,9 +1,7 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {EntityModelSchemaType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {SwoopingEnemyModel} from './swoopingEnemyEntity';
 
 export class WallEntity extends Entity {
   type = 'wall' as const;

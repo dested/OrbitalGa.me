@@ -5,7 +5,7 @@ import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
 import {WallEntity} from './wallEntity';
-import {ExplosionEntity, ExplosionModel} from './explosionEntity';
+import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Utils} from '../utils/utils';
@@ -14,7 +14,6 @@ import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
-import {EntityModelSchemaType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export type PlayerInputKeys = {

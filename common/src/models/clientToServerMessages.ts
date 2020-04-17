@@ -1,6 +1,6 @@
 import {PlayerInputKeys} from '../entities/playerEntity';
 import {PlayerWeapon} from '../game/gameRules';
-import {SDElement, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
+import {SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './schemaEnums';
 import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 

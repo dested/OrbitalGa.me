@@ -1,5 +1,5 @@
 import {ArrayBufferBuilder, ArrayBufferReader} from '../parsers/arrayBufferBuilder';
-import {ABFlags, ABSchemaDef, Discriminate} from './schemaDefinerTypes';
+import {ABFlags, ABSchemaDef} from './schemaDefinerTypes';
 import {assertType, Utils} from '../utils/utils';
 
 export class SchemaDefiner {

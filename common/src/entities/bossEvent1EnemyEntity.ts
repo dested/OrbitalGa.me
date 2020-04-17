@@ -3,9 +3,8 @@ import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
-import {EntityModels, ImpliedEntityType} from '../models/entityTypeModels';
-import {EntityModelSchemaType} from '../models/serverToClientMessages';
-import {SDSimpleObject, SDTypeElement, SDTypeLookup} from '../schemaDefiner/schemaDefinerTypes';
+import {ImpliedEntityType} from '../models/entityTypeModels';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
   aliveTick: number = 0;

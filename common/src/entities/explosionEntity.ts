@@ -2,9 +2,7 @@ import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/entityTypeModels';
-import {EntityModelSchemaType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {EnemyShotModel} from './enemyShotEntity';
 
 export class ExplosionEntity extends Entity {
   static totalAliveDuration = 5;

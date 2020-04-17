@@ -1,7 +1,7 @@
 import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
 import {EntityModels} from './entityTypeModels';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
-import {SDElement, SDArray, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
+import {SDArray, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
 import {WallModelSchema} from '../entities/wallEntity';
 import {BossEvent1EnemyModelSchema} from '../entities/bossEvent1EnemyEntity';
 import {BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
@@ -11,7 +11,7 @@ import {ExplosionModelSchema} from '../entities/explosionEntity';
 import {PlayerShieldModelSchema} from '../entities/playerShieldEntity';
 import {SwoopingEnemyModelSchema} from '../entities/swoopingEnemyEntity';
 import {DropModelSchema} from '../entities/dropEntity';
-import {SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity';
+import {SpectatorModelSchema} from '../entities/spectatorEntity';
 import {MeteorModelSchema} from '../entities/meteorEntity';
 import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 

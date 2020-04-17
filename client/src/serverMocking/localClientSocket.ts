@@ -4,11 +4,7 @@ import {GameConstants} from '@common/game/gameConstants';
 import {WebSocketClient} from './webSocketClient';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ClientToServerMessage, ClientToServerSchemaAdderFunction} from '@common/models/clientToServerMessages';
-import {
-  ServerToClientMessage,
-  ServerToClientSchemaAdderFunction,
-  ServerToClientSchemaReaderFunction,
-} from '@common/models/serverToClientMessages';
+import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
 
 export class LocalClientSocket implements IClientSocket {
   private socket?: WebSocketClient;

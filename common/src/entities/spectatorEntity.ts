@@ -1,10 +1,8 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {EntityModels, ImpliedEntityType} from '../models/entityTypeModels';
-import {EntityModelSchemaType} from '../models/serverToClientMessages';
-import {SDTypeElement, SDTypeLookup} from '../schemaDefiner/schemaDefinerTypes';
-import {PlayerWeaponModel} from './playerWeaponEntity';
+import {ImpliedEntityType} from '../models/entityTypeModels';
+import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class SpectatorEntity extends Entity {
   type = 'spectator' as const;
