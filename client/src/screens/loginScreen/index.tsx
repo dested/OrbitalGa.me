@@ -39,8 +39,12 @@ export const LoginScreen: React.FC = observer((props) => {
             setError('This username is already taken');
             setConnectingStatus('none');
             break;
+          case '500':
+            setError('An error has occurred');
+            setConnectingStatus('none');
+            break;
           default:
-            unreachable(errorMessage.reason);
+            unreachable(errorMessage);
         }
       },
       onDied: () => {},

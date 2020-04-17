@@ -31,8 +31,15 @@ export type ABFlags =
   | {elements: {[key: string]: AnyAndKey<'entityType', number>}; flag: 'entity-type-lookup'}
   | {flag: undefined};
 
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+type StringUnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
+  ? I extends string
+    ? I
+    : never
+  : never;
+
 export type AB<T> = T extends string
-  ? 'string' | ABEnum<T>
+  ? 'string'
   : T extends number
   ?
       | 'uint8'
@@ -63,8 +70,15 @@ export type AB<T> = T extends string
   ? ABObj<T>
   : never;
 
+type IsUnion<T, U extends T = T> = T extends unknown ? ([U] extends [T] ? false : true) : false;
+type IsStringUnion<T> = IsUnion<T> extends true ? (T extends string ? true : false) : false;
+
 export type ABObj<TItem> = {
-  [keyT in keyof TItem]: AB<TItem[keyT]>;
+  [keyT in keyof TItem]: IsStringUnion<TItem[keyT]> extends true
+    ? TItem[keyT] extends string
+      ? ABEnum<TItem[keyT]>
+      : never
+    : AB<TItem[keyT]>;
 };
 
 export type ABByType<TItem extends {type: string}, TKey extends TItem['type']> = ABObj<

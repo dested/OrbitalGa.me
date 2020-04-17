@@ -19,7 +19,7 @@ import {ArrayBufferReader} from '../parsers/arrayBufferBuilder';
 type STOCJoined = {serverVersion: number; type: 'joined'} & LivePlayerModel;
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
 type STOCPong = {ping: number; type: 'pong'};
-export type STOCError = {reason: 'nameInUse'; type: 'error'};
+export type STOCError = {reason: 'nameInUse'; type: 'error'} | {reason: '500'; type: 'error'};
 type STOCWorldState = {entities: EntityModels[]; type: 'worldState'};
 type STOCLeaderboard = {scores: LeaderboardEntryRanked[]; type: 'leaderboard'};
 
@@ -43,7 +43,7 @@ const STOCTypes: {[key in ServerToClientMessage['type']]: number} = {
 const STOCPongSchema: ABByType<ServerToClientMessage, 'pong'> = {type: STOCTypes.pong, ping: 'uint8'};
 const STOCErrorSchema: ABByType<ServerToClientMessage, 'error'> = {
   type: STOCTypes.error,
-  reason: {flag: 'enum', nameInUse: 1},
+  reason: {flag: 'enum', nameInUse: 1, '500': 2},
 };
 const STOCJoinedSchema: ABByType<ServerToClientMessage, 'joined'> = {
   type: STOCTypes.joined,

@@ -156,8 +156,11 @@ export class ClientGame extends Game {
             case 'nameInUse':
               this.options.onError(this, message);
               break;
+            case '500':
+              this.options.onError(this, message);
+              break;
             default:
-              unreachable(message.reason);
+              unreachable(message);
           }
           break;
         case 'spectating':
