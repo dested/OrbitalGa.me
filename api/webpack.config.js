@@ -18,6 +18,9 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     symlinks: false,
+    alias: {
+      '@common': path.resolve(__dirname, '..', 'common', 'src'),
+    },
   },
   externals: [nodeExternals()],
   plugins: [],

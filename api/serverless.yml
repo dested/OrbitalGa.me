@@ -17,6 +17,7 @@ provider:
 
 custom:
   domain:
+    dev: api.orbitalga.me
     prod: api.orbitalga.me
   customDomain:
     domainName: ${self:custom.domain.${self:provider.stage}}

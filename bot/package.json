@@ -1,5 +1,5 @@
 {
-  "name": "dots-game-bot",
+  "name": "orbitalgame-bot",
   "version": "1.0.0",
   "scripts": {
     "build": "rimraf dist && webpack --mode development",

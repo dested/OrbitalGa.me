@@ -8,15 +8,16 @@
     "target": "es2017",
     "module": "commonjs",
     "emitDecoratorMetadata": true,
-    "noEmit": true,
     "sourceMap": true,
     "pretty": true,
+    "declaration": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src",
+    "outDir": "./build",
     "skipLibCheck": true,
-    "baseUrl": "./",
     "paths": {
-      "@common/*": ["../common/src/*"]
+      "@common/*": ["../../common/src/*"]
     }
   }
 }
