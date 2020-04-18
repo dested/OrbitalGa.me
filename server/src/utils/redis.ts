@@ -1,5 +1,5 @@
 import {createClient, RedisClient} from 'redis';
-import {Config} from '../config';
+// import {Config} from '../config';
 
 export class RedisManager {
   static manager: RedisManager;
@@ -148,6 +148,7 @@ export class RedisManager {
       console.time('connecting redis');
       const manager = new RedisManager();
       RedisManager.manager = manager;
+      /*
       manager.client = createClient({
         host: Config.redis.host,
         port: Config.redis.port,
@@ -156,7 +157,7 @@ export class RedisManager {
       manager.client.on('ready', (result) => {
         console.timeEnd('connecting redis');
         res(manager);
-      });
+      });*/
     });
   }
 }

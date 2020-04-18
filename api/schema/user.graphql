@@ -1,11 +1,11 @@
-type User @controller(path: "user") {
-  doThing(request: DoThingRequest): DoThingResponse @request(method: GET, path: "thing")
+extend type Query {
+  login(userName:String!,password:String!): User
 }
 
-type DoThingRequest @model {
-  shoes: String
-}
+#extend type Mutation {
+#  create(vendorId: Int!, updateVendor: VendorCreate!): User!
+#}
 
-type DoThingResponse @model {
-  jwt: String!
+type User {
+  id: Int!
 }

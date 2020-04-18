@@ -12,7 +12,7 @@ module.exports = {
     pathinfo: false,
   },
   optimization: {
-    minimize: false
+    minimize: false,
   },
   target: 'node',
   resolve: {
@@ -32,6 +32,12 @@ module.exports = {
           compilerOptions: {noEmit: false},
         },
       },
+      {
+        test: /\.(graphql|gql)$/,
+        exclude: /node_modules/,
+        loader: 'graphql-tag/loader',
+      },
+
     ],
   },
 };

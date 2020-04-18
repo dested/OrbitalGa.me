@@ -1,0 +1,21 @@
+overwrite: true
+schema: './schema/*.graphql'
+config:
+  scalars:
+    Date: Date
+generates:
+  generated/graphql.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-resolvers'
+    config:
+      enumsAsTypes: true
+      useIndexSignature: true
+      defaultMapper: Partial<{T}>
+  generated/schema.d.ts:
+    plugins:
+      - 'typescript-graphql-files-modules'
+  ../client/src/schema/server-schema.graphql:
+    plugins:
+      - schema-ast
