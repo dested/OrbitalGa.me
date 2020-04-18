@@ -1,18 +1,24 @@
-extend type Query {
+scalar Date
+
+type Query {
+  placeholder: Boolean
   spectateServer: GameModel
 }
 
-extend type Mutation {
-  loginAnonymous(loginInput: LoginAnonymousInput!): LoginResponse!
+type Mutation {
   login(loginInput: LoginInput!): LoginResponse!
+  loginAnonymous(loginInput: LoginAnonymousInput!): LoginResponse!
+  placeholder: Boolean
   register(registerInput: LoginInput!): LoginResponse!
 }
 
 union LoginResponse = LoginSuccessResponse | ErrorResponse
+
 type LoginSuccessResponse {
   jwt: String!
   gameModel: GameModel
 }
+
 type ErrorResponse {
   error: String!
 }
@@ -20,4 +26,13 @@ type ErrorResponse {
 type GameModel {
   serverId: String!
   serverUrl: String!
+}
+
+input LoginInput {
+  userName: String!
+  password: String!
+}
+
+input LoginAnonymousInput {
+  userName: String!
 }

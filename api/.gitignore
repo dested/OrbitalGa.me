@@ -31,8 +31,8 @@ npm-debug.log
 
 .webpack
 .serverless
-.env
-.env.production
+.graphqlconfig
+.env.prod
 .env.dev
 aws-config.bat
 aws-config.sh

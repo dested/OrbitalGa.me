@@ -76,11 +76,12 @@ export const LoginScreen: React.FC = observer((props) => {
           onChange={(e: any) => uiStore.setPlayerName(e.target.value)}
         />
         {error && <span style={styles.label}>{error}</span>}
+        {uiStore.serverIsDown && <span style={styles.label}>Server is down...</span>}
         {(connectStatus === 'none' && (
           <div style={styles.buttonList}>
             {servers.map((s) => (
               <JoinButton key={s} onClick={() => onJoin(s)}>
-                Join {GameConstants.singlePlayer ? 'Single Player' : 'Server'}
+                Join {GameConstants.singlePlayer || uiStore.serverIsDown ? 'Single Player' : 'Server'}
               </JoinButton>
             ))}
           </div>

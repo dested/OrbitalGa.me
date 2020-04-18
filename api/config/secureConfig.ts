@@ -1,5 +1,3 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
 import {SSM} from 'aws-sdk';
 let envDetails: any;
 

@@ -1,6 +1,6 @@
 {
   "name": "orbitalgame-server-common",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "main": "build/index.js",
   "types" : "dist/index.d.ts",
@@ -28,7 +28,7 @@
   "scripts": {
     "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
     "lint": "npx tslint -p tsconfig.json --fix",
-    "generate": "cd src && prisma generate",
+    "generate": "cd src && prisma generate && yarn && tsc",
     "migrate-db": "cd src && prisma migrate save --experimental ",
     "migrate-db-run": "cd src && prisma migrate up --experimental ",
     "studio": "cd src && npx prisma studio --experimental "

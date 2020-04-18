@@ -1,0 +1,19 @@
+overwrite: true
+schema: 'http://localhost:3116/graphql'
+documents:
+  - './**/*.graphql'
+config:
+  scalars:
+    Date: Date
+generates:
+  ./src/schema/generated/graphql.tsx:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      withHooks: true
+      withMutationFn: true
+  ./src/schema/server-schema.graphql:
+    plugins:
+      - schema-ast

@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "apollo-boost": "^0.4.7",
+    "apollo-cache-inmemory": "^1.6.5",
+    "graphql": "^14.6.0",
+    "react-apollo": "^3.1.4",
+    "react-apollo-hooks": "^0.5.0",
     "react": "^16.13.1",
     "nipplejs": "^0.8.5",
     "mobx": "^5.15.4",
@@ -22,7 +27,15 @@
   },
 
   "devDependencies": {
-
+    "@graphql-codegen/cli": "1.13.2",
+    "@graphql-codegen/introspection": "1.13.2",
+    "@graphql-codegen/schema-ast": "1.13.2",
+    "@graphql-codegen/typescript": "1.13.2",
+    "@graphql-codegen/typescript-graphql-files-modules": "1.13.2",
+    "@graphql-codegen/typescript-operations": "1.13.2",
+    "@graphql-codegen/typescript-react-apollo": "1.13.2",
+    "@graphql-codegen/typescript-resolvers": "1.13.2",
+    "@types/graphql": "^14.5.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -48,7 +61,7 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
-
+    "codegen": "graphql-codegen --config codegen.yml",
     "assets": "node scripts/process-assets",
     "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
     "lint": "npx tslint -p tsconfig.json --fix"

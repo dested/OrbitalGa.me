@@ -1,6 +1,7 @@
-input VendorCreate {
-  firstName: String!
-  lastName: String!
-  emailAddress: String!
-  password: String
+input LoginInput {
+  userName: String!
+  password: String!
+}
+input LoginAnonymousInput {
+  userName: String!
 }

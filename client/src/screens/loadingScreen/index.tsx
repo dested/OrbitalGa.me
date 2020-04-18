@@ -1,22 +1,36 @@
 import React, {useEffect} from 'react';
 import './index.css';
 import {create} from 'mobx-persist';
-import {uiStore} from '../../store/uiStore';
 import {Utils} from '@common/utils/utils';
 import {observer} from 'mobx-react-lite';
 import {GameData} from '../../game/gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {Assets} from '../../assets';
 import {OrbitalAssets} from '../../utils/assetManager';
+import {SpectateDocument, SpectateQuery} from '../../schema/generated/graphql';
+import {apolloClient} from '../../schema/apolloClient';
+import {useStores} from '../../store/stores';
 
 export const LoadingScreen: React.FC = observer((props) => {
+  const {uiStore} = useStores();
   useEffect(() => {
     async function load() {
       const hydrate = await create({
         jsonify: true,
       });
       await hydrate('uiStore', uiStore);
-      GameData.instance.spectateGame('1' /*todo current specate server*/);
+      try {
+        const result = await apolloClient.query<SpectateQuery>({
+          query: SpectateDocument,
+        });
+        if (result.data.spectateServer) {
+          GameData.instance.spectateGame(result.data.spectateServer.serverUrl);
+        } else {
+          uiStore.setServerDown(true);
+        }
+      } catch (ex) {
+        uiStore.setServerDown(true);
+      }
     }
 
     async function assets() {

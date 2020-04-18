@@ -16,6 +16,9 @@ export class UIStore {
   screen: Screens = 'loading';
 
   @observable
+  serverIsDown?: boolean;
+
+  @observable
   serverPath?: string;
 
   @action setJwt(jwt: string) {
@@ -28,6 +31,10 @@ export class UIStore {
 
   @action setScreen(newScreen: Screens) {
     this.screen = newScreen;
+  }
+
+  @action setServerDown(serverIsDown: boolean) {
+    this.serverIsDown = serverIsDown;
   }
 
   @action setServerPath(serverPath: string) {

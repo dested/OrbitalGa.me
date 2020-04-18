@@ -1,5 +1,13 @@
 export class ClientConfig {
   static isLocal = true;
+  static get graphqlEndpoint() {
+    switch (this.isLocal) {
+      case true:
+        return 'http://localhost:3116/graphql';
+      case false:
+        return `https://api.orbitalga.me/graphql`;
+    }
+  }
   static websocketUrl(serverPath: string) {
     switch (this.isLocal) {
       case true:

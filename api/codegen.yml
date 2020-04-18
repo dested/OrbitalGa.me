@@ -4,7 +4,7 @@ config:
   scalars:
     Date: Date
 generates:
-  generated/graphql.ts:
+  ./schema/generated/graphql.ts:
     plugins:
       - 'typescript'
       - 'typescript-operations'
@@ -12,8 +12,8 @@ generates:
     config:
       enumsAsTypes: true
       useIndexSignature: true
-      defaultMapper: Partial<{T}>
-  generated/schema.d.ts:
+      contextType: ../orbitalContext#OrbitalContext
+  ./schema/generated/schema.d.ts:
     plugins:
       - 'typescript-graphql-files-modules'
   ../client/src/schema/server-schema.graphql:
