@@ -33,13 +33,18 @@ return buff.buildBuffer()
 
     // language=JavaScript
     code = `
+var sum=(items)=>{
+  let c=0;
+  for (let i = 0; i < items.length; i++) {
+    c+=items[i];
+  }
+  return c;
+};
 (value)=>{
 ${objectMaps.join(';\n')}
-let size=0;
-${code}
-return size;
+return (${code}0);
 }`;
-    console.log(code);
+    // console.log(code);
     // tslint:disable no-eval
     return eval(code);
   }
@@ -194,67 +199,63 @@ ${Utils.safeKeysExclude(schema, 'flag')
   ): string {
     switch (schema) {
       case 'uint8':
-        return `size+=1;`;
+        return `1+`;
       case 'uint16':
-        return `size+=2;`;
+        return `2+`;
       case 'uint32':
-        return `size+=4;`;
+        return `4+`;
       case 'int8':
-        return `size+=1;`;
+        return `1+`;
       case 'int16':
-        return `size+=2;`;
+        return `2+`;
       case 'int32':
-        return `size+=4;`;
+        return `4+`;
       case 'float32':
-        return `size+=4;`;
+        return `4+`;
       case 'float64':
-        return `size+=8;`;
+        return `8+`;
       case 'boolean':
-        return `size+=1;`;
+        return `1+`;
       case 'string':
-        return `size+=2+${fieldName}.length*2`;
+        return `2+${fieldName}.length*2+`;
       case 'int32Optional':
-        return `size+=4;`;
+        return `4+`;
       case 'int8Optional':
-        return `size+=1;`;
+        return `1+`;
       default:
         assertType<ABFlags>(schema);
         switch (schema.flag) {
           case 'enum': {
-            return `size+=1;`;
+            return `1+`;
           }
           case 'bitmask': {
-            return `size+=1;`;
+            return `1+`;
           }
-
           case 'array-uint8': {
             const noPeriodsFieldName = fieldName.replace(/\./g, '_');
-            return `
-           size+=1;
-    for (const ${noPeriodsFieldName}Element of ${fieldName}) {
-      ${SchemaDefiner.buildAdderSizeFunction(schema.elements, noPeriodsFieldName + 'Element', addMap)}
-    }`;
+            return `1+sum(${fieldName}.map(${noPeriodsFieldName + 'Element'}=>(${SchemaDefiner.buildAdderSizeFunction(
+              schema.elements,
+              noPeriodsFieldName + 'Element',
+              addMap
+            )}0)))+`;
           }
           case 'array-uint16': {
             const noPeriodsFieldName = fieldName.replace(/\./g, '_');
-            return `
-           size+=2;
-    for (const ${noPeriodsFieldName}Element of ${fieldName}) {
-      ${SchemaDefiner.buildAdderSizeFunction(schema.elements, noPeriodsFieldName + 'Element', addMap)}
-    }`;
+            return `2+sum(${fieldName}.map(${noPeriodsFieldName + 'Element'}=>(${SchemaDefiner.buildAdderSizeFunction(
+              schema.elements,
+              noPeriodsFieldName + 'Element',
+              addMap
+            )}0)))+`;
           }
           case 'type-lookup': {
             let map = '{\n';
             let index = 0;
             for (const key of Object.keys(schema.elements)) {
-              map += `${key}:()=>{
-              size+=1;
-              ${SchemaDefiner.buildAdderSizeFunction(schema.elements[key], fieldName, addMap)}
-              },`;
+              map += `${key}:()=>1+${SchemaDefiner.buildAdderSizeFunction(schema.elements[key], fieldName, addMap)}0,`;
               index++;
             }
-            map += '}\n';
-            return `(${map})[${fieldName}.type]();`;
+            map += '}';
+            return `(${map})[${fieldName}.type]()+`;
           }
           case undefined:
             let result = '';
@@ -263,9 +264,9 @@ ${Utils.safeKeysExclude(schema, 'flag')
                 continue;
               }
               const currentSchemaElement = schema[key];
-              result += this.buildAdderSizeFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '\n';
+              result += this.buildAdderSizeFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '';
             }
-            return result;
+            return result + '0+';
         }
     }
     throw new Error('Buffer error');
