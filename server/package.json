@@ -5,6 +5,7 @@
   "scripts": {
     "build": "rimraf dist && webpack --mode development",
     "watch": "rimraf dist && webpack --mode development --watch",
+    "codegen": "graphql-codegen --config codegen.yml",
     "pretty": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
     "lint": "npx tslint -p tsconfig.json --fix",
     "nodemon": "nodemon",
@@ -14,14 +15,27 @@
     "deploy": "yarn build-prod & eb deploy"
   },
   "dependencies": {
+    "apollo-boost": "^0.4.7",
+    "graphql": "^14.6.0",
     "ws": "^7.2.1",
     "collisions": "^2.0.13",
     "bufferutil": "^4.0.1",
+    "node-fetch": "^2.6.0",
     "utf-8-validate": "^5.0.2",
     "redis": "^3.0.2",
     "quickselect": "^2.0.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "1.13.2",
+    "@graphql-codegen/introspection": "1.13.2",
+    "@graphql-codegen/schema-ast": "1.13.2",
+    "@graphql-codegen/typescript": "1.13.2",
+    "@graphql-codegen/typescript-graphql-files-modules": "1.13.2",
+    "@graphql-codegen/typescript-operations": "1.13.2",
+    "@graphql-codegen/typescript-document-nodes": "1.13.2",
+    "@graphql-codegen/typescript-resolvers": "1.13.2",
+    "@types/graphql": "^14.5.0",
+    "@types/node-fetch": "^2.5.6",
     "@types/node": "13.9.2",
     "@types/redis": "^2.8.17",
     "nodemon": "^2.0.2",

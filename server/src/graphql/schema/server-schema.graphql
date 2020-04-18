@@ -1,0 +1,44 @@
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+"""Date custom scalar type"""
+scalar Date
+
+type ErrorResponse {
+  error: String!
+}
+
+type GameModel {
+  serverId: String!
+  serverUrl: String!
+}
+
+input LoginAnonymousInput {
+  userName: String!
+}
+
+input LoginInput {
+  userName: String!
+  password: String!
+}
+
+union LoginResponse = LoginSuccessResponse | ErrorResponse
+
+type LoginSuccessResponse {
+  jwt: String!
+  gameModel: GameModel
+}
+
+type Mutation {
+  placeholder: Boolean
+  loginAnonymous(loginInput: LoginAnonymousInput!): LoginResponse!
+  login(loginInput: LoginInput!): LoginResponse!
+  register(registerInput: LoginInput!): LoginResponse!
+}
+
+type Query {
+  placeholder: Boolean
+  spectateServer: GameModel
+}
