@@ -17,7 +17,7 @@ export type SocketConnection = {
   lastAction: number;
   lastPing: number;
   socket: ISocket;
-  spectatorJoin: number;
+  spectatorJoin?: number;
 };
 
 export interface ISocket {
@@ -52,7 +52,7 @@ export class ServerSocket implements IServerSocket {
     if (connection) {
       connection.socket.close();
       this.connections.remove(connection);
-      console.log('closed: connections', this.connections.length);
+      // console.log('closed: connections', this.connections.length);
       this.serverSocketOptions?.onLeave(connectionId);
     }
   }
@@ -100,7 +100,6 @@ export class ServerSocket implements IServerSocket {
       const me: SocketConnection = {
         socket: ws,
         connectionId: nextId(),
-        spectatorJoin: +new Date(),
         lastAction: +new Date(),
         lastPing: +new Date(),
       };
@@ -118,22 +117,26 @@ export class ServerSocket implements IServerSocket {
       // console.log('opened: connections', this.connections.length);
       ws.on('message', (message) => {
         if (GameConstants.binaryTransport) {
-          // console.log('got message', (message as ArrayBuffer).byteLength);
-          this.totalBytesReceived += (message as ArrayBuffer).byteLength;
-          if (!(message instanceof ArrayBuffer)) {
-            console.log('bad connection');
+          try {
+            if (!(message instanceof ArrayBuffer)) {
+              console.log('bad connection');
+              ws.close();
+              return;
+            }
+            this.totalBytesReceived += (message as ArrayBuffer).byteLength;
+            const messageData = SchemaDefiner.startReadSchemaBuffer(
+              message as ArrayBuffer,
+              ClientToServerSchemaReaderFunction
+            );
+            if (messageData === null) {
+              ws.close();
+              return;
+            }
+            onMessage(me.connectionId, messageData);
+          } catch (ex) {
             ws.close();
             return;
           }
-          const messageData = SchemaDefiner.startReadSchemaBuffer(
-            message as ArrayBuffer,
-            ClientToServerSchemaReaderFunction
-          );
-          if (messageData === null) {
-            ws.close();
-            return;
-          }
-          onMessage(me.connectionId, messageData);
         } else {
           onMessage(me.connectionId, JSON.parse(message as string));
         }

@@ -154,9 +154,9 @@ export class ClientGame extends Game {
         case 'error':
           switch (message.reason) {
             case 'nameInUse':
-              this.options.onError(this, message);
-              break;
             case '500':
+            case 'spectatorCapacity':
+            case 'userCapacity':
               this.options.onError(this, message);
               break;
             default:

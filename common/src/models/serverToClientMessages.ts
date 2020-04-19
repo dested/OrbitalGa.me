@@ -18,7 +18,11 @@ import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 type STOCJoined = {player: Omit<LivePlayerModel, 'type'>; serverVersion: number; type: 'joined'};
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
 type STOCPong = {ping: number; type: 'pong'};
-export type STOCError = {reason: 'nameInUse'; type: 'error'} | {reason: '500'; type: 'error'};
+export type STOCError =
+  | {reason: 'nameInUse'; type: 'error'}
+  | {reason: '500'; type: 'error'}
+  | {reason: 'spectatorCapacity'; type: 'error'}
+  | {reason: 'userCapacity'; type: 'error'};
 type STOCWorldState = {entities: EntityModels[]; type: 'worldState'};
 type STOCLeaderboard = {scores: LeaderboardEntryRanked[]; type: 'leaderboard'};
 
@@ -30,9 +34,9 @@ export type ServerToClientMessage =
   | STOCWorldState
   | STOCLeaderboard;
 
-const STOCPongSchema: SDTypeLookup<ServerToClientMessage, 'pong'> = {ping: 'uint8'};
+const STOCPongSchema: SDTypeLookup<ServerToClientMessage, 'pong'> = {ping: 'uint32'};
 const STOCErrorSchema: SDTypeLookup<ServerToClientMessage, 'error'> = {
-  reason: {flag: 'enum', nameInUse: 1, '500': 2},
+  reason: {flag: 'enum', nameInUse: 1, '500': 2, spectatorCapacity: 3, userCapacity: 4},
 };
 const STOCJoinedSchema: SDTypeLookup<ServerToClientMessage, 'joined'> = {
   serverVersion: 'uint8',

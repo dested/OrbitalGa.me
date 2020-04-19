@@ -210,7 +210,6 @@ export class ServerGame extends Game {
         totalBytesReceived: this.serverSocket.totalBytesReceived,
         totalBytesSent: this.serverSocket.totalBytesSent,
       });
-
     }
 
     this.processInputs();
@@ -312,12 +311,16 @@ export class ServerGame extends Game {
           continue;
         }
       }
-      if (this.spectators.lookup(connection.connectionId)) {
-        if (connection.spectatorJoin + GameConstants.totalSpectatorDuration < now) {
+      if (!connection.spectatorJoin && connection.lastAction + GameConstants.noMessageDuration < now) {
+        this.serverSocket.disconnect(connection.connectionId);
+        continue;
+      } else if (this.spectators.lookup(connection.connectionId)) {
+        if (connection.spectatorJoin! + GameConstants.totalSpectatorDuration < now) {
           this.serverSocket.disconnect(connection.connectionId);
           continue;
         }
       }
+
       if (connection.lastPing + GameConstants.lastPingTimeout < now) {
         this.serverSocket.disconnect(connection.connectionId);
       }
@@ -325,11 +328,19 @@ export class ServerGame extends Game {
   }
 
   spectatorJoin(connectionId: number) {
-    this.spectators.push({connectionId});
     const connection = this.serverSocket.connections.lookup(connectionId);
     if (connection) {
       connection.spectatorJoin = +new Date();
+    } else {
+      // connection is already dead
+      return;
     }
+    if (this.spectators.length > GameConstants.capOnServerSpectators) {
+      this.serverSocket.sendMessage(connectionId, [{type: 'error', reason: 'spectatorCapacity'}]);
+      this.serverSocket.disconnect(connectionId);
+      return;
+    }
+    this.spectators.push({connectionId});
 
     this.sendMessageToClient(connectionId, {
       type: 'spectating',
@@ -343,6 +354,12 @@ export class ServerGame extends Game {
       connection.lastAction = +new Date();
     } else {
       // connection is already dead
+      return;
+    }
+
+    if (this.users.length > GameConstants.capOnServerUsers) {
+      this.serverSocket.sendMessage(connectionId, [{type: 'error', reason: 'userCapacity'}]);
+      this.serverSocket.disconnect(connectionId);
       return;
     }
 
@@ -554,4 +571,3 @@ export class ServerGame extends Game {
     spectator.y = 0;
   }
 }
-

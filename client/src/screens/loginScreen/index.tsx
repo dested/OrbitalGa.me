@@ -39,6 +39,14 @@ export const LoginScreen: React.FC = observer((props) => {
             setError('This username is already taken');
             setConnectingStatus('none');
             break;
+          case 'spectatorCapacity':
+            setError('Sorry, this server is at spectator capacity');
+            setConnectingStatus('none');
+            break;
+          case 'userCapacity':
+            setError('Sorry, this server is at player capacity');
+            setConnectingStatus('none');
+            break;
           case '500':
             setError('An error has occurred');
             setConnectingStatus('none');

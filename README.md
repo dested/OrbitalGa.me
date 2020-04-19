@@ -28,6 +28,8 @@
 - [ ] fix momentum for player, should be additive not replacing
 - [ ] fix explosion animation
 - [ ] get rid of explosion and make things light up when hit?
+- [ ] dying and reviving does weird things, health bar wiggled too
+- [x] add server throttling
 - [x] add latency tracking
 - [x] refactor entity constructor to make easier entity creation
 - [x] cluster size never scales back down after 400 users?
@@ -77,6 +79,7 @@
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event?
 - [ ] add 5 second sustained laser
+- [ ] need much better enemy variability
 - [x] add time based weapons
 - [x] add laser upgrade
 - [x] add fire to rockets
@@ -103,11 +106,13 @@
 - [x] server level leaderboard
 - [ ] global leaderboard
   - [ ] redis
-- [ ] add lambda for join/etc, checks redis for servers, spins one up?
-- [ ] add login register
+- [x] add lambda for join/etc
+- [ ] checks for servers, spins one up?
+- [x] add login, login anon, register api
+- [ ] add login, register ui
 - [ ] add license to repo
 - [ ] test what happens if server crashes on aws
-- [ ] add analytics to server to see users connected, enemies, etc
+- [x] add analytics to server to see users connected, enemies, etc
 - [ ] add monitoring server to watch things happen
 - [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation
 - [x] make sure disconnect and kill work

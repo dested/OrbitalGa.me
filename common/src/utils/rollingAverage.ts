@@ -8,6 +8,6 @@ export class RollingAverage {
   }
   push(n: number) {
     this.items.push(n);
-    this.items.slice(-this.roll);
+    this.items = this.items.slice(-this.roll);
   }
 }

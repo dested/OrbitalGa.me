@@ -8,20 +8,23 @@ export class ServerSync implements IServerSync {
   private serverId?: number;
   async setStat(serverStat: Omit<ServerStatCreateInput, 'server'>) {
     this.serverStats.push(serverStat);
-    console.log(
-      `#${serverStat.tickIndex}, Con: ${serverStat.connections}, Usr: ${serverStat.users}, Spc ${
-        serverStat.spectators
-      }, Ents: ${serverStat.entities}, Msg:${serverStat.messages}, Duration: ${
-        serverStat.duration
-      }ms, -> ${Utils.formatBytes(serverStat.totalBytesSent)}, <- ${Utils.formatBytes(
-        serverStat.totalBytesReceived
-      )}, Wdt: ${serverStat.boardWidth}, Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(
-        serverStat.memHeapTotal
-      )}/${Utils.formatBytes(serverStat.memExternal)} ${serverStat.entityGroupCount}`
-    );
+    const messages = [
+      `#${serverStat.tickIndex}`,
+      `Con: ${serverStat.connections}`,
+      `Spc ${serverStat.spectators}`,
+      `Ents: ${serverStat.entities}`,
+      `Msg:${serverStat.messages}`,
+      `Duration: ${serverStat.duration}ms`,
+      `-> ${Utils.formatBytes(serverStat.totalBytesSent)}`,
+      `<- ${Utils.formatBytes(serverStat.totalBytesReceived)}`,
+      `Wdt: ${serverStat.boardWidth}`,
+      `Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(serverStat.memHeapTotal)}`,
+      `${serverStat.entityGroupCount}`,
+    ];
+    console.log(messages.join(','));
 
     if (this.serverStats.length > 10_000 / GameConstants.serverTickRate) {
-      console.log('pushing updates', this.serverStats.length);
+      // console.log('pushing updates', this.serverStats.length);
       const statsToPush = [...this.serverStats];
       this.serverStats.length = 0;
       const awaiter = async () => {
