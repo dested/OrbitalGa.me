@@ -30,7 +30,7 @@ export type ErrorResponse = {
 
 export type GameModel = {
    __typename?: 'GameModel';
-  serverId: Scalars['String'];
+  serverId: Scalars['Int'];
   serverUrl: Scalars['String'];
 };
 
@@ -61,17 +61,17 @@ export type Mutation = {
 
 
 export type MutationLoginAnonymousArgs = {
-  loginInput: LoginAnonymousInput;
+  request: LoginAnonymousInput;
 };
 
 
 export type MutationLoginArgs = {
-  loginInput: LoginInput;
+  request: LoginInput;
 };
 
 
 export type MutationRegisterArgs = {
-  registerInput: LoginInput;
+  request: LoginInput;
 };
 
 export type Query = {
@@ -89,14 +89,14 @@ export type LoginMutationVariables = {
 export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login: (
-    { __typename?: 'LoginSuccessResponse' }
+    { __typename: 'LoginSuccessResponse' }
     & Pick<LoginSuccessResponse, 'jwt'>
     & { gameModel?: Maybe<(
       { __typename?: 'GameModel' }
       & GameModelFragmentFragment
     )> }
   ) | (
-    { __typename?: 'ErrorResponse' }
+    { __typename: 'ErrorResponse' }
     & Pick<ErrorResponse, 'error'>
   ) }
 );
@@ -125,7 +125,8 @@ export const GameModelFragmentFragmentDoc = gql`
     `;
 export const LoginDocument = gql`
     mutation Login($userName: String!, $password: String!) {
-  login(loginInput: {userName: $userName, password: $password}) {
+  login(request: {userName: $userName, password: $password}) {
+    __typename
     ... on ErrorResponse {
       error
     }

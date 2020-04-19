@@ -16,8 +16,10 @@ export const StarBackground: React.FC = (props) => {
     frame.current++;
     context.save();
 
-    const view = GameData.instance.view;
-
+    const view = GameData.view;
+    if (!view) {
+      return;
+    }
     const outerBox = view.outerViewBox;
     const box = view.viewBox;
     context.scale(view.scale, view.scale);

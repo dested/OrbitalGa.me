@@ -29,17 +29,17 @@ export type Mutation = {
 
 
 export type MutationLoginArgs = {
-  loginInput: LoginInput;
+  request: LoginInput;
 };
 
 
 export type MutationLoginAnonymousArgs = {
-  loginInput: LoginAnonymousInput;
+  request: LoginAnonymousInput;
 };
 
 
 export type MutationRegisterArgs = {
-  registerInput: LoginInput;
+  request: LoginInput;
 };
 
 export type LoginResponse = LoginSuccessResponse | ErrorResponse;
@@ -57,7 +57,7 @@ export type ErrorResponse = {
 
 export type GameModel = {
    __typename?: 'GameModel';
-  serverId: Scalars['String'];
+  serverId: Scalars['Int'];
   serverUrl: Scalars['String'];
 };
 
@@ -154,6 +154,7 @@ export type ResolversTypes = ResolversObject<{
   LoginSuccessResponse: ResolverTypeWrapper<LoginSuccessResponse>,
   ErrorResponse: ResolverTypeWrapper<ErrorResponse>,
   GameModel: ResolverTypeWrapper<GameModel>,
+  Int: ResolverTypeWrapper<Scalars['Int']>,
   LoginInput: LoginInput,
   LoginAnonymousInput: LoginAnonymousInput,
 }>;
@@ -169,6 +170,7 @@ export type ResolversParentTypes = ResolversObject<{
   LoginSuccessResponse: LoginSuccessResponse,
   ErrorResponse: ErrorResponse,
   GameModel: GameModel,
+  Int: Scalars['Int'],
   LoginInput: LoginInput,
   LoginAnonymousInput: LoginAnonymousInput,
 }>;
@@ -183,10 +185,10 @@ export type QueryResolvers<ContextType = OrbitalContext, ParentType extends Reso
 }>;
 
 export type MutationResolvers<ContextType = OrbitalContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'loginInput'>>,
-  loginAnonymous?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginAnonymousArgs, 'loginInput'>>,
+  login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'request'>>,
+  loginAnonymous?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginAnonymousArgs, 'request'>>,
   placeholder?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  register?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationRegisterArgs, 'registerInput'>>,
+  register?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationRegisterArgs, 'request'>>,
 }>;
 
 export type LoginResponseResolvers<ContextType = OrbitalContext, ParentType extends ResolversParentTypes['LoginResponse'] = ResolversParentTypes['LoginResponse']> = ResolversObject<{
@@ -205,7 +207,7 @@ export type ErrorResponseResolvers<ContextType = OrbitalContext, ParentType exte
 }>;
 
 export type GameModelResolvers<ContextType = OrbitalContext, ParentType extends ResolversParentTypes['GameModel'] = ResolversParentTypes['GameModel']> = ResolversObject<{
-  serverId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  serverId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   serverUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 }>;

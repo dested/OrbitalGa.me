@@ -1,5 +1,6 @@
 mutation Login($userName: String!, $password: String!) {
-  login(loginInput: {userName: $userName, password: $password}) {
+  login(request: {userName: $userName, password: $password}) {
+    __typename
     ... on ErrorResponse {
       error
     }

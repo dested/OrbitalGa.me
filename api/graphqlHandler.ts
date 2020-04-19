@@ -1,7 +1,5 @@
-// tslint:disable-next-line:no-var-requires
-require('dotenv').config();
 import {Utils} from '@common/utils/utils';
-import {AuthService} from './auth/authService';
+import {AuthService} from '../server-common/src/auth/authService';
 import * as bcrypt from 'bcryptjs';
 import {ApolloServer} from 'apollo-server-lambda';
 import {GameModel, Resolvers} from './schema/generated/graphql';
@@ -13,13 +11,20 @@ import {DateScalar} from './gqlUtils/dateScalar';
 import {prisma, User} from 'orbitalgame-server-common/build/index';
 
 const getNextGameServer = async (): Promise<GameModel | null> => {
-  const latestServer = await prisma.server.findMany({where: {live: true}, orderBy: {updatedAt: 'desc'}, first: 1});
-  return latestServer[0]
-    ? {
-        serverId: latestServer[0].serverId,
+  console.log('next game server');
+  const latestServer = await prisma.server.findMany({where: {live: true}, orderBy: {updatedAt: 'desc'}, first: 5});
+  console.log('next game server', latestServer.length);
+  for (const latestServerElement of latestServer) {
+    if (+latestServerElement.updatedAt + 15_000 < +new Date()) {
+      await prisma.server.update({where: {id: latestServerElement.id}, data: {live: false}});
+    } else {
+      return {
+        serverId: latestServer[0].id,
         serverUrl: latestServer[0].serverUrl,
-      }
-    : null;
+      };
+    }
+  }
+  return null;
 };
 
 async function userReady(user: User) {
@@ -42,10 +47,10 @@ const resolvers: Resolvers = {
   },
   Mutation: {
     placeholder: () => true,
-    login: async (_, {loginInput}) => {
-      const user = await prisma.user.findOne({where: {username: loginInput.userName}});
+    login: async (_, {request}) => {
+      const user = await prisma.user.findOne({where: {username: request.userName}});
       if (user) {
-        if (!(user.passwordHash && (await bcrypt.compare(loginInput.password, user.passwordHash)))) {
+        if (!(user.passwordHash && (await bcrypt.compare(request.password, user.passwordHash)))) {
           await Utils.timeout(5000);
           return {
             error: 'User not found',
@@ -58,7 +63,7 @@ const resolvers: Resolvers = {
         };
       }
     },
-    register: async (_, {registerInput}, context) => {
+    register: async (_, {request}, context) => {
       if (context.jwtPlayer) {
         const foundUser = await prisma.user.findOne({where: {id: context.jwtPlayer.userId}});
         if (foundUser) {
@@ -71,13 +76,13 @@ const resolvers: Resolvers = {
             where: {id: context.jwtPlayer.userId},
             data: {
               anonymous: false,
-              passwordHash: await bcrypt.hash(registerInput.password, await bcrypt.genSalt(10)),
+              passwordHash: await bcrypt.hash(request.password, await bcrypt.genSalt(10)),
             },
           });
           return await userReady(foundUser);
         }
       }
-      let user = await prisma.user.findOne({where: {username: registerInput.userName}});
+      let user = await prisma.user.findOne({where: {username: request.userName}});
       if (user) {
         return {
           error: 'This username is registered',
@@ -86,14 +91,14 @@ const resolvers: Resolvers = {
       user = await prisma.user.create({
         data: {
           anonymous: false,
-          passwordHash: await bcrypt.hash(registerInput.password, await bcrypt.genSalt(10)),
-          username: registerInput.userName,
+          passwordHash: await bcrypt.hash(request.password, await bcrypt.genSalt(10)),
+          username: request.userName,
         },
       });
       return await userReady(user);
     },
-    loginAnonymous: async (_, args, {jwtPlayer}) => {
-      let user = await prisma.user.findOne({where: {username: args.loginInput.userName}});
+    loginAnonymous: async (_, {request}, {jwtPlayer}) => {
+      let user = await prisma.user.findOne({where: {username: request.userName}});
       if (user && !user.anonymous) {
         return {
           error: 'This username is registered',
@@ -109,7 +114,7 @@ const resolvers: Resolvers = {
         user = await prisma.user.create({
           data: {
             anonymous: true,
-            username: args.loginInput.userName,
+            username: request.userName,
           },
         });
       }

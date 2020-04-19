@@ -1,9 +1,12 @@
 import * as jwt from 'jsonwebtoken';
 import {Config} from '../config/config';
 import {JwtPlayer} from './models/jwtPlayer';
+import {SecureConfig} from '../config/secureConfig';
 
 export class AuthService {
   static async createToken(user: JwtPlayer): Promise<string> {
+    await SecureConfig.setup();
+    await Config.setup();
     const expiresIn = 60 * 24 * 3;
     const token = jwt.sign(user, Config.jwtPlayerKey, {expiresIn});
     return token;

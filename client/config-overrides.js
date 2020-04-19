@@ -1,5 +1,6 @@
 const {removeModuleScopePlugin, override, addWebpackAlias, babelInclude} = require('customize-cra');
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = override(
   removeModuleScopePlugin(),

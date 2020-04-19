@@ -3,9 +3,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  loginAnonymous(loginInput: LoginAnonymousInput!): LoginResponse!
-  login(loginInput: LoginInput!): LoginResponse!
-  register(registerInput: LoginInput!): LoginResponse!
+  loginAnonymous(request: LoginAnonymousInput!): LoginResponse!
+  login(request: LoginInput!): LoginResponse!
+  register(request: LoginInput!): LoginResponse!
 }
 
 union LoginResponse = LoginSuccessResponse | ErrorResponse
@@ -18,6 +18,6 @@ type ErrorResponse {
 }
 
 type GameModel {
-  serverId: String!
+  serverId: Int!
   serverUrl: String!
 }

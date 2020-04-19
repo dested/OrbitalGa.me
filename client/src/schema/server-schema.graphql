@@ -1,15 +1,27 @@
-scalar Date
-
-type Query {
-  placeholder: Boolean
-  spectateServer: GameModel
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
 }
 
-type Mutation {
-  login(loginInput: LoginInput!): LoginResponse!
-  loginAnonymous(loginInput: LoginAnonymousInput!): LoginResponse!
-  placeholder: Boolean
-  register(registerInput: LoginInput!): LoginResponse!
+"""Date custom scalar type"""
+scalar Date
+
+type ErrorResponse {
+  error: String!
+}
+
+type GameModel {
+  serverId: Int!
+  serverUrl: String!
+}
+
+input LoginAnonymousInput {
+  userName: String!
+}
+
+input LoginInput {
+  userName: String!
+  password: String!
 }
 
 union LoginResponse = LoginSuccessResponse | ErrorResponse
@@ -19,20 +31,14 @@ type LoginSuccessResponse {
   gameModel: GameModel
 }
 
-type ErrorResponse {
-  error: String!
+type Mutation {
+  placeholder: Boolean
+  loginAnonymous(request: LoginAnonymousInput!): LoginResponse!
+  login(request: LoginInput!): LoginResponse!
+  register(request: LoginInput!): LoginResponse!
 }
 
-type GameModel {
-  serverId: String!
-  serverUrl: String!
-}
-
-input LoginInput {
-  userName: String!
-  password: String!
-}
-
-input LoginAnonymousInput {
-  userName: String!
+type Query {
+  placeholder: Boolean
+  spectateServer: GameModel
 }

@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const fs = require('fs');
 const path = require('path');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = (env) => {
   return {
@@ -17,7 +18,7 @@ module.exports = (env) => {
         '@common': path.resolve(__dirname, '..', 'common', 'src'),
       },
     },
-    externals: {},
+    externals: [nodeExternals({whitelist:['collisions']})],
     mode: 'development',
     plugins: [].filter((a) => a),
     module: {

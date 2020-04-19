@@ -22,7 +22,7 @@ export class ClientGameUI extends ClientGame {
       () => {
         this.canvas.width = GameConstants.screenSize.width;
         this.canvas.height = GameConstants.screenSize.height;
-        GameData.instance.view.setBounds(GameConstants.screenSize.width, GameConstants.screenSize.height);
+        GameData.view.setBounds(GameConstants.screenSize.width, GameConstants.screenSize.height);
         this.draw();
       },
       true
@@ -70,9 +70,9 @@ export class ClientGameUI extends ClientGame {
 
     const context = this.context;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    const gameData = GameData.instance;
+    const gameData = GameData;
 
-    this.centerView(gameData);
+    this.centerView();
 
     context.save();
     const outerBox = gameData.view.outerViewBox;
@@ -184,23 +184,23 @@ export class ClientGameUI extends ClientGame {
     }
   }
 
-  private centerView(gameData: GameData) {
+  private centerView( ) {
     if (this.liveEntity) {
-      gameData.view.setCenterPosition(
-        gameData.view.transformPoint(this.liveEntity.drawX),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.liveEntity.drawY / 5 /*todo this isnt good*/)
+      GameData.view.setCenterPosition(
+        GameData.view.transformPoint(this.liveEntity.drawX),
+        GameData.view.transformPoint(GameData.view.viewHeight / 2 + this.liveEntity.drawY / 5 /*todo this isnt good*/)
       );
     }
     if (this.spectatorMode && this.spectatorEntity) {
-      gameData.view.setCenterPosition(
-        gameData.view.transformPoint(this.spectatorEntity.x),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
+      GameData.view.setCenterPosition(
+        GameData.view.transformPoint(this.spectatorEntity.x),
+        GameData.view.transformPoint(GameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
       );
     }
     if (this.lastXY) {
-      gameData.view.setCenterPosition(
-        gameData.view.transformPoint(this.lastXY.x),
-        gameData.view.transformPoint(gameData.view.viewHeight / 2 + this.lastXY.y / 5)
+      GameData.view.setCenterPosition(
+        GameData.view.transformPoint(this.lastXY.x),
+        GameData.view.transformPoint(GameData.view.viewHeight / 2 + this.lastXY.y / 5)
       );
     }
   }

@@ -33,9 +33,9 @@ type LoginSuccessResponse {
 
 type Mutation {
   placeholder: Boolean
-  loginAnonymous(loginInput: LoginAnonymousInput!): LoginResponse!
-  login(loginInput: LoginInput!): LoginResponse!
-  register(registerInput: LoginInput!): LoginResponse!
+  loginAnonymous(request: LoginAnonymousInput!): LoginResponse!
+  login(request: LoginInput!): LoginResponse!
+  register(request: LoginInput!): LoginResponse!
 }
 
 type Query {

@@ -32,7 +32,7 @@ export const LoginScreen: React.FC = observer((props) => {
     uiStore.setServerPath(server);
     setError('');
     setConnectingStatus('connecting');
-    GameData.instance.joinGame(uiStore.serverPath!, uiStore.playerName!, {
+    GameData.joinGame(uiStore.serverPath!, uiStore.playerName!, {
       onError: (client: ClientGame, errorMessage: STOCError) => {
         switch (errorMessage.reason) {
           case 'nameInUse':
@@ -81,7 +81,7 @@ export const LoginScreen: React.FC = observer((props) => {
           <div style={styles.buttonList}>
             {servers.map((s) => (
               <JoinButton key={s} onClick={() => onJoin(s)}>
-                Join {GameConstants.singlePlayer || uiStore.serverIsDown ? 'Single Player' : 'Server'}
+                Join {GameConstants.isSinglePlayer ? 'Single Player' : 'Server'}
               </JoinButton>
             ))}
           </div>

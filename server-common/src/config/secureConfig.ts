@@ -1,3 +1,5 @@
+// tslint:disable-next-line:no-var-requires
+require('dotenv').config();
 import {SSM} from 'aws-sdk';
 let envDetails: any;
 

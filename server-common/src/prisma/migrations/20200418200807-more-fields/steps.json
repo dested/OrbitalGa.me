@@ -1,0 +1,86 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "ServerLeaderboardEntry",
+      "field": "server",
+      "type": "Server",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "ServerLeaderboardEntry",
+          "field": "server"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "ServerLeaderboardEntry",
+          "field": "server"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[serverId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "ServerLeaderboardEntry",
+          "field": "server"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "ServerLeaderboardEntry",
+      "field": "serverId",
+      "type": "Int"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Server",
+      "field": "serverId"
+    },
+    {
+      "tag": "CreateField",
+      "model": "ServerStat",
+      "field": "duration",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "ServerStat",
+      "field": "totalBytesReceived",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "ServerStat",
+      "field": "Duration"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "ServerStat",
+      "field": "totalBytesRecieved"
+    }
+  ]
+}

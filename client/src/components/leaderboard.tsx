@@ -10,7 +10,7 @@ const styles = {
 } as const;
 
 export const Leaderboard = (props: {tick: number}) => {
-  const client = GameData.instance.client;
+  const client = GameData.client;
   const liveEntity = client?.liveEntity;
 
   return (

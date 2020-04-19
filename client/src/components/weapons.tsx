@@ -35,12 +35,12 @@ const styles = {
 } as const;
 
 export const Weapons = (props: {tick: number}) => {
-  const client = GameData.instance.client;
+  const client = GameData.client;
   const liveEntity = client?.liveEntity;
 
   const selectWeapon = useCallback((weapon: PlayerWeapon) => {
     return () => {
-      const player = GameData.instance.client?.liveEntity;
+      const player = GameData.client?.liveEntity;
       if (!player) {
         return;
       }

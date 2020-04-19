@@ -1,5 +1,6 @@
 import {action, observable} from 'mobx';
 import {persist} from 'mobx-persist';
+import {GameConstants} from '@common/game/gameConstants';
 
 type Screens = 'loading' | 'login' | 'game';
 
@@ -35,6 +36,9 @@ export class UIStore {
 
   @action setServerDown(serverIsDown: boolean) {
     this.serverIsDown = serverIsDown;
+    if (serverIsDown) {
+      GameConstants.isSinglePlayer = true;
+    }
   }
 
   @action setServerPath(serverPath: string) {

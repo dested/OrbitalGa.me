@@ -4,6 +4,8 @@ import {
   GraphQLRequestListener,
   GraphQLServiceContext,
 } from 'apollo-server-plugin-base';
+import {SecureConfig} from 'orbitalgame-server-common/build/config/secureConfig';
+import {Config} from 'orbitalgame-server-common/build/config/config';
 
 export class MyApolloPlugin implements ApolloServerPlugin {
   /*  requestDidStart<TContext>(requestContext: GraphQLRequestContext<TContext>): GraphQLRequestListener<TContext> | void {
@@ -11,7 +13,7 @@ export class MyApolloPlugin implements ApolloServerPlugin {
   }*/
 
   async serverWillStart(service: GraphQLServiceContext) {
-    // await SecureConfig.setup();
-    // await Config.setup();
+    await SecureConfig.setup();
+    await Config.setup();
   }
 }

@@ -24,12 +24,15 @@ export const LoadingScreen: React.FC = observer((props) => {
           query: SpectateDocument,
         });
         if (result.data.spectateServer) {
-          GameData.instance.spectateGame(result.data.spectateServer.serverUrl);
+          GameData.start();
+          GameData.spectateGame(result.data.spectateServer.serverUrl);
         } else {
           uiStore.setServerDown(true);
+          GameData.start();
         }
       } catch (ex) {
         uiStore.setServerDown(true);
+        GameData.start();
       }
     }
 

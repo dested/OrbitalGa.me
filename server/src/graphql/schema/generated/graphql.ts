@@ -55,17 +55,17 @@ export type Mutation = {
 
 
 export type MutationLoginAnonymousArgs = {
-  loginInput: LoginAnonymousInput;
+  request: LoginAnonymousInput;
 };
 
 
 export type MutationLoginArgs = {
-  loginInput: LoginInput;
+  request: LoginInput;
 };
 
 
 export type MutationRegisterArgs = {
-  registerInput: LoginInput;
+  request: LoginInput;
 };
 
 export type Query = {
@@ -74,68 +74,17 @@ export type Query = {
   spectateServer?: Maybe<GameModel>;
 };
 
-export type LoginMutationVariables = {
-  userName: Scalars['String'];
-  password: Scalars['String'];
-};
+export type PlaceholderMutationVariables = {};
 
 
-export type LoginMutation = (
+export type PlaceholderMutation = (
   { __typename?: 'Mutation' }
-  & { login: (
-    { __typename?: 'LoginSuccessResponse' }
-    & Pick<LoginSuccessResponse, 'jwt'>
-    & { gameModel?: Maybe<(
-      { __typename?: 'GameModel' }
-      & GameModelFragmentFragment
-    )> }
-  ) | (
-    { __typename?: 'ErrorResponse' }
-    & Pick<ErrorResponse, 'error'>
-  ) }
+  & Pick<Mutation, 'placeholder'>
 );
 
-export type SpectateQueryVariables = {};
 
-
-export type SpectateQuery = (
-  { __typename?: 'Query' }
-  & { spectateServer?: Maybe<(
-    { __typename?: 'GameModel' }
-    & GameModelFragmentFragment
-  )> }
-);
-
-export type GameModelFragmentFragment = (
-  { __typename?: 'GameModel' }
-  & Pick<GameModel, 'serverId' | 'serverUrl'>
-);
-
-export const GameModelFragment = gql`
-    fragment GameModelFragment on GameModel {
-  serverId
-  serverUrl
+export const PlaceholderDocument = gql`
+    mutation Placeholder {
+  placeholder
 }
     `;
-export const LoginDocument = gql`
-    mutation Login($userName: String!, $password: String!) {
-  login(loginInput: {userName: $userName, password: $password}) {
-    ... on ErrorResponse {
-      error
-    }
-    ... on LoginSuccessResponse {
-      gameModel {
-        ...GameModelFragment
-      }
-      jwt
-    }
-  }
-}
-    ${GameModelFragment}`;
-export const SpectateDocument = gql`
-    query Spectate {
-  spectateServer {
-    ...GameModelFragment
-  }
-}
-    ${GameModelFragment}`;

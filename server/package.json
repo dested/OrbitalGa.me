@@ -15,6 +15,7 @@
     "deploy": "yarn build-prod & eb deploy"
   },
   "dependencies": {
+    "orbitalgame-server-common": "file:../server-common",
     "apollo-boost": "^0.4.7",
     "graphql": "^14.6.0",
     "ws": "^7.2.1",
@@ -40,6 +41,7 @@
     "@types/redis": "^2.8.17",
     "nodemon": "^2.0.2",
     "prettier": "^2.0.2",
+    "webpack-node-externals": "^1.7.2",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.7.0",
     "tslint": "^6.1.0",

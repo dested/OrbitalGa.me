@@ -18,6 +18,8 @@ import {EntityGrouping} from './entityClusterer';
 import {GameRules} from '@common/game/gameRules';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {ServerToClientMessage} from '@common/models/serverToClientMessages';
+import {ServerSync} from './serverSync';
+import {IServerSync} from './IServerSync';
 
 type Spectator = {connectionId: number};
 type User = {
@@ -36,7 +38,7 @@ export class ServerGame extends Game {
   spectators = new ArrayHash<Spectator>('connectionId');
   users = new ArrayHash<User>('connectionId');
 
-  constructor(private serverSocket: IServerSocket) {
+  constructor(private serverSocket: IServerSocket, private serverSync: IServerSync) {
     super(false);
     serverSocket.start({
       onJoin: (connectionId) => {
@@ -49,6 +51,9 @@ export class ServerGame extends Game {
         this.processMessage(connectionId, message);
       },
     });
+    if (!GameConstants.isSinglePlayer) {
+      serverSync.startServer();
+    }
   }
 
   init() {
@@ -180,25 +185,32 @@ export class ServerGame extends Game {
   }
 
   serverTick(tickIndex: number, duration: number, tickTime: number) {
-    if (!GameConstants.singlePlayer) {
+    if (!GameConstants.isSinglePlayer) {
       const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
       const groups = Utils.groupBy(this.entities.array, (a) => a.type);
       const memoryUsage = process.memoryUsage();
-      console.log(
-        `#${tickIndex}, Con: ${this.serverSocket.connections.length}, Usr: ${this.users.length}, Spc ${
-          this.spectators.length
-        }, Ents: ${this.entities.length}, Msg:${
-          this.queuedMessages.length
-        }, Duration: ${tickTime}ms, -> ${Utils.formatBytes(this.serverSocket.totalBytesSent)}, -> ${Utils.formatBytes(
-          this.serverSocket.totalBytesSentPerSecond
-        )}/s, <- ${Utils.formatBytes(this.serverSocket.totalBytesReceived)}, Wdt: ${
-          groupings[groupings.length - 1].x1 - groupings[0].x0
-        }, Mem:${Utils.formatBytes(memoryUsage.heapUsed)}/${Utils.formatBytes(
-          memoryUsage.heapTotal
-        )}/${Utils.formatBytes(memoryUsage.external)} ${Utils.safeKeys(groups)
+
+      this.serverSync.setStat({
+        boardWidth: groupings[groupings.length - 1].x1 - groupings[0].x0,
+        bytesReceived: this.serverSocket.totalBytesSentPerSecond,
+        bytesSent: this.serverSocket.totalBytesSent,
+        connections: this.serverSocket.connections.length,
+        entities: this.queuedMessages.length,
+        duration: tickTime,
+        users: this.users.length,
+        spectators: this.spectators.length,
+        entityGroupCount: Utils.safeKeys(groups)
           .map((a) => `${a}: ${groups[a].length}`)
-          .join(', ')}`
-      );
+          .join(', '),
+        memExternal: memoryUsage.external,
+        memHeapTotal: memoryUsage.heapTotal,
+        memHeapUsed: memoryUsage.heapUsed,
+        messages: this.queuedMessages.length,
+        tickIndex,
+        totalBytesReceived: this.serverSocket.totalBytesReceived,
+        totalBytesSent: this.serverSocket.totalBytesSent,
+      });
+
     }
 
     this.processInputs();
@@ -542,3 +554,4 @@ export class ServerGame extends Game {
     spectator.y = 0;
   }
 }
+
