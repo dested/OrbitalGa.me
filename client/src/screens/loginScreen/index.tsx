@@ -23,7 +23,7 @@ export const LoginScreen: React.FC = observer((props) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // onJoin('1')
+    onJoin('1');
   }, []);
 
   const servers = ['1' /*, '2', '3', '4', '11'*/];

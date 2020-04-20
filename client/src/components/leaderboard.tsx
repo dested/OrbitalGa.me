@@ -6,6 +6,14 @@ const styles = {
     position: 'absolute',
     top: 0,
     right: 0,
+    margin: 0,
+    borderBottomLeftRadius: '20px',
+    padding: '0.5rem',
+    backgroundColor: 'rgb(38,62,85,0.85)',
+    fontFamily: 'kenney_spaceregular',
+    fontSize: '0.3rem',
+    color: 'white',
+    listStyle: 'none',
   },
 } as const;
 
@@ -15,13 +23,11 @@ export const Leaderboard = (props: {tick: number}) => {
 
   return (
     <ul style={styles.wrapper}>
+      <li style={{fontWeight: 'bold', fontSize: '1.3em', marginBottom: '1em'}}>Leaderboard</li>
       {client?.leaderboardScores.map((score) => (
         <li
           key={score.userId}
           style={{
-            fontFamily: 'kenney_spaceregular',
-            fontSize: '0.6rem',
-            color: 'white',
             fontWeight: score.userId === liveEntity?.entityId ? 'bold' : 'initial',
           }}
         >

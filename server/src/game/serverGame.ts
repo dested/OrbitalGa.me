@@ -310,8 +310,7 @@ export class ServerGame extends Game {
           this.serverSocket.disconnect(connection.connectionId);
           continue;
         }
-      }
-      if (!connection.spectatorJoin && connection.lastAction + GameConstants.noMessageDuration < now) {
+      } else if (!connection.spectatorJoin && connection.lastAction + GameConstants.noMessageDuration < now) {
         this.serverSocket.disconnect(connection.connectionId);
         continue;
       } else if (this.spectators.lookup(connection.connectionId)) {
