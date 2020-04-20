@@ -3,6 +3,7 @@ import {ClientGame} from '../clientGame';
 import {BossEvent1Entity, BossEvent1Model} from '@common/entities/bossEvent1Entity';
 
 export class ClientBossEvent1Entity extends BossEvent1Entity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: BossEvent1Model) {
@@ -14,6 +15,7 @@ export class ClientBossEvent1Entity extends BossEvent1Entity implements ClientEn
   get drawY() {
     return this.y;
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {}
   tick() {}

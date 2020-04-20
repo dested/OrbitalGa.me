@@ -3,6 +3,7 @@ import {ClientGame} from '../clientGame';
 import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';
 
 export class ClientSpectatorEntity extends SpectatorEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Ordinance;
   constructor(game: ClientGame, messageModel: SpectatorModel) {
     super(game, messageModel);
@@ -14,6 +15,7 @@ export class ClientSpectatorEntity extends SpectatorEntity implements ClientEnti
   get drawY() {
     return this.y;
   }
+  destroyClient(): void {}
   draw(context: CanvasRenderingContext2D): void {}
   tick() {}
 }

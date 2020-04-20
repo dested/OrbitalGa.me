@@ -12,6 +12,7 @@ export class ServerSync implements IServerSync {
       `#${serverStat.tickIndex}`,
       `Con: ${serverStat.connections}`,
       `Spc ${serverStat.spectators}`,
+      `Usrs: ${serverStat.users}`,
       `Ents: ${serverStat.entities}`,
       `Msg:${serverStat.messages}`,
       `Duration: ${serverStat.duration}ms`,
@@ -21,7 +22,8 @@ export class ServerSync implements IServerSync {
       `Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(serverStat.memHeapTotal)}`,
       `${serverStat.entityGroupCount}`,
     ];
-    console.log(messages.join(','));
+    console.clear();
+    console.log(messages.join('\n'));
 
     if (this.serverStats.length > 10_000 / GameConstants.serverTickRate) {
       // console.log('pushing updates', this.serverStats.length);

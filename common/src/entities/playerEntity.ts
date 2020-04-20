@@ -237,6 +237,14 @@ export class PlayerEntity extends Entity implements Weapon {
       this.updatePolygon();
       return true;
     }
+    if (otherEntity instanceof PlayerEntity) {
+      this.momentumX -= collisionResult.overlap * collisionResult.overlap_x;
+      this.momentumY -= collisionResult.overlap * collisionResult.overlap_y;
+      otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x;
+      otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y;
+      this.updatePolygon();
+      return true;
+    }
 
     if (!this.game.isClient) {
       if (isEnemyWeapon(otherEntity)) {

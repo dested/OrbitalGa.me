@@ -4,6 +4,7 @@ import {ClientGame} from '../clientGame';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Ordinance;
 
   constructor(game: ClientGame, messageModel: EnemyShotModel) {
@@ -15,6 +16,7 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
   get drawY() {
     return this.y;
   }
+  destroyClient(): void {}
   draw(context: CanvasRenderingContext2D): void {
     const laserRed = OrbitalAssets.assets['Lasers.laserRed03'];
     context.save();

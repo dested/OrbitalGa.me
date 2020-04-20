@@ -157,7 +157,7 @@ export class ClientGameUI extends ClientGame {
       context.font = '22px bold';
       context.fillStyle = 'white';
       context.textBaseline = 'top';
-      let debugY = context.canvas.height-22;
+      let debugY = context.canvas.height - 22;
       for (const key of Object.keys(this.debugValues)) {
         context.fillText(`${key}: ${this.debugValues[key]}`, this.canvas.width * 0.8, debugY);
         debugY -= 22;
@@ -184,7 +184,7 @@ export class ClientGameUI extends ClientGame {
     }
   }
 
-  private centerView( ) {
+  private centerView() {
     if (this.liveEntity) {
       GameData.view.setCenterPosition(
         GameData.view.transformPoint(this.liveEntity.drawX),

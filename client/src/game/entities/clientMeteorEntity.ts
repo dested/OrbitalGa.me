@@ -8,6 +8,7 @@ import {AssetKeys} from '../../assets';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
+  clientDestroyed: boolean = false;
   hitTimer = 0;
   zIndex = DrawZIndex.Scenery;
 
@@ -22,6 +23,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   get drawY() {
     return this.realY;
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const color = this.meteorColor === 'brown' ? 'Brown' : 'Grey';

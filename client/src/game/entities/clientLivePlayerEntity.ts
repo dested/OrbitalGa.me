@@ -7,6 +7,7 @@ import {ClientPlayerEntity} from './clientPlayerEntity';
 type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
 export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   keys: KeyInput = {
     up: false,
     down: false,

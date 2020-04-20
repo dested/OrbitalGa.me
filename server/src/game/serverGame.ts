@@ -195,8 +195,8 @@ export class ServerGame extends Game {
         bytesReceived: this.serverSocket.totalBytesSentPerSecond,
         bytesSent: this.serverSocket.totalBytesSent,
         connections: this.serverSocket.connections.length,
-        entities: this.queuedMessages.length,
         duration: tickTime,
+        entities: this.entities.length,
         users: this.users.length,
         spectators: this.spectators.length,
         entityGroupCount: Utils.safeKeys(groups)

@@ -42,11 +42,11 @@ export class DropEntity extends Entity {
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (!this.game.isClient) {
-      if (otherEntity instanceof PlayerEntity) {
+    if (otherEntity instanceof PlayerEntity) {
+      if (!this.game.isClient) {
         otherEntity.addDrop(this.drop);
-        this.destroy();
       }
+      this.destroy();
     }
     return false;
   }

@@ -7,6 +7,7 @@ import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientExplosionEntity extends ExplosionEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   rotate = Math.random() * 360;
 
   zIndex = DrawZIndex.Effect;
@@ -34,6 +35,7 @@ export class ClientExplosionEntity extends ExplosionEntity implements ClientEnti
     }
     return this.y + owner.drawY;
   }
+  destroyClient(): void {}
   draw(context: CanvasRenderingContext2D): void {
     const blueExplosion = OrbitalAssets.assets['Lasers.laserBlue10'];
     context.save();

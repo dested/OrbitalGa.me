@@ -87,6 +87,17 @@ export class ClientGame extends Game {
     }
     this.collisionEngine.update();
     this.liveEntity?.checkCollisions();
+    for (const entity of this.entities.array) {
+      if (entity.type === 'drop') {
+        entity.checkCollisions();
+      }
+    }
+    for (const entity of this.entities.array) {
+      if (entity.markToDestroy) {
+        assertType<Entity & ClientEntity>(entity);
+        (entity as ClientEntity).destroyClient();
+      }
+    }
   }
 
   joinGame(name: string) {
@@ -186,6 +197,8 @@ export class ClientGame extends Game {
           const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
           for (let i = this.entities.length - 1; i >= 0; i--) {
             const entity = this.entities.getIndex(i);
+            assertType<Entity & ClientEntity>(entity);
+            entity.clientDestroyed = false;
             if (entityMap[entity.entityId]) {
               continue;
             }

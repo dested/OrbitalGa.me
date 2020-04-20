@@ -6,6 +6,7 @@ import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageModel: PlayerShieldModel) {
@@ -25,6 +26,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     }
     return this.y + owner.drawY;
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const owner = this.game.entities.lookup(this.ownerEntityId);

@@ -5,6 +5,7 @@ import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {
@@ -31,6 +32,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
         return OrbitalAssets.assets['Enemies.enemyRed1'];
     }
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const ship = this.ship;

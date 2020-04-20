@@ -6,6 +6,7 @@ import {unreachable} from '@common/utils/unreachable';
 import {CanvasUtils} from '../../utils/canvasUtils';
 
 export class ClientDropEntity extends DropEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Scenery;
 
   constructor(game: ClientGame, messageModel: DropModel) {
@@ -48,8 +49,14 @@ export class ClientDropEntity extends DropEntity implements ClientEntity {
   get drawY() {
     return this.realY;
   }
+  destroyClient(): void {
+    this.clientDestroyed = true;
+  }
 
   draw(context: CanvasRenderingContext2D): void {
+    if (this.clientDestroyed) {
+      return;
+    }
     const circleSize = 50;
     const size = 30;
     context.save();

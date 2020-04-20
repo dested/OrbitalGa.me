@@ -6,6 +6,7 @@ import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 
 export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Player;
 
   constructor(public clientGame: ClientGame, messageModel: BossEvent1EnemyModel) {
@@ -37,6 +38,7 @@ export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implement
         throw unreachable(this.pieceType);
     }
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const piece = this.piece;

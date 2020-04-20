@@ -5,6 +5,7 @@ import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
@@ -31,6 +32,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
         return OrbitalAssets.assets['Ships.playerShip1_red'];
     }
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const ship = this.ship;

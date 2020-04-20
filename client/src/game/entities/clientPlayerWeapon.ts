@@ -6,6 +6,7 @@ import {ClientPlayerEntity} from './clientPlayerEntity';
 import {unreachable} from '@common/utils/unreachable';
 
 export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
+  clientDestroyed: boolean = false;
   zIndex = DrawZIndex.Ordinance;
 
   constructor(private clientGame: ClientGame, messageModel: PlayerWeaponModel) {
@@ -38,6 +39,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
   get owner() {
     return this.game.entities.lookup<ClientPlayerEntity>(this.ownerEntityId);
   }
+  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const asset = this.asset;

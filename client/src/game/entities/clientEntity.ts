@@ -1,7 +1,9 @@
 export interface ClientEntity {
+  clientDestroyed: boolean;
   drawX: number;
   drawY: number;
   zIndex: DrawZIndex;
+  destroyClient(): void;
   draw(context: CanvasRenderingContext2D): void;
   tick(duration: number): void;
 }
