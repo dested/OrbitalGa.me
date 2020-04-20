@@ -5,7 +5,7 @@ import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
-  clientDestroyed: boolean = false;
+  clientDestroyedTick?: number = undefined
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {

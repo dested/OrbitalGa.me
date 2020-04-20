@@ -6,7 +6,7 @@ import {ClientPlayerEntity} from './clientPlayerEntity';
 import {unreachable} from '@common/utils/unreachable';
 
 export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
-  clientDestroyed: boolean = false;
+  clientDestroyedTick?: number = undefined
   zIndex = DrawZIndex.Ordinance;
 
   constructor(private clientGame: ClientGame, messageModel: PlayerWeaponModel) {

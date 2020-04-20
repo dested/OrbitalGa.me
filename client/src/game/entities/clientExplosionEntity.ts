@@ -7,7 +7,7 @@ import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientExplosionEntity extends ExplosionEntity implements ClientEntity {
-  clientDestroyed: boolean = false;
+  clientDestroyedTick?: number = undefined
   rotate = Math.random() * 360;
 
   zIndex = DrawZIndex.Effect;

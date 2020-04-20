@@ -6,7 +6,7 @@ import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
-  clientDestroyed: boolean = false;
+  clientDestroyedTick?: number = undefined
   zIndex = DrawZIndex.Effect;
 
   constructor(game: ClientGame, messageModel: PlayerShieldModel) {

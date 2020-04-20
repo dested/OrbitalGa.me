@@ -1,5 +1,5 @@
 export interface ClientEntity {
-  clientDestroyed: boolean;
+  clientDestroyedTick?: number;
   drawX: number;
   drawY: number;
   zIndex: DrawZIndex;

@@ -6,7 +6,7 @@ import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 
 export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implements ClientEntity {
-  clientDestroyed: boolean = false;
+  clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Player;
 
   constructor(public clientGame: ClientGame, messageModel: BossEvent1EnemyModel) {

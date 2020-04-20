@@ -8,7 +8,7 @@ import {AssetKeys} from '../../assets';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
-  clientDestroyed: boolean = false;
+  clientDestroyedTick?: number = undefined
   hitTimer = 0;
   zIndex = DrawZIndex.Scenery;
 

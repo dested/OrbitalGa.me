@@ -198,7 +198,12 @@ export class ClientGame extends Game {
           for (let i = this.entities.length - 1; i >= 0; i--) {
             const entity = this.entities.getIndex(i);
             assertType<Entity & ClientEntity>(entity);
-            entity.clientDestroyed = false;
+            if (entity.clientDestroyedTick !== undefined) {
+              entity.clientDestroyedTick--;
+              if (entity.clientDestroyedTick <= 0) {
+                entity.clientDestroyedTick = undefined;
+              }
+            }
             if (entityMap[entity.entityId]) {
               continue;
             }

@@ -11,23 +11,19 @@ import {DateScalar} from './gqlUtils/dateScalar';
 import {prisma, User} from 'orbitalgame-server-common/build/index';
 
 const getNextGameServer = async (): Promise<GameModel | null> => {
-  try {
-    const latestServer = await prisma.server.findMany({where: {live: true}, orderBy: {updatedAt: 'desc'}, first: 5});
-    console.log('next game server', latestServer.length);
-    for (const latestServerElement of latestServer) {
-      if (+latestServerElement.updatedAt + 15_000 < +new Date()) {
-        await prisma.server.update({where: {id: latestServerElement.id}, data: {live: false}});
-      } else {
-        return {
-          serverId: latestServer[0].id,
-          serverUrl: latestServer[0].serverUrl,
-        };
-      }
+  const latestServer = await prisma.server.findMany({where: {live: true}, orderBy: {updatedAt: 'desc'}, first: 5});
+  console.log('next game server', latestServer.length);
+  for (const latestServerElement of latestServer) {
+    if (+latestServerElement.updatedAt + 15_000 < +new Date()) {
+      await prisma.server.update({where: {id: latestServerElement.id}, data: {live: false}});
+    } else {
+      return {
+        serverId: latestServer[0].id,
+        serverUrl: latestServer[0].serverUrl,
+      };
     }
-    return null;
-  } catch (ex) {
-    console.error(ex);
   }
+  return null;
 };
 
 async function userReady(user: User) {
