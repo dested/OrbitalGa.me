@@ -12,7 +12,7 @@ export class GameConstants {
   static lastActionTimeout = 120_000;
   static lastPingTimeout = 30_000;
   static noMessageDuration = 3_000;
-  static numberOfSinglePlayerBots = 0;
+  static numberOfSinglePlayerBots = 50;
   static pingInterval = 3_000;
   static playerStartingY = screenSize.height * 0.8;
   static screenRange = screenSize.width * 1.4;

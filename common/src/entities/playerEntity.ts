@@ -49,13 +49,15 @@ export class PlayerEntity extends Entity implements Weapon {
   lastProcessedInputSequenceNumber: number = 0;
   momentumX = 0;
   momentumY = 0;
-
   ownerPlayerEntityId: number;
   pendingInputs: PlayerInput[] = [];
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon = 'laser1';
   shootTimer: number = 1;
   shotSide: 'left' | 'right' = 'left';
+
+  staticPlayersToLeft?: number;
+  staticPlayersToRight?: number;
   type = 'player' as const;
   weaponSide = 'player' as const;
   xInputsThisTick: boolean = false;
@@ -69,6 +71,22 @@ export class PlayerEntity extends Entity implements Weapon {
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
     this.createPolygon();
+  }
+  get playersToLeft() {
+    if (this.staticPlayersToLeft !== undefined) return this.staticPlayersToLeft;
+    return this.game.entities.filter((e) => e.type === 'player' && e.x < this.x - GameConstants.screenSize.width / 2)
+      .length;
+  }
+  set playersToLeft(value: number) {
+    this.staticPlayersToLeft = value;
+  }
+  get playersToRight() {
+    if (this.staticPlayersToRight !== undefined) return this.staticPlayersToRight;
+    return this.game.entities.filter((e) => e.type === 'player' && e.x > this.x + GameConstants.screenSize.width / 2)
+      .length;
+  }
+  set playersToRight(value: number) {
+    this.staticPlayersToRight = value;
   }
 
   get realX() {
@@ -378,6 +396,8 @@ export class PlayerEntity extends Entity implements Weapon {
     this.momentumY = messageModel.momentumY;
     this.availableWeapons = messageModel.availableWeapons;
     this.selectedWeapon = messageModel.selectedWeapon;
+    this.playersToLeft = messageModel.playersToLeft;
+    this.playersToRight = messageModel.playersToRight;
   }
 
   serialize(): PlayerModel {
@@ -395,6 +415,8 @@ export class PlayerEntity extends Entity implements Weapon {
       ...this.serialize(),
       momentumX: this.momentumX,
       momentumY: this.momentumY,
+      playersToLeft: this.playersToLeft,
+      playersToRight: this.playersToRight,
       lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       dead: this.dead,
       type: 'livePlayer',
@@ -456,6 +478,8 @@ export type LivePlayerModel = EntityModel & {
   momentumX: number;
   momentumY: number;
   playerColor: PlayerColor;
+  playersToLeft: number;
+  playersToRight: number;
   selectedWeapon: PlayerWeapon;
   type: 'livePlayer';
 };
@@ -479,6 +503,8 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
   lastProcessedInputSequenceNumber: 'uint32',
   momentumX: 'float32',
   momentumY: 'float32',
+  playersToLeft: 'uint16',
+  playersToRight: 'uint16',
   selectedWeapon: PlayerWeaponEnumSchema,
 };
 

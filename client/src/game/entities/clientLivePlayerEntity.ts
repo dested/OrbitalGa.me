@@ -7,7 +7,7 @@ import {ClientPlayerEntity} from './clientPlayerEntity';
 type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
 export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined
+  clientDestroyedTick?: number = undefined;
   keys: KeyInput = {
     up: false,
     down: false,
@@ -117,4 +117,22 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
 
   tick() {}
+  draw(context: CanvasRenderingContext2D): void {
+    super.draw(context);
+
+    context.save();
+    context.font = '20px kenney_spaceregular';
+    context.strokeStyle = '#f0f0f0';
+    context.strokeText(this.playersToLeft.toString(), this.drawX - 100, this.drawY);
+    context.fillStyle = '#49d7b8';
+    context.fillText(this.playersToLeft.toString(), this.drawX - 100, this.drawY);
+
+    context.font = '20px kenney_spaceregular';
+    context.strokeStyle = '#f0f0f0';
+    context.strokeText(this.playersToRight.toString(), this.drawX + 100, this.drawY);
+    context.fillStyle = '#49d7b8';
+    context.fillText(this.playersToRight.toString(), this.drawX + 100, this.drawY);
+
+    context.restore();
+  }
 }

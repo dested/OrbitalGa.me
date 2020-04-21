@@ -87,16 +87,16 @@ export class MeteorEntity extends Entity {
     }
     switch (messageModel.size) {
       case 'big':
-        this.health = Math.ceil(5 + Math.random() * 5);
+        this.health = Math.floor(4 + Math.random() * 2);
         break;
       case 'med':
-        this.health = Math.ceil(4 + Math.random() * 4);
+        this.health = Math.floor(3 + Math.random() * 2);
         break;
       case 'small':
-        this.health = Math.ceil(3 + Math.random() * 3);
+        this.health = Math.floor(2 + Math.random() * 2);
         break;
       case 'tiny':
-        this.health = Math.ceil(2 + Math.random() * 2);
+        this.health = 1;
         break;
     }
     this.createPolygon();

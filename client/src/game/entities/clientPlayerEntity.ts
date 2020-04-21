@@ -5,7 +5,7 @@ import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined
+  clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
@@ -38,6 +38,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     const ship = this.ship;
 
     this.drawFire(context);
+
 
     context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
     this.drawHealth(context);
