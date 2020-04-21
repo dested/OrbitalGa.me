@@ -3,6 +3,8 @@ import {assertType, Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
+import {GameConstants} from '@common/game/gameConstants';
+import {OrbitalAssets} from '../../utils/assetManager';
 
 type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
@@ -16,6 +18,8 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     shoot: false,
     weapon: 'unset',
   };
+
+  mainTick = 0;
 
   positionLerp?: {duration: number; startTime: number; x: number; y: number};
   zIndex = DrawZIndex.Player;
@@ -49,6 +53,26 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
       } else {
         return Utils.lerp(y, this.y, (now - startTime) / duration);
       }
+    }
+  }
+
+  draw(context: CanvasRenderingContext2D): void {
+    super.draw(context);
+
+    if (GameConstants.debugClient) {
+      context.save();
+      context.font = '20px kenney_spaceregular';
+      context.strokeStyle = '#f0f0f0';
+      context.strokeText(this.playersToLeft.toString(), this.drawX - 100, this.drawY);
+      context.fillStyle = '#49d7b8';
+      context.fillText(this.playersToLeft.toString(), this.drawX - 100, this.drawY);
+
+      context.strokeStyle = '#f0f0f0';
+      context.strokeText(this.playersToRight.toString(), this.drawX + 100, this.drawY);
+      context.fillStyle = '#49d7b8';
+      context.fillText(this.playersToRight.toString(), this.drawX + 100, this.drawY);
+
+      context.restore();
     }
   }
 
@@ -116,23 +140,30 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     this.keys[input] = value;
   }
 
-  tick() {}
-  draw(context: CanvasRenderingContext2D): void {
-    super.draw(context);
-
-    context.save();
-    context.font = '20px kenney_spaceregular';
-    context.strokeStyle = '#f0f0f0';
-    context.strokeText(this.playersToLeft.toString(), this.drawX - 100, this.drawY);
-    context.fillStyle = '#49d7b8';
-    context.fillText(this.playersToLeft.toString(), this.drawX - 100, this.drawY);
-
-    context.font = '20px kenney_spaceregular';
-    context.strokeStyle = '#f0f0f0';
-    context.strokeText(this.playersToRight.toString(), this.drawX + 100, this.drawY);
-    context.fillStyle = '#49d7b8';
-    context.fillText(this.playersToRight.toString(), this.drawX + 100, this.drawY);
-
-    context.restore();
+  staticDraw(context: CanvasRenderingContext2D) {
+    const totalCount = this.game.totalPlayers;
+    if (this.playersToLeft > this.playersToRight && this.playersToLeft > totalCount * 0.6) {
+      const dx = GameConstants.screenSize.width * 0.1 + Math.cos(this.mainTick / 10) * 50;
+      context.drawImage(
+        OrbitalAssets.assets['Arrows.arrowLeft'].image,
+        dx,
+        GameConstants.screenSize.height * 0.5,
+        GameConstants.screenSize.height * 0.15,
+        GameConstants.screenSize.height * 0.15
+      );
+    }
+    if (this.playersToRight > this.playersToLeft && this.playersToRight > totalCount * 0.6) {
+      const dx = GameConstants.screenSize.width * 0.9 - +Math.cos(this.mainTick / 10) * 50;
+      context.drawImage(
+        OrbitalAssets.assets['Arrows.arrowRight'].image,
+        dx,
+        GameConstants.screenSize.height * 0.5,
+        GameConstants.screenSize.height * 0.15,
+        GameConstants.screenSize.height * 0.15
+      );
+    }
+  }
+  tick() {
+    this.mainTick++;
   }
 }

@@ -56,7 +56,7 @@ export type STOCError =
   | {reason: '500'; type: 'error'}
   | {reason: 'spectatorCapacity'; type: 'error'}
   | {reason: 'userCapacity'; type: 'error'};
-type STOCWorldState = {entities: EntityModels[]; type: 'worldState'};
+type STOCWorldState = {entities: EntityModels[]; totalPlayers: number; type: 'worldState'};
 type STOCLeaderboard = {scores: LeaderboardEntryRanked[]; type: 'leaderboard'};
 
 export type ServerToClientMessage =
@@ -102,6 +102,7 @@ export type EntityModelSchemaType<TEntityModelType extends EntityModels['type']>
 >;
 
 const STOCWorldStateSchema: SDTypeLookup<ServerToClientMessage, 'worldState'> = {
+  totalPlayers: 'uint16',
   entities: {
     flag: 'array-uint16',
     elements: {

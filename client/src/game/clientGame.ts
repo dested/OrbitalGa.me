@@ -194,6 +194,7 @@ export class ClientGame extends Game {
         case 'worldState':
           this.lagAverage.push(GameConstants.serverTickRate - (+new Date() - this.lastWorldStateTick));
           this.lastWorldStateTick = +new Date();
+          this.totalPlayers = message.totalPlayers;
           const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
           for (let i = this.entities.length - 1; i >= 0; i--) {
             const entity = this.entities.getIndex(i);

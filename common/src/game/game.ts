@@ -12,6 +12,7 @@ export abstract class Game {
   entities = new ArrayHash<Entity>('entityId');
   entityClusterer: EntityClusterer;
   gameLeaderboard = new GameLeaderboard();
+  totalPlayers: number = 0;
 
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();

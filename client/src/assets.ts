@@ -1,4 +1,6 @@
 export type AssetKeys =
+  | 'Arrows.arrowLeft'
+  | 'Arrows.arrowRight'
   | 'Backgrounds.stars'
   | 'Damage.playerShip1_damage1'
   | 'Damage.playerShip1_damage2'
@@ -306,6 +308,8 @@ export type AssetKeys =
   | 'UI.playerLife3_orange'
   | 'UI.playerLife3_red';
 export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')>; height: number; width: number}} = {
+  'Arrows.arrowLeft': {asset: require('./assets/Arrows/arrowLeft.png'), width: 100, height: 100},
+  'Arrows.arrowRight': {asset: require('./assets/Arrows/arrowRight.png'), width: 100, height: 100},
   'Backgrounds.stars': {asset: require('./assets/Backgrounds/stars.png'), width: 256, height: 256},
   'Damage.playerShip1_damage1': {asset: require('./assets/Damage/playerShip1_damage1.png'), width: 99, height: 76},
   'Damage.playerShip1_damage2': {asset: require('./assets/Damage/playerShip1_damage2.png'), width: 99, height: 76},
@@ -366,7 +370,7 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Lasers.laserBlue01': {asset: require('./assets/Lasers/laserBlue01.png'), width: 9, height: 54},
   'Lasers.laserBlue02': {asset: require('./assets/Lasers/laserBlue02.png'), width: 13, height: 37},
   'Lasers.laserBlue03': {asset: require('./assets/Lasers/laserBlue03.png'), width: 9, height: 37},
-  'Lasers.laserBlue03Spray': {asset: require('./assets/Lasers/laserBlue03Spray.png'), width: 9, height: 37},
+  'Lasers.laserBlue03Spray': {asset: require('./assets/Lasers/laserBlue03Spray.png'), width: 37, height: 37},
   'Lasers.laserBlue04': {asset: require('./assets/Lasers/laserBlue04.png'), width: 13, height: 37},
   'Lasers.laserBlue05': {asset: require('./assets/Lasers/laserBlue05.png'), width: 9, height: 37},
   'Lasers.laserBlue06': {asset: require('./assets/Lasers/laserBlue06.png'), width: 13, height: 37},

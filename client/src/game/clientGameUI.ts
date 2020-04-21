@@ -93,6 +93,7 @@ export class ClientGameUI extends ClientGame {
     }
 
     context.restore();
+    this.liveEntity?.staticDraw(context);
     /*const nose = OrbitalAssets.assets['Rocket_parts.spaceRocketParts_008'];
     if (nose) {
       this.drawTick++;

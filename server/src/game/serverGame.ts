@@ -481,6 +481,7 @@ export class ServerGame extends Game {
     if (!spectator) {
       return;
     }
+    const totalPlayers = this.entities.filter((a) => a.type === 'player').length;
     const box = {
       x0: spectator.x - GameConstants.screenRange / 2,
       x1: spectator.x + GameConstants.screenRange / 2,
@@ -505,6 +506,7 @@ export class ServerGame extends Game {
       this.serverSocket.sendMessage(c.connectionId, [
         {
           type: 'worldState',
+          totalPlayers,
           entities: myEntities.map((a) => a.serializedEntity),
         },
       ]);
@@ -513,6 +515,7 @@ export class ServerGame extends Game {
 
   private sendWorldState() {
     if (this.users.array.length === 0) return;
+    const totalPlayers = this.entities.filter((a) => a.type === 'player').length;
 
     const bush = new RBushXOnly<{entity: Entity; serializedEntity: EntityModels}>();
 
@@ -559,6 +562,7 @@ export class ServerGame extends Game {
       }
 
       this.sendMessageToClient(user.connectionId, {
+        totalPlayers,
         type: 'worldState',
         entities: myEntities.map((a) => a.serializedEntity),
       });

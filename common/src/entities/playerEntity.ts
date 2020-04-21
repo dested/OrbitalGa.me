@@ -72,6 +72,7 @@ export class PlayerEntity extends Entity implements Weapon {
     this.playerColor = messageModel.playerColor;
     this.createPolygon();
   }
+
   get playersToLeft() {
     if (this.staticPlayersToLeft !== undefined) return this.staticPlayersToLeft;
     return this.game.entities.filter((e) => e.type === 'player' && e.x < this.x - GameConstants.screenSize.width / 2)

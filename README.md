@@ -12,7 +12,6 @@
 
 ## Features/Bugs
 
-- [ ] add arrows to direct you to where the action is
 - [ ] improve bot logic
 - [ ] why do things get so jumpy when it lags
 - [ ] add audio
@@ -27,6 +26,7 @@
 - [ ] fix explosion animation
 - [ ] get rid of explosion and make things light up when hit?
 - [ ] dying and reviving does weird things, health bar wiggled too
+- [x] add arrows to direct you to where the action is
 - [x] make game ui better
 - [x] hard to go straight left with nipplejs
 - [x] add server throttling
