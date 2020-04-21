@@ -5,7 +5,14 @@ export const GameRules = {
     big: {maxHealth: 30, depletedRegenTimeout: 30, regenRate: 3},
   },
   player: {
-    base: {maxSideSpeed: 70, maxReverseSpeed: 45, maxForwardSpeed: 90, momentumDeceleration: 0.5, startingHealth: 50},
+    base: {
+      maxSideSpeed: 120,
+      maxReverseSpeed: 60,
+      maxForwardSpeed: 150,
+      momentumDeceleration: 0.7,
+      startingHealth: 25,
+      ramp: 50,
+    },
   },
   enemyShots: {
     base: {

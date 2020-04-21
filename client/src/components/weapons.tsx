@@ -29,7 +29,7 @@ const styles = {
   ammo: {
     fontFamily: 'kenney_spaceregular',
     fontSize: '0.5rem',
-    marginLeft:15,
+    marginLeft: 15,
     color: 'rgb(128,222,102)',
   },
   weaponBody: {
