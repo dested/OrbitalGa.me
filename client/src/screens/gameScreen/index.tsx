@@ -40,7 +40,7 @@ const styles = {
   label: {fontSize: '1rem', color: 'white'},
   leftJoyStick: {
     position: 'absolute',
-    height: '30%',
+    height: '50%',
     width: '30%',
     bottom: 0,
     left: 0,
@@ -48,7 +48,7 @@ const styles = {
   },
   rightJoystick: {
     position: 'absolute',
-    height: '30%',
+    height: '50%',
     width: '30%',
     bottom: 0,
     right: 0,
@@ -107,23 +107,24 @@ export const GameScreen: React.FC = observer((props) => {
 
   const managerListenerMove = useCallback((manager: JoystickManager) => {
     const onMove = (evt: EventData, stick: JoystickOutputData) => {
+      console.log(stick.vector);
       GameData.client?.liveEntity?.setKey('left', false);
       GameData.client?.liveEntity?.setKey('down', false);
       GameData.client?.liveEntity?.setKey('right', false);
       GameData.client?.liveEntity?.setKey('up', false);
-      switch (stick.direction?.x) {
-        case 'left':
+      switch (true) {
+        case stick.vector.x < -0.3:
           GameData.client?.liveEntity?.setKey('left', true);
           break;
-        case 'right':
+        case stick.vector.x > 0.3:
           GameData.client?.liveEntity?.setKey('right', true);
           break;
       }
-      switch (stick.direction?.y) {
-        case 'up':
+      switch (true) {
+        case stick.vector.y > 0.3:
           GameData.client?.liveEntity?.setKey('up', true);
           break;
-        case 'down':
+        case stick.vector.y < -0.3:
           GameData.client?.liveEntity?.setKey('down', true);
           break;
       }

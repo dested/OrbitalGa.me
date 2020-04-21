@@ -12,12 +12,10 @@
 
 ## Features/Bugs
 
-- [ ] make game ui better
 - [ ] add arrows to direct you to where the action is
 - [ ] improve bot logic
 - [ ] why do things get so jumpy when it lags
 - [ ] add audio
-- [ ] hard to go straight left with nipplejs
 - [ ] add server kill switch to boot everyone out
 - [ ] support multiple bounding boxes
   - [ ] fix boundingbox not being from center
@@ -29,6 +27,8 @@
 - [ ] fix explosion animation
 - [ ] get rid of explosion and make things light up when hit?
 - [ ] dying and reviving does weird things, health bar wiggled too
+- [x] make game ui better
+- [x] hard to go straight left with nipplejs
 - [x] add server throttling
 - [x] add latency tracking
 - [x] refactor entity constructor to make easier entity creation
@@ -80,6 +80,8 @@
   - [ ] puzzles solve together like a maze blow up walls game event?
 - [ ] add 5 second sustained laser
 - [ ] need much better enemy variability
+- [x] add score entity
+- [x] add laser spray
 - [x] add time based weapons
 - [x] add laser upgrade
 - [x] add fire to rockets

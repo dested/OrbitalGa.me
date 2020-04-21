@@ -14,6 +14,6 @@ export const SelectWeaponBox = glamorous.div<{liveEntity: ClientLivePlayerEntity
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: '25%',
   })
 );
