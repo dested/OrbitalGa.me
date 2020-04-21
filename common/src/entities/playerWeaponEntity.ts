@@ -17,9 +17,9 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   isWeapon = true as const;
   offsetX: number;
   ownerEntityId: number;
-
   ownerPlayerEntityId: number;
   sprayAngle: number;
+  startY: number;
   type = 'playerWeapon' as const;
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
@@ -30,6 +30,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
+    this.startY = messageModel.startY;
     this.sprayAngle = messageModel.sprayAngle;
     this.damage = WeaponConfigs[this.weaponType].damage;
     this.explosionIntensity = WeaponConfigs[this.weaponType].explosionIntensity;
@@ -88,6 +89,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
     this.ownerEntityId = messageModel.ownerEntityId;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
+    this.startY = messageModel.startY;
     this.sprayAngle = messageModel.sprayAngle;
   }
 
@@ -96,6 +98,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
       offsetX: this.offsetX,
+      startY: this.startY,
       sprayAngle: this.sprayAngle,
       weaponType: this.weaponType,
       type: 'playerWeapon',
@@ -107,6 +110,7 @@ export type PlayerWeaponModel = EntityModel & {
   offsetX: number;
   ownerEntityId: number;
   sprayAngle: number;
+  startY: number;
   type: 'playerWeapon';
   weaponType: PlayerWeapon;
 };
@@ -115,6 +119,7 @@ export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
   ...EntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
   sprayAngle: 'uint8',
+  startY: 'int32',
   offsetX: 'int32',
   ownerEntityId: 'uint32',
 };

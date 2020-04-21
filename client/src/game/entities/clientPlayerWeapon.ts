@@ -102,6 +102,9 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
           this.positionBuffer[1].y =
             this.y - Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (GameConstants.serverTickRate / 1000);
         }
+      } else {
+        this.y = messageModel.startY;
+        this.positionBuffer[0].y = messageModel.startY;
       }
     }
   }

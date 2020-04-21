@@ -1,4 +1,4 @@
-const screenSize = {width: 1500 * 1.3, height: 692 * 1.3};
+const screenSize = {width: 1950 * 1.3, height: 900 * 1.3};
 
 export class GameConstants {
   static binaryTransport = true;
