@@ -9,8 +9,10 @@ import {GameRules} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
 import {isPlayerWeapon, Weapon} from './weapon';
 import {DropEntity} from './dropEntity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {ScoreEntity} from './scoreEntity';
+import {GameLeaderboard, LeaderboardEntryWeight} from '../game/gameLeaderboard';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -81,6 +83,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     super(game, messageModel);
     this.health = messageModel.health;
     this.enemyColor = messageModel.enemyColor;
+    this.ownerPlayerEntityId = messageModel.entityId;
     this.createPolygon();
     if (!this.game.isClient) {
       this.path.setStartPosition(this.x, this.y);
@@ -123,7 +126,12 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       this.aliveTick % 4 === 0 &&
       (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
     ) {
-      const shotEntity = new EnemyShotEntity(this.game, {entityId: nextId(), x: this.x, y: this.y - 6});
+      const shotEntity = new EnemyShotEntity(this.game, {
+        entityId: nextId(),
+        x: this.x,
+        y: this.y - 6,
+        ownerEntityId: this.entityId,
+      });
       this.game.entities.push(shotEntity);
     }
 
@@ -167,6 +175,25 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       });
       this.game.entities.push(drop);
       this.game.explode(this, 'medium');
+      this.game.entities.push(
+        new ScoreEntity(this.game, {
+          entityId: nextId(),
+          x: this.realX,
+          y: this.realY,
+          onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
+          score: LeaderboardEntryWeight.enemiesKilled,
+        })
+      );
+    } else {
+      this.game.entities.push(
+        new ScoreEntity(this.game, {
+          entityId: nextId(),
+          x: this.realX,
+          y: this.realY,
+          onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
+          score: LeaderboardEntryWeight.damageGiven,
+        })
+      );
     }
   }
 
@@ -188,7 +215,11 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   static randomEnemyColor() {
     return Utils.randomElement(['black' as const, 'blue' as const, 'red' as const, 'green' as const]);
   }
+
+  ownerPlayerEntityId: number;
 }
+
+class SwoopingEnemyEntityImpl extends SwoopingEnemyEntity {}
 
 export type SwoopingEnemyModel = EntityModel & {
   enemyColor: EnemyColor;

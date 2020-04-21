@@ -26,10 +26,10 @@ export const LeaderboardEntryRankedKeys = Utils.safeKeys(leaderboardEntryRankedK
 export const LeaderboardEntryWeight: {[key in keyof LeaderboardEntry]: number} = {
   aliveTime: 0.00025 /**/,
   damageGiven: 2 /**/,
-  damageTaken: 0.5 /**/,
+  damageTaken: 0.25 /**/,
   enemiesKilled: 3,
   eventsParticipatedIn: 10,
-  shotsFired: 0.2 /**/,
+  shotsFired: 0.1 /**/,
   calculatedScore: 0,
 };
 

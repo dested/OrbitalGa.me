@@ -5,7 +5,7 @@ import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';

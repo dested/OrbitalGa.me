@@ -1,6 +1,6 @@
 import {Polygon, Result} from 'collisions';
 import {Game} from '../game/game';
-import {EntityModels} from '../models/entityTypeModels';
+import {EntityModels} from '../models/serverToClientMessages';
 import {GameConstants} from '../game/gameConstants';
 import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 
@@ -21,6 +21,7 @@ export abstract class Entity {
   markToDestroy: boolean = false;
   momentumX = 0;
   momentumY = 0;
+  onlyVisibleToPlayerEntityId?: number;
   positionBuffer: {time: number; x: number; y: number}[] = [];
   abstract type: EntityModels['type'];
   width: number = 0;

@@ -3,7 +3,7 @@ import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class BossEvent1EnemyEntity extends Entity implements Weapon {
@@ -12,6 +12,7 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   explosionIntensity = 4;
   isWeapon = true as const;
   ownerEntityId: number;
+  ownerPlayerEntityId: number;
   pieceType: BossEvent1PieceType;
   rotate: number;
   type = 'bossEvent1Enemy' as const;
@@ -21,6 +22,7 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
 
   constructor(game: Game, messageModel: ImpliedEntityType<BossEvent1EnemyModel>) {
     super(game, messageModel);
+    this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.xOffset = messageModel.xOffset;
     this.yOffset = messageModel.yOffset;
     this.rotate = messageModel.rotate;

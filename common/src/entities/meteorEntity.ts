@@ -7,8 +7,9 @@ import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {ScoreEntity} from './scoreEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
@@ -220,16 +221,20 @@ export class MeteorEntity extends Entity {
 
   private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
     if (this.markToDestroy) return;
+    if (!isPlayerWeapon(otherEntity)) {
+      return;
+    }
     this.health -= damage;
     this.hit = true;
-    const explosionEntity = new ExplosionEntity(this.game, {
-      entityId: nextId(),
-      x,
-      y,
-      intensity: 1,
-      ownerEntityId: this.entityId,
-    });
-    this.game.entities.push(explosionEntity);
+    this.game.entities.push(
+      new ExplosionEntity(this.game, {
+        entityId: nextId(),
+        x,
+        y,
+        intensity: 1,
+        ownerEntityId: this.entityId,
+      })
+    );
     this.momentumX += x;
     this.momentumY += y;
     if (!this.game.isClient) {

@@ -6,7 +6,7 @@ import {assertType, Utils} from '@common/utils/utils';
 import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {WorldModelCastToEntityModel} from '@common/models/entityTypeModels';
+import {WorldModelCastToEntityModel} from '@common/models/serverToClientMessages';
 import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
 import {RollingAverage} from '@common/utils/rollingAverage';

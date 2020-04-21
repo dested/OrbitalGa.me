@@ -1,6 +1,6 @@
 import {PlayerInput, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ServerGame} from '../serverGame';
-import {ImpliedEntityType} from '@common/models/entityTypeModels';
+import {ImpliedEntityType} from '@common/models/serverToClientMessages';
 
 export class ServerPlayerEntity extends PlayerEntity {
   constructor(private serverGame: ServerGame, messageModel: ImpliedEntityType<PlayerModel>) {

@@ -7,7 +7,7 @@ import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {EntityModels} from '@common/models/entityTypeModels';
+import {EntityModels} from '@common/models/serverToClientMessages';
 import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
@@ -548,7 +548,12 @@ export class ServerGame extends Game {
       if (!GameConstants.debugDontFilterEntities) {
         for (const entity of items) {
           if (entity.item.entity !== user.entity) {
-            myEntities.push(entity.item);
+            if (
+              !entity.item.entity.onlyVisibleToPlayerEntityId ||
+              entity.item.entity.onlyVisibleToPlayerEntityId === user.entity.entityId
+            ) {
+              myEntities.push(entity.item);
+            }
           }
         }
       }

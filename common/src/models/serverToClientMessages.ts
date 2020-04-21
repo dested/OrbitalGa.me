@@ -1,19 +1,52 @@
-import {LivePlayerModel, LivePlayerModelSchema, PlayerModelSchema} from '../entities/playerEntity';
-import {EntityModels} from './entityTypeModels';
+import {
+  LivePlayerModel,
+  LivePlayerModelSchema,
+  PlayerEntity,
+  PlayerModel,
+  PlayerModelSchema,
+} from '../entities/playerEntity';
 import {LeaderboardEntryRanked} from '../game/gameLeaderboard';
 import {SDArray, SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefinerTypes';
-import {WallModelSchema} from '../entities/wallEntity';
-import {BossEvent1EnemyModelSchema} from '../entities/bossEvent1EnemyEntity';
-import {BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
-import {PlayerWeaponModelSchema} from '../entities/playerWeaponEntity';
-import {EnemyShotModelSchema} from '../entities/enemyShotEntity';
-import {ExplosionModelSchema} from '../entities/explosionEntity';
-import {PlayerShieldModelSchema} from '../entities/playerShieldEntity';
-import {SwoopingEnemyModelSchema} from '../entities/swoopingEnemyEntity';
-import {DropModelSchema} from '../entities/dropEntity';
-import {SpectatorModelSchema} from '../entities/spectatorEntity';
-import {MeteorModelSchema} from '../entities/meteorEntity';
+import {WallEntity, WallModel, WallModelSchema} from '../entities/wallEntity';
+import {
+  BossEvent1EnemyEntity,
+  BossEvent1EnemyModel,
+  BossEvent1EnemyModelSchema,
+} from '../entities/bossEvent1EnemyEntity';
+import {BossEvent1Entity, BossEvent1Model, BossEvent1ModelSchema} from '../entities/bossEvent1Entity';
+import {PlayerWeaponEntity, PlayerWeaponModel, PlayerWeaponModelSchema} from '../entities/playerWeaponEntity';
+import {EnemyShotEntity, EnemyShotModel, EnemyShotModelSchema} from '../entities/enemyShotEntity';
+import {ExplosionEntity, ExplosionModel, ExplosionModelSchema} from '../entities/explosionEntity';
+import {PlayerShieldEntity, PlayerShieldModel, PlayerShieldModelSchema} from '../entities/playerShieldEntity';
+import {SwoopingEnemyEntity, SwoopingEnemyModel, SwoopingEnemyModelSchema} from '../entities/swoopingEnemyEntity';
+import {DropEntity, DropModel, DropModelSchema} from '../entities/dropEntity';
+import {SpectatorEntity, SpectatorModel, SpectatorModelSchema} from '../entities/spectatorEntity';
+import {MeteorEntity, MeteorModel, MeteorModelSchema} from '../entities/meteorEntity';
 import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
+import {ScoreEntity, ScoreModel, ScoreModelSchema} from '../entities/scoreEntity';
+
+export type EntityType = {
+  bossEvent1: {entity: BossEvent1Entity; model: BossEvent1Model};
+  bossEvent1Enemy: {entity: BossEvent1EnemyEntity; model: BossEvent1EnemyModel};
+  drop: {entity: DropEntity; model: DropModel};
+  enemyShot: {entity: EnemyShotEntity; model: EnemyShotModel};
+  explosion: {entity: ExplosionEntity; model: ExplosionModel};
+  livePlayer: {entity: PlayerEntity; model: LivePlayerModel};
+  meteor: {entity: MeteorEntity; model: MeteorModel};
+  player: {entity: PlayerEntity; model: PlayerModel};
+  playerShield: {entity: PlayerShieldEntity; model: PlayerShieldModel};
+  playerWeapon: {entity: PlayerWeaponEntity; model: PlayerWeaponModel};
+  score: {entity: ScoreEntity; model: ScoreModel};
+  spectator: {entity: SpectatorEntity; model: SpectatorModel};
+  swoopingEnemy: {entity: SwoopingEnemyEntity; model: SwoopingEnemyModel};
+  wall: {entity: WallEntity; model: WallModel};
+};
+
+export type EntityModels = EntityType[keyof EntityType]['model'];
+
+export type WorldModelCastToEntityModel = any;
+
+export type ImpliedEntityType<T> = Omit<T, 'type'>;
 
 type STOCJoined = {player: Omit<LivePlayerModel, 'type'>; serverVersion: number; type: 'joined'};
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
@@ -87,6 +120,7 @@ const STOCWorldStateSchema: SDTypeLookup<ServerToClientMessage, 'worldState'> = 
         playerWeapon: PlayerWeaponModelSchema,
         bossEvent1: BossEvent1ModelSchema,
         bossEvent1Enemy: BossEvent1EnemyModelSchema,
+        score: ScoreModelSchema,
       },
     },
   },

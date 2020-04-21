@@ -1,5 +1,5 @@
 import {ClientSpectatorEntity} from './clientSpectatorEntity';
-import {EntityType, EntityModels} from '@common/models/entityTypeModels';
+import {EntityType, EntityModels} from '@common/models/serverToClientMessages';
 import {ClientExplosionEntity} from './clientExplosionEntity';
 import {ClientPlayerShieldEntity} from './clientPlayerShieldEntity';
 import {ClientSwoopingEnemyEntity} from './clientSwoopingEnemyEntity';
@@ -13,6 +13,7 @@ import {ClientLivePlayerEntity} from './clientLivePlayerEntity';
 import {ClientDropEntity} from './clientDropEntity';
 import {ClientBossEvent1Entity} from './clientBossEvent1Entity';
 import {ClientBossEvent1EnemyEntity} from './clientBossEvent1EnemyEntity';
+import {ClientScoreEntity} from './clientScoreEntity';
 
 export const ClientEntityTypes: {
   [key in EntityModels['type']]: new (
@@ -33,4 +34,5 @@ export const ClientEntityTypes: {
   drop: ClientDropEntity,
   bossEvent1: ClientBossEvent1Entity,
   bossEvent1Enemy: ClientBossEvent1EnemyEntity,
+  score: ClientScoreEntity,
 };

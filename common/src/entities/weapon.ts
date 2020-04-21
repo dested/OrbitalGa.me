@@ -4,6 +4,7 @@ export interface Weapon {
   damage: number;
   explosionIntensity: number;
   isWeapon: true;
+  ownerPlayerEntityId: number;
   weaponSide: 'player' | 'enemy';
   causedDamage(damage: number, otherEntity: Entity): void;
   causedKill(otherEntity: Entity): void;

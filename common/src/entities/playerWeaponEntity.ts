@@ -4,7 +4,7 @@ import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
@@ -24,6 +24,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   constructor(game: Game, messageModel: ImpliedEntityType<PlayerWeaponModel>) {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
+    this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.startY = messageModel.startY;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
@@ -92,6 +93,8 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
       type: 'playerWeapon',
     };
   }
+
+  ownerPlayerEntityId: number;
 }
 
 export type PlayerWeaponModel = EntityModel & {

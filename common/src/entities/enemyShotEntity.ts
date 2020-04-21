@@ -4,7 +4,7 @@ import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class EnemyShotEntity extends Entity implements Weapon {
@@ -13,11 +13,15 @@ export class EnemyShotEntity extends Entity implements Weapon {
   damage = 1;
   explosionIntensity = 2;
   isWeapon = true as const;
+  ownerEntityId: number;
+  ownerPlayerEntityId: number;
   type = 'enemyShot' as const;
   weaponSide = 'enemy' as const;
 
   constructor(game: Game, messageModel: ImpliedEntityType<EnemyShotModel>) {
     super(game, messageModel);
+    this.ownerEntityId = messageModel.ownerEntityId;
+    this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.createPolygon();
   }
 
@@ -55,14 +59,17 @@ export class EnemyShotEntity extends Entity implements Weapon {
     return {
       ...super.serialize(),
       type: 'enemyShot',
+      ownerEntityId: this.ownerEntityId,
     };
   }
 }
 
 export type EnemyShotModel = EntityModel & {
+  ownerEntityId: number;
   type: 'enemyShot';
 };
 
 export const EnemyShotModelSchema: SDTypeElement<EnemyShotModel> = {
   ...EntityModelSchema,
+  ownerEntityId: 'uint32',
 };

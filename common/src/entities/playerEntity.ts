@@ -12,7 +12,7 @@ import {Utils} from '../utils/utils';
 import {isEnemyWeapon, Weapon} from './weapon';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
-import {ImpliedEntityType} from '../models/entityTypeModels';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
@@ -63,6 +63,7 @@ export class PlayerEntity extends Entity implements Weapon {
 
   constructor(game: Game, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
     super(game, messageModel);
+    this.ownerPlayerEntityId = messageModel.entityId;
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
     this.createPolygon();
@@ -416,6 +417,8 @@ export class PlayerEntity extends Entity implements Weapon {
   static randomEnemyColor() {
     return Utils.randomElement(['blue' as const, 'green' as const, 'orange' as const, 'red' as const]);
   }
+
+  ownerPlayerEntityId: number;
 }
 
 export type PlayerModel = EntityModel & {
