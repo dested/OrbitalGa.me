@@ -8,6 +8,7 @@ export const PlayerWeaponEnumSchema: SDEnum<PlayerWeapon> = {
   laser1: 2,
   laser2: 3,
   torpedo: 4,
+  laser1Spray10: 5,
 };
 export const PlayerInputKeyBitmask: SDBitmask<PlayerInputKeys> = {
   flag: 'bitmask',

@@ -7,6 +7,7 @@ import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {Utils} from '../utils/utils';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
@@ -16,7 +17,9 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   isWeapon = true as const;
   offsetX: number;
   ownerEntityId: number;
-  startY: number;
+
+  ownerPlayerEntityId: number;
+  sprayAngle: number;
   type = 'playerWeapon' as const;
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
@@ -25,9 +28,9 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
-    this.startY = messageModel.startY;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
+    this.sprayAngle = messageModel.sprayAngle;
     this.damage = WeaponConfigs[this.weaponType].damage;
     this.explosionIntensity = WeaponConfigs[this.weaponType].explosionIntensity;
     this.createPolygon();
@@ -63,7 +66,12 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
       this.momentumY += config.speed * (duration / 1000);
       this.y -= this.momentumY;
     } else {
-      this.y -= config.speed * (duration / 1000);
+      if (this.sprayAngle > 0) {
+        this.x -= Math.cos(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);
+        this.y -= Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);
+      } else {
+        this.y -= config.speed * (duration / 1000);
+      }
     }
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
@@ -78,9 +86,9 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   reconcileFromServer(messageModel: PlayerWeaponModel) {
     super.reconcileFromServer(messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
-    this.startY = messageModel.startY;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
+    this.sprayAngle = messageModel.sprayAngle;
   }
 
   serialize(): PlayerWeaponModel {
@@ -88,19 +96,17 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
       offsetX: this.offsetX,
-      startY: this.startY,
+      sprayAngle: this.sprayAngle,
       weaponType: this.weaponType,
       type: 'playerWeapon',
     };
   }
-
-  ownerPlayerEntityId: number;
 }
 
 export type PlayerWeaponModel = EntityModel & {
   offsetX: number;
   ownerEntityId: number;
-  startY: number;
+  sprayAngle: number;
   type: 'playerWeapon';
   weaponType: PlayerWeapon;
 };
@@ -108,7 +114,7 @@ export type PlayerWeaponModel = EntityModel & {
 export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
   ...EntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
-  startY: 'int32',
+  sprayAngle: 'uint8',
   offsetX: 'int32',
   ownerEntityId: 'uint32',
 };

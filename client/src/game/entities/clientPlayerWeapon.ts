@@ -4,9 +4,12 @@ import {ClientGame} from '../clientGame';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {unreachable} from '@common/utils/unreachable';
+import {Utils} from '@common/utils/utils';
+import {GameConstants} from '@common/game/gameConstants';
+import {WeaponConfigs} from '@common/game/gameRules';
 
 export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined
+  clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
   constructor(private clientGame: ClientGame, messageModel: PlayerWeaponModel) {
@@ -18,6 +21,8 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
       case 'rocket':
         return OrbitalAssets.assets['Missiles.spaceMissiles_001'];
       case 'laser1':
+        return OrbitalAssets.assets['Lasers.laserBlue03'];
+      case 'laser1Spray10':
         return OrbitalAssets.assets['Lasers.laserBlue03'];
       case 'laser2':
         return OrbitalAssets.assets['Lasers.laserBlue02'];
@@ -46,6 +51,9 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     context.save();
     context.translate(this.drawX, this.drawY);
     this.drawFire(context);
+    if (this.sprayAngle > 0) {
+      context.rotate(Utils.degToRad(90 + this.sprayAngle));
+    }
     context.drawImage(asset.image, -asset.size.width / 2, -asset.size.height / 2);
     context.restore();
   }
@@ -61,6 +69,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }
+      case 'laser1Spray10':
       case 'laser1':
       case 'laser2':
         break;
@@ -83,9 +92,17 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     if (messageModel.create) {
       if (this.owner && this.owner === this.clientGame.liveEntity && this.clientGame.liveEntity) {
         this.x = this.owner.x + this.offsetX;
+        this.y = this.owner.y;
+        this.positionBuffer[0].x = this.x;
+        this.positionBuffer[0].y = this.y;
+        if (this.sprayAngle > 0) {
+          const config = WeaponConfigs[this.weaponType];
+          this.positionBuffer[1].x =
+            this.x - Math.cos(Utils.degToRad(this.sprayAngle)) * config.speed * (GameConstants.serverTickRate / 1000);
+          this.positionBuffer[1].y =
+            this.y - Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (GameConstants.serverTickRate / 1000);
+        }
       }
-      this.y = messageModel.startY;
-      this.positionBuffer[0].y = messageModel.startY;
     }
   }
 

@@ -49,6 +49,8 @@ export class PlayerEntity extends Entity implements Weapon {
   lastProcessedInputSequenceNumber: number = 0;
   momentumX = 0;
   momentumY = 0;
+
+  ownerPlayerEntityId: number;
   pendingInputs: PlayerInput[] = [];
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon = 'laser1';
@@ -87,6 +89,9 @@ export class PlayerEntity extends Entity implements Weapon {
         let myWeapon = this.availableWeapons.find((a) => a.weapon === drop.weapon);
         if (!myWeapon) {
           switch (drop.weapon) {
+            case 'laser1Spray10':
+              this.availableWeapons.push((myWeapon = {weapon: drop.weapon, ammo: 0}));
+              break;
             case 'laser1':
               return;
             case 'laser2':
@@ -157,16 +162,31 @@ export class PlayerEntity extends Entity implements Weapon {
               if (config.alternateSide) {
                 offsetX = this.shotSide === 'left' ? -42 : 42;
               }
-              const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
-                entityId: nextId(),
-                x: this.x + offsetX,
-                y: this.y - 6,
-                ownerEntityId: this.entityId,
-                offsetX,
-                startY: this.y - 6,
-                weaponType: this.selectedWeapon,
-              });
-              this.game.entities.push(playerWeaponEntity);
+              if (config.spray) {
+                for (let i = 1; i < config.spray; i++) {
+                  const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
+                    entityId: nextId(),
+                    x: this.x + offsetX,
+                    y: this.y - 6,
+                    ownerEntityId: this.entityId,
+                    offsetX,
+                    weaponType: this.selectedWeapon,
+                    sprayAngle: Math.round(i * (180 / config.spray)),
+                  });
+                  this.game.entities.push(playerWeaponEntity);
+                }
+              } else {
+                const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
+                  entityId: nextId(),
+                  x: this.x + offsetX,
+                  y: this.y - 6,
+                  ownerEntityId: this.entityId,
+                  offsetX,
+                  weaponType: this.selectedWeapon,
+                  sprayAngle: 0,
+                });
+                this.game.entities.push(playerWeaponEntity);
+              }
               if (config.alternateSide) {
                 this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
               }
@@ -417,8 +437,6 @@ export class PlayerEntity extends Entity implements Weapon {
   static randomEnemyColor() {
     return Utils.randomElement(['blue' as const, 'green' as const, 'orange' as const, 'red' as const]);
   }
-
-  ownerPlayerEntityId: number;
 }
 
 export type PlayerModel = EntityModel & {

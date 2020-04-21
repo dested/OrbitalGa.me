@@ -59,6 +59,7 @@ export type AssetKeys =
   | 'Lasers.laserBlue01'
   | 'Lasers.laserBlue02'
   | 'Lasers.laserBlue03'
+  | 'Lasers.laserBlue03Spray'
   | 'Lasers.laserBlue04'
   | 'Lasers.laserBlue05'
   | 'Lasers.laserBlue06'
@@ -365,6 +366,7 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Lasers.laserBlue01': {asset: require('./assets/Lasers/laserBlue01.png'), width: 9, height: 54},
   'Lasers.laserBlue02': {asset: require('./assets/Lasers/laserBlue02.png'), width: 13, height: 37},
   'Lasers.laserBlue03': {asset: require('./assets/Lasers/laserBlue03.png'), width: 9, height: 37},
+  'Lasers.laserBlue03Spray': {asset: require('./assets/Lasers/laserBlue03Spray.png'), width: 9, height: 37},
   'Lasers.laserBlue04': {asset: require('./assets/Lasers/laserBlue04.png'), width: 13, height: 37},
   'Lasers.laserBlue05': {asset: require('./assets/Lasers/laserBlue05.png'), width: 9, height: 37},
   'Lasers.laserBlue06': {asset: require('./assets/Lasers/laserBlue06.png'), width: 13, height: 37},

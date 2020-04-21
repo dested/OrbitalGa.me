@@ -7,7 +7,7 @@ export const GameRules = {
   player: {
     base: {
       maxSideSpeed: 120,
-      maxReverseSpeed: 60,
+      maxReverseSpeed: 100,
       maxForwardSpeed: 150,
       momentumDeceleration: 0.7,
       startingHealth: 25,
@@ -21,13 +21,12 @@ export const GameRules = {
   },
   enemies: {
     swoopingEnemy: {
-      startingHealth: 10,
+      startingHealth: 1,
     },
   },
 };
 
-export type PlayerWeapon = 'rocket' | 'laser1' | 'laser2' | 'torpedo';
-export const AllPlayerWeapons: PlayerWeapon[] = ['laser1', 'laser2', 'rocket', 'torpedo'];
+export type PlayerWeapon = 'rocket' | 'laser1' | 'laser2' | 'torpedo' | 'laser1Spray10';
 
 export type WeaponConfig = {
   alternateSide: boolean;
@@ -38,6 +37,7 @@ export type WeaponConfig = {
   rampUp: boolean;
   resetShootTimer: number;
   speed: number;
+  spray: number;
 };
 
 export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
@@ -50,6 +50,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     explosionIntensity: 2,
     alternateSide: false,
     resetShootTimer: 5,
+    spray: 0,
   },
   laser1: {
     maxAmmo: 0,
@@ -60,6 +61,18 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     explosionIntensity: 1,
     alternateSide: true,
     resetShootTimer: 1,
+    spray: 0,
+  },
+  laser1Spray10: {
+    maxAmmo: 30_000,
+    ammoType: 'time',
+    speed: 700,
+    rampUp: false,
+    damage: 1,
+    explosionIntensity: 1,
+    alternateSide: false,
+    resetShootTimer: 3,
+    spray: 10,
   },
   laser2: {
     maxAmmo: 60_000,
@@ -70,6 +83,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     explosionIntensity: 1,
     alternateSide: true,
     resetShootTimer: 1,
+    spray: 0,
   },
   torpedo: {
     maxAmmo: 10,
@@ -80,5 +94,6 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     explosionIntensity: 3,
     alternateSide: false,
     resetShootTimer: 7,
+    spray: 0,
   },
 };

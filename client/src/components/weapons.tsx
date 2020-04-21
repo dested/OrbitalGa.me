@@ -4,11 +4,13 @@ import spaceMissiles_001 from '../assets/Missiles/spaceMissiles_001.png';
 import spaceMissiles_004 from '../assets/Missiles/spaceMissiles_004.png';
 import laserBlue02 from '../assets/Lasers/laserBlue02.png';
 import laserBlue03 from '../assets/Lasers/laserBlue03.png';
+import laserBlue03Spray from '../assets/Lasers/laserBlue03Spray.png';
 import {PlayerWeapon, WeaponConfigs} from '@common/game/gameRules';
 import {boxSize, SelectWeaponBox} from './weapons.styles';
 import {Utils} from '@common/utils/utils';
 
 const images: {[key in PlayerWeapon]: string} = {
+  laser1Spray10: laserBlue03Spray,
   laser1: laserBlue03,
   laser2: laserBlue02,
   torpedo: spaceMissiles_004,
