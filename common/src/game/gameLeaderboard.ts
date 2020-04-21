@@ -24,7 +24,7 @@ const leaderboardEntryRankedKeysObject: {[key in Exclude<keyof LeaderboardEntryR
 };
 export const LeaderboardEntryRankedKeys = Utils.safeKeys(leaderboardEntryRankedKeysObject);
 export const LeaderboardEntryWeight: {[key in keyof LeaderboardEntry]: number} = {
-  aliveTime: 0.001 /**/,
+  aliveTime: 0.00025 /**/,
   damageGiven: 2 /**/,
   damageTaken: 0.5 /**/,
   enemiesKilled: 3,

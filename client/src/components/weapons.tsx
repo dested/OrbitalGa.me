@@ -22,15 +22,19 @@ const styles = {
     bottom: 0,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
   },
   f1: {flex: 1, display: 'flex'},
-  image: {height: `calc(${boxSize} - 2rem)`, margin: '0.5rem'},
+  image: {height: `calc(${boxSize} - 0.7rem)`, margin: '0.4rem'},
   ammo: {
     fontFamily: 'kenney_spaceregular',
-    fontSize: '0.6rem',
-    margin: 10,
-    color: 'rgb(45,59,112)',
+    fontSize: '0.5rem',
+    marginLeft:15,
+    color: 'rgb(128,222,102)',
+  },
+  weaponBody: {
+    display: 'flex',
+    flexDirection: 'column',
   },
 } as const;
 
@@ -53,17 +57,8 @@ export const Weapons = (props: {tick: number}) => {
   }
   return (
     <div style={styles.wrapper}>
-      <div style={styles.f1} />
       {liveEntity.availableWeapons.map((weapon) => (
-        <SelectWeaponBox
-          onClick={selectWeapon(weapon.weapon)}
-          key={weapon.weapon}
-          liveEntity={liveEntity}
-          weapon={weapon}
-        >
-          <div style={styles.f1} />
-          <img src={images[weapon.weapon]} style={styles.image} />
-          <div style={styles.f1} />
+        <div key={weapon.weapon} style={styles.weaponBody}>
           <span style={styles.ammo}>
             {Utils.switchType(WeaponConfigs[weapon.weapon].ammoType, {
               infinite: <>&nbsp;</>,
@@ -71,9 +66,16 @@ export const Weapons = (props: {tick: number}) => {
               time: <>{(weapon.ammo / 1000).toFixed()}</>,
             })}
           </span>
-        </SelectWeaponBox>
+          <SelectWeaponBox
+            onClick={selectWeapon(weapon.weapon)}
+            key={weapon.weapon}
+            liveEntity={liveEntity}
+            weapon={weapon}
+          >
+            <img src={images[weapon.weapon]} style={styles.image} />
+          </SelectWeaponBox>
+        </div>
       ))}
-      <div style={styles.f1} />
     </div>
   );
 };

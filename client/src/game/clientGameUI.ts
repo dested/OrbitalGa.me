@@ -159,16 +159,12 @@ export class ClientGameUI extends ClientGame {
       context.textBaseline = 'top';
       let debugY = context.canvas.height - 22;
       for (const key of Object.keys(this.debugValues)) {
-        context.fillText(`${key}: ${this.debugValues[key]}`, this.canvas.width * 0.8, debugY);
+        context.fillText(`${key}: ${this.debugValues[key]}`, 0, debugY);
         debugY -= 22;
       }
-      context.fillText(
-        `Average Lag between ticks: ${this.lagAverage.average.toFixed(1)}ms`,
-        this.canvas.width * 0.8,
-        debugY
-      );
+      context.fillText(`Average Lag between ticks: ${this.lagAverage.average.toFixed(1)}ms`, 0, debugY);
       debugY -= 22;
-      context.fillText(`Latency: ${this.latency.toFixed(1)}ms`, this.canvas.width * 0.8, debugY);
+      context.fillText(`Latency: ${this.latency.toFixed(1)}ms`, 0, debugY);
       context.restore();
     }
 

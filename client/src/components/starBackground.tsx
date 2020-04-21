@@ -3,6 +3,7 @@ import {useAnimationFrame} from '../hooks/useAnimationFrame';
 import {GameData} from '../game/gameData';
 import {GameConstants} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../utils/assetManager';
+import {GameView} from '../game/gameView';
 
 export const StarBackground: React.FC = (props) => {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -16,11 +17,10 @@ export const StarBackground: React.FC = (props) => {
     frame.current++;
     context.save();
 
-    const view = GameData.view;
+    let view = GameData.view;
     if (!view) {
-      return;
+      view = new GameView(GameConstants.screenSize.width, GameConstants.screenSize.height);
     }
-    const outerBox = view.outerViewBox;
     const box = view.viewBox;
     context.scale(view.scale, view.scale);
     context.translate(-box.x, -box.y);

@@ -73,7 +73,7 @@ export const LoadingScreen: React.FC = observer((props) => {
           color: 'white',
         }}
       >
-        <span style={{fontSize: '3rem'}}>Loading...</span>
+        <span style={{fontSize: '2rem'}}>Loading...</span>
       </div>
     </div>
   );
