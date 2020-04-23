@@ -3,7 +3,7 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 
 export class ClientWallEntity extends WallEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined
+  clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Scenery;
 
   constructor(game: ClientGame, messageModel: WallModel) {

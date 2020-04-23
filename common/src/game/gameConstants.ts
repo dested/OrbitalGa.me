@@ -1,10 +1,10 @@
-const screenSize = {width: 1950 * 1.3, height: 900 * 1.3};
+const screenSize = {width: 1950, height: 900};
 
 export class GameConstants {
   static binaryTransport = true;
   static capOnServerSpectators = 200;
   static capOnServerUsers = 200;
-  static debugClient = true;
+  static debugClient = false;
   static debugCollisions = false;
   static debugDontFilterEntities = false;
   static debugInvulnerable = false;
@@ -12,7 +12,7 @@ export class GameConstants {
   static lastActionTimeout = 120_000;
   static lastPingTimeout = 30_000;
   static noMessageDuration = 3_000;
-  static numberOfSinglePlayerBots = 50;
+  static numberOfSinglePlayerBots = 0;
   static pingInterval = 3_000;
   static playerStartingY = screenSize.height * 0.8;
   static screenRange = screenSize.width * 1.4;

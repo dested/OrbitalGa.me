@@ -5,7 +5,7 @@ import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined
+  clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {

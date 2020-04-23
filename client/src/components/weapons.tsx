@@ -19,6 +19,7 @@ const images: {[key in PlayerWeapon]: string} = {
 
 const styles = {
   wrapper: {
+    zIndex: 1000,
     width: '100%',
     position: 'absolute',
     bottom: 0,

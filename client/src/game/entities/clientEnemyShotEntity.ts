@@ -4,7 +4,7 @@ import {ClientGame} from '../clientGame';
 import {OrbitalAssets} from '../../utils/assetManager';
 
 export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined
+  clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
   constructor(game: ClientGame, messageModel: EnemyShotModel) {

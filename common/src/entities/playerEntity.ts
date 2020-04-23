@@ -314,18 +314,11 @@ export class PlayerEntity extends Entity implements Weapon {
     this.dead = true;
     if (this.shieldEntityId) this.game.entities.lookup(this.shieldEntityId)?.destroy();
     this.game.explode(this, 'big');
-    this.game.gameLeaderboard.removePlayer(this.entityId);
   }
 
   gameTick(): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
     this.updatedPositionFromMomentum();
-
-    if (!this.game.isClient) {
-      if (this.health <= 0) {
-        this.die();
-      }
-    }
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
@@ -353,6 +346,9 @@ export class PlayerEntity extends Entity implements Weapon {
       ownerEntityId: this.entityId,
     });
     this.game.entities.push(explosionEntity);
+    if (this.health <= 0) {
+      this.die();
+    }
   }
 
   postTick() {

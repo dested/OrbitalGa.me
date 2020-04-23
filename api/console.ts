@@ -1,6 +1,4 @@
-
-async function main() {
-}
+async function main() {}
 
 main()
   .then(() => console.log('done'))

@@ -1,8 +1,8 @@
 export const GameRules = {
   playerShield: {
-    small: {maxHealth: 10, depletedRegenTimeout: 30, regenRate: 3},
-    medium: {maxHealth: 20, depletedRegenTimeout: 30, regenRate: 3},
-    big: {maxHealth: 30, depletedRegenTimeout: 30, regenRate: 3},
+    small: {maxHealth: 1, depletedRegenTimeout: 30, regenRate: 3},
+    medium: {maxHealth: 10, depletedRegenTimeout: 30, regenRate: 3},
+    big: {maxHealth: 15, depletedRegenTimeout: 30, regenRate: 3},
   },
   player: {
     base: {
@@ -10,7 +10,7 @@ export const GameRules = {
       maxReverseSpeed: 100,
       maxForwardSpeed: 150,
       momentumDeceleration: 0.7,
-      startingHealth: 25,
+      startingHealth: 1,
       ramp: 50,
     },
   },
@@ -21,7 +21,7 @@ export const GameRules = {
   },
   enemies: {
     swoopingEnemy: {
-      startingHealth: 1,
+      startingHealth: 7,
     },
   },
 };

@@ -18,13 +18,13 @@ import {EntityGrouping} from './entityClusterer';
 import {GameRules} from '@common/game/gameRules';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {ServerToClientMessage} from '@common/models/serverToClientMessages';
-import {ServerSync} from './serverSync';
 import {IServerSync} from './IServerSync';
 
 type Spectator = {connectionId: number};
 type User = {
   connectionId: number;
-  entity: ServerPlayerEntity;
+  deadXY?: {x: number; y: number};
+  entity?: ServerPlayerEntity;
   name: string;
 };
 
@@ -96,8 +96,22 @@ export class ServerGame extends Game {
     }, 1000 / 5);
   }
 
+  killPlayer(player: PlayerEntity): void {
+    this.gameLeaderboard.removePlayer(player.entityId);
+    for (const user of this.users.array) {
+      if (user.entity === player) {
+        user.deadXY = {x: player.realX, y: player.realY};
+        user.entity = undefined;
+        break;
+      }
+    }
+  }
+
   processInputs() {
-    const noInputThisTick = Utils.toDictionary(this.users.array, (a) => a.entity.entityId);
+    const noInputThisTick = Utils.toDictionary(
+      this.users.array.filter((a) => a.entity),
+      (a) => a.entity!.entityId
+    );
 
     const time = +new Date();
     let stopped = false;
@@ -129,7 +143,7 @@ export class ServerGame extends Game {
         case 'playerInput': {
           const user = this.users.lookup(q.connectionId);
           const connection = this.serverSocket.connections.lookup(q.connectionId);
-          if (user && connection) {
+          if (user && connection && user.entity) {
             connection.lastAction = +new Date();
             delete noInputThisTick[user.entity.entityId];
             /*if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
@@ -162,14 +176,14 @@ export class ServerGame extends Game {
     }
 
     for (const key in noInputThisTick) {
-      noInputThisTick[key].entity.applyInput({
+      noInputThisTick[key].entity!.applyInput({
         down: false,
         up: false,
         right: false,
         left: false,
         shoot: false,
-        weapon: noInputThisTick[key].entity.selectedWeapon,
-        inputSequenceNumber: noInputThisTick[key].entity.lastProcessedInputSequenceNumber + 1,
+        weapon: noInputThisTick[key].entity!.selectedWeapon,
+        inputSequenceNumber: noInputThisTick[key].entity!.lastProcessedInputSequenceNumber + 1,
       });
     }
   }
@@ -237,7 +251,7 @@ export class ServerGame extends Game {
       const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
       // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
-    if (tickIndex % 50 === 0) {
+    if (tickIndex % 50 === -1) {
       for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
@@ -296,6 +310,9 @@ export class ServerGame extends Game {
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.getIndex(i);
       if (entity.markToDestroy) {
+        if (entity instanceof PlayerEntity) {
+          this.killPlayer(entity);
+        }
         this.entities.remove(entity);
       } else {
         entity.postTick();
@@ -369,6 +386,7 @@ export class ServerGame extends Game {
     const user = this.users.lookup(connectionId);
     if (user) {
       this.userLeave(connectionId);
+      this.queuedMessagesToSend[connectionId] = [];
     }
     if (name.length > 10) {
       this.serverSocket.disconnect(connectionId);
@@ -426,7 +444,7 @@ export class ServerGame extends Game {
       delete this.queuedMessagesToSend[connectionId];
       return;
     }
-    user.entity.die();
+    if (user.entity) user.entity.die();
     this.users.remove(user);
     delete this.queuedMessagesToSend[connectionId];
   }
@@ -441,7 +459,7 @@ export class ServerGame extends Game {
 
     const scores = this.gameLeaderboard.updateScores();
     for (const score of scores) {
-      score.username = this.users.array.find((a) => a.entity.entityId === score.userId)?.name ?? '';
+      score.username = this.users.array.find((a) => a.entity?.entityId === score.userId)?.name ?? '';
     }
 
     const topTen = [...scores].slice(0, 10);
@@ -450,13 +468,13 @@ export class ServerGame extends Game {
         continue;
       }
 
-      if (topTen.find((a) => a.userId === user.entity.entityId)) {
+      if (topTen.find((a) => a.userId === user.entity?.entityId)) {
         this.sendMessageToClient(user.connectionId, {
           type: 'leaderboard',
           scores: topTen,
         });
       } else {
-        const myScore = scores.find((a) => a.userId === user.entity.entityId)!;
+        const myScore = scores.find((a) => a.userId === user.entity?.entityId)!;
         if (myScore) {
           this.sendMessageToClient(user.connectionId, {
             type: 'leaderboard',
@@ -533,28 +551,39 @@ export class ServerGame extends Game {
     }
 
     for (const user of this.users.array) {
-      if (!user.entity) {
-        continue;
-      }
-
-      const items = bush.search({
-        minX: user.entity.realX - GameConstants.screenRange / 2,
-        maxX: user.entity.realX + GameConstants.screenRange / 2,
-      });
-
       const myEntities: typeof bush.data.item[] = [];
-      myEntities.push({
-        entity: user.entity,
-        serializedEntity: user.entity.serializeLive(),
-      });
+      if (user.entity) {
+        const items = bush.search({
+          minX: user.entity.realX - GameConstants.screenRange / 2,
+          maxX: user.entity.realX + GameConstants.screenRange / 2,
+        });
 
-      if (!GameConstants.debugDontFilterEntities) {
-        for (const entity of items) {
-          if (entity.item.entity !== user.entity) {
-            if (
-              !entity.item.entity.onlyVisibleToPlayerEntityId ||
-              entity.item.entity.onlyVisibleToPlayerEntityId === user.entity.entityId
-            ) {
+        myEntities.push({
+          entity: user.entity,
+          serializedEntity: user.entity.serializeLive(),
+        });
+
+        if (!GameConstants.debugDontFilterEntities) {
+          for (const entity of items) {
+            if (entity.item.entity !== user.entity) {
+              if (
+                !entity.item.entity.onlyVisibleToPlayerEntityId ||
+                entity.item.entity.onlyVisibleToPlayerEntityId === user.entity.entityId
+              ) {
+                myEntities.push(entity.item);
+              }
+            }
+          }
+        }
+      } else {
+        const items = bush.search({
+          minX: user.deadXY!.x - GameConstants.screenRange / 2,
+          maxX: user.deadXY!.x + GameConstants.screenRange / 2,
+        });
+
+        if (!GameConstants.debugDontFilterEntities) {
+          for (const entity of items) {
+            if (!entity.item.entity.onlyVisibleToPlayerEntityId) {
               myEntities.push(entity.item);
             }
           }

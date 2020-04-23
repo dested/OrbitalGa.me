@@ -5,6 +5,7 @@ import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
 import {GameLeaderboard} from './gameLeaderboard';
+import {PlayerEntity} from '../entities/playerEntity';
 
 export abstract class Game {
   collisionEngine: Collisions;
@@ -58,6 +59,8 @@ export abstract class Game {
     }
     return {x0: range.x0 - padding, x1: range.x1 + padding};
   }
+
+  abstract killPlayer(player: PlayerEntity): void;
 
   protected checkCollisions() {
     this.collisionEngine.update();

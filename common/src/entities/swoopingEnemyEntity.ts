@@ -143,11 +143,11 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    if (!isPlayerWeapon(otherEntity)) {
+    if (this.markToDestroy) {
       return;
     }
 
-    if (this.markToDestroy) {
+    if (!isPlayerWeapon(otherEntity)) {
       return;
     }
 

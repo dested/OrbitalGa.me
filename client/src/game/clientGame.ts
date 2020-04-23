@@ -13,6 +13,7 @@ import {RollingAverage} from '@common/utils/rollingAverage';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
 import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
+import {PlayerEntity} from '@common/entities/playerEntity';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -69,10 +70,12 @@ export class ClientGame extends Game {
   }
 
   died() {
-    this.isDead = true;
-    this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
-    this.liveEntity = undefined;
-    this.options.onDied(this);
+    if (!this.isDead) {
+      this.isDead = true;
+      this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
+      this.liveEntity = undefined;
+      this.options.onDied(this);
+    }
   }
 
   disconnect() {
@@ -104,6 +107,8 @@ export class ClientGame extends Game {
     this.lastXY = undefined;
     this.sendMessageToServer({type: 'join', name});
   }
+
+  killPlayer(player: PlayerEntity): void {}
 
   sendInput(input: ClientLivePlayerEntity['keys'], inputSequenceNumber: number) {
     this.sendMessageToServer({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input});
@@ -211,6 +216,7 @@ export class ClientGame extends Game {
             entity.destroy();
             this.entities.remove(entity);
           }
+
           for (const messageModel of message.entities) {
             let foundEntity = this.entities.lookup(messageModel.entityId);
             if (!foundEntity) {

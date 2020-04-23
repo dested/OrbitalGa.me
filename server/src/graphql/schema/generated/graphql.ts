@@ -13,17 +13,16 @@ export type Scalars = {
 
 export enum CacheControlScope {
   Public = 'PUBLIC',
-  Private = 'PRIVATE'
+  Private = 'PRIVATE',
 }
 
-
 export type ErrorResponse = {
-   __typename?: 'ErrorResponse';
+  __typename?: 'ErrorResponse';
   error: Scalars['String'];
 };
 
 export type GameModel = {
-   __typename?: 'GameModel';
+  __typename?: 'GameModel';
   serverId: Scalars['String'];
   serverUrl: Scalars['String'];
 };
@@ -40,51 +39,43 @@ export type LoginInput = {
 export type LoginResponse = LoginSuccessResponse | ErrorResponse;
 
 export type LoginSuccessResponse = {
-   __typename?: 'LoginSuccessResponse';
+  __typename?: 'LoginSuccessResponse';
   jwt: Scalars['String'];
   gameModel?: Maybe<GameModel>;
 };
 
 export type Mutation = {
-   __typename?: 'Mutation';
+  __typename?: 'Mutation';
   placeholder?: Maybe<Scalars['Boolean']>;
   loginAnonymous: LoginResponse;
   login: LoginResponse;
   register: LoginResponse;
 };
 
-
 export type MutationLoginAnonymousArgs = {
   request: LoginAnonymousInput;
 };
 
-
 export type MutationLoginArgs = {
   request: LoginInput;
 };
-
 
 export type MutationRegisterArgs = {
   request: LoginInput;
 };
 
 export type Query = {
-   __typename?: 'Query';
+  __typename?: 'Query';
   placeholder?: Maybe<Scalars['Boolean']>;
   spectateServer?: Maybe<GameModel>;
 };
 
 export type PlaceholderMutationVariables = {};
 
-
-export type PlaceholderMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'placeholder'>
-);
-
+export type PlaceholderMutation = {__typename?: 'Mutation'} & Pick<Mutation, 'placeholder'>;
 
 export const PlaceholderDocument = gql`
-    mutation Placeholder {
-  placeholder
-}
-    `;
+  mutation Placeholder {
+    placeholder
+  }
+`;

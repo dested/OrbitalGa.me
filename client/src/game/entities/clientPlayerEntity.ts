@@ -39,7 +39,6 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
 
     this.drawFire(context);
 
-
     context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
     this.drawHealth(context);
   }
