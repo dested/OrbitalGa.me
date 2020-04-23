@@ -47,7 +47,6 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
 
     if (this.hitTimer > 0) {
-      console.log(this.hitTimer);
       context.save();
       context.globalAlpha = this.hitTimer / 5;
       context.drawImage(ClientPlayerEntity.whitePlayer(), -ship.size.width / 2, -ship.size.height / 2);

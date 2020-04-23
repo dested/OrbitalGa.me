@@ -121,7 +121,6 @@ export class GameView {
   setScale(scale: number) {
     const center = this.center;
     this.scale = scale;
-    console.log(center.x);
     this.x = center.x - this.viewWidth / 2;
     this.y = center.y - this.viewHeight / 2;
   }

@@ -107,7 +107,6 @@ export const GameScreen: React.FC = observer((props) => {
 
   const managerListenerMove = useCallback((manager: JoystickManager) => {
     const onMove = (evt: EventData, stick: JoystickOutputData) => {
-      console.log(stick.vector);
       GameData.client?.liveEntity?.setKey('left', false);
       GameData.client?.liveEntity?.setKey('down', false);
       GameData.client?.liveEntity?.setKey('right', false);

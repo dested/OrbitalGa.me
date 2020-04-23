@@ -119,7 +119,6 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     const wasHit = this.hit;
     super.reconcileFromServerLive(messageModel);
     if (this.hit !== wasHit) {
-      console.log('HIT', +new Date());
       this.hitTimer = 5;
     }
 
