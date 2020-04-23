@@ -38,10 +38,10 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
 
     if (this.hitTimer > 0) {
       context.save();
-      context.globalAlpha = this.hitTimer / 100;
+      context.globalAlpha = this.hitTimer / 5;
       context.drawImage(ClientMeteorEntity.whiteMeteor(asset), -meteor.size.width / 2, -meteor.size.height / 2);
       context.restore();
-      this.hitTimer -= 3;
+      this.hitTimer -= 1;
     }
     context.restore();
   }
@@ -50,7 +50,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
     const wasHit = this.hit;
     super.reconcileFromServer(messageModel);
     if (this.hit !== wasHit) {
-      // this.hitTimer = 90;
+      this.hitTimer = 5;
     }
   }
 

@@ -116,7 +116,12 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {
     assertType<LivePlayerModel>(messageModel);
+    const wasHit = this.hit;
     super.reconcileFromServerLive(messageModel);
+    if (this.hit !== wasHit) {
+      console.log('HIT', +new Date());
+      this.hitTimer = 5;
+    }
 
     if (this.dead) {
       this.clientGame.died();

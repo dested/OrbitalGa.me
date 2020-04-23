@@ -3,9 +3,13 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
+import {CanvasUtils} from '../../utils/canvasUtils';
+import {MeteorModel} from '@common/entities/meteorEntity';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
+  static _whitePlayer?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
+  hitTimer = 0;
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
@@ -38,9 +42,29 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     const ship = this.ship;
 
     this.drawFire(context);
+    context.save();
+    context.translate(this.drawX, this.drawY);
+    context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
 
-    context.drawImage(ship.image, this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2);
+    if (this.hitTimer > 0) {
+      console.log(this.hitTimer);
+      context.save();
+      context.globalAlpha = this.hitTimer / 5;
+      context.drawImage(ClientPlayerEntity.whitePlayer(), -ship.size.width / 2, -ship.size.height / 2);
+      context.restore();
+      this.hitTimer -= 1;
+    }
+    context.restore();
+
     this.drawHealth(context);
+  }
+
+  reconcileFromServer(messageModel: PlayerModel) {
+    const wasHit = this.hit;
+    super.reconcileFromServer(messageModel);
+    if (this.hit !== wasHit) {
+      this.hitTimer = 5;
+    }
   }
 
   tick() {}
@@ -78,5 +102,12 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
       (ship.size.width - 2) * (this.health / GameRules.player.base.startingHealth),
       3
     );
+  }
+
+  static whitePlayer() {
+    if (!this._whitePlayer) {
+      this._whitePlayer = CanvasUtils.mask(OrbitalAssets.assets['Ships.playerShip1_blue'], 255, 255, 255);
+    }
+    return this._whitePlayer!;
   }
 }

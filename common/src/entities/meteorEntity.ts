@@ -226,15 +226,6 @@ export class MeteorEntity extends Entity {
     }
     this.health -= damage;
     this.hit = true;
-    this.game.entities.push(
-      new ExplosionEntity(this.game, {
-        entityId: nextId(),
-        x,
-        y,
-        intensity: 1,
-        ownerEntityId: this.entityId,
-      })
-    );
     this.momentumX += x;
     this.momentumY += y;
     if (!this.game.isClient) {

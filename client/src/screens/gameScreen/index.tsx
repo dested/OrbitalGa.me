@@ -186,7 +186,7 @@ export const GameScreen: React.FC = observer((props) => {
             </JoinButton>
           </LoginBox>
         )}
-        {died && (
+        {!disconnected && died && (
           <LoginBox>
             <Logo>Orbital</Logo>
             <span style={styles.label}>You Died</span>

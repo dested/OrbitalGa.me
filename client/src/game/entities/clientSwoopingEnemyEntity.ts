@@ -3,9 +3,15 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
+import {MeteorModel} from '@common/entities/meteorEntity';
+import {AssetKeys} from '../../assets';
+import {CanvasUtils} from '../../utils/canvasUtils';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
+  static _whiteEnemy?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
+
+  hitTimer = 0;
   zIndex = DrawZIndex.Player;
 
   constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {
@@ -39,7 +45,16 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     context.save();
     context.translate(this.drawX, this.drawY);
     context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
+
+    if (this.hitTimer > 0) {
+      context.save();
+      context.globalAlpha = this.hitTimer / 5;
+      context.drawImage(ClientSwoopingEnemyEntity.whiteEnemy(), -ship.size.width / 2, -ship.size.height / 2);
+      context.restore();
+      this.hitTimer -= 1;
+    }
     context.restore();
+
     this.drawHealth(context);
   }
 
@@ -56,5 +71,20 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     );
   }
 
+  reconcileFromServer(messageModel: SwoopingEnemyModel) {
+    const wasHit = this.hit;
+    super.reconcileFromServer(messageModel);
+    if (this.hit !== wasHit) {
+      this.hitTimer = 5;
+    }
+  }
+
   tick() {}
+
+  static whiteEnemy() {
+    if (!this._whiteEnemy) {
+      this._whiteEnemy = CanvasUtils.mask(OrbitalAssets.assets['Enemies.enemyBlack1'], 255, 255, 255);
+    }
+    return this._whiteEnemy!;
+  }
 }

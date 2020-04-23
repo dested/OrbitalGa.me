@@ -23,8 +23,8 @@
   - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
 - [ ] fix momentum for player, should be additive not replacing
-- [ ] fix explosion animation
-- [ ] get rid of explosion and make things light up when hit?
+- [x] fix explosion animation
+- [x] get rid of explosion and make things light up when hit?
 - [x] dying and reviving does weird things, health bar wiggled too
 - [x] add arrows to direct you to where the action is
 - [x] make game ui better

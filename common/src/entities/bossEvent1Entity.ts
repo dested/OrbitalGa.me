@@ -218,14 +218,6 @@ export class BossEvent1Entity extends Entity {
     this.momentumX += x;
     this.momentumY += y;
 
-    const explosionEntity = new ExplosionEntity(this.game, {
-      entityId: nextId(),
-      x: otherEntity.x - this.x,
-      y: otherEntity.y - this.y,
-      intensity: this.explosionIntensity,
-      ownerEntityId: this.entityId,
-    });
-    this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
       const drop = new DropEntity(this.game, {
         entityId: nextId(),

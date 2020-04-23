@@ -87,14 +87,6 @@ export class PlayerShieldEntity extends Entity {
       this.health -= damage;
     }
     this.lastHit = 10;
-    const explosionEntity = new ExplosionEntity(this.game, {
-      entityId: nextId(),
-      x,
-      y,
-      intensity: 3,
-      ownerEntityId: this.entityId,
-    });
-    this.game.entities.push(explosionEntity);
     return damageLeft;
   }
 

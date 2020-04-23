@@ -241,6 +241,7 @@ export class ServerGame extends Game {
             y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
             enemyColor: SwoopingEnemyEntity.randomEnemyColor(),
             health: GameRules.enemies.swoopingEnemy.startingHealth,
+            hit: false,
           });
           this.entities.push(swoopingEnemyEntity);
         }
@@ -251,7 +252,7 @@ export class ServerGame extends Game {
       const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
       // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
-    if (tickIndex % 50 === -1) {
+    if (tickIndex % 50 === 0) {
       for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
@@ -410,6 +411,7 @@ export class ServerGame extends Game {
       x: startingPos,
       y: GameConstants.playerStartingY,
       playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
+      hit: false,
     });
     this.gameLeaderboard.addPlayer(playerEntity.entityId);
     this.users.push({name, connectionId, entity: playerEntity});
@@ -464,10 +466,6 @@ export class ServerGame extends Game {
 
     const topTen = [...scores].slice(0, 10);
     for (const user of this.users.array) {
-      if (!user.entity) {
-        continue;
-      }
-
       if (topTen.find((a) => a.userId === user.entity?.entityId)) {
         this.sendMessageToClient(user.connectionId, {
           type: 'leaderboard',
@@ -479,6 +477,11 @@ export class ServerGame extends Game {
           this.sendMessageToClient(user.connectionId, {
             type: 'leaderboard',
             scores: [...topTen, myScore],
+          });
+        } else {
+          this.sendMessageToClient(user.connectionId, {
+            type: 'leaderboard',
+            scores: topTen,
           });
         }
       }

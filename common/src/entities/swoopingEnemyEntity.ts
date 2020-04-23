@@ -28,9 +28,11 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   enemyColor: EnemyColor;
   explosionIntensity = 4;
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
+  hit = false;
   isWeapon = true as const;
   momentumX = 0;
   momentumY = 0;
+  ownerPlayerEntityId: number;
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
   type = 'swoopingEnemy' as const;
   weaponSide = 'enemy' as const;
@@ -79,6 +81,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     ],
     this
   );
+
   constructor(game: Game, messageModel: ImpliedEntityType<SwoopingEnemyModel>) {
     super(game, messageModel);
     this.health = messageModel.health;
@@ -151,19 +154,11 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       return;
     }
 
+    this.hit = true;
     this.health -= damage;
     this.momentumX += x;
     this.momentumY += y;
     otherEntity.causedDamage(otherEntity.damage, this);
-
-    const explosionEntity = new ExplosionEntity(this.game, {
-      entityId: nextId(),
-      x: otherEntity.x - this.x,
-      y: otherEntity.y - this.y,
-      intensity: this.explosionIntensity,
-      ownerEntityId: this.entityId,
-    });
-    this.game.entities.push(explosionEntity);
     if (this.health <= 0) {
       this.health = 0;
       otherEntity.causedKill(this);
@@ -197,9 +192,15 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     }
   }
 
+  postTick() {
+    super.postTick();
+    this.hit = false;
+  }
+
   reconcileFromServer(messageModel: SwoopingEnemyModel) {
     super.reconcileFromServer(messageModel);
     this.health = messageModel.health;
+    this.hit = messageModel.hit;
     this.enemyColor = messageModel.enemyColor;
   }
 
@@ -208,6 +209,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       ...super.serialize(),
       health: this.health,
       type: 'swoopingEnemy',
+      hit: this.hit,
       enemyColor: this.enemyColor,
     };
   }
@@ -215,8 +217,6 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
   static randomEnemyColor() {
     return Utils.randomElement(['black' as const, 'blue' as const, 'red' as const, 'green' as const]);
   }
-
-  ownerPlayerEntityId: number;
 }
 
 class SwoopingEnemyEntityImpl extends SwoopingEnemyEntity {}
@@ -224,12 +224,14 @@ class SwoopingEnemyEntityImpl extends SwoopingEnemyEntity {}
 export type SwoopingEnemyModel = EntityModel & {
   enemyColor: EnemyColor;
   health: number;
+  hit: boolean;
   type: 'swoopingEnemy';
 };
 
 export const SwoopingEnemyModelSchema: SDTypeElement<SwoopingEnemyModel> = {
   ...EntityModelSchema,
   health: 'uint8',
+  hit: 'boolean',
   enemyColor: {
     flag: 'enum',
     red: 1,

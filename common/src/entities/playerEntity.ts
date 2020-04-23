@@ -38,12 +38,12 @@ export class PlayerEntity extends Entity implements Weapon {
     {ammo: 5, weapon: 'rocket'},
     {ammo: 3, weapon: 'torpedo'},
   ];
-
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
   explosionIntensity = 2;
   health = GameRules.player.base.startingHealth;
+  hit = false;
   inputSequenceNumber: number = 1;
   isWeapon = true as const;
   lastProcessedInputSequenceNumber: number = 0;
@@ -338,14 +338,7 @@ export class PlayerEntity extends Entity implements Weapon {
     }
 
     this.health -= damage;
-    const explosionEntity = new ExplosionEntity(this.game, {
-      entityId: nextId(),
-      x,
-      y,
-      intensity: this.explosionIntensity,
-      ownerEntityId: this.entityId,
-    });
-    this.game.entities.push(explosionEntity);
+    this.hit = true;
     if (this.health <= 0) {
       this.die();
     }
@@ -353,6 +346,7 @@ export class PlayerEntity extends Entity implements Weapon {
 
   postTick() {
     super.postTick();
+    this.hit = false;
     this.game.gameLeaderboard.increaseEntry(this.entityId, 'aliveTime', GameConstants.serverTickRate);
 
     for (const availableWeapon of this.availableWeapons) {
@@ -380,12 +374,14 @@ export class PlayerEntity extends Entity implements Weapon {
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
     this.lastPlayerInput = messageModel.playerInputKeys;
+    this.hit = messageModel.hit;
   }
 
   reconcileFromServerLive(messageModel: LivePlayerModel) {
     this.x = messageModel.x;
     this.y = messageModel.y;
     this.health = messageModel.health;
+    this.hit = messageModel.hit;
     this.dead = messageModel.dead;
     this.playerColor = messageModel.playerColor;
     this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
@@ -403,6 +399,7 @@ export class PlayerEntity extends Entity implements Weapon {
       health: this.health,
       playerColor: this.playerColor,
       playerInputKeys: this.lastPlayerInput ?? {down: false, left: false, right: false, shoot: false, up: false},
+      hit: this.hit,
       type: 'player',
     };
   }
@@ -462,6 +459,7 @@ export class PlayerEntity extends Entity implements Weapon {
 
 export type PlayerModel = EntityModel & {
   health: number;
+  hit: boolean;
   playerColor: PlayerColor;
   playerInputKeys: PlayerInputKeys;
   type: 'player';
@@ -471,6 +469,7 @@ export type LivePlayerModel = EntityModel & {
   availableWeapons: {ammo: number; weapon: PlayerWeapon}[];
   dead: boolean;
   health: number;
+  hit: boolean;
   lastProcessedInputSequenceNumber: number;
   momentumX: number;
   momentumY: number;
@@ -492,6 +491,7 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
     red: 4,
   },
   create: 'boolean',
+  hit: 'boolean',
   availableWeapons: {
     flag: 'array-uint8',
     elements: {ammo: 'uint16', weapon: PlayerWeaponEnumSchema},
@@ -516,5 +516,6 @@ export const PlayerModelSchema: SDTypeElement<PlayerModel> = {
     red: 4,
   },
   create: 'boolean',
+  hit: 'boolean',
   playerInputKeys: PlayerInputKeyBitmask,
 };
