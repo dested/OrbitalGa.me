@@ -2,7 +2,11 @@
   "extends": "./paths.json",
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "experimentalDecorators": true,
     "downlevelIteration": true,
@@ -18,5 +22,7 @@
     "noEmit": true,
     "jsx": "react"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

@@ -9,7 +9,7 @@ import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class EnemyShotEntity extends Entity implements Weapon {
   aliveDuration = 3000;
-  boundingBoxes = [{width: 9, height: 57}];
+  boundingBoxes = [{width: 9, height: 100}];
   damage = 1;
   explosionIntensity = 2;
   isWeapon = true as const;

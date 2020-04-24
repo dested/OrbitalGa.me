@@ -16,13 +16,11 @@
 - [ ] why do things get so jumpy when it lags
 - [ ] add audio
 - [ ] add server kill switch to boot everyone out
-- [ ] support multiple bounding boxes
-  - [ ] fix boundingbox not being from center
-  - [ ] add client side collisions better
-  - [x] add rotate to bounding box
-  - [ ] figure out collision position for explosion
 - [ ] server is offline, play with bots locally
-- [ ] fix momentum for player, should be additive not replacing
+- [ ] add score on death screen
+- [x] fix collisions of shots
+- [x] add rotate to bounding box
+- [x] add client side collisions better
 - [x] fix explosion animation
 - [x] get rid of explosion and make things light up when hit?
 - [x] dying and reviving does weird things, health bar wiggled too

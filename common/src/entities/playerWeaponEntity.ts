@@ -11,7 +11,7 @@ import {Utils} from '../utils/utils';
 
 export class PlayerWeaponEntity extends Entity implements Weapon {
   aliveDuration = 3000;
-  boundingBoxes = [{width: 9, height: 57}];
+  boundingBoxes = [{width: 9, height: 150}];
   damage: number;
   explosionIntensity: number;
   isWeapon = true as const;
