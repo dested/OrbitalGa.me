@@ -167,9 +167,12 @@ export type AssetKeys =
   | 'Missiles.spaceMissiles_038'
   | 'Missiles.spaceMissiles_039'
   | 'Missiles.spaceMissiles_040'
-  | 'Power_ups.bold_silver'
+  | 'Power_ups.badge_bronze'
+  | 'Power_ups.badge_gold'
+  | 'Power_ups.badge_silver'
   | 'Power_ups.bolt_bronze'
   | 'Power_ups.bolt_gold'
+  | 'Power_ups.bolt_silver'
   | 'Power_ups.pill_blue'
   | 'Power_ups.pill_green'
   | 'Power_ups.pill_red'
@@ -196,9 +199,6 @@ export type AssetKeys =
   | 'Power_ups.star_bronze'
   | 'Power_ups.star_gold'
   | 'Power_ups.star_silver'
-  | 'Power_ups.things_bronze'
-  | 'Power_ups.things_gold'
-  | 'Power_ups.things_silver'
   | 'Rocket_parts.spaceRocketParts_001'
   | 'Rocket_parts.spaceRocketParts_002'
   | 'Rocket_parts.spaceRocketParts_003'
@@ -476,9 +476,12 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Missiles.spaceMissiles_038': {asset: require('./assets/Missiles/spaceMissiles_038.png'), width: 21, height: 69},
   'Missiles.spaceMissiles_039': {asset: require('./assets/Missiles/spaceMissiles_039.png'), width: 21, height: 69},
   'Missiles.spaceMissiles_040': {asset: require('./assets/Missiles/spaceMissiles_040.png'), width: 21, height: 69},
-  'Power_ups.bold_silver': {asset: require('./assets/Power-ups/bold_silver.png'), width: 19, height: 30},
+  'Power_ups.badge_bronze': {asset: require('./assets/Power-ups/badge_bronze.png'), width: 32, height: 32},
+  'Power_ups.badge_gold': {asset: require('./assets/Power-ups/badge_gold.png'), width: 32, height: 32},
+  'Power_ups.badge_silver': {asset: require('./assets/Power-ups/badge_silver.png'), width: 32, height: 32},
   'Power_ups.bolt_bronze': {asset: require('./assets/Power-ups/bolt_bronze.png'), width: 19, height: 30},
   'Power_ups.bolt_gold': {asset: require('./assets/Power-ups/bolt_gold.png'), width: 19, height: 30},
+  'Power_ups.bolt_silver': {asset: require('./assets/Power-ups/bolt_silver.png'), width: 19, height: 30},
   'Power_ups.pill_blue': {asset: require('./assets/Power-ups/pill_blue.png'), width: 22, height: 21},
   'Power_ups.pill_green': {asset: require('./assets/Power-ups/pill_green.png'), width: 22, height: 21},
   'Power_ups.pill_red': {asset: require('./assets/Power-ups/pill_red.png'), width: 22, height: 21},
@@ -513,9 +516,6 @@ export const Assets: {[key in AssetKeys]: {asset: Promise<typeof import('*.png')
   'Power_ups.star_bronze': {asset: require('./assets/Power-ups/star_bronze.png'), width: 31, height: 30},
   'Power_ups.star_gold': {asset: require('./assets/Power-ups/star_gold.png'), width: 31, height: 30},
   'Power_ups.star_silver': {asset: require('./assets/Power-ups/star_silver.png'), width: 31, height: 30},
-  'Power_ups.things_bronze': {asset: require('./assets/Power-ups/things_bronze.png'), width: 32, height: 32},
-  'Power_ups.things_gold': {asset: require('./assets/Power-ups/things_gold.png'), width: 32, height: 32},
-  'Power_ups.things_silver': {asset: require('./assets/Power-ups/things_silver.png'), width: 32, height: 32},
   'Rocket_parts.spaceRocketParts_001': {
     asset: require('./assets/Rocket parts/spaceRocketParts_001.png'),
     width: 72,

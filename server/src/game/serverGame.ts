@@ -412,6 +412,7 @@ export class ServerGame extends Game {
       y: GameConstants.playerStartingY,
       playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
       hit: false,
+      badges: [],
     });
     this.gameLeaderboard.addPlayer(playerEntity.entityId);
     this.users.push({name, connectionId, entity: playerEntity});

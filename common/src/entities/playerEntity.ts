@@ -14,7 +14,7 @@ import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
-import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {SDArray, SDElement, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -27,9 +27,12 @@ export type PlayerInput = PlayerInputKeys & {
   inputSequenceNumber: number;
   weapon: PlayerWeapon | 'unset';
 };
-
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
 export type AvailablePlayerWeapon = {ammo: number; weapon: PlayerWeapon};
+export type PlayerBadges = {
+  level: 'bronze' | 'silver' | 'gold';
+  rank: 'bolt' | 'shield' | 'star' | 'badge';
+};
 
 export class PlayerEntity extends Entity implements Weapon {
   aliveTick = 0;
@@ -38,6 +41,7 @@ export class PlayerEntity extends Entity implements Weapon {
     {ammo: 5, weapon: 'rocket'},
     {ammo: 3, weapon: 'torpedo'},
   ];
+  badges: PlayerBadges[];
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
@@ -70,6 +74,7 @@ export class PlayerEntity extends Entity implements Weapon {
     this.ownerPlayerEntityId = messageModel.entityId;
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
+    this.badges = messageModel.badges;
     this.createPolygon();
   }
 
@@ -375,6 +380,7 @@ export class PlayerEntity extends Entity implements Weapon {
     this.playerColor = messageModel.playerColor;
     this.lastPlayerInput = messageModel.playerInputKeys;
     this.hit = messageModel.hit;
+    this.badges = messageModel.badges;
   }
 
   reconcileFromServerLive(messageModel: LivePlayerModel) {
@@ -384,6 +390,7 @@ export class PlayerEntity extends Entity implements Weapon {
     this.hit = messageModel.hit;
     this.dead = messageModel.dead;
     this.playerColor = messageModel.playerColor;
+    this.badges = messageModel.badges;
     this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
     this.momentumX = messageModel.momentumX;
     this.momentumY = messageModel.momentumY;
@@ -399,6 +406,7 @@ export class PlayerEntity extends Entity implements Weapon {
       health: this.health,
       playerColor: this.playerColor,
       playerInputKeys: this.lastPlayerInput ?? {down: false, left: false, right: false, shoot: false, up: false},
+      badges: this.badges,
       hit: this.hit,
       type: 'player',
     };
@@ -458,6 +466,7 @@ export class PlayerEntity extends Entity implements Weapon {
 }
 
 export type PlayerModel = EntityModel & {
+  badges: PlayerBadges[];
   health: number;
   hit: boolean;
   playerColor: PlayerColor;
@@ -467,6 +476,7 @@ export type PlayerModel = EntityModel & {
 
 export type LivePlayerModel = EntityModel & {
   availableWeapons: {ammo: number; weapon: PlayerWeapon}[];
+  badges: PlayerBadges[];
   dead: boolean;
   health: number;
   hit: boolean;
@@ -478,6 +488,14 @@ export type LivePlayerModel = EntityModel & {
   playersToRight: number;
   selectedWeapon: PlayerWeapon;
   type: 'livePlayer';
+};
+
+export const PlayerBadgesModelSchema: SDArray<SDSimpleObject<PlayerBadges>> = {
+  flag: 'array-uint8',
+  elements: {
+    level: {flag: 'enum', bronze: 1, silver: 3, gold: 3},
+    rank: {flag: 'enum', badge: 1, bolt: 2, shield: 3, star: 4},
+  },
 };
 
 export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
@@ -496,6 +514,7 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
     flag: 'array-uint8',
     elements: {ammo: 'uint16', weapon: PlayerWeaponEnumSchema},
   },
+  badges: PlayerBadgesModelSchema,
   dead: 'boolean',
   lastProcessedInputSequenceNumber: 'uint32',
   momentumX: 'float32',
@@ -515,6 +534,7 @@ export const PlayerModelSchema: SDTypeElement<PlayerModel> = {
     orange: 3,
     red: 4,
   },
+  badges: PlayerBadgesModelSchema,
   create: 'boolean',
   hit: 'boolean',
   playerInputKeys: PlayerInputKeyBitmask,

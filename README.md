@@ -69,15 +69,15 @@
 ## Game Rules
 
 - [ ] watch other shmups
-- [ ] come up with more enemies
 - [ ] come up with realtime events
   - [ ] big bosses every 5 min
   - [ ] countdown to next boss event
 - [ ] abstract game events into a class
   - [ ] register event at tick?
   - [ ] puzzles solve together like a maze blow up walls game event?
-- [ ] add 5 second sustained laser
 - [ ] need much better enemy variability
+- [ ] add player upgrades, unlock
+- [ ] add badges to player
 - [x] add score entity
 - [x] add laser spray
 - [x] add time based weapons
@@ -105,7 +105,6 @@
 
 - [x] server level leaderboard
 - [ ] global leaderboard
-  - [ ] redis
 - [x] add lambda for join/etc
 - [ ] checks for servers, spins one up?
 - [x] add login, login anon, register api
