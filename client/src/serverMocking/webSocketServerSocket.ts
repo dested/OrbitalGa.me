@@ -1,5 +1,5 @@
 import {WebSocketClient} from './webSocketClient';
-import {ISocket} from '../../../server/src/serverSocket';
+import {ISocket} from '@common/socket/models';
 
 export class WebSocketServerSocket implements ISocket {
   binaryType: string = '';

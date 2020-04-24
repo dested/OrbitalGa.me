@@ -40,5 +40,10 @@ type Mutation {
 
 type Query {
   placeholder: Boolean
-  spectateServer: GameModel
+  spectateServer: SpectateResponse
+}
+
+type SpectateResponse {
+  spectateJwt: String!
+  gameModel: GameModel
 }

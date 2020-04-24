@@ -3,8 +3,6 @@ import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
-import {MeteorModel} from '@common/entities/meteorEntity';
-import {AssetKeys} from '../../assets';
 import {CanvasUtils} from '../../utils/canvasUtils';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {

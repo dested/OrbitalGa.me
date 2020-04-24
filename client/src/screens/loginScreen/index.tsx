@@ -10,6 +10,13 @@ import {ClientGame} from '../../game/clientGame';
 import {unreachable} from '@common/utils/unreachable';
 import {Leaderboard} from '../../components/leaderboard';
 import {STOCError} from '@common/models/serverToClientMessages';
+import {useApolloClient} from 'react-apollo-hooks';
+import {
+  LoginAnonymousDocument,
+  LoginAnonymousMutation,
+  LoginAnonymousMutationVariables,
+} from '../../schema/generated/graphql';
+import {makeJwt} from '../../utils/jwt';
 
 const styles = {
   buttonList: {display: 'flex', width: '100%'},
@@ -19,22 +26,37 @@ const styles = {
 
 export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
-  const [connectStatus, setConnectingStatus] = useState<'none' | 'connecting'>('none');
+  const [connectStatus, setConnectingStatus] = useState<'none' | 'loggingIn' | 'connecting'>('none');
   const [error, setError] = useState('');
+  const apolloClient = useApolloClient();
 
-  useEffect(() => {
-    setTimeout(() => {
-      onJoin('1');
-    }, 100);
-  }, []);
+  useEffect(() => {}, []);
 
-  const servers = ['1' /*, '2', '3', '4', '11'*/];
-
-  const onJoin = useCallback(async (server: string) => {
-    uiStore.setServerPath(server);
+  const onJoin = useCallback(async () => {
     setError('');
+    if (!GameConstants.isSinglePlayer) {
+      setConnectingStatus('loggingIn');
+      const result = await apolloClient.mutate<LoginAnonymousMutation, LoginAnonymousMutationVariables>({
+        mutation: LoginAnonymousDocument,
+        variables: {userName: uiStore.playerName},
+      });
+      switch (result.data?.loginAnonymous.__typename) {
+        case 'ErrorResponse':
+          alert(result.data?.loginAnonymous.error);
+          return;
+        case 'LoginSuccessResponse': {
+          uiStore.setJwt(makeJwt(result.data?.loginAnonymous.jwt));
+          if (result.data?.loginAnonymous.gameModel) {
+            uiStore.setServerPath(result.data?.loginAnonymous.gameModel.serverUrl);
+          } else {
+            GameConstants.isSinglePlayer = true;
+          }
+          break;
+        }
+      }
+    }
     setConnectingStatus('connecting');
-    GameData.joinGame(uiStore.serverPath!, uiStore.playerName!, {
+    GameData.joinGame(uiStore.serverPath!, {
       onError: (client: ClientGame, errorMessage: STOCError) => {
         switch (errorMessage.reason) {
           case 'nameInUse':
@@ -63,7 +85,7 @@ export const LoginScreen: React.FC = observer((props) => {
         uiStore.setScreen('game');
       },
       onOpen: (client) => {
-        client.joinGame(uiStore.playerName!);
+        client.joinGame();
       },
       onDisconnect: () => {},
     });
@@ -89,11 +111,7 @@ export const LoginScreen: React.FC = observer((props) => {
         {uiStore.serverIsDown && <span style={styles.label}>Server is down...</span>}
         {(connectStatus === 'none' && (
           <div style={styles.buttonList}>
-            {servers.map((s) => (
-              <JoinButton key={s} onClick={() => onJoin(s)}>
-                Join {GameConstants.isSinglePlayer ? 'Single Player' : 'Server'}
-              </JoinButton>
-            ))}
+            <JoinButton onClick={onJoin}>Join {GameConstants.isSinglePlayer ? 'Single Player' : 'Server'}</JoinButton>{' '}
           </div>
         )) ||
           (connectStatus === 'connecting' && <Status>Connecting...</Status>)}

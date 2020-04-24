@@ -1,13 +1,14 @@
 import {action, observable} from 'mobx';
 import {persist} from 'mobx-persist';
 import {GameConstants} from '@common/game/gameConstants';
+import {Jwt, makeJwt} from '../../utils/jwt';
 
 type Screens = 'loading' | 'login' | 'game';
 
 export class UIStore {
   @persist
   @observable
-  jwt?: string;
+  jwt?: Jwt;
 
   @persist
   @observable
@@ -22,7 +23,10 @@ export class UIStore {
   @observable
   serverPath?: string;
 
-  @action setJwt(jwt: string) {
+  @observable
+  spectateJwt?: Jwt;
+
+  @action setJwt(jwt: Jwt) {
     this.jwt = jwt;
   }
 
@@ -43,6 +47,10 @@ export class UIStore {
 
   @action setServerPath(serverPath: string) {
     this.serverPath = serverPath;
+  }
+
+  setSpectateJwt(spectateJwt: string) {
+    this.spectateJwt = makeJwt(spectateJwt);
   }
 }
 

@@ -15,7 +15,7 @@ export type Scalars = {
 export type Query = {
   __typename?: 'Query';
   placeholder?: Maybe<Scalars['Boolean']>;
-  spectateServer?: Maybe<GameModel>;
+  spectateServer?: Maybe<SpectateResponse>;
 };
 
 export type Mutation = {
@@ -55,6 +55,12 @@ export type GameModel = {
   __typename?: 'GameModel';
   serverId: Scalars['Int'];
   serverUrl: Scalars['String'];
+};
+
+export type SpectateResponse = {
+  __typename?: 'SpectateResponse';
+  spectateJwt: Scalars['String'];
+  gameModel?: Maybe<GameModel>;
 };
 
 export type LoginInput = {
@@ -149,6 +155,7 @@ export type ResolversTypes = ResolversObject<{
   ErrorResponse: ResolverTypeWrapper<ErrorResponse>;
   GameModel: ResolverTypeWrapper<GameModel>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  SpectateResponse: ResolverTypeWrapper<SpectateResponse>;
   LoginInput: LoginInput;
   LoginAnonymousInput: LoginAnonymousInput;
 }>;
@@ -165,6 +172,7 @@ export type ResolversParentTypes = ResolversObject<{
   ErrorResponse: ErrorResponse;
   GameModel: GameModel;
   Int: Scalars['Int'];
+  SpectateResponse: SpectateResponse;
   LoginInput: LoginInput;
   LoginAnonymousInput: LoginAnonymousInput;
 }>;
@@ -178,7 +186,7 @@ export type QueryResolvers<
   ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
 > = ResolversObject<{
   placeholder?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  spectateServer?: Resolver<Maybe<ResolversTypes['GameModel']>, ParentType, ContextType>;
+  spectateServer?: Resolver<Maybe<ResolversTypes['SpectateResponse']>, ParentType, ContextType>;
 }>;
 
 export type MutationResolvers<
@@ -239,6 +247,15 @@ export type GameModelResolvers<
   __isTypeOf?: isTypeOfResolverFn<ParentType>;
 }>;
 
+export type SpectateResponseResolvers<
+  ContextType = OrbitalContext,
+  ParentType extends ResolversParentTypes['SpectateResponse'] = ResolversParentTypes['SpectateResponse']
+> = ResolversObject<{
+  spectateJwt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  gameModel?: Resolver<Maybe<ResolversTypes['GameModel']>, ParentType, ContextType>;
+  __isTypeOf?: isTypeOfResolverFn<ParentType>;
+}>;
+
 export type Resolvers<ContextType = OrbitalContext> = ResolversObject<{
   Date?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
@@ -247,6 +264,7 @@ export type Resolvers<ContextType = OrbitalContext> = ResolversObject<{
   LoginSuccessResponse?: LoginSuccessResponseResolvers<ContextType>;
   ErrorResponse?: ErrorResponseResolvers<ContextType>;
   GameModel?: GameModelResolvers<ContextType>;
+  SpectateResponse?: SpectateResponseResolvers<ContextType>;
 }>;
 
 /**

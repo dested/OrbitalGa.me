@@ -9,6 +9,7 @@
     "module": "commonjs",
     "emitDecoratorMetadata": true,
     "noEmit": true,
+    "jsx": "react",
     "sourceMap": true,
     "pretty": true,
     "moduleResolution": "node",

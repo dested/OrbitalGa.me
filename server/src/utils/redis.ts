@@ -1,4 +1,4 @@
-import {createClient, RedisClient} from 'redis';
+import {RedisClient} from 'redis';
 // import {Config} from '../config';
 
 export class RedisManager {

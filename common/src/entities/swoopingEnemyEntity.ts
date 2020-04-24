@@ -2,7 +2,6 @@ import {Result} from 'collisions';
 import {Utils} from '../utils/utils';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {GameRules} from '../game/gameRules';
@@ -12,7 +11,7 @@ import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {ScoreEntity} from './scoreEntity';
-import {GameLeaderboard, LeaderboardEntryWeight} from '../game/gameLeaderboard';
+import {LeaderboardEntryWeight} from '../game/gameLeaderboard';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 

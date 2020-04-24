@@ -4,7 +4,7 @@ import {SDTypeLookup, SDTypeLookupElements} from '../schemaDefiner/schemaDefiner
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from './schemaEnums';
 import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 
-type CTOSJoin = {name: string; type: 'join'};
+type CTOSJoin = {type: 'join'};
 type CTOSSpectate = {type: 'spectate'};
 type CTOSPing = {ping: number; type: 'ping'};
 type CTOSPlayerInput = {
@@ -18,7 +18,7 @@ export type ClientToServerMessage = CTOSJoin | CTOSSpectate | CTOSPing | CTOSPla
 
 const CTOSPingSchema: SDTypeLookup<ClientToServerMessage, 'ping'> = {ping: 'uint32'};
 
-const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {name: 'string'};
+const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {};
 
 const CTOSSpectateSchema: SDTypeLookup<ClientToServerMessage, 'spectate'> = {};
 

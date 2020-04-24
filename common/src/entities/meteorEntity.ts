@@ -3,13 +3,11 @@ import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
-import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
-import {ScoreEntity} from './scoreEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 

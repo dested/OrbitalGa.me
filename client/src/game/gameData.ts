@@ -9,6 +9,7 @@ import {BotClientGame} from './botClientGame';
 import {ClientGame, ClientGameOptions} from './clientGame';
 import {STOCError} from '@common/models/serverToClientMessages';
 import {ServerStatSync} from '../../../server/src/game/IServerSync';
+import {uiStore} from '../store/uiStore';
 
 export class GameData {
   static client?: ClientGameUI;
@@ -20,24 +21,14 @@ export class GameData {
     if (GameConstants.isSinglePlayer) {
       return new LocalClientSocket();
     } else {
-      return new ClientSocket();
+      return new ClientSocket(uiStore.jwt || uiStore.spectateJwt);
     }
   }
 
-  static joinGame(serverPath: string, name: string, options: ClientGameOptions) {
-    if (!this.client || this.serverPath !== serverPath) {
-      this.client?.disconnect();
-      this.serverPath = serverPath;
-      this.client = new ClientGameUI(this.serverPath, options, this.getClientSocket());
-    } else {
-      if (!this.client.socket.isConnected()) {
-        this.client.setOptions(options);
-        this.client.connect();
-      } else {
-        this.client.setOptions(options);
-        this.client.joinGame(name);
-      }
-    }
+  static joinGame(serverPath: string, options: ClientGameOptions) {
+    this.client?.disconnect();
+    this.serverPath = serverPath;
+    this.client = new ClientGameUI(this.serverPath, options, this.getClientSocket());
   }
 
   static setOptions(options: ClientGameOptions) {
@@ -86,12 +77,12 @@ export class GameData {
           {
             onError: (client: ClientGame, error: STOCError) => {},
             onDied: (client) => {
-              client.joinGame(Math.random().toFixed(8));
+              client.joinGame();
             },
             onUIUpdate: () => {},
             onReady: () => {},
             onOpen: (client) => {
-              client.joinGame(Math.random().toFixed(8));
+              client.joinGame();
             },
             onDisconnect: () => {},
           },

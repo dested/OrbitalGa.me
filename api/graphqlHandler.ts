@@ -1,5 +1,4 @@
 import {Utils} from '@common/utils/utils';
-import {AuthService} from '../server-common/src/auth/authService';
 import * as bcrypt from 'bcryptjs';
 import {ApolloServer} from 'apollo-server-lambda';
 import {GameModel, Resolvers} from './schema/generated/graphql';
@@ -8,7 +7,7 @@ import * as CommonTypeDefs from './schema/common.graphql';
 import * as UserTypeDefs from './schema/user.graphql';
 import * as UserInputTypeDefs from './schema/user.input.graphql';
 import {DateScalar} from './gqlUtils/dateScalar';
-import {prisma, User} from 'orbitalgame-server-common/build/index';
+import {AuthService, prisma, User} from 'orbitalgame-server-common/build';
 
 const getNextGameServer = async (): Promise<GameModel | null> => {
   const latestServer = await prisma.server.findMany({where: {live: true}, orderBy: {updatedAt: 'desc'}, first: 5});
@@ -30,6 +29,8 @@ async function userReady(user: User) {
   const game = await getNextGameServer();
   const jwt = await AuthService.createToken({
     userId: user.id,
+    isAnonymous: user.anonymous,
+    userName: user.username,
   });
   return {
     jwt,
@@ -40,8 +41,11 @@ async function userReady(user: User) {
 const resolvers: Resolvers = {
   Query: {
     placeholder: () => true,
-    spectateServer: () => {
-      return getNextGameServer();
+    spectateServer: async () => {
+      return {
+        spectateJwt: await AuthService.createSpectateToken(),
+        gameModel: await getNextGameServer(),
+      };
     },
   },
   Mutation: {

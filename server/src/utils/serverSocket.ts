@@ -1,38 +1,21 @@
-///<reference path="./types/ws.d.ts"/>
+///<reference path="../types/ws.d.ts"/>
+
 import * as WebServer from 'ws';
+import * as url from 'url';
 import {GameConstants} from '@common/game/gameConstants';
 import {createServer} from 'http';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {nextId} from '@common/utils/uuid';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
-import {ClientToServerMessage, ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
+import {ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
 import {
   ServerToClientMessage,
   ServerToClientSchemaAdderFunction,
   ServerToClientSchemaAdderSizeFunction,
 } from '@common/models/serverToClientMessages';
+import {IServerSocket, ServerSocketOptions, SocketConnection} from '@common/socket/models';
+import {AuthService} from 'orbitalgame-server-common/build';
 
-export type SocketConnection = {
-  connectionId: number;
-  lastAction: number;
-  lastPing: number;
-  socket: ISocket;
-  spectatorJoin?: number;
-};
-
-export interface ISocket {
-  binaryType: string;
-  onclose: (result: any) => void;
-  onmessage: (message: any) => void;
-  close(): void;
-  send(message: string | ArrayBuffer): void;
-}
-
-export type ServerSocketOptions = {
-  onJoin: (connectionId: number) => void;
-  onLeave: (connectionId: number) => void;
-  onMessage: (connectionId: number, message: ClientToServerMessage) => void;
-};
 export class ServerSocket implements IServerSocket {
   connections = new ArrayHash<SocketConnection>('connectionId');
 
@@ -90,18 +73,47 @@ export class ServerSocket implements IServerSocket {
       }
     });
 
-    this.wss = new WebServer.Server({server, perMessageDeflate: false});
+    this.wss = new WebServer.Server({server, noServer: true, perMessageDeflate: false});
     this.wss.on('error', (a: any, b: any) => {
       console.error('error', a, b);
+      throw a;
     });
 
-    this.wss.on('connection', (ws) => {
+    this.wss.on('connection', (ws, request) => {
+      debugger;
+      if (!request.url) {
+        ws.close();
+        return;
+      }
+      const query = url.parse(request.url).query;
+      if (!query) {
+        ws.close();
+        return;
+      }
+      const [jwtKey, jwt] = query.split('=');
+      if (jwtKey !== 'jwt' || !jwt) {
+        ws.close();
+        return;
+      }
+
+      let jwtUser: SocketConnection['jwt'];
+      if (AuthService.validateSpectate(jwt)) {
+        jwtUser = {spectator: true};
+      } else {
+        const jwtResult = AuthService.validate(jwt);
+        if (!jwtResult) {
+          ws.close();
+          return;
+        }
+        jwtUser = jwtResult;
+      }
       ws.binaryType = 'arraybuffer';
       const me: SocketConnection = {
         socket: ws,
         connectionId: nextId(),
         lastAction: +new Date(),
         lastPing: +new Date(),
+        jwt: jwtUser,
       };
 
       this.connections.push(me);
@@ -153,15 +165,4 @@ export class ServerSocket implements IServerSocket {
     });
     server.listen(port);
   }
-}
-
-export interface IServerSocket {
-  connections: ArrayHash<SocketConnection>;
-  totalBytesReceived: number;
-  totalBytesSent: number;
-  totalBytesSentPerSecond: number;
-
-  disconnect(connectionId: number): void;
-  sendMessage(connectionId: number, messages: ServerToClientMessage[]): void;
-  start(serverSocketOptions: ServerSocketOptions): void;
 }

@@ -13,7 +13,10 @@
   "dependencies": {
     "@types/websocket": "^1.0.0",
     "websocket": "^1.0.31",
-    "collisions": "^2.0.13"
+    "collisions": "^2.0.13",
+    "node-fetch": "^2.6.0",
+    "graphql": "^14.6.0",
+    "apollo-boost": "^0.4.7"
   },
   "devDependencies": {
     "@types/node": "^8.0.28",

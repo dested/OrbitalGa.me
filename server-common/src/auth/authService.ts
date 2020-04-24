@@ -1,9 +1,19 @@
 import * as jwt from 'jsonwebtoken';
 import {Config} from '../config/config';
-import {JwtPlayer} from './models/jwtPlayer';
+import {JwtPlayer, JwtSpectate} from './jwtModels';
 import {SecureConfig} from '../config/secureConfig';
 
 export class AuthService {
+  static async createSpectateToken(): Promise<string> {
+    const payload: JwtSpectate = {
+      timeJoined: +new Date(),
+    };
+    await SecureConfig.setup();
+    await Config.setup();
+    const expiresIn = 60 * 1;
+    const token = jwt.sign(payload, Config.jwtSpectateKey, {expiresIn});
+    return token;
+  }
   static async createToken(user: JwtPlayer): Promise<string> {
     await SecureConfig.setup();
     await Config.setup();
@@ -17,7 +27,7 @@ export class AuthService {
       return undefined;
     }
     try {
-      const jwtUser = this.validateJwt(authorization.replace('Bearer ', ''));
+      const jwtUser = jwt.verify(authorization.replace('Bearer ', ''), Config.jwtPlayerKey) as JwtPlayer | undefined;
       if (!jwtUser) {
         return undefined;
       }
@@ -26,10 +36,19 @@ export class AuthService {
       return undefined;
     }
   }
-  static validateJwt(jwtText: string): JwtPlayer | undefined {
+
+  static validateSpectate(authorization: string): JwtSpectate | undefined {
+    if (!authorization) {
+      return undefined;
+    }
     try {
-      const j = jwt.verify(jwtText || '', Config.jwtPlayerKey);
-      return (j as unknown) as JwtPlayer;
+      const jwtUser = jwt.verify(authorization.replace('Bearer ', ''), Config.jwtSpectateKey) as
+        | JwtSpectate
+        | undefined;
+      if (!jwtUser) {
+        return undefined;
+      }
+      return jwtUser;
     } catch (ex) {
       return undefined;
     }

@@ -1,4 +1,4 @@
-import {prisma, ServerStat, ServerStatCreateInput} from 'orbitalgame-server-common/build/index';
+import {prisma, ServerStatCreateInput} from 'orbitalgame-server-common/build';
 import {GameConstants} from '@common/game/gameConstants';
 import {IServerSync} from './IServerSync';
 import {Utils} from '@common/utils/utils';

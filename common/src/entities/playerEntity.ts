@@ -5,7 +5,6 @@ import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
 import {WallEntity} from './wallEntity';
-import {ExplosionEntity} from './explosionEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Utils} from '../utils/utils';
@@ -14,7 +13,7 @@ import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
-import {SDArray, SDElement, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {SDArray, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export type PlayerInputKeys = {
   down: boolean;

@@ -104,9 +104,9 @@ export class ClientGame extends Game {
     }
   }
 
-  joinGame(name: string) {
+  joinGame() {
     this.lastXY = undefined;
-    this.sendMessageToServer({type: 'join', name});
+    this.sendMessageToServer({type: 'join'});
   }
 
   killPlayer(player: PlayerEntity): void {}

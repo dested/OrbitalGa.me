@@ -88,7 +88,8 @@ export const GameScreen: React.FC = observer((props) => {
       },
       onReady: () => {},
       onOpen: (client) => {
-        client.joinGame(uiStore.playerName!);
+        setDisconnected(false);
+        client.joinGame();
       },
       onDisconnect: () => {
         setDisconnected(true);
@@ -97,7 +98,7 @@ export const GameScreen: React.FC = observer((props) => {
   }, []);
 
   const connect = useCallback(() => {
-    GameData.joinGame(uiStore.serverPath!, uiStore.playerName!, {
+    GameData.joinGame(uiStore.serverPath!, {
       onError: (client: ClientGame, error: STOCError) => {},
       onDied: () => {
         setDied(true);
@@ -107,7 +108,8 @@ export const GameScreen: React.FC = observer((props) => {
       },
       onReady: () => {},
       onOpen: (client) => {
-        client.joinGame(uiStore.playerName!);
+        setDisconnected(false);
+        client.joinGame();
       },
       onDisconnect: () => {
         setDisconnected(true);

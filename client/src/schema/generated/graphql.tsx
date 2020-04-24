@@ -8,13 +8,13 @@ export type Maybe<T> = T | null;
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
+  ID: string;
+  String: string;
   Boolean: boolean;
+  Int: number;
+  Float: number;
   /** Date custom scalar type */
   Date: Date;
-  Float: number;
-  ID: string;
-  Int: number;
-  String: string;
 };
 
 export enum CacheControlScope {
@@ -38,23 +38,23 @@ export type LoginAnonymousInput = {
 };
 
 export type LoginInput = {
-  password: Scalars['String'];
   userName: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type LoginResponse = LoginSuccessResponse | ErrorResponse;
 
 export type LoginSuccessResponse = {
   __typename?: 'LoginSuccessResponse';
-  gameModel?: Maybe<GameModel>;
   jwt: Scalars['String'];
+  gameModel?: Maybe<GameModel>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  login: LoginResponse;
-  loginAnonymous: LoginResponse;
   placeholder?: Maybe<Scalars['Boolean']>;
+  loginAnonymous: LoginResponse;
+  login: LoginResponse;
   register: LoginResponse;
 };
 
@@ -73,12 +73,18 @@ export type MutationRegisterArgs = {
 export type Query = {
   __typename?: 'Query';
   placeholder?: Maybe<Scalars['Boolean']>;
-  spectateServer?: Maybe<GameModel>;
+  spectateServer?: Maybe<SpectateResponse>;
+};
+
+export type SpectateResponse = {
+  __typename?: 'SpectateResponse';
+  spectateJwt: Scalars['String'];
+  gameModel?: Maybe<GameModel>;
 };
 
 export type LoginMutationVariables = {
-  password: Scalars['String'];
   userName: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type LoginMutation = {__typename?: 'Mutation'} & {
@@ -89,10 +95,26 @@ export type LoginMutation = {__typename?: 'Mutation'} & {
     | ({__typename: 'ErrorResponse'} & Pick<ErrorResponse, 'error'>);
 };
 
+export type LoginAnonymousMutationVariables = {
+  userName: Scalars['String'];
+};
+
+export type LoginAnonymousMutation = {__typename?: 'Mutation'} & {
+  loginAnonymous:
+    | ({__typename: 'LoginSuccessResponse'} & Pick<LoginSuccessResponse, 'jwt'> & {
+          gameModel?: Maybe<{__typename?: 'GameModel'} & GameModelFragmentFragment>;
+        })
+    | ({__typename: 'ErrorResponse'} & Pick<ErrorResponse, 'error'>);
+};
+
 export type SpectateQueryVariables = {};
 
 export type SpectateQuery = {__typename?: 'Query'} & {
-  spectateServer?: Maybe<{__typename?: 'GameModel'} & GameModelFragmentFragment>;
+  spectateServer?: Maybe<
+    {__typename?: 'SpectateResponse'} & Pick<SpectateResponse, 'spectateJwt'> & {
+        gameModel?: Maybe<{__typename?: 'GameModel'} & GameModelFragmentFragment>;
+      }
+  >;
 };
 
 export type GameModelFragmentFragment = {__typename?: 'GameModel'} & Pick<GameModel, 'serverId' | 'serverUrl'>;
@@ -177,10 +199,100 @@ export function useLoginMutation(
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = ApolloReactCommon.MutationResult<LoginMutation>;
 export type LoginMutationOptions = ApolloReactCommon.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export const LoginAnonymousDocument = gql`
+  mutation LoginAnonymous($userName: String!) {
+    loginAnonymous(request: {userName: $userName}) {
+      __typename
+      ... on ErrorResponse {
+        error
+      }
+      ... on LoginSuccessResponse {
+        gameModel {
+          ...GameModelFragment
+        }
+        jwt
+      }
+    }
+  }
+  ${GameModelFragmentFragmentDoc}
+`;
+export type LoginAnonymousMutationFn = ApolloReactCommon.MutationFunction<
+  LoginAnonymousMutation,
+  LoginAnonymousMutationVariables
+>;
+export type LoginAnonymousComponentProps = Omit<
+  ApolloReactComponents.MutationComponentOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>,
+  'mutation'
+>;
+
+export const LoginAnonymousComponent = (props: LoginAnonymousComponentProps) => (
+  <ApolloReactComponents.Mutation<LoginAnonymousMutation, LoginAnonymousMutationVariables>
+    mutation={LoginAnonymousDocument}
+    {...props}
+  />
+);
+
+export type LoginAnonymousProps<TChildProps = {}, TDataName extends string = 'mutate'> = {
+  [key in TDataName]: ApolloReactCommon.MutationFunction<LoginAnonymousMutation, LoginAnonymousMutationVariables>;
+} &
+  TChildProps;
+export function withLoginAnonymous<TProps, TChildProps = {}, TDataName extends string = 'mutate'>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    LoginAnonymousMutation,
+    LoginAnonymousMutationVariables,
+    LoginAnonymousProps<TChildProps, TDataName>
+  >
+) {
+  return ApolloReactHoc.withMutation<
+    TProps,
+    LoginAnonymousMutation,
+    LoginAnonymousMutationVariables,
+    LoginAnonymousProps<TChildProps, TDataName>
+  >(LoginAnonymousDocument, {
+    alias: 'loginAnonymous',
+    ...operationOptions,
+  });
+}
+
+/**
+ * __useLoginAnonymousMutation__
+ *
+ * To run a mutation, you first call `useLoginAnonymousMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLoginAnonymousMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [loginAnonymousMutation, { data, loading, error }] = useLoginAnonymousMutation({
+ *   variables: {
+ *      userName: // value for 'userName'
+ *   },
+ * });
+ */
+export function useLoginAnonymousMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>
+) {
+  return ApolloReactHooks.useMutation<LoginAnonymousMutation, LoginAnonymousMutationVariables>(
+    LoginAnonymousDocument,
+    baseOptions
+  );
+}
+export type LoginAnonymousMutationHookResult = ReturnType<typeof useLoginAnonymousMutation>;
+export type LoginAnonymousMutationResult = ApolloReactCommon.MutationResult<LoginAnonymousMutation>;
+export type LoginAnonymousMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  LoginAnonymousMutation,
+  LoginAnonymousMutationVariables
+>;
 export const SpectateDocument = gql`
   query Spectate {
     spectateServer {
-      ...GameModelFragment
+      spectateJwt
+      gameModel {
+        ...GameModelFragment
+      }
     }
   }
   ${GameModelFragmentFragmentDoc}

@@ -1,5 +1,4 @@
 import {unreachable} from '@common/utils/unreachable';
-import {IServerSocket} from '../serverSocket';
 import {nextId} from '@common/utils/uuid';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
@@ -19,6 +18,7 @@ import {GameRules} from '@common/game/gameRules';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {IServerSync} from './IServerSync';
+import {IServerSocket} from '@common/socket/models';
 
 type Spectator = {connectionId: number};
 type User = {
@@ -126,7 +126,7 @@ export class ServerGame extends Game {
       const q = this.queuedMessages[i];
       switch (q.message.type) {
         case 'join':
-          this.userJoin(q.connectionId, q.message.name);
+          this.userJoin(q.connectionId);
           break;
         case 'spectate':
           this.spectatorJoin(q.connectionId);
@@ -365,7 +365,7 @@ export class ServerGame extends Game {
     });
   }
 
-  userJoin(connectionId: number, name: string) {
+  userJoin(connectionId: number) {
     const connection = this.serverSocket.connections.lookup(connectionId);
     if (connection) {
       connection.lastAction = +new Date();
@@ -373,7 +373,12 @@ export class ServerGame extends Game {
       // connection is already dead
       return;
     }
+    if ('spectator' in connection.jwt) {
+      this.serverSocket.disconnect(connectionId);
+      return;
+    }
 
+    const name = connection.jwt.userName;
     if (this.users.length > GameConstants.capOnServerUsers) {
       this.serverSocket.sendMessage(connectionId, [{type: 'error', reason: 'userCapacity'}]);
       this.serverSocket.disconnect(connectionId);
@@ -388,19 +393,6 @@ export class ServerGame extends Game {
     if (user) {
       this.userLeave(connectionId);
       this.queuedMessagesToSend[connectionId] = [];
-    }
-    if (name.length > 10) {
-      this.serverSocket.disconnect(connectionId);
-      return;
-    }
-    if (this.users.filter((u) => u.name === name).length > 0) {
-      this.serverSocket.sendMessage(connectionId, [
-        {
-          type: 'error',
-          reason: 'nameInUse',
-        },
-      ]);
-      return;
     }
 
     const startingPos = this.entityClusterer.getNewPlayerXPosition();

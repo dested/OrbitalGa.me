@@ -1,4 +1,4 @@
-import {JwtPlayer} from '../../server-common/src/auth/models/jwtPlayer';
+import {JwtPlayer} from 'orbitalgame-server-common/build';
 
 export interface OrbitalContext {
   jwtPlayer?: JwtPlayer;

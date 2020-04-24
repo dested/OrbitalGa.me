@@ -1,7 +1,6 @@
 import {Result} from 'collisions';
 import {Game} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
-import {ExplosionEntity} from './explosionEntity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';

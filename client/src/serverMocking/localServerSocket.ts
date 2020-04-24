@@ -1,4 +1,3 @@
-import {IServerSocket, ServerSocketOptions, SocketConnection} from '../../../server/src/serverSocket';
 import {WebSocketServer} from './webSocketServer';
 import {GameConstants} from '@common/game/gameConstants';
 import {ArrayHash} from '@common/utils/arrayHash';
@@ -10,6 +9,7 @@ import {
   ServerToClientSchemaAdderSizeFunction,
 } from '@common/models/serverToClientMessages';
 import {ClientToServerSchemaReaderFunction} from '@common/models/clientToServerMessages';
+import {IServerSocket, ServerSocketOptions, SocketConnection} from '@common/socket/models';
 
 export class LocalServerSocket implements IServerSocket {
   connections = new ArrayHash<SocketConnection>('connectionId');
@@ -68,6 +68,7 @@ export class LocalServerSocket implements IServerSocket {
         spectatorJoin: +new Date(),
         lastAction: +new Date(),
         lastPing: +new Date(),
+        jwt: {userId: Math.random(), isAnonymous: true, userName: Math.random() + ''},
       };
       // console.log('new connection', me.connectionId);
       this.connections.push(me);

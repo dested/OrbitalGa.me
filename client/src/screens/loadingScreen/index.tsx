@@ -23,9 +23,10 @@ export const LoadingScreen: React.FC = observer((props) => {
         const result = await apolloClient.query<SpectateQuery>({
           query: SpectateDocument,
         });
-        if (result.data.spectateServer) {
+        if (result.data.spectateServer && result.data.spectateServer.gameModel) {
           GameData.start();
-          GameData.spectateGame(result.data.spectateServer.serverUrl);
+          uiStore.setSpectateJwt(result.data.spectateServer.spectateJwt);
+          GameData.spectateGame(result.data.spectateServer.gameModel.serverUrl);
         } else {
           uiStore.setServerDown(true);
           GameData.start();

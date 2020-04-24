@@ -1,5 +1,5 @@
 extend type Query {
-  spectateServer: GameModel
+  spectateServer: SpectateResponse
 }
 
 extend type Mutation {
@@ -20,4 +20,9 @@ type ErrorResponse {
 type GameModel {
   serverId: Int!
   serverUrl: String!
+}
+
+type SpectateResponse {
+  spectateJwt: String!
+  gameModel: GameModel
 }

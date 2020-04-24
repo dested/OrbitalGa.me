@@ -4,9 +4,7 @@ import {ClientGame} from '../clientGame';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
-import {MeteorModel} from '@common/entities/meteorEntity';
 import {unreachable} from '@common/utils/unreachable';
-import {start} from 'repl';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   static _whitePlayer?: HTMLCanvasElement;

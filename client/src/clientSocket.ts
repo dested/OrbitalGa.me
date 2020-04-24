@@ -7,9 +7,11 @@ import {
   ClientToServerSchemaAdderFunction,
   ClientToServerSchemaAdderSizeFunction,
 } from '@common/models/clientToServerMessages';
+import {Jwt} from './utils/jwt';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
+  constructor(private jwt?: Jwt) {}
   connect(
     serverPath: string,
     options: {
@@ -18,8 +20,12 @@ export class ClientSocket implements IClientSocket {
       onOpen: () => void;
     }
   ) {
+    if (!this.jwt) {
+      console.log('not authenticated');
+      return;
+    }
     let totalLength = 0;
-    this.socket = new WebSocket(ClientConfig.websocketUrl(serverPath));
+    this.socket = new WebSocket(ClientConfig.websocketUrl(serverPath) + '?jwt=' + this.jwt);
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       options.onOpen();

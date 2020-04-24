@@ -12,9 +12,28 @@ mutation Login($userName: String!, $password: String!) {
     }
   }
 }
+
+mutation LoginAnonymous($userName: String!) {
+  loginAnonymous(request: {userName: $userName}) {
+    __typename
+    ... on ErrorResponse {
+      error
+    }
+    ... on LoginSuccessResponse {
+      gameModel {
+        ...GameModelFragment
+      }
+      jwt
+    }
+  }
+}
+
 query Spectate {
   spectateServer {
-    ...GameModelFragment
+    spectateJwt
+    gameModel {
+      ...GameModelFragment
+    }
   }
 }
 
