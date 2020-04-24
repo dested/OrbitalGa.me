@@ -233,7 +233,7 @@ export class PlayerEntity extends Entity implements Weapon {
       }
     }
 
-    const ramp = GameRules.player.base.ramp;
+    const ramp = GameRules.player.base.speedRamp;
     if (input.left) {
       this.xInputsThisTick = true;
       this.momentumX -= ramp;

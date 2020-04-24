@@ -58,7 +58,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
       {
         phase: 'bounce' as const,
         type: 'loop',
-        loopCount: 3,
+        loopCount: 6,
         duration: 5,
         variability: 10,
         points: [

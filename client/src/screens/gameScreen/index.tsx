@@ -54,6 +54,21 @@ const styles = {
     right: 0,
     background: 'transparent',
   },
+  scoreItem: {
+    fontFamily: 'kenney_spaceregular',
+    fontSize: '0.3rem',
+    lineHeight: '0.8rem',
+    color: 'white',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  score: {
+    textAlign: 'center',
+    fontFamily: 'kenney_spaceregular',
+    fontSize: '0.7rem',
+    color: 'white',
+    marginBottom: '1rem',
+  },
 } as const;
 
 export const GameScreen: React.FC = observer((props) => {
@@ -102,6 +117,7 @@ export const GameScreen: React.FC = observer((props) => {
 
   const revive = useCallback(() => {
     setDied(false);
+    setDisconnected(false);
     connect();
   }, []);
 
@@ -171,7 +187,7 @@ export const GameScreen: React.FC = observer((props) => {
       />
       <Weapons tick={tick} />
       <Wrapper>
-        {disconnected && (
+        {disconnected && !died && (
           <LoginBox>
             <Logo>Orbital</Logo>
             <span style={styles.label}>DISCONNECTED</span>
@@ -185,10 +201,40 @@ export const GameScreen: React.FC = observer((props) => {
             </JoinButton>
           </LoginBox>
         )}
-        {!disconnected && died && (
+        {died && (
           <LoginBox>
-            <Logo>Orbital</Logo>
-            <span style={styles.label}>You Died</span>
+            <Logo>You Died</Logo>
+            <div style={{marginLeft: '1rem', marginRight: '1rem', marginBottom: '0.5rem'}}>
+              <div style={styles.score}>Rank: {GameData.client?.myScore?.rank}</div>
+              <div style={styles.scoreItem}>
+                <span>Score</span>
+                <span>{GameData.client?.myScore?.calculatedScore}</span>
+              </div>
+              <div style={styles.scoreItem}>
+                <span>Alive Time</span>
+                <span>{Math.round((GameData.client?.myScore?.aliveTime ?? 0) / 1000)} seconds</span>
+              </div>
+              <div style={styles.scoreItem}>
+                <span>Damage Given</span>
+                <span>{GameData.client?.myScore?.damageGiven}</span>
+              </div>
+              <div style={styles.scoreItem}>
+                <span>Damage Taken</span>
+                <span>{GameData.client?.myScore?.damageTaken}</span>
+              </div>
+              <div style={styles.scoreItem}>
+                <span>Enemies Killed</span>
+                <span>{GameData.client?.myScore?.enemiesKilled}</span>
+              </div>
+              <div style={styles.scoreItem}>
+                <span>Events Participated In</span>
+                <span>{GameData.client?.myScore?.eventsParticipatedIn}</span>
+              </div>
+              <div style={styles.scoreItem}>
+                <span>Shots Fired</span>
+                <span>{GameData.client?.myScore?.shotsFired}</span>
+              </div>
+            </div>
             <JoinButton onClick={revive}>Revive</JoinButton>
           </LoginBox>
         )}

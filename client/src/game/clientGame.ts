@@ -32,6 +32,7 @@ export class ClientGame extends Game {
   lastXY?: {x: number; y: number};
   leaderboardScores: LeaderboardEntryRanked[] = [];
   liveEntity?: ClientLivePlayerEntity;
+  myScore?: LeaderboardEntryRanked;
   pingIndex = 0;
   pings: {[pingIndex: number]: number} = {};
   spectatorEntity?: SpectatorEntity;
@@ -187,6 +188,12 @@ export class ClientGame extends Game {
           break;
         case 'leaderboard':
           this.leaderboardScores = message.scores;
+          if (this.liveEntity) {
+            const myScore = message.scores.find((a) => a.userId === this.liveEntity?.entityId);
+            if (myScore) {
+              this.myScore = myScore;
+            }
+          }
           break;
         case 'pong':
           if (!(message.ping in this.pings)) {

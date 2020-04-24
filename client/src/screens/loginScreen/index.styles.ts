@@ -17,14 +17,14 @@ export const LoginBox = glamorous.div({
   borderRadius: 20,
   width: '30vw',
   background: 'rgba(69,84,147,0.5)',
-  padding: 40,
+  padding: '1rem',
 });
 
 export const Logo = glamorous.span({
   ...flex,
   alignSelf: 'center',
   color: 'white',
-  fontSize: '39px',
+  fontSize: '1rem',
 });
 
 export const NameBox = glamorous.input({

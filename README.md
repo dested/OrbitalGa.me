@@ -17,7 +17,7 @@
 - [ ] add audio
 - [ ] add server kill switch to boot everyone out
 - [ ] server is offline, play with bots locally
-- [ ] add score on death screen
+- [x] add score on death screen
 - [x] fix collisions of shots
 - [x] add rotate to bounding box
 - [x] add client side collisions better
