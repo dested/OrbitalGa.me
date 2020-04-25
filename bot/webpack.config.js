@@ -2,27 +2,27 @@ const webpack = require('webpack');
 const fs = require('fs');
 const path = require('path');
 
-module.exports = env => {
+module.exports = (env) => {
   return {
     entry: './src/index.ts',
     output: {
       path: path.join(__dirname, 'dist'),
       filename: 'index.js',
-      libraryTarget: 'commonjs2'
+      libraryTarget: 'commonjs2',
     },
     target: 'node',
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
       alias: {
         '@common': path.resolve(__dirname, '..', 'common', 'src'),
-      }
+      },
     },
     externals: {},
     mode: 'development',
     plugins: [
       // new webpack.IgnorePlugin(/uWebSockets/),
       // env === 'deploy' && new UglifyJsPlugin(),
-    ].filter(a => a),
+    ].filter((a) => a),
     module: {
       rules: [
         // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
@@ -30,10 +30,10 @@ module.exports = env => {
           test: /\.tsx?$/,
           loader: 'ts-loader',
           options: {
-            compilerOptions: {noEmit: false}
-          }
-        }
-      ]
-    }
+            compilerOptions: {noEmit: false},
+          },
+        },
+      ],
+    },
   };
 };

@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import './index.css';
 import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
-import {JoinButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
+import {JoinButton, LeaderboardButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
 import {GoFullScreen} from '../../components/goFullScreen';
 import {GameConstants} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
@@ -32,6 +32,9 @@ export const LoginScreen: React.FC = observer((props) => {
 
   useEffect(() => {}, []);
 
+  const onLeaderboard = useCallback(() => {
+    uiStore.setScreen('leaderboard');
+  }, []);
   const onJoin = useCallback(async () => {
     setError('');
     if (!GameConstants.isSinglePlayer) {
@@ -44,7 +47,7 @@ export const LoginScreen: React.FC = observer((props) => {
         case 'ErrorResponse':
           alert(result.data?.loginAnonymous.error);
           return;
-        case 'LoginSuccessResponse': {
+        case 'LoginSuccess': {
           uiStore.setJwt(makeJwt(result.data?.loginAnonymous.jwt));
           if (result.data?.loginAnonymous.gameModel) {
             uiStore.setServerPath(result.data?.loginAnonymous.gameModel.serverUrl);
@@ -93,12 +96,6 @@ export const LoginScreen: React.FC = observer((props) => {
 
   return (
     <Wrapper>
-      <canvas
-        id={'game'}
-        width={GameConstants.screenSize.width}
-        height={GameConstants.screenSize.height}
-        style={styles.canvas}
-      />
       <LoginBox>
         <Logo>Orbital</Logo>
         <NameBox
@@ -110,11 +107,10 @@ export const LoginScreen: React.FC = observer((props) => {
         {error && <span style={styles.label}>{error}</span>}
         {uiStore.serverIsDown && <span style={styles.label}>Server is down...</span>}
         {(connectStatus === 'none' && (
-          <div style={styles.buttonList}>
-            <JoinButton onClick={onJoin}>Join {GameConstants.isSinglePlayer ? 'Single Player' : 'Server'}</JoinButton>{' '}
-          </div>
+          <JoinButton onClick={onJoin}>Join {GameConstants.isSinglePlayer ? 'Single Player' : 'Server'}</JoinButton>
         )) ||
           (connectStatus === 'connecting' && <Status>Connecting...</Status>)}
+        <LeaderboardButton onClick={onLeaderboard}>Today's Leaderboard</LeaderboardButton>
       </LoginBox>
       <Leaderboard tick={0} />
       <GoFullScreen />

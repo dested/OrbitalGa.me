@@ -4,7 +4,7 @@ mutation Login($userName: String!, $password: String!) {
     ... on ErrorResponse {
       error
     }
-    ... on LoginSuccessResponse {
+    ... on LoginSuccess {
       gameModel {
         ...GameModelFragment
       }
@@ -19,7 +19,7 @@ mutation LoginAnonymous($userName: String!) {
     ... on ErrorResponse {
       error
     }
-    ... on LoginSuccessResponse {
+    ... on LoginSuccess {
       gameModel {
         ...GameModelFragment
       }
@@ -34,6 +34,22 @@ query Spectate {
     gameModel {
       ...GameModelFragment
     }
+  }
+}
+
+query Leaderboard {
+  leaderboard {
+    aliveTime
+    anonymous
+    createdAt
+    damageGiven
+    damageTaken
+    enemiesKilled
+    eventsParticipatedIn
+    score
+    shotsFired
+    username
+    sessionId
   }
 }
 

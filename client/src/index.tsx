@@ -6,14 +6,11 @@ import {Provider} from 'mobx-react';
 import {ApolloProvider} from 'react-apollo-hooks';
 import {App} from './app';
 import {apolloClient} from './schema/apolloClient';
-
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider {...stores}>
     <ApolloProvider client={apolloClient}>
-      <Provider {...stores}>
-        <App />
-      </Provider>
+      <App />
     </ApolloProvider>
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById('root')
 );

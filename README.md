@@ -103,20 +103,20 @@
 
 ## Infrastructure
 
-- [x] server level leaderboard
-- [ ] global leaderboard
-- [x] add lambda for join/etc
 - [ ] checks for servers, spins one up?
-- [x] add login, login anon, register api
 - [ ] add login, register ui
 - [ ] add license to repo
 - [ ] test what happens if server crashes on aws
-- [x] add analytics to server to see users connected, enemies, etc
 - [ ] add monitoring server to watch things happen
 - [ ] once the average duration (over 10 ticks) goes above a threshold, take server out of rotation
-- [x] make sure disconnect and kill work
 - [ ] If you use this code let me know! it's not required I'm just curious
 - [ ] write better readme describe architecture
+- [x] make sure disconnect and kill work
+- [x] server level leaderboard
+- [x] global leaderboard
+- [x] add lambda for join/etc
+- [x] add login, login anon, register api
+- [x] add analytics to server to see users connected, enemies, etc
 
 ## Money
 

@@ -36,7 +36,6 @@ const rightJoystickOptions = {
 } as const;
 
 const styles = {
-  canvas: {width: '100vw', height: '100vh', position: 'absolute', zIndex: -99},
   label: {fontSize: '1rem', color: 'white'},
   leftJoyStick: {
     position: 'absolute',
@@ -180,13 +179,7 @@ export const GameScreen: React.FC = observer((props) => {
   }, []);
 
   return (
-    <div className="App">
-      <canvas
-        id={'game'}
-        width={GameConstants.screenSize.width}
-        height={GameConstants.screenSize.height}
-        style={styles.canvas}
-      />
+    <>
       <Weapons tick={tick} />
       <Wrapper>
         {disconnected && !died && (
@@ -257,6 +250,6 @@ export const GameScreen: React.FC = observer((props) => {
           />
         </>
       )}
-    </div>
+    </>
   );
 });

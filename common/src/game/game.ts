@@ -12,13 +12,16 @@ export abstract class Game {
   readonly collisionResult: Result;
   entities = new ArrayHash<Entity>('entityId');
   entityClusterer: EntityClusterer;
-  gameLeaderboard = new GameLeaderboard();
+  gameLeaderboard?: GameLeaderboard;
   totalPlayers: number = 0;
 
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
     this.entityClusterer = new EntityClusterer(this.entities, 3);
+    if (!isClient) {
+      this.gameLeaderboard = new GameLeaderboard();
+    }
   }
 
   explode(entity: Entity, explosionSize: 'small' | 'medium' | 'big') {

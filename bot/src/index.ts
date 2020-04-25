@@ -1,7 +1,7 @@
 import {w3cwebsocket} from 'websocket';
 (global as any).WebSocket = w3cwebsocket;
 import {Utils} from '@common/utils/utils';
-import ApolloClient from 'apollo-boost';
+import ApolloClient, {InMemoryCache, IntrospectionFragmentMatcher} from 'apollo-boost';
 import fetch from 'node-fetch';
 import {ClientSocket} from '../../client/src/clientSocket';
 import {BotClientGame} from '../../client/src/game/botClientGame';
@@ -13,20 +13,42 @@ import {
 } from '../../client/src/schema/generated/graphql';
 import {makeJwt} from '../../client/src/utils/jwt';
 
-console.log('started');
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: {
+    __schema: {
+      types: [
+        {
+          kind: 'UNION',
+          name: 'LoginSuccessResponseResponse',
+          possibleTypes: [
+            {
+              name: 'LoginSuccessResponse',
+            },
+            {
+              name: 'ErrorResponse',
+            },
+          ],
+        },
+      ],
+    },
+  },
+});
+
+const cache = new InMemoryCache({fragmentMatcher});
+
+const apolloClient = new ApolloClient({
+  fetch: fetch as any,
+  cache,
+  uri: 'http://localhost:3116/graphql',
+  request: (operation) => {
+    operation.setContext({
+      headers: {},
+    });
+  },
+});
 
 async function main() {
-  const apolloClient = new ApolloClient({
-    fetch: fetch as any,
-    uri: 'http://localhost:3116/graphql',
-    request: (operation) => {
-      operation.setContext({
-        headers: {},
-      });
-    },
-  });
-
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 50; i++) {
     const start = async () => {
       const result = await apolloClient.mutate<LoginAnonymousMutation, LoginAnonymousMutationVariables>({
         mutation: LoginAnonymousDocument,
@@ -36,7 +58,7 @@ async function main() {
         case 'ErrorResponse':
           alert(result.data?.loginAnonymous.error);
           return;
-        case 'LoginSuccessResponse': {
+        case 'LoginSuccess': {
           if (result.data?.loginAnonymous.gameModel) {
             new BotClientGame(
               result.data?.loginAnonymous.gameModel.serverUrl,

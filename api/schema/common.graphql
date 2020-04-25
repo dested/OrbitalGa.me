@@ -1,8 +1,0 @@
-scalar Date
-
-type Query {
-  placeholder: Boolean
-}
-type Mutation {
-  placeholder: Boolean
-}

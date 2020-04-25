@@ -5,7 +5,6 @@ import {SecureConfig, Config} from 'orbitalgame-server-common/build';
 
 console.log('started');
 async function main() {
-  debugger;
   await SecureConfig.setup();
   await Config.setup();
 

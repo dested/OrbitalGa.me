@@ -180,7 +180,7 @@ export class PlayerEntity extends Entity implements Weapon {
                 break;
             }
             if (canFire) {
-              this.game.gameLeaderboard.increaseEntry(this.entityId, 'shotsFired', 1);
+              this.game.gameLeaderboard?.increaseEntry(this.entityId, 'shotsFired', 1);
               let offsetX = 0;
               if (config.alternateSide) {
                 offsetX = this.shotSide === 'left' ? -42 : 42;
@@ -269,11 +269,11 @@ export class PlayerEntity extends Entity implements Weapon {
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {
-    this.game.gameLeaderboard.increaseEntry(this.entityId, 'damageGiven', damage);
+    this.game.gameLeaderboard?.increaseEntry(this.entityId, 'damageGiven', damage);
   }
 
   causedKill(otherEntity: Entity): void {
-    this.game.gameLeaderboard.increaseEntry(this.entityId, 'enemiesKilled', 1);
+    this.game.gameLeaderboard?.increaseEntry(this.entityId, 'enemiesKilled', 1);
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -330,7 +330,7 @@ export class PlayerEntity extends Entity implements Weapon {
     this.momentumX += x;
     this.momentumY += y;
     if (!this.game.isClient) {
-      this.game.gameLeaderboard.increaseEntry(this.entityId, 'damageTaken', damage);
+      this.game.gameLeaderboard?.increaseEntry(this.entityId, 'damageTaken', damage);
     }
     if (shield && !shield.depleted) {
       const damageLeft = shield.hurt(damage, otherEntity, x, y);
@@ -351,7 +351,7 @@ export class PlayerEntity extends Entity implements Weapon {
   postTick() {
     super.postTick();
     this.hit = false;
-    this.game.gameLeaderboard.increaseEntry(this.entityId, 'aliveTime', GameConstants.serverTickRate);
+    this.game.gameLeaderboard?.increaseEntry(this.entityId, 'aliveTime', GameConstants.serverTickRate);
 
     for (const availableWeapon of this.availableWeapons) {
       if (WeaponConfigs[availableWeapon.weapon].ammoType === 'time') {

@@ -6,7 +6,7 @@
     "resolveJsonModule": true,
     "strict": true,
     "target": "es2017",
-    "module": "commonjs",
+    "module": "esnext",
     "emitDecoratorMetadata": true,
     "noEmit": true,
     "jsx": "react",

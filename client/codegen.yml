@@ -6,6 +6,9 @@ config:
   scalars:
     Date: Date
 generates:
+  ./src/schema/generated/fragmentTypes.json:
+    plugins:
+      - fragment-matcher
   ./src/schema/generated/graphql.tsx:
     plugins:
       - 'typescript'

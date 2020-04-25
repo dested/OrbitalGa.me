@@ -1,6 +1,10 @@
+import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
+
 export interface IServerSync {
+  setLeaderboardEntry(activePlayerScore: LeaderboardEntry & LeaderboardEntryUserDetails): void;
   setStat(serverStat: ServerStatSync): Promise<void>;
   startServer(): Promise<void>;
+  syncLeaderboard(): Promise<void>;
 }
 
 export type ServerStatSync = {

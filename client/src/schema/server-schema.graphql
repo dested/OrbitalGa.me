@@ -1,11 +1,3 @@
-enum CacheControlScope {
-  PUBLIC
-  PRIVATE
-}
-
-"""Date custom scalar type"""
-scalar Date
-
 type ErrorResponse {
   error: String!
 }
@@ -15,35 +7,53 @@ type GameModel {
   serverUrl: String!
 }
 
+type LeaderboardResponse {
+  aliveTime: Int!
+  anonymous: Boolean!
+  createdAt: Timestamp!
+  damageGiven: Int!
+  damageTaken: Int!
+  enemiesKilled: Int!
+  eventsParticipatedIn: Int!
+  score: Int!
+  sessionId: String!
+  shotsFired: Int!
+  username: String!
+}
+
 input LoginAnonymousInput {
   userName: String!
 }
 
 input LoginInput {
-  userName: String!
   password: String!
+  userName: String!
 }
 
-union LoginResponse = LoginSuccessResponse | ErrorResponse
-
-type LoginSuccessResponse {
-  jwt: String!
+type LoginSuccess {
   gameModel: GameModel
+  jwt: String!
 }
+
+union LoginSuccessResponse = LoginSuccess | ErrorResponse
 
 type Mutation {
-  placeholder: Boolean
-  loginAnonymous(request: LoginAnonymousInput!): LoginResponse!
-  login(request: LoginInput!): LoginResponse!
-  register(request: LoginInput!): LoginResponse!
+  login(request: LoginInput!): LoginSuccessResponse!
+  loginAnonymous(request: LoginAnonymousInput!): LoginSuccessResponse!
+  register(request: LoginInput!): LoginSuccessResponse!
 }
 
 type Query {
-  placeholder: Boolean
-  spectateServer: SpectateResponse
+  spectateServer: SpectateResponse!
+  leaderboard(serverId: Int): [LeaderboardResponse!]!
 }
 
 type SpectateResponse {
-  spectateJwt: String!
   gameModel: GameModel
+  spectateJwt: String!
 }
+
+"""
+The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp

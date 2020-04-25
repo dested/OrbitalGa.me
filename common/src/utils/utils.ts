@@ -258,6 +258,13 @@ export class Utils {
     }
     return dictionary;
   }
+  static toDictionaryStr<T>(items: T[], getKey: (t: T) => string): {[key: string]: T} {
+    const dictionary: {[key: string]: T} = {};
+    for (const item of items) {
+      dictionary[getKey(item)] = item;
+    }
+    return dictionary;
+  }
 }
 
 export function objectSafeKeys<T>(obj: T): (keyof T)[] {

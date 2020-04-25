@@ -11,8 +11,7 @@
     "console": "webpack --config webpack-console.config.js && node ./.webpack/main.js",
     "create-domain": "sls login && sls create_domain",
     "local": "serverless offline start --location .webpack/service",
-    "debug-local-windows": "node --inspect %APPDATA%\\npm\\node_modules\\serverless\\bin\\serverless offline start  --location .webpack/service",
-    "codegen": "graphql-codegen --config codegen.yml"
+    "debug-local-windows": "node --inspect %APPDATA%\\npm\\node_modules\\serverless\\bin\\serverless offline start  --location .webpack/service"
   },
   "dependencies": {
     "orbitalgame-server-common": "file:../server-common",
@@ -22,13 +21,14 @@
     "aws-sdk": "^2.632.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
-    "graphql": "^15.0.0",
+    "graphql": "^14.6.0",
     "moment-timezone": "^0.5.28",
     "pg": "^7.18.2",
     "pg-hstore": "^2.3.3",
     "reflect-metadata": "^0.1.13",
     "dotenv": "^8.2.0",
-    "mime-types": "^2.1.26"
+    "mime-types": "^2.1.26",
+    "type-graphql": "^0.17.6"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "1.13.2",

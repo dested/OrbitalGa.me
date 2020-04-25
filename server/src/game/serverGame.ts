@@ -40,6 +40,7 @@ export class ServerGame extends Game {
 
   constructor(private serverSocket: IServerSocket, private serverSync: IServerSync) {
     super(false);
+    this.gameLeaderboard?.setServerSync(serverSync);
     serverSocket.start({
       onJoin: (connectionId) => {
         this.queuedMessagesToSend[connectionId] = [];
@@ -87,6 +88,10 @@ export class ServerGame extends Game {
         setTimeout(() => {
           processTick();
         }, Math.max(Math.min(GameConstants.serverTickRate, GameConstants.serverTickRate - tickTime), 1));
+
+        if (serverTick % 30 === 0) {
+          this.serverSync.syncLeaderboard();
+        }
       } catch (ex) {
         console.error(ex);
       }
@@ -97,7 +102,7 @@ export class ServerGame extends Game {
   }
 
   killPlayer(player: PlayerEntity): void {
-    this.gameLeaderboard.removePlayer(player.entityId);
+    this.gameLeaderboard!.removePlayer(player.entityId);
     for (const user of this.users.array) {
       if (user.entity === player) {
         user.deadXY = {x: player.realX, y: player.realY};
@@ -406,7 +411,7 @@ export class ServerGame extends Game {
       hit: false,
       badges: [],
     });
-    this.gameLeaderboard.addPlayer(playerEntity.entityId);
+    this.gameLeaderboard!.addPlayer(playerEntity.entityId, connection.jwt.userId);
     this.users.push({name, connectionId, entity: playerEntity});
     this.entities.push(playerEntity);
 
@@ -452,7 +457,7 @@ export class ServerGame extends Game {
   private sendLeaderboard() {
     if (this.users.array.length === 0 && this.spectators.array.length === 0) return;
 
-    const scores = this.gameLeaderboard.updateScores();
+    const scores = this.gameLeaderboard!.updateScores();
     for (const score of scores) {
       score.username = this.users.array.find((a) => a.entity?.entityId === score.userId)?.name ?? '';
     }

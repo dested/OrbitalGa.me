@@ -2,10 +2,17 @@ import {prisma, ServerStatCreateInput} from 'orbitalgame-server-common/build';
 import {GameConstants} from '@common/game/gameConstants';
 import {IServerSync} from './IServerSync';
 import {Utils} from '@common/utils/utils';
+import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
 
 export class ServerSync implements IServerSync {
+  leaderboard: {[sessionId: string]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
   serverStats: Omit<ServerStatCreateInput, 'server'>[] = [];
   private serverId?: number;
+
+  setLeaderboardEntry(activePlayerScore: LeaderboardEntry & LeaderboardEntryUserDetails): void {
+    this.leaderboard[activePlayerScore.sessionId] = activePlayerScore;
+  }
+
   async setStat(serverStat: Omit<ServerStatCreateInput, 'server'>) {
     this.serverStats.push(serverStat);
     const messages = [
@@ -65,5 +72,76 @@ export class ServerSync implements IServerSync {
     });
     console.log(server.id);
     this.serverId = server.id;
+  }
+
+  async syncLeaderboard(): Promise<void> {
+    const leaderboard = {...this.leaderboard};
+    this.leaderboard = {};
+    const awaiter = async () => {
+      const sessionIds = Object.keys(leaderboard);
+      if (sessionIds.length === 0) return;
+      const foundSessions = Utils.toDictionaryStr(
+        await prisma.globalLeaderboardEntry.findMany({
+          where: {
+            sessionId: {
+              in: sessionIds,
+            },
+          },
+          select: {
+            sessionId: true,
+          },
+        }),
+        (a) => a.sessionId
+      );
+      await Promise.all(
+        Object.keys(leaderboard).map(async (leaderboardKey) => {
+          const activePlayerScore = leaderboard[leaderboardKey];
+          if (foundSessions[activePlayerScore.sessionId]) {
+            await prisma.globalLeaderboardEntry.update({
+              where: {
+                sessionId: activePlayerScore.sessionId,
+              },
+              data: {
+                score: Math.round(activePlayerScore.calculatedScore),
+                updatedAt: new Date(),
+                aliveTime: activePlayerScore.aliveTime,
+                damageGiven: activePlayerScore.damageGiven,
+                damageTaken: activePlayerScore.damageTaken,
+                enemiesKilled: activePlayerScore.enemiesKilled,
+                eventsParticipatedIn: activePlayerScore.eventsParticipatedIn,
+                shotsFired: activePlayerScore.shotsFired,
+              },
+              select: {id: true},
+            });
+          } else {
+            await prisma.globalLeaderboardEntry.create({
+              data: {
+                score: Math.round(activePlayerScore.calculatedScore),
+                createdAt: new Date(),
+                aliveTime: activePlayerScore.aliveTime,
+                damageGiven: activePlayerScore.damageGiven,
+                damageTaken: activePlayerScore.damageTaken,
+                enemiesKilled: activePlayerScore.enemiesKilled,
+                eventsParticipatedIn: activePlayerScore.eventsParticipatedIn,
+                shotsFired: activePlayerScore.shotsFired,
+                sessionId: activePlayerScore.sessionId,
+                server: {
+                  connect: {
+                    id: this.serverId!,
+                  },
+                },
+                user: {
+                  connect: {
+                    id: activePlayerScore.jwtId,
+                  },
+                },
+              },
+              select: {id: true},
+            });
+          }
+        })
+      );
+    };
+    awaiter().then(() => {});
   }
 }

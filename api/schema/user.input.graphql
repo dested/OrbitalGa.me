@@ -1,7 +1,0 @@
-input LoginInput {
-  userName: String!
-  password: String!
-}
-input LoginAnonymousInput {
-  userName: String!
-}

@@ -10,6 +10,7 @@ import {ClientGame, ClientGameOptions} from './clientGame';
 import {STOCError} from '@common/models/serverToClientMessages';
 import {ServerStatSync} from '../../../server/src/game/IServerSync';
 import {uiStore} from '../store/uiStore';
+import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
 
 export class GameData {
   static client?: ClientGameUI;
@@ -69,6 +70,8 @@ export class GameData {
       const serverGame = new ServerGame(serverSocket, {
         async setStat(serverStat: ServerStatSync): Promise<void> {},
         async startServer(): Promise<void> {},
+        async syncLeaderboard(): Promise<void> {},
+        setLeaderboardEntry(activePlayerScore: LeaderboardEntry & LeaderboardEntryUserDetails): void {},
       });
       serverGame.init();
       for (let i = 0; i < GameConstants.numberOfSinglePlayerBots; i++) {

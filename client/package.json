@@ -33,6 +33,7 @@
     "@graphql-codegen/typescript": "1.13.2",
     "@graphql-codegen/typescript-graphql-files-modules": "1.13.2",
     "@graphql-codegen/typescript-operations": "1.13.2",
+    "@graphql-codegen/fragment-matcher": "1.13.2",
     "@graphql-codegen/typescript-react-apollo": "1.13.2",
     "@graphql-codegen/typescript-resolvers": "1.13.2",
     "@types/graphql": "^14.5.0",

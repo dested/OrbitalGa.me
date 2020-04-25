@@ -1,4 +1,6 @@
 import {assertType, Utils} from '../utils/utils';
+import {IServerSync} from '../../../server/src/game/IServerSync';
+import {uuid} from '../utils/uuid';
 
 export type LeaderboardEntry = {
   aliveTime: number;
@@ -9,20 +11,24 @@ export type LeaderboardEntry = {
   eventsParticipatedIn: number;
   shotsFired: number;
 };
-export type LeaderboardEntryRanked = LeaderboardEntry & {rank: number; userId: number; username: string};
 
-const leaderboardEntryRankedKeysObject: {[key in Exclude<keyof LeaderboardEntryRanked, 'username'>]: true} = {
-  rank: true,
-  userId: true,
+const LeaderboardEntryKeys: {[key in keyof LeaderboardEntry]: true} = {
   aliveTime: true,
+  calculatedScore: true,
   damageGiven: true,
   damageTaken: true,
   enemiesKilled: true,
   eventsParticipatedIn: true,
   shotsFired: true,
-  calculatedScore: true,
 };
-export const LeaderboardEntryRankedKeys = Utils.safeKeys(leaderboardEntryRankedKeysObject);
+
+export type LeaderboardEntryUserDetails = {
+  jwtId: number;
+  sessionId: string;
+};
+
+export type LeaderboardEntryRanked = LeaderboardEntry & {rank: number; userId: number; username: string};
+
 export const LeaderboardEntryWeight: {[key in keyof LeaderboardEntry]: number} = {
   aliveTime: 0.00025 /**/,
   damageGiven: 2 /**/,
@@ -34,11 +40,12 @@ export const LeaderboardEntryWeight: {[key in keyof LeaderboardEntry]: number} =
 };
 
 export class GameLeaderboard {
-  activePlayerScores: {[userId: number]: LeaderboardEntry} = {};
-  totalPlayerScores: {[userId: number]: LeaderboardEntry} = {};
+  activePlayerScores: {[userId: number]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
+  totalPlayerScores: {[userId: number]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
+  private serverSync?: IServerSync;
 
-  addPlayer(userId: number) {
-    this.activePlayerScores[userId] = GameLeaderboard.initializeBoard();
+  addPlayer(userId: number, jwtId: number) {
+    this.activePlayerScores[userId] = GameLeaderboard.initializeBoard(jwtId, uuid());
     this.totalPlayerScores[userId] = this.activePlayerScores[userId];
   }
 
@@ -54,9 +61,14 @@ export class GameLeaderboard {
     if (this.activePlayerScores[userId]) this.activePlayerScores[userId][entry] = value;
   }
 
+  setServerSync(serverSync: IServerSync) {
+    this.serverSync = serverSync;
+  }
+
   updateScores(): LeaderboardEntryRanked[] {
     for (const userId in this.activePlayerScores) {
       this.activePlayerScores[userId].calculatedScore = GameLeaderboard.calculateScore(this.activePlayerScores[userId]);
+      this.serverSync?.setLeaderboardEntry(this.activePlayerScores[userId]);
     }
 
     return Utils.mapObjToArray(this.activePlayerScores, (userId) => ({
@@ -71,15 +83,16 @@ export class GameLeaderboard {
 
   private static calculateScore(entry: LeaderboardEntry) {
     let score = 0;
-    for (const entryKey in entry) {
-      assertType<keyof LeaderboardEntry>(entryKey);
+    for (const entryKey of Utils.safeKeys(LeaderboardEntryKeys)) {
       score += entry[entryKey] * LeaderboardEntryWeight[entryKey];
     }
     return score;
   }
 
-  private static initializeBoard(): LeaderboardEntry {
+  private static initializeBoard(jwtId: number, sessionId: string): LeaderboardEntry & LeaderboardEntryUserDetails {
     return {
+      jwtId,
+      sessionId,
       eventsParticipatedIn: 0,
       enemiesKilled: 0,
       damageTaken: 0,

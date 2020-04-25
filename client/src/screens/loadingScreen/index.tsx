@@ -54,13 +54,7 @@ export const LoadingScreen: React.FC = observer((props) => {
   }, []);
 
   return (
-    <div className="App">
-      <canvas
-        id={'game'}
-        width={GameConstants.screenSize.width}
-        height={GameConstants.screenSize.height}
-        style={{width: '100vw', height: '100vh', position: 'absolute', zIndex: -99}}
-      />
+    <>
       <div
         style={{
           position: 'absolute',
@@ -76,6 +70,6 @@ export const LoadingScreen: React.FC = observer((props) => {
       >
         <span style={{fontSize: '2rem'}}>Loading...</span>
       </div>
-    </div>
+    </>
   );
 });

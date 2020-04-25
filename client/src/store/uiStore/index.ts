@@ -3,7 +3,7 @@ import {persist} from 'mobx-persist';
 import {GameConstants} from '@common/game/gameConstants';
 import {Jwt, makeJwt} from '../../utils/jwt';
 
-type Screens = 'loading' | 'login' | 'game';
+type Screens = 'loading' | 'login' | 'game' | 'leaderboard';
 
 export class UIStore {
   @persist

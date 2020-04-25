@@ -4,7 +4,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native"]
 }
 
@@ -16,31 +16,17 @@ model User {
   passwordHash String?
 }
 
-model ServerLeaderboardEntry {
-  id                 Int              @default(autoincrement()) @id
-  createdAt          DateTime         @default(now())
-  serverId           Int
-  server             Server           @relation(fields: [serverId], references: [id])
-  score              Int
-  leaderboardEntryId Int
-  leaderboardEntry   LeaderboardEntry @relation(fields: [leaderboardEntryId], references: [id])
-}
-
 model GlobalLeaderboardEntry {
-  id                 Int              @default(autoincrement()) @id
-  createdAt          DateTime         @default(now())
-  score              Int
-  leaderboardEntryId Int
-  leaderboardEntry   LeaderboardEntry @relation(fields: [leaderboardEntryId], references: [id])
-}
-
-model LeaderboardEntry {
-  id                   Int    @default(autoincrement()) @id
-  sessionId            String
+  id                   Int      @default(autoincrement()) @id
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @default(now())
+  score                Int
+  sessionId            String   @unique
   userId               Int
-  user                 User   @relation(fields: [userId], references: [id])
+  user                 User     @relation(fields: [userId], references: [id])
+  serverId             Int
+  server               Server   @relation(fields: [serverId], references: [id])
   aliveTime            Int
-  calculatedScore      Int
   damageGiven          Int
   damageTaken          Int
   enemiesKilled        Int
