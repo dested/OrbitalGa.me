@@ -4,7 +4,7 @@ import {MyApolloPlugin} from './gqlUtils/myApolloPlugin';
 import {buildSchemaSync} from 'type-graphql';
 import {UserResolver} from './resolvers/user/userResolver';
 import {LeaderboardResolver} from './resolvers/leaderboard/leaderboardResolver';
-import {AuthService} from './server-common';
+import {AuthService} from './server-common/auth/authService';
 
 const schema = buildSchemaSync({
   resolvers: [UserResolver, LeaderboardResolver],
