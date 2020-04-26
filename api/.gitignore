@@ -45,3 +45,4 @@ aws-write-key.txt
 policy-dev.json
 policy-prod.json
 /aws
+.env

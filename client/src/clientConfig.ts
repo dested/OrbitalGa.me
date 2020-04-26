@@ -1,5 +1,5 @@
 export class ClientConfig {
-  static isLocal = true;
+  static isLocal = false;
   static get graphqlEndpoint() {
     switch (this.isLocal) {
       case true:
@@ -9,11 +9,11 @@ export class ClientConfig {
     }
   }
   static websocketUrl(serverPath: string) {
-    switch (this.isLocal) {
-      case true:
-        return 'ws://192.168.86.21:8081';
-      case false:
-        return `wss://game.orbitalga.me/${serverPath}`;
-    }
+    // switch (this.isLocal) {
+    //   case true:
+    return 'ws://192.168.86.21:8081';
+    // case false:
+    //   return `wss://game.orbitalga.me/${serverPath}`;
+    // }
   }
 }

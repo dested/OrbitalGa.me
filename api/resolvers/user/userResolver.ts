@@ -1,11 +1,10 @@
 import {Arg, Ctx, Int, Mutation, Query, Resolver} from 'type-graphql';
-import {AuthService} from 'orbitalgame-server-common/build';
-import {prisma, User} from 'orbitalgame-server-common/build';
 import {GameModel, LoginResponse, SpectateResponse} from './models';
 import * as bcrypt from 'bcryptjs';
 import {Utils} from '@common/utils/utils';
 import {LoginAnonymousInput, LoginInput} from './userInputs';
 import {OrbitalContext} from '../../gqlUtils/orbitalContext';
+import {AuthService, prisma, User} from '../../server-common';
 
 @Resolver()
 export class UserResolver {

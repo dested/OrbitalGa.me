@@ -5,6 +5,7 @@ plugins:
   - serverless-domain-manager
   - serverless-cloudformation-resource-counter
   - serverless-webpack
+  - serverless-prune-plugin
 
 provider:
   name: aws
@@ -24,9 +25,13 @@ custom:
     basePath: ''
     stage: ${self:provider.stage}
     createRoute53Record: true
+  prune:
+    automatic: true
+    number: 5
   webpack:
     webpackConfig: 'webpack.config.js'
-    packager: 'yarn'
+    includeModules: true # Node modules configuration for packaging
+    packager: 'yarn' # Reserved for future use. Any other values will not work right now.
   serverless-offline:
     host: 0.0.0.0
     port: 3116

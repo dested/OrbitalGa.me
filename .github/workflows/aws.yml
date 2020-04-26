@@ -1,0 +1,28 @@
+on:
+  push:
+    paths:
+      - 'api/**'
+name: Deploy master branch
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: chmod
+        working-directory: ./api
+        run: chmod +x ./.generated-prisma-client/runtime/query-engine-rhel-openssl-1.0.x
+      - name: install
+        working-directory: ./api
+        run: npm install
+        env:
+          PRISMA_QUERY_ENGINE_BINARY: ./.generated-prisma-client/runtime/query-engine-rhel-openssl-1.0.x
+      - name: serverless deploy
+        run: npx serverless deploy --stage prod
+        working-directory: ./api
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.a }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.s }}

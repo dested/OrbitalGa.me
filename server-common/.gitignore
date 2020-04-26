@@ -6,3 +6,5 @@
 /.awcache
 /.vscode
 /build
+.env
+.env.prod

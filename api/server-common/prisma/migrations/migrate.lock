@@ -1,0 +1,12 @@
+# IF THERE'S A GIT CONFLICT IN THIS FILE, DON'T SOLVE IT MANUALLY!
+# INSTEAD EXECUTE `prisma migrate fix`
+# Prisma Migrate lockfile v1
+# Read more about conflict resolution here: TODO
+
+20200418114301-initial
+20200418115320-made-username-unique
+20200418141737-fleshed-out-fields
+20200418200807-more-fields
+20200424203223-switched-up-leaderboard
+20200424205552-more-leaderboard
+20200424210806-removed-local-leaderboard-concept

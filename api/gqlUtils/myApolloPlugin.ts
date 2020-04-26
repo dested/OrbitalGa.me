@@ -1,5 +1,5 @@
 import {ApolloServerPlugin, GraphQLServiceContext} from 'apollo-server-plugin-base';
-import {Config, SecureConfig} from 'orbitalgame-server-common/build';
+import {Config, SecureConfig} from '../server-common';
 
 export class MyApolloPlugin implements ApolloServerPlugin {
   /*  requestDidStart<TContext>(requestContext: GraphQLRequestContext<TContext>): GraphQLRequestListener<TContext> | void {

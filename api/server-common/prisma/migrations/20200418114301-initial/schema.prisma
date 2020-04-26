@@ -1,0 +1,77 @@
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @default(autoincrement()) @id
+  createdAt DateTime @default(now())
+  anonymous Boolean
+  username  String
+  password  String?
+}
+
+model ServerLeaderboardEntry {
+  id                 Int              @default(autoincrement()) @id
+  createdAt          DateTime         @default(now())
+  serverId           String
+  score              Int
+  leaderboardEntryId Int
+  leaderboardEntry   LeaderboardEntry @relation(fields: [leaderboardEntryId], references: [id])
+}
+
+model GlobalLeaderboardEntry {
+  id                 Int              @default(autoincrement()) @id
+  createdAt          DateTime         @default(now())
+  score              Int
+  leaderboardEntryId Int
+  leaderboardEntry   LeaderboardEntry @relation(fields: [leaderboardEntryId], references: [id])
+}
+
+model LeaderboardEntry {
+  id                   Int    @default(autoincrement()) @id
+  sessionId            String
+  userId               Int
+  user                 User   @relation(fields: [userId], references: [id])
+  aliveTime            Int
+  calculatedScore      Int
+  damageGiven          Int
+  damageTaken          Int
+  enemiesKilled        Int
+  eventsParticipatedIn Int
+  shotsFired           Int
+}
+
+model Server {
+  id        Int      @default(autoincrement()) @id
+  serverId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model ServerStat {
+  id                 Int      @default(autoincrement()) @id
+  createdAt          DateTime @default(now())
+  serverId           Int
+  server             Server   @relation(fields: [serverId], references: [id])
+  tickIndex          Int
+  connections        Int
+  users              Int
+  spectators         Int
+  entities           Int
+  messages           Int
+  Duration           Int
+  bytesSent          Int
+  bytesReceived      Int
+  totalBytesSent     Int
+  totalBytesRecieved Int
+  boardWidth         Int
+  memHeapUsed        Int
+  memHeapTotal       Int
+  memExternal        Int
+  entityGroupCount   String
+}

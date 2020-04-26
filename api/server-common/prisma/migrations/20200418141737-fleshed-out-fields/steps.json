@@ -1,0 +1,31 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "passwordHash",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "password"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Server",
+      "field": "serverUrl",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Server",
+      "field": "live",
+      "type": "Boolean",
+      "arity": "Required"
+    }
+  ]
+}

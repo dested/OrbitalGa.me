@@ -1,7 +1,7 @@
-import {prisma, User, GlobalLeaderboardEntryWhereInput} from 'orbitalgame-server-common/build';
 import {Query, Resolver, Arg, Int} from 'type-graphql';
 import {LeaderboardResponse} from './models';
 import * as moment from 'moment';
+import {prisma, GlobalLeaderboardEntryWhereInput} from '../../server-common';
 
 @Resolver()
 export class LeaderboardResolver {

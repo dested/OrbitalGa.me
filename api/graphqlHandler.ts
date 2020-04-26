@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import {ApolloServer} from 'apollo-server-lambda';
 import {MyApolloPlugin} from './gqlUtils/myApolloPlugin';
-import {AuthService, prisma, User} from 'orbitalgame-server-common/build';
 import {buildSchemaSync} from 'type-graphql';
 import {UserResolver} from './resolvers/user/userResolver';
 import {LeaderboardResolver} from './resolvers/leaderboard/leaderboardResolver';
+import {AuthService} from './server-common';
 
 const schema = buildSchemaSync({
   resolvers: [UserResolver, LeaderboardResolver],
@@ -28,5 +28,6 @@ const server = new ApolloServer({
     context,
   }),
 });
+
 
 exports.graphqlHandler = server.createHandler();
