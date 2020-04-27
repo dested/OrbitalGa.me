@@ -4,7 +4,7 @@ import {MyApolloPlugin} from './gqlUtils/myApolloPlugin';
 import {buildSchemaSync} from 'type-graphql';
 import {UserResolver} from './resolvers/user/userResolver';
 import {LeaderboardResolver} from './resolvers/leaderboard/leaderboardResolver';
-import {AuthService} from './server-common/auth/authService';
+import {AuthService} from './server-common';
 
 const schema = buildSchemaSync({
   resolvers: [UserResolver, LeaderboardResolver],
@@ -29,5 +29,9 @@ const server = new ApolloServer({
   }),
 });
 
-
-exports.graphqlHandler = server.createHandler();
+exports.graphqlHandler = server.createHandler({
+  cors: {
+    origin: '*',
+    credentials: true,
+  },
+});

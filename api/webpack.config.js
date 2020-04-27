@@ -27,7 +27,7 @@ module.exports = {
   },
   externals: [nodeExternals()],
   plugins: [
-    new CopyWebpackPlugin(['./server-common/prisma/schema.prisma']),
+    new CopyWebpackPlugin(['./prisma/schema.prisma']),
     ...(slsw.lib.webpack.isLocal
       ? [
           /**

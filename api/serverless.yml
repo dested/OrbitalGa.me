@@ -10,11 +10,19 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-  timeout: 29
+  timeout: 6
   memorySize: 128
   stage: ${opt:stage, 'dev'}
   region: us-west-2
   logRetentionInDays: 7
+  vpc:
+    securityGroupIds:
+      - sg-0d0bc3a9373d794e5
+    subnetIds:
+      - subnet-0c4ef501b6cbbb550
+      - subnet-0ee93ed6a0f3f8130
+      - subnet-05c7308a3b6cdb68d
+      - subnet-0e63966ebc917bade
 
 custom:
   domain:
