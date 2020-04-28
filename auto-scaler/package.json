@@ -3,21 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "",
-  "license": "ISC", "scripts": {
-  "build": "rimraf dist && webpack --mode development",
-  "watch": "rimraf dist && webpack --mode development --watch",
-  "nodemon": "nodemon",
-  "start": "node --expose-gc ./dist/index.js",
-  "debug": "node --expose-gc --inspect-brk ./dist/index.js",
-  "build-prod": "rimraf dist && webpack --mode production  --progress --hide-modules",
-  "deploy": "yarn build-prod & eb deploy",
-  "docker": "docker build -t orb-server . && docker run -p 8081:8081 orb-server ",
-  "docker-deploy": "docker build -t orb-server . && docker tag orb-server:latest 114394156384.dkr.ecr.us-west-2.amazonaws.com/orb-server:latest && docker push 114394156384.dkr.ecr.us-west-2.amazonaws.com/orb-server:latest"
-},
+  "license": "ISC",
+  "scripts": {
+    "build": "rimraf dist && webpack --mode development",
+    "watch": "rimraf dist && webpack --mode development --watch",
+    "nodemon": "nodemon",
+    "spin-up": "node --expose-gc ./dist/index.js up",
+    "spin-down": "node --expose-gc ./dist/index.js down",
+    "post-deploy": "node --expose-gc ./dist/index.js post-deploy",
+    "start": "node --expose-gc ./dist/index.js",
+    "debug": "node --expose-gc --inspect-brk ./dist/index.js"
+  },
   "dependencies": {
     "aws-sdk": "^2.651.0"
   },

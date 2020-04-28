@@ -12,6 +12,7 @@ import {
   LoginAnonymousMutationVariables,
 } from '../../client/src/schema/generated/graphql';
 import {makeJwt} from '../../client/src/utils/jwt';
+import {ClientConfig} from '../../client/src/clientConfig';
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData: {
@@ -39,7 +40,7 @@ const cache = new InMemoryCache({fragmentMatcher});
 const apolloClient = new ApolloClient({
   fetch: fetch as any,
   cache,
-  uri: 'http://localhost:3116/graphql',
+  uri: ClientConfig.graphqlEndpoint,
   request: (operation) => {
     operation.setContext({
       headers: {},

@@ -1,7 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import {Config} from '../config/config';
 import {JwtPlayer, JwtSpectate} from './jwtModels';
-import {SecureConfig} from '../config/secureConfig';
 
 export class AuthService {
   static async createSpectateToken(): Promise<string> {

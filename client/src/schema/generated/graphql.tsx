@@ -18,18 +18,18 @@ export type Scalars = {
 };
 
 export type ErrorResponse = {
-   __typename?: 'ErrorResponse';
+  __typename?: 'ErrorResponse';
   error: Scalars['String'];
 };
 
 export type GameModel = {
-   __typename?: 'GameModel';
+  __typename?: 'GameModel';
   serverId: Scalars['Int'];
   serverUrl: Scalars['String'];
 };
 
 export type LeaderboardResponse = {
-   __typename?: 'LeaderboardResponse';
+  __typename?: 'LeaderboardResponse';
   aliveTime: Scalars['Int'];
   anonymous: Scalars['Boolean'];
   createdAt: Scalars['Timestamp'];
@@ -53,7 +53,7 @@ export type LoginInput = {
 };
 
 export type LoginSuccess = {
-   __typename?: 'LoginSuccess';
+  __typename?: 'LoginSuccess';
   gameModel?: Maybe<GameModel>;
   jwt: Scalars['String'];
 };
@@ -61,159 +61,149 @@ export type LoginSuccess = {
 export type LoginSuccessResponse = LoginSuccess | ErrorResponse;
 
 export type Mutation = {
-   __typename?: 'Mutation';
+  __typename?: 'Mutation';
   login: LoginSuccessResponse;
   loginAnonymous: LoginSuccessResponse;
   register: LoginSuccessResponse;
 };
 
-
 export type MutationLoginArgs = {
   request: LoginInput;
 };
 
-
 export type MutationLoginAnonymousArgs = {
   request: LoginAnonymousInput;
 };
-
 
 export type MutationRegisterArgs = {
   request: LoginInput;
 };
 
 export type Query = {
-   __typename?: 'Query';
+  __typename?: 'Query';
   spectate: SpectateResponse;
   leaderboard: Array<LeaderboardResponse>;
 };
-
 
 export type QueryLeaderboardArgs = {
   serverId?: Maybe<Scalars['Int']>;
 };
 
 export type SpectateResponse = {
-   __typename?: 'SpectateResponse';
+  __typename?: 'SpectateResponse';
   gameModel?: Maybe<GameModel>;
   spectateJwt: Scalars['String'];
 };
-
 
 export type LoginMutationVariables = {
   userName: Scalars['String'];
   password: Scalars['String'];
 };
 
-
-export type LoginMutation = (
-  { __typename?: 'Mutation' }
-  & { login: (
-    { __typename: 'LoginSuccess' }
-    & Pick<LoginSuccess, 'jwt'>
-    & { gameModel?: Maybe<(
-      { __typename?: 'GameModel' }
-      & GameModelFragmentFragment
-    )> }
-  ) | (
-    { __typename: 'ErrorResponse' }
-    & Pick<ErrorResponse, 'error'>
-  ) }
-);
+export type LoginMutation = {__typename?: 'Mutation'} & {
+  login:
+    | ({__typename: 'LoginSuccess'} & Pick<LoginSuccess, 'jwt'> & {
+          gameModel?: Maybe<{__typename?: 'GameModel'} & GameModelFragmentFragment>;
+        })
+    | ({__typename: 'ErrorResponse'} & Pick<ErrorResponse, 'error'>);
+};
 
 export type LoginAnonymousMutationVariables = {
   userName: Scalars['String'];
 };
 
-
-export type LoginAnonymousMutation = (
-  { __typename?: 'Mutation' }
-  & { loginAnonymous: (
-    { __typename: 'LoginSuccess' }
-    & Pick<LoginSuccess, 'jwt'>
-    & { gameModel?: Maybe<(
-      { __typename?: 'GameModel' }
-      & GameModelFragmentFragment
-    )> }
-  ) | (
-    { __typename: 'ErrorResponse' }
-    & Pick<ErrorResponse, 'error'>
-  ) }
-);
+export type LoginAnonymousMutation = {__typename?: 'Mutation'} & {
+  loginAnonymous:
+    | ({__typename: 'LoginSuccess'} & Pick<LoginSuccess, 'jwt'> & {
+          gameModel?: Maybe<{__typename?: 'GameModel'} & GameModelFragmentFragment>;
+        })
+    | ({__typename: 'ErrorResponse'} & Pick<ErrorResponse, 'error'>);
+};
 
 export type SpectateQueryVariables = {};
 
-
-export type SpectateQuery = (
-  { __typename?: 'Query' }
-  & { spectate: (
-    { __typename?: 'SpectateResponse' }
-    & Pick<SpectateResponse, 'spectateJwt'>
-    & { gameModel?: Maybe<(
-      { __typename?: 'GameModel' }
-      & GameModelFragmentFragment
-    )> }
-  ) }
-);
+export type SpectateQuery = {__typename?: 'Query'} & {
+  spectate: {__typename?: 'SpectateResponse'} & Pick<SpectateResponse, 'spectateJwt'> & {
+      gameModel?: Maybe<{__typename?: 'GameModel'} & GameModelFragmentFragment>;
+    };
+};
 
 export type LeaderboardQueryVariables = {};
 
+export type LeaderboardQuery = {__typename?: 'Query'} & {
+  leaderboard: Array<
+    {__typename?: 'LeaderboardResponse'} & Pick<
+      LeaderboardResponse,
+      | 'aliveTime'
+      | 'anonymous'
+      | 'createdAt'
+      | 'damageGiven'
+      | 'damageTaken'
+      | 'enemiesKilled'
+      | 'eventsParticipatedIn'
+      | 'score'
+      | 'shotsFired'
+      | 'username'
+      | 'sessionId'
+    >
+  >;
+};
 
-export type LeaderboardQuery = (
-  { __typename?: 'Query' }
-  & { leaderboard: Array<(
-    { __typename?: 'LeaderboardResponse' }
-    & Pick<LeaderboardResponse, 'aliveTime' | 'anonymous' | 'createdAt' | 'damageGiven' | 'damageTaken' | 'enemiesKilled' | 'eventsParticipatedIn' | 'score' | 'shotsFired' | 'username' | 'sessionId'>
-  )> }
-);
-
-export type GameModelFragmentFragment = (
-  { __typename?: 'GameModel' }
-  & Pick<GameModel, 'serverId' | 'serverUrl'>
-);
+export type GameModelFragmentFragment = {__typename?: 'GameModel'} & Pick<GameModel, 'serverId' | 'serverUrl'>;
 
 export const GameModelFragmentFragmentDoc = gql`
-    fragment GameModelFragment on GameModel {
-  serverId
-  serverUrl
-}
-    `;
+  fragment GameModelFragment on GameModel {
+    serverId
+    serverUrl
+  }
+`;
 export const LoginDocument = gql`
-    mutation Login($userName: String!, $password: String!) {
-  login(request: {userName: $userName, password: $password}) {
-    __typename
-    ... on ErrorResponse {
-      error
-    }
-    ... on LoginSuccess {
-      gameModel {
-        ...GameModelFragment
+  mutation Login($userName: String!, $password: String!) {
+    login(request: {userName: $userName, password: $password}) {
+      __typename
+      ... on ErrorResponse {
+        error
       }
-      jwt
+      ... on LoginSuccess {
+        gameModel {
+          ...GameModelFragment
+        }
+        jwt
+      }
     }
   }
-}
-    ${GameModelFragmentFragmentDoc}`;
+  ${GameModelFragmentFragmentDoc}
+`;
 export type LoginMutationFn = ApolloReactCommon.MutationFunction<LoginMutation, LoginMutationVariables>;
-export type LoginComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<LoginMutation, LoginMutationVariables>, 'mutation'>;
+export type LoginComponentProps = Omit<
+  ApolloReactComponents.MutationComponentOptions<LoginMutation, LoginMutationVariables>,
+  'mutation'
+>;
 
-    export const LoginComponent = (props: LoginComponentProps) => (
-      <ApolloReactComponents.Mutation<LoginMutation, LoginMutationVariables> mutation={LoginDocument} {...props} />
-    );
-    
+export const LoginComponent = (props: LoginComponentProps) => (
+  <ApolloReactComponents.Mutation<LoginMutation, LoginMutationVariables> mutation={LoginDocument} {...props} />
+);
+
 export type LoginProps<TChildProps = {}, TDataName extends string = 'mutate'> = {
-      [key in TDataName]: ApolloReactCommon.MutationFunction<LoginMutation, LoginMutationVariables>
-    } & TChildProps;
-export function withLogin<TProps, TChildProps = {}, TDataName extends string = 'mutate'>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  LoginMutation,
-  LoginMutationVariables,
-  LoginProps<TChildProps, TDataName>>) {
-    return ApolloReactHoc.withMutation<TProps, LoginMutation, LoginMutationVariables, LoginProps<TChildProps, TDataName>>(LoginDocument, {
+  [key in TDataName]: ApolloReactCommon.MutationFunction<LoginMutation, LoginMutationVariables>;
+} &
+  TChildProps;
+export function withLogin<TProps, TChildProps = {}, TDataName extends string = 'mutate'>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    LoginMutation,
+    LoginMutationVariables,
+    LoginProps<TChildProps, TDataName>
+  >
+) {
+  return ApolloReactHoc.withMutation<TProps, LoginMutation, LoginMutationVariables, LoginProps<TChildProps, TDataName>>(
+    LoginDocument,
+    {
       alias: 'login',
-      ...operationOptions
-    });
-};
+      ...operationOptions,
+    }
+  );
+}
 
 /**
  * __useLoginMutation__
@@ -233,48 +223,69 @@ export function withLogin<TProps, TChildProps = {}, TDataName extends string = '
  *   },
  * });
  */
-export function useLoginMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        return ApolloReactHooks.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, baseOptions);
-      }
+export function useLoginMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<LoginMutation, LoginMutationVariables>
+) {
+  return ApolloReactHooks.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, baseOptions);
+}
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = ApolloReactCommon.MutationResult<LoginMutation>;
 export type LoginMutationOptions = ApolloReactCommon.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const LoginAnonymousDocument = gql`
-    mutation LoginAnonymous($userName: String!) {
-  loginAnonymous(request: {userName: $userName}) {
-    __typename
-    ... on ErrorResponse {
-      error
-    }
-    ... on LoginSuccess {
-      gameModel {
-        ...GameModelFragment
+  mutation LoginAnonymous($userName: String!) {
+    loginAnonymous(request: {userName: $userName}) {
+      __typename
+      ... on ErrorResponse {
+        error
       }
-      jwt
+      ... on LoginSuccess {
+        gameModel {
+          ...GameModelFragment
+        }
+        jwt
+      }
     }
   }
-}
-    ${GameModelFragmentFragmentDoc}`;
-export type LoginAnonymousMutationFn = ApolloReactCommon.MutationFunction<LoginAnonymousMutation, LoginAnonymousMutationVariables>;
-export type LoginAnonymousComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>, 'mutation'>;
-
-    export const LoginAnonymousComponent = (props: LoginAnonymousComponentProps) => (
-      <ApolloReactComponents.Mutation<LoginAnonymousMutation, LoginAnonymousMutationVariables> mutation={LoginAnonymousDocument} {...props} />
-    );
-    
-export type LoginAnonymousProps<TChildProps = {}, TDataName extends string = 'mutate'> = {
-      [key in TDataName]: ApolloReactCommon.MutationFunction<LoginAnonymousMutation, LoginAnonymousMutationVariables>
-    } & TChildProps;
-export function withLoginAnonymous<TProps, TChildProps = {}, TDataName extends string = 'mutate'>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
+  ${GameModelFragmentFragmentDoc}
+`;
+export type LoginAnonymousMutationFn = ApolloReactCommon.MutationFunction<
   LoginAnonymousMutation,
-  LoginAnonymousMutationVariables,
-  LoginAnonymousProps<TChildProps, TDataName>>) {
-    return ApolloReactHoc.withMutation<TProps, LoginAnonymousMutation, LoginAnonymousMutationVariables, LoginAnonymousProps<TChildProps, TDataName>>(LoginAnonymousDocument, {
-      alias: 'loginAnonymous',
-      ...operationOptions
-    });
-};
+  LoginAnonymousMutationVariables
+>;
+export type LoginAnonymousComponentProps = Omit<
+  ApolloReactComponents.MutationComponentOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>,
+  'mutation'
+>;
+
+export const LoginAnonymousComponent = (props: LoginAnonymousComponentProps) => (
+  <ApolloReactComponents.Mutation<LoginAnonymousMutation, LoginAnonymousMutationVariables>
+    mutation={LoginAnonymousDocument}
+    {...props}
+  />
+);
+
+export type LoginAnonymousProps<TChildProps = {}, TDataName extends string = 'mutate'> = {
+  [key in TDataName]: ApolloReactCommon.MutationFunction<LoginAnonymousMutation, LoginAnonymousMutationVariables>;
+} &
+  TChildProps;
+export function withLoginAnonymous<TProps, TChildProps = {}, TDataName extends string = 'mutate'>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    LoginAnonymousMutation,
+    LoginAnonymousMutationVariables,
+    LoginAnonymousProps<TChildProps, TDataName>
+  >
+) {
+  return ApolloReactHoc.withMutation<
+    TProps,
+    LoginAnonymousMutation,
+    LoginAnonymousMutationVariables,
+    LoginAnonymousProps<TChildProps, TDataName>
+  >(LoginAnonymousDocument, {
+    alias: 'loginAnonymous',
+    ...operationOptions,
+  });
+}
 
 /**
  * __useLoginAnonymousMutation__
@@ -293,41 +304,60 @@ export function withLoginAnonymous<TProps, TChildProps = {}, TDataName extends s
  *   },
  * });
  */
-export function useLoginAnonymousMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>) {
-        return ApolloReactHooks.useMutation<LoginAnonymousMutation, LoginAnonymousMutationVariables>(LoginAnonymousDocument, baseOptions);
-      }
+export function useLoginAnonymousMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>
+) {
+  return ApolloReactHooks.useMutation<LoginAnonymousMutation, LoginAnonymousMutationVariables>(
+    LoginAnonymousDocument,
+    baseOptions
+  );
+}
 export type LoginAnonymousMutationHookResult = ReturnType<typeof useLoginAnonymousMutation>;
 export type LoginAnonymousMutationResult = ApolloReactCommon.MutationResult<LoginAnonymousMutation>;
-export type LoginAnonymousMutationOptions = ApolloReactCommon.BaseMutationOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>;
+export type LoginAnonymousMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  LoginAnonymousMutation,
+  LoginAnonymousMutationVariables
+>;
 export const SpectateDocument = gql`
-    query Spectate {
-  spectate {
-    spectateJwt
-    gameModel {
-      ...GameModelFragment
+  query Spectate {
+    spectate {
+      spectateJwt
+      gameModel {
+        ...GameModelFragment
+      }
     }
   }
-}
-    ${GameModelFragmentFragmentDoc}`;
-export type SpectateComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SpectateQuery, SpectateQueryVariables>, 'query'>;
+  ${GameModelFragmentFragmentDoc}
+`;
+export type SpectateComponentProps = Omit<
+  ApolloReactComponents.QueryComponentOptions<SpectateQuery, SpectateQueryVariables>,
+  'query'
+>;
 
-    export const SpectateComponent = (props: SpectateComponentProps) => (
-      <ApolloReactComponents.Query<SpectateQuery, SpectateQueryVariables> query={SpectateDocument} {...props} />
-    );
-    
+export const SpectateComponent = (props: SpectateComponentProps) => (
+  <ApolloReactComponents.Query<SpectateQuery, SpectateQueryVariables> query={SpectateDocument} {...props} />
+);
+
 export type SpectateProps<TChildProps = {}, TDataName extends string = 'data'> = {
-      [key in TDataName]: ApolloReactHoc.DataValue<SpectateQuery, SpectateQueryVariables>
-    } & TChildProps;
-export function withSpectate<TProps, TChildProps = {}, TDataName extends string = 'data'>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  SpectateQuery,
-  SpectateQueryVariables,
-  SpectateProps<TChildProps, TDataName>>) {
-    return ApolloReactHoc.withQuery<TProps, SpectateQuery, SpectateQueryVariables, SpectateProps<TChildProps, TDataName>>(SpectateDocument, {
+  [key in TDataName]: ApolloReactHoc.DataValue<SpectateQuery, SpectateQueryVariables>;
+} &
+  TChildProps;
+export function withSpectate<TProps, TChildProps = {}, TDataName extends string = 'data'>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    SpectateQuery,
+    SpectateQueryVariables,
+    SpectateProps<TChildProps, TDataName>
+  >
+) {
+  return ApolloReactHoc.withQuery<TProps, SpectateQuery, SpectateQueryVariables, SpectateProps<TChildProps, TDataName>>(
+    SpectateDocument,
+    {
       alias: 'spectate',
-      ...operationOptions
-    });
-};
+      ...operationOptions,
+    }
+  );
+}
 
 /**
  * __useSpectateQuery__
@@ -344,51 +374,67 @@ export function withSpectate<TProps, TChildProps = {}, TDataName extends string 
  *   },
  * });
  */
-export function useSpectateQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SpectateQuery, SpectateQueryVariables>) {
-        return ApolloReactHooks.useQuery<SpectateQuery, SpectateQueryVariables>(SpectateDocument, baseOptions);
-      }
-export function useSpectateLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SpectateQuery, SpectateQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<SpectateQuery, SpectateQueryVariables>(SpectateDocument, baseOptions);
-        }
+export function useSpectateQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<SpectateQuery, SpectateQueryVariables>
+) {
+  return ApolloReactHooks.useQuery<SpectateQuery, SpectateQueryVariables>(SpectateDocument, baseOptions);
+}
+export function useSpectateLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SpectateQuery, SpectateQueryVariables>
+) {
+  return ApolloReactHooks.useLazyQuery<SpectateQuery, SpectateQueryVariables>(SpectateDocument, baseOptions);
+}
 export type SpectateQueryHookResult = ReturnType<typeof useSpectateQuery>;
 export type SpectateLazyQueryHookResult = ReturnType<typeof useSpectateLazyQuery>;
 export type SpectateQueryResult = ApolloReactCommon.QueryResult<SpectateQuery, SpectateQueryVariables>;
 export const LeaderboardDocument = gql`
-    query Leaderboard {
-  leaderboard {
-    aliveTime
-    anonymous
-    createdAt
-    damageGiven
-    damageTaken
-    enemiesKilled
-    eventsParticipatedIn
-    score
-    shotsFired
-    username
-    sessionId
+  query Leaderboard {
+    leaderboard {
+      aliveTime
+      anonymous
+      createdAt
+      damageGiven
+      damageTaken
+      enemiesKilled
+      eventsParticipatedIn
+      score
+      shotsFired
+      username
+      sessionId
+    }
   }
-}
-    `;
-export type LeaderboardComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LeaderboardQuery, LeaderboardQueryVariables>, 'query'>;
+`;
+export type LeaderboardComponentProps = Omit<
+  ApolloReactComponents.QueryComponentOptions<LeaderboardQuery, LeaderboardQueryVariables>,
+  'query'
+>;
 
-    export const LeaderboardComponent = (props: LeaderboardComponentProps) => (
-      <ApolloReactComponents.Query<LeaderboardQuery, LeaderboardQueryVariables> query={LeaderboardDocument} {...props} />
-    );
-    
+export const LeaderboardComponent = (props: LeaderboardComponentProps) => (
+  <ApolloReactComponents.Query<LeaderboardQuery, LeaderboardQueryVariables> query={LeaderboardDocument} {...props} />
+);
+
 export type LeaderboardProps<TChildProps = {}, TDataName extends string = 'data'> = {
-      [key in TDataName]: ApolloReactHoc.DataValue<LeaderboardQuery, LeaderboardQueryVariables>
-    } & TChildProps;
-export function withLeaderboard<TProps, TChildProps = {}, TDataName extends string = 'data'>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  LeaderboardQuery,
-  LeaderboardQueryVariables,
-  LeaderboardProps<TChildProps, TDataName>>) {
-    return ApolloReactHoc.withQuery<TProps, LeaderboardQuery, LeaderboardQueryVariables, LeaderboardProps<TChildProps, TDataName>>(LeaderboardDocument, {
-      alias: 'leaderboard',
-      ...operationOptions
-    });
-};
+  [key in TDataName]: ApolloReactHoc.DataValue<LeaderboardQuery, LeaderboardQueryVariables>;
+} &
+  TChildProps;
+export function withLeaderboard<TProps, TChildProps = {}, TDataName extends string = 'data'>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    LeaderboardQuery,
+    LeaderboardQueryVariables,
+    LeaderboardProps<TChildProps, TDataName>
+  >
+) {
+  return ApolloReactHoc.withQuery<
+    TProps,
+    LeaderboardQuery,
+    LeaderboardQueryVariables,
+    LeaderboardProps<TChildProps, TDataName>
+  >(LeaderboardDocument, {
+    alias: 'leaderboard',
+    ...operationOptions,
+  });
+}
 
 /**
  * __useLeaderboardQuery__
@@ -405,12 +451,16 @@ export function withLeaderboard<TProps, TChildProps = {}, TDataName extends stri
  *   },
  * });
  */
-export function useLeaderboardQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LeaderboardQuery, LeaderboardQueryVariables>) {
-        return ApolloReactHooks.useQuery<LeaderboardQuery, LeaderboardQueryVariables>(LeaderboardDocument, baseOptions);
-      }
-export function useLeaderboardLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LeaderboardQuery, LeaderboardQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<LeaderboardQuery, LeaderboardQueryVariables>(LeaderboardDocument, baseOptions);
-        }
+export function useLeaderboardQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<LeaderboardQuery, LeaderboardQueryVariables>
+) {
+  return ApolloReactHooks.useQuery<LeaderboardQuery, LeaderboardQueryVariables>(LeaderboardDocument, baseOptions);
+}
+export function useLeaderboardLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LeaderboardQuery, LeaderboardQueryVariables>
+) {
+  return ApolloReactHooks.useLazyQuery<LeaderboardQuery, LeaderboardQueryVariables>(LeaderboardDocument, baseOptions);
+}
 export type LeaderboardQueryHookResult = ReturnType<typeof useLeaderboardQuery>;
 export type LeaderboardLazyQueryHookResult = ReturnType<typeof useLeaderboardLazyQuery>;
 export type LeaderboardQueryResult = ApolloReactCommon.QueryResult<LeaderboardQuery, LeaderboardQueryVariables>;

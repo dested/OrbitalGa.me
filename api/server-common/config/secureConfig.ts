@@ -27,7 +27,6 @@ export class SecureConfig {
         })
         .promise();
 
-
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const value = result.Parameters?.find((p) => p.Name === key)?.Value;
