@@ -2,15 +2,20 @@ import {ServerGame} from './game/serverGame';
 import {ServerSocket} from './utils/serverSocket';
 import {ServerSync} from './game/serverSync';
 import {SecureConfig, Config} from '../../api/server-common';
-import {prisma} from './utils/db';
+import {ServerUtils} from './utils/serverUtils';
 
 async function main() {
-  console.log('Up');
+  console.log('Getting config');
   await SecureConfig.setup();
   await Config.setup();
-  console.log('Starting');
+
+  console.log('Getting Path');
+  const path = await ServerUtils.getLoadbalancerPath();
+
   const serverSocket = new ServerSocket();
-  const serverSync = new ServerSync();
+  const serverSync = new ServerSync(path);
+
+  console.log('Starting game');
   const serverGame = new ServerGame(serverSocket, serverSync);
   serverGame.init();
   console.log('Ready');

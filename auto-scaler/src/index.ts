@@ -241,6 +241,7 @@ async function spinDown() {
 }
 
 async function postDeploy() {
+  console.log('Running post deploy');
   const ec2 = new EC2({region: 'us-west-2'});
   const elbv2 = new ELBv2({region: 'us-west-2'});
   const scaling = new AutoScaling({region: 'us-west-2'});
@@ -254,6 +255,7 @@ async function postDeploy() {
     if (result.TargetHealthDescriptions.length !== 1) {
       throw new Error(`Bad target group: ${targetGroup.TargetGroupArn}`);
     }
+    console.log('Found bad target');
     removeTargets.push(result.TargetHealthDescriptions[0].Target.Id);
   }
 
@@ -272,7 +274,19 @@ async function setupFresh() {
 }
 
 async function main() {
-  await postDeploy();
+  switch (process.argv[2]) {
+    case 'up':
+      await spinUp();
+      break;
+    case 'down':
+      await spinDown();
+      break;
+    case 'post-deploy':
+      await postDeploy();
+      break;
+    default:
+      console.log('Invalid Command');
+  }
 }
 
 main()

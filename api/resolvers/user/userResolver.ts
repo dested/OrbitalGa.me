@@ -113,8 +113,8 @@ const getNextGameServer = async (): Promise<GameModel | null> => {
       await prisma.server.update({where: {id: latestServerElement.id}, data: {live: false}});
     } else {
       return {
-        serverId: latestServer[0].id,
-        serverUrl: latestServer[0].serverUrl,
+        serverId: latestServerElement.id,
+        serverUrl: latestServerElement.serverUrl,
       };
     }
   }

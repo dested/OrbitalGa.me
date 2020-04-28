@@ -13,7 +13,7 @@
     "start": "node --expose-gc ./dist/index.js",
     "debug": "node --expose-gc --inspect-brk ./dist/index.js",
     "build-prod": "rimraf dist && webpack --mode production  --progress --hide-modules",
-    "deploy": "yarn build-prod & eb deploy",
+    "deploy": "yarn build-prod && eb deploy && node ../auto-scaler/dist/index.js post-deploy",
     "generate": "prisma generate",
     "postinstall": "npm run generate"
   },

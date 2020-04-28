@@ -6,6 +6,8 @@ import {ServerStatCreateInput} from '@prisma/client';
 import {prisma} from '../utils/db';
 
 export class ServerSync implements IServerSync {
+  constructor(private serverPath: string) {}
+
   leaderboard: {[sessionId: string]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
   serverStats: Omit<ServerStatCreateInput, 'server'>[] = [];
   private serverId?: number;
@@ -30,8 +32,8 @@ export class ServerSync implements IServerSync {
       `Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(serverStat.memHeapTotal)}`,
       `${serverStat.entityGroupCount}`,
     ];
-    // console.clear();
-    console.log(messages.join('\n'));
+    console.clear();
+    console.log(messages.join(','));
 
     if (this.serverStats.length > 10_000 / GameConstants.serverTickRate) {
       // console.log('pushing updates', this.serverStats.length);
@@ -63,20 +65,19 @@ export class ServerSync implements IServerSync {
       awaiter().then(() => {});
     }
   }
+
   async startServer() {
     try {
       console.log('starting server');
       console.log('0');
-      console.log('1', JSON.stringify(await prisma.server.findMany({}), null, 2));
       const server = await prisma.server.create({
         data: {
-          serverUrl: '1',
+          serverUrl: this.serverPath,
           live: true,
         },
         select: {id: true},
       });
-      console.log('2', JSON.stringify(await prisma.server.findMany({}), null, 2));
-      console.log('started server');
+      console.log('started installed');
       console.log('serverid', server.id);
       this.serverId = server.id;
     } catch (ex) {
