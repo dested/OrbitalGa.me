@@ -1,8 +1,9 @@
 {
   "name": "server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "scripts": {
+    "link-prisma": "mklink /H .\\schema.prisma ..\\api\\prisma\\schema.prisma",
     "build": "rimraf dist && webpack --mode development",
     "watch": "rimraf dist && webpack --mode development --watch",
     "codegen": "graphql-codegen --config codegen.yml",
@@ -12,20 +13,27 @@
     "start": "node --expose-gc ./dist/index.js",
     "debug": "node --expose-gc --inspect-brk ./dist/index.js",
     "build-prod": "rimraf dist && webpack --mode production  --progress --hide-modules",
-    "deploy": "yarn build-prod & eb deploy"
+    "deploy": "yarn build-prod & eb deploy",
+    "generate": "prisma generate",
+    "postinstall": "npm run generate"
   },
   "dependencies": {
-    "orbitalgame-server-common": "file:../server-common",
+    "@prisma/client": "^2.0.0-beta.3",
+    "@prisma/cli": "^2.0.0-beta.3",
     "apollo-boost": "^0.4.7",
     "graphql": "^14.6.0",
+    "dotenv": "^8.2.0",
     "ws": "^7.2.1",
+    "jsonwebtoken": "^8.5.1",
     "collisions": "^2.0.13",
     "bufferutil": "^4.0.1",
     "node-fetch": "^2.6.0",
     "utf-8-validate": "^5.0.2",
     "redis": "^3.0.2",
     "moment": "^2.24.0",
-    "quickselect": "^2.0.0"
+    "quickselect": "^2.0.0",
+    "aws-sdk": "^2.658.0",
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "1.13.2",
@@ -52,6 +60,7 @@
     "tslint-plugin-prettier": "^2.3.0",
     "typescript": "^3.8.3",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "copy-webpack-plugin": "^5.1.1y"
   }
 }

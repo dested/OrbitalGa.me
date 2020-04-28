@@ -14,7 +14,7 @@ import {
   ServerToClientSchemaAdderSizeFunction,
 } from '@common/models/serverToClientMessages';
 import {IServerSocket, ServerSocketOptions, SocketConnection} from '@common/socket/models';
-import {AuthService} from 'orbitalgame-server-common/build';
+import {AuthService} from '../../../api/server-common';
 
 export class ServerSocket implements IServerSocket {
   connections = new ArrayHash<SocketConnection>('connectionId');

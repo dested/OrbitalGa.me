@@ -78,6 +78,7 @@
 - [ ] need much better enemy variability
 - [ ] add player upgrades, unlock
 - [ ] add badges to player
+- [ ] add leveling like mario maker?
 - [x] add score entity
 - [x] add laser spray
 - [x] add time based weapons

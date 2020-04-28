@@ -1,8 +1,9 @@
-import {prisma, ServerStatCreateInput} from 'orbitalgame-server-common/build';
 import {GameConstants} from '@common/game/gameConstants';
 import {IServerSync} from './IServerSync';
 import {Utils} from '@common/utils/utils';
 import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
+import {ServerStatCreateInput} from '@prisma/client';
+import {prisma} from '../utils/db';
 
 export class ServerSync implements IServerSync {
   leaderboard: {[sessionId: string]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
@@ -29,7 +30,7 @@ export class ServerSync implements IServerSync {
       `Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(serverStat.memHeapTotal)}`,
       `${serverStat.entityGroupCount}`,
     ];
-    console.clear();
+    // console.clear();
     console.log(messages.join('\n'));
 
     if (this.serverStats.length > 10_000 / GameConstants.serverTickRate) {
@@ -63,15 +64,24 @@ export class ServerSync implements IServerSync {
     }
   }
   async startServer() {
-    const server = await prisma.server.create({
-      data: {
-        serverUrl: '1',
-        live: true,
-      },
-      select: {id: true},
-    });
-    console.log(server.id);
-    this.serverId = server.id;
+    try {
+      console.log('starting server');
+      console.log('0');
+      console.log('1', JSON.stringify(await prisma.server.findMany({}), null, 2));
+      const server = await prisma.server.create({
+        data: {
+          serverUrl: '1',
+          live: true,
+        },
+        select: {id: true},
+      });
+      console.log('2', JSON.stringify(await prisma.server.findMany({}), null, 2));
+      console.log('started server');
+      console.log('serverid', server.id);
+      this.serverId = server.id;
+    } catch (ex) {
+      console.error('ERROR', ex);
+    }
   }
 
   async syncLeaderboard(): Promise<void> {

@@ -5,7 +5,6 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "link-server-common": "mklink /J .\\server-common ..\\server-common && mklink /J .\\prisma ..\\prisma",
     "lint": "npx tslint -p tsconfig.json --fix",
     "prettier": "npx prettier \"*/**/*.ts*\"  --config .prettierrc --write",
     "verify": "tsc --noEmit",
@@ -14,6 +13,7 @@
     "local": "serverless offline start --location .webpack/service",
     "depl": "serverless deploy --stage prod",
     "debug-local-windows": "node --inspect %APPDATA%\\npm\\node_modules\\serverless\\bin\\serverless offline start  --location .webpack/service",
+
     "generate": "prisma generate",
     "migrate-db": "prisma migrate save --experimental ",
     "migrate-db-preview": "prisma migrate save --experimental ",
@@ -39,6 +39,7 @@
     "type-graphql": "^0.17.6"
   },
   "devDependencies": {
+    "@prisma/cli": "^2.0.0-beta.3",
     "@graphql-codegen/cli": "1.13.2",
     "@graphql-codegen/introspection": "1.13.2",
     "@graphql-codegen/schema-ast": "1.13.2",
@@ -46,7 +47,6 @@
     "@graphql-codegen/typescript-graphql-files-modules": "1.13.2",
     "@graphql-codegen/typescript-operations": "1.13.2",
     "@graphql-codegen/typescript-resolvers": "1.13.2",
-    "@prisma/cli": "^2.0.0-beta.3",
     "@types/aws-sdk": "^2.7.0",
     "@types/axios": "^0.14.0",
     "@types/bcryptjs": "^2.4.2",
