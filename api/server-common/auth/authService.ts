@@ -8,15 +8,11 @@ export class AuthService {
     const payload: JwtSpectate = {
       timeJoined: +new Date(),
     };
-    await SecureConfig.setup();
-    await Config.setup();
     const expiresIn = 60 * 1;
     const token = jwt.sign(payload, Config.jwtSpectateKey, {expiresIn});
     return token;
   }
   static async createToken(user: JwtPlayer): Promise<string> {
-    await SecureConfig.setup();
-    await Config.setup();
     const expiresIn = 60 * 24 * 3;
     const token = jwt.sign(user, Config.jwtPlayerKey, {expiresIn});
     return token;

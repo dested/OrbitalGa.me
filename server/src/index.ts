@@ -7,7 +7,6 @@ import {ServerUtils} from './utils/serverUtils';
 async function main() {
   console.log('Getting config');
   await SecureConfig.setup();
-  await Config.setup();
 
   console.log('Getting Path');
   const path = await ServerUtils.getLoadbalancerPath();

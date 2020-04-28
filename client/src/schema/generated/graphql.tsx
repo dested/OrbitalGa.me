@@ -84,7 +84,7 @@ export type MutationRegisterArgs = {
 
 export type Query = {
    __typename?: 'Query';
-  spectateServer: SpectateResponse;
+  spectate: SpectateResponse;
   leaderboard: Array<LeaderboardResponse>;
 };
 
@@ -146,7 +146,7 @@ export type SpectateQueryVariables = {};
 
 export type SpectateQuery = (
   { __typename?: 'Query' }
-  & { spectateServer: (
+  & { spectate: (
     { __typename?: 'SpectateResponse' }
     & Pick<SpectateResponse, 'spectateJwt'>
     & { gameModel?: Maybe<(
@@ -301,7 +301,7 @@ export type LoginAnonymousMutationResult = ApolloReactCommon.MutationResult<Logi
 export type LoginAnonymousMutationOptions = ApolloReactCommon.BaseMutationOptions<LoginAnonymousMutation, LoginAnonymousMutationVariables>;
 export const SpectateDocument = gql`
     query Spectate {
-  spectateServer {
+  spectate {
     spectateJwt
     gameModel {
       ...GameModelFragment

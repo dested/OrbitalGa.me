@@ -97,7 +97,7 @@ export class UserResolver {
   }
 
   @Query(() => SpectateResponse)
-  async spectateServer(): Promise<SpectateResponse> {
+  async spectate(): Promise<SpectateResponse> {
     return {
       spectateJwt: await AuthService.createSpectateToken(),
       gameModel: await getNextGameServer(),

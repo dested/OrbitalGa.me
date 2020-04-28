@@ -29,7 +29,7 @@ mutation LoginAnonymous($userName: String!) {
 }
 
 query Spectate {
-  spectateServer {
+  spectate {
     spectateJwt
     gameModel {
       ...GameModelFragment

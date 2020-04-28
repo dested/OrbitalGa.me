@@ -8,6 +8,5 @@ export class MyApolloPlugin implements ApolloServerPlugin {
 
   async serverWillStart(service: GraphQLServiceContext) {
     await SecureConfig.setup();
-    await Config.setup();
   }
 }

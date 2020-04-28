@@ -44,7 +44,7 @@ type Mutation {
 }
 
 type Query {
-  spectateServer: SpectateResponse!
+  spectate: SpectateResponse!
   leaderboard(serverId: Int): [LeaderboardResponse!]!
 }
 

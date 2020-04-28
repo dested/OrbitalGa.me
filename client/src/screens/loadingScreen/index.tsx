@@ -20,13 +20,11 @@ export const LoadingScreen: React.FC = observer((props) => {
       });
       await hydrate('uiStore', uiStore);
       try {
-        const result = await apolloClient.query<SpectateQuery>({
-          query: SpectateDocument,
-        });
-        if (result.data.spectateServer && result.data.spectateServer.gameModel) {
+        const result = await apolloClient.query<SpectateQuery>({query: SpectateDocument});
+        if (result.data.spectate && result.data.spectate.gameModel) {
           GameData.start();
-          uiStore.setSpectateJwt(result.data.spectateServer.spectateJwt);
-          GameData.spectateGame(result.data.spectateServer.gameModel.serverUrl);
+          uiStore.setSpectateJwt(result.data.spectate.spectateJwt);
+          GameData.spectateGame(result.data.spectate.gameModel.serverUrl);
         } else {
           uiStore.setServerDown(true);
           GameData.start();

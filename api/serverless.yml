@@ -6,6 +6,7 @@ plugins:
   - serverless-cloudformation-resource-counter
   - serverless-webpack
   - serverless-prune-plugin
+  - serverless-pseudo-parameters
 
 provider:
   name: aws
@@ -17,6 +18,7 @@ provider:
   logRetentionInDays: 7
   environment:
     ENV: ${opt:stage, 'dev'}
+  role: arn:aws:iam::#{AWS::AccountId}:role/orbitalgame-${self:provider.stage}
   vpc:
     securityGroupIds:
       - sg-0d0bc3a9373d794e5

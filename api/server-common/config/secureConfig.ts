@@ -8,21 +8,38 @@ export class SecureConfig {
     return process.env[key] as string;
   }
   static async setup() {
-    if (process.env.ISLOCAL) {
-      return;
-    }
-    const ssm = new SSM();
-    const kmsKeyDescription = 'kms-orbit-raiders';
-    const result = await ssm
-      .getParameters({Names: EnvKeys.map((k) => `/${kmsKeyDescription}-${process.env.ENV}/${k}`), WithDecryption: true})
-      .promise();
-    for (const key of EnvKeys) {
-      const value = result.Parameters?.find((p) => p.Name === key)?.Value;
-      if (!value) {
-        console.log('KEY NOT FOUND', key);
-      } else {
-        process.env[key] = value;
+    try {
+      if (process.env.ISLOCAL) {
+        return;
       }
+      if (process.env.$$READY) {
+        return;
+      }
+      console.log('setting up kms');
+      const ssm = new SSM();
+      const kmsKeyDescription = 'kms-orbit-raiders';
+      const keys = EnvKeys.map((k) => `/${kmsKeyDescription}-${process.env.ENV}/${k}`);
+
+      const result = await ssm
+        .getParameters({
+          Names: keys,
+          WithDecryption: true,
+        })
+        .promise();
+
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value = result.Parameters?.find((p) => p.Name === key)?.Value;
+        if (!value) {
+          console.log('KEY NOT FOUND', key);
+        } else {
+          process.env[EnvKeys[i]] = value;
+        }
+      }
+      process.env.$$READY = 'TRUE';
+      console.log('done');
+    } catch (ex) {
+      console.error('bed shit', ex);
     }
   }
 }
