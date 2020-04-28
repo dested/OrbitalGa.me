@@ -15,6 +15,8 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: us-west-2
   logRetentionInDays: 7
+  environment:
+    ENV: ${opt:stage, 'dev'}
   vpc:
     securityGroupIds:
       - sg-0d0bc3a9373d794e5

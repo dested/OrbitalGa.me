@@ -30,3 +30,6 @@ npm-debug.log
 
 aws-notes.md
 config.ts
+.env.prod
+.env.dev
+.env

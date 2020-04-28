@@ -1,24 +1,28 @@
 // tslint:disable-next-line:no-var-requires
 require('dotenv').config();
+import {EnvKeys, EnvKeysTypes} from '../../utils/envKeys';
 import {SSM} from 'aws-sdk';
-let envDetails: any;
 
 export class SecureConfig {
-  static getKey(key: string): string {
-    return envDetails[key];
+  static getKey(key: EnvKeysTypes): string {
+    return process.env[key] as string;
   }
   static async setup() {
-    envDetails = JSON.parse('{"jwtPlayerKey":"hi","jwtSpectateKey":"ho"}');
-    return;
-    /* if (envDetails) {
+    if (process.env.ISLOCAL) {
       return;
     }
-    if (process.env.ENVDETAILS) {
-      envDetails = JSON.parse(process.env.ENVDETAILS.replace(/\\"/g, '"'));
-    } else {
-      const ssm = new SSM();
-      const result = await ssm.getParameter({Name: process.env.ENVKEY!, WithDecryption: true}).promise();
-      envDetails = JSON.parse(result.Parameter!.Value!);
-    }*/
+    const ssm = new SSM();
+    const kmsKeyDescription = 'kms-orbit-raiders';
+    const result = await ssm
+      .getParameters({Names: EnvKeys.map((k) => `/${kmsKeyDescription}-${process.env.ENV}/${k}`), WithDecryption: true})
+      .promise();
+    for (const key of EnvKeys) {
+      const value = result.Parameters?.find((p) => p.Name === key)?.Value;
+      if (!value) {
+        console.log('KEY NOT FOUND', key);
+      } else {
+        process.env[key] = value;
+      }
+    }
   }
 }
