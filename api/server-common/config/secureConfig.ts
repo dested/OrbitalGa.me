@@ -15,8 +15,8 @@ export class SecureConfig {
       if (process.env.$$READY) {
         return;
       }
-      console.log('setting up kms');
-      const ssm = new SSM();
+      console.log('setting up kms', process.env.ENV);
+      const ssm = new SSM({region: 'us-west-2'});
       const kmsKeyDescription = 'kms-orbit-raiders';
       const keys = EnvKeys.map((k) => `/${kmsKeyDescription}-${process.env.ENV}/${k}`);
 
@@ -26,6 +26,7 @@ export class SecureConfig {
           WithDecryption: true,
         })
         .promise();
+
 
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -39,7 +40,7 @@ export class SecureConfig {
       process.env.$$READY = 'TRUE';
       console.log('done');
     } catch (ex) {
-      console.error('bed shit', ex);
+      console.error('ENVIRONMENT VARIABLE FAILURE', ex);
     }
   }
 }

@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "",
   "scripts": {
-    "link-prisma": "mklink /H .\\schema.prisma ..\\api\\prisma\\schema.prisma",
+    "link-stuff": "mklink /H .\\schema.prisma ..\\api\\prisma\\schema.prisma && mklink /H .\\.env ..\\api\\.env && mklink /H .\\.env.dev ..\\api\\.env.dev && mklink /H .\\.env.prod ..\\api\\.env.prod",
     "build": "rimraf dist && webpack --mode development",
     "watch": "rimraf dist && webpack --mode development --watch",
     "codegen": "graphql-codegen --config codegen.yml",

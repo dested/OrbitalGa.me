@@ -1,6 +1,9 @@
 import {SecureConfig} from './secureConfig';
 
 export class Config {
+  static get awsRegion(): string {
+    return SecureConfig.getKey('AWSREGION');
+  }
   static get jwtPlayerKey(): string {
     return SecureConfig.getKey('JWTPLAYERKEY');
   }

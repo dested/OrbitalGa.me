@@ -42,7 +42,12 @@ export class UserResolver {
     }
     if (user) {
       if (!context.jwtPlayer || context.jwtPlayer.userId !== user.id) {
-        await prisma.user.delete({where: {id: user.id}});
+        await prisma.globalLeaderboardEntry.deleteMany({
+          where: {userId: user.id},
+        });
+        await prisma.user.delete({
+          where: {id: user.id},
+        });
         user = null;
       }
     }

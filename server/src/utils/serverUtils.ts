@@ -13,7 +13,7 @@ export class ServerUtils {
     } catch (ex) {
       return '1';
     }
-    const elbv2 = new ELBv2({});
+    const elbv2 = new ELBv2({region: Config.awsRegion});
     let found = false;
     const targetGroups = await elbv2
       .describeTargetGroups({

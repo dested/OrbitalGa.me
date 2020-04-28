@@ -11,7 +11,7 @@
     "console": "webpack --config webpack-console.config.js && node ./.webpack/main.js",
     "create-domain": "sls login && sls create_domain",
     "local": "serverless offline start --location .webpack/service --stage prod",
-    "depl": "serverless deploy --stage prod",
+    "deploy": "serverless deploy --stage prod",
     "debug-local-windows": "node --inspect %APPDATA%\\npm\\node_modules\\serverless\\bin\\serverless offline start  --location .webpack/service",
     "generate": "prisma generate",
     "migrate-db": "prisma migrate save --experimental ",

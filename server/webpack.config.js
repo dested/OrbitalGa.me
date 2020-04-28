@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
+const webpack = require('webpack');
 
 module.exports = (env) => {
   return {
@@ -19,7 +20,10 @@ module.exports = (env) => {
     },
     externals: [nodeExternals({whitelist: ['collisions']})],
     mode: 'development',
-    plugins: [new CopyWebpackPlugin(['./schema.prisma'])].filter((a) => a),
+    plugins: [
+      new webpack.DefinePlugin({'process.env.ENV': '"prod"'}),
+      new CopyWebpackPlugin(['./schema.prisma']),
+    ].filter((a) => a),
     module: {
       rules: [
         {
