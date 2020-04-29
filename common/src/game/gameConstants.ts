@@ -4,7 +4,7 @@ export class GameConstants {
   static binaryTransport = true;
   static capOnServerSpectators = 200;
   static capOnServerUsers = 200;
-  static debugClient = false;
+  static debugClient = true;
   static debugCollisions = false;
   static debugDontFilterEntities = false;
   static debugInvulnerable = false;

@@ -34,10 +34,10 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     } else {
       const {x, y, startTime, duration} = this.positionLerp;
       const now = +new Date();
-      if (now >= startTime + duration) {
-        return this.x;
+      if ((now - startTime) / duration >= 1) {
+        return Math.round(this.x);
       } else {
-        return Utils.lerp(x, this.x, (now - startTime) / duration);
+        return Math.round(Utils.lerp(x, this.x, (now - startTime) / duration));
       }
     }
   }
@@ -48,10 +48,10 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     } else {
       const {x, y, startTime, duration} = this.positionLerp;
       const now = +new Date();
-      if (now >= startTime + duration) {
-        return this.y;
+      if ((now - startTime) / duration >= 1) {
+        return Math.round(this.y);
       } else {
-        return Utils.lerp(y, this.y, (now - startTime) / duration);
+        return Math.round(Utils.lerp(y, this.y, (now - startTime) / duration));
       }
     }
   }
@@ -74,10 +74,6 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
       context.restore();
     }
-  }
-
-  gameTick(): void {
-    super.gameTick();
   }
 
   interpolateEntity(renderTimestamp: number) {

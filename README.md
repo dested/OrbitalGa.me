@@ -17,6 +17,8 @@
 - [ ] add audio
 - [ ] add server kill switch to boot everyone out
 - [ ] server is offline, play with bots locally
+- [ ] remove leaderboard from spectate
+- [ ] take interactive video or picture of everyone playing 
 - [x] add score on death screen
 - [x] fix collisions of shots
 - [x] add rotate to bounding box
@@ -79,6 +81,7 @@
 - [ ] add player upgrades, unlock
 - [ ] add badges to player
 - [ ] add leveling like mario maker?
+- [ ] you level up exp all the time, get stronger, so do enmeis, they chase you
 - [x] add score entity
 - [x] add laser spray
 - [x] add time based weapons
@@ -104,6 +107,7 @@
 
 ## Infrastructure
 
+- [ ] build server montorinng ui, auth endpoints
 - [ ] checks for servers, spins one up?
 - [ ] add login, register ui
 - [ ] add license to repo
@@ -127,6 +131,7 @@
 - [ ] for huge streamers 500 people play across 10 servers, same script tho
 - [ ] Add analytics
 - [ ] buy ads
+- [ ] watch video ad start at level 5
 
 ### old
 

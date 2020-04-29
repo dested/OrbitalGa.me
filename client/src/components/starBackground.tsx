@@ -29,7 +29,9 @@ export const StarBackground: React.FC = (props) => {
 
     const viewY = view.viewY - frame.current / 2;
     let count = 0;
-    const image = OrbitalAssets.assets['Backgrounds.stars'].image;
+    const asset = OrbitalAssets.assets['Backgrounds.stars'];
+    if (!asset) return;
+    const image = asset.image;
 
     for (let x = view.viewX - (view.viewX % 256) - 256; x < view.viewX + view.viewWidth + 256 * 2; x += 256) {
       for (let y = viewY - (viewY % 256) - 256; y < viewY + view.viewHeight + 256 * 2; y += 256) {

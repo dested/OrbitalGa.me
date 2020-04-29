@@ -188,7 +188,7 @@ export class ServerGame extends Game {
         left: false,
         shoot: false,
         weapon: noInputThisTick[key].entity!.selectedWeapon,
-        inputSequenceNumber: noInputThisTick[key].entity!.lastProcessedInputSequenceNumber + 1,
+        inputSequenceNumber: noInputThisTick[key].entity!.lastProcessedInputSequenceNumber,
       });
     }
   }
@@ -483,15 +483,6 @@ export class ServerGame extends Game {
           });
         }
       }
-    }
-
-    for (const c of this.spectators.array) {
-      this.serverSocket.sendMessage(c.connectionId, [
-        {
-          type: 'leaderboard',
-          scores: topTen,
-        },
-      ]);
     }
   }
 

@@ -228,14 +228,16 @@ export class MeteorEntity extends Entity {
     this.momentumY += y;
     if (!this.game.isClient) {
       if (this.health <= 0) {
-        const drop = new DropEntity(this.game, {
-          entityId: nextId(),
-          x: this.x,
-          y: this.y,
-          drop: DropEntity.randomDrop(this.size),
-        });
-        this.game.entities.push(drop);
-        this.game.explode(this, 'small');
+        if (Utils.random(50)) {
+          const drop = new DropEntity(this.game, {
+            entityId: nextId(),
+            x: this.x,
+            y: this.y,
+            drop: DropEntity.randomDrop(this.size),
+          });
+          this.game.entities.push(drop);
+          this.game.explode(this, 'small');
+        }
       }
     }
   }

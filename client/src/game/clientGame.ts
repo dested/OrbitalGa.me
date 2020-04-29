@@ -200,7 +200,7 @@ export class ClientGame extends Game {
             throw new Error('Unmatched ping.');
           }
           const time = this.pings[message.ping];
-          this.latency = Math.max(+new Date() - time - GameConstants.serverTickRate, 0);
+          this.latency = +new Date() - time - GameConstants.serverTickRate;
           delete this.pings[message.ping];
           break;
         case 'worldState':

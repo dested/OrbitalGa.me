@@ -26,7 +26,7 @@ const styles = {
 
 export const LoginScreen: React.FC = observer((props) => {
   const {uiStore} = useStores();
-  const [connectStatus, setConnectingStatus] = useState<'none' | 'loggingIn' | 'connecting'>('none');
+  const [connectStatus, setConnectingStatus] = useState<'none' | 'authenticating' | 'connecting'>('none');
   const [error, setError] = useState('');
   const apolloClient = useApolloClient();
 
@@ -38,7 +38,7 @@ export const LoginScreen: React.FC = observer((props) => {
   const onJoin = useCallback(async () => {
     setError('');
     if (!GameConstants.isSinglePlayer) {
-      setConnectingStatus('loggingIn');
+      setConnectingStatus('authenticating');
       const result = await apolloClient.mutate<LoginAnonymousMutation, LoginAnonymousMutationVariables>({
         mutation: LoginAnonymousDocument,
         variables: {userName: uiStore.playerName},
@@ -109,7 +109,8 @@ export const LoginScreen: React.FC = observer((props) => {
         {(connectStatus === 'none' && (
           <JoinButton onClick={onJoin}>Join {GameConstants.isSinglePlayer ? 'Single Player' : 'Server'}</JoinButton>
         )) ||
-          (connectStatus === 'connecting' && <Status>Connecting...</Status>)}
+          (connectStatus === 'connecting' && <Status>Connecting...</Status>) ||
+          (connectStatus === 'authenticating' && <Status>Authenticating...</Status>)}
         <LeaderboardButton onClick={onLeaderboard}>Today's Leaderboard</LeaderboardButton>
       </LoginBox>
       <Leaderboard tick={0} />

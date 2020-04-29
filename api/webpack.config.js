@@ -3,7 +3,6 @@ const nodeExternals = require('webpack-node-externals');
 const slsw = require('serverless-webpack');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ChmodWebpackPlugin = require('chmod-webpack-plugin');
 
 module.exports = {
   entry: slsw.lib.entries,

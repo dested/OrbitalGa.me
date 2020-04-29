@@ -33,7 +33,7 @@ export const NameBox = glamorous.input({
   background: '#a6f4f4',
   type: 'text',
   color: '#312436',
-  fontSize: '39px',
+  fontSize: '0.8rem',
   marginBottom: 20,
   marginTop: 20,
 });
@@ -46,7 +46,7 @@ export const JoinButton = glamorous.button({
   borderRadius: 5,
   background: '#94c7f4',
   color: '#312436',
-  fontSize: '39px',
+  fontSize: '0.8rem',
 });
 export const LeaderboardButton = glamorous.button({
   ...flex,
@@ -56,11 +56,11 @@ export const LeaderboardButton = glamorous.button({
   borderRadius: 5,
   background: '#94c7f4',
   color: '#312436',
-  fontSize: '39px',
+  fontSize: '0.8rem',
 });
 
 export const Status = glamorous.span({
   ...flex,
   color: '#94c7f4',
-  fontSize: '39px',
+  fontSize: '0.8rem',
 });
