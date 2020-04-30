@@ -8,10 +8,16 @@ import {
   ClientToServerSchemaAdderSizeFunction,
 } from '@common/models/clientToServerMessages';
 import {Jwt} from './utils/jwt';
+import {Utils} from '@common/utils/utils';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
-  constructor(private jwt?: Jwt) {}
+  private throttle = new QueuedThrottle();
+  constructor(private jwt?: Jwt) {
+    this.throttle.execute = (m) => {
+      this.socket!.send(m);
+    };
+  }
   connect(
     serverPath: string,
     options: {
@@ -40,7 +46,12 @@ export class ClientSocket implements IClientSocket {
     this.socket.onmessage = (e) => {
       if (GameConstants.binaryTransport) {
         totalLength += (e.data as ArrayBuffer).byteLength;
-        options.onMessage(SchemaDefiner.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction));
+        const messages = SchemaDefiner.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction);
+        if (GameConstants.throttleClient) {
+          options.onMessage(messages);
+        } else {
+          options.onMessage(messages);
+        }
       } else {
         totalLength += e.data.length;
         options.onMessage(JSON.parse(e.data));
@@ -79,9 +90,7 @@ export class ClientSocket implements IClientSocket {
     }
     try {
       if (GameConstants.throttleClient) {
-        setTimeout(() => {
-          this.socket!.send(data);
-        }, 400);
+        this.throttle.sendMessage(data);
       } else {
         this.socket.send(data);
       }
@@ -103,4 +112,29 @@ export interface IClientSocket {
   disconnect(): void;
   isConnected(): boolean;
   sendMessage(message: ClientToServerMessage): void;
+}
+
+export class QueuedThrottle {
+  execute?: (message: any) => void;
+  maxTime = 350;
+  messages: {lag: number; message: any; timeSent: number}[] = [];
+  minTime = 150;
+
+  sendMessage(message: any) {
+    const timeSent = this.messages[this.messages.length - 1]
+      ? this.messages[this.messages.length - 1].timeSent + this.messages[this.messages.length - 1].lag
+      : +new Date();
+    this.messages.push({
+      message,
+      timeSent,
+      lag: Utils.randomInRange(this.minTime, this.maxTime),
+    });
+
+    const timeout =
+      this.messages[this.messages.length - 1].timeSent + this.messages[this.messages.length - 1].lag - +new Date();
+    setTimeout(() => {
+      this.execute?.(this.messages[0].message);
+      this.messages.splice(0, 1);
+    }, timeout);
+  }
 }

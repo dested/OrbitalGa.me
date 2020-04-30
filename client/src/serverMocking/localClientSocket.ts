@@ -1,4 +1,4 @@
-import {IClientSocket} from '../clientSocket';
+import {IClientSocket, QueuedThrottle} from '../clientSocket';
 import {ClientConfig} from '../clientConfig';
 import {GameConstants} from '@common/game/gameConstants';
 import {WebSocketClient} from './webSocketClient';
@@ -9,10 +9,16 @@ import {
   ClientToServerSchemaAdderSizeFunction,
 } from '@common/models/clientToServerMessages';
 import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
+import {Jwt} from '../utils/jwt';
 
 export class LocalClientSocket implements IClientSocket {
   private socket?: WebSocketClient;
-
+  private throttle = new QueuedThrottle();
+  constructor() {
+    this.throttle.execute = (m) => {
+      this.socket!.send(m);
+    };
+  }
   connect(
     serverPath: string,
     options: {
@@ -61,7 +67,7 @@ export class LocalClientSocket implements IClientSocket {
     }
     try {
       if (GameConstants.binaryTransport) {
-        this.socket.send(
+        this.socketSend(
           SchemaDefiner.startAddSchemaBuffer(
             message,
             ClientToServerSchemaAdderSizeFunction,
@@ -69,7 +75,22 @@ export class LocalClientSocket implements IClientSocket {
           )
         );
       } else {
-        this.socket.send(JSON.stringify(message));
+        this.socketSend(JSON.stringify(message));
+      }
+    } catch (ex) {
+      console.error('disconnected??', ex);
+    }
+  }
+
+  private socketSend(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+    if (!this.socket) {
+      throw new Error('Not connected');
+    }
+    try {
+      if (GameConstants.throttleClient) {
+        this.throttle.sendMessage(data);
+      } else {
+        this.socket.send(data);
       }
     } catch (ex) {
       console.error('disconnected??', ex);

@@ -30,7 +30,11 @@ export const LoginScreen: React.FC = observer((props) => {
   const [error, setError] = useState('');
   const apolloClient = useApolloClient();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    setTimeout(() => {
+      onJoin();
+    }, 100);
+  }, []);
 
   const onLeaderboard = useCallback(() => {
     uiStore.setScreen('leaderboard');

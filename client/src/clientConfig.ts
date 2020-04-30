@@ -1,5 +1,5 @@
 export class ClientConfig {
-  static isLocal = false;
+  static isLocal = true;
   static get graphqlEndpoint() {
     switch (this.isLocal) {
       case true:

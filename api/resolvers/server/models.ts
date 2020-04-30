@@ -2,7 +2,9 @@ import {Field, Int, ObjectType, createUnionType} from 'type-graphql';
 import {response} from '../../gqlUtils/response';
 
 @ObjectType()
-export class ServerStats {}
+export class ServerStats {
+  @Field(() => Int) serverId!: number;
+}
 
 export const ServerStatsResponse = response(ServerStats);
 
