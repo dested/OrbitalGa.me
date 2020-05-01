@@ -22,7 +22,7 @@ const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {};
 
 const CTOSSpectateSchema: SDTypeLookup<ClientToServerMessage, 'spectate'> = {};
 
-const CTOSPlayerInputSchema: SDTypeLookup<ClientToServerMessage, 'playerInput'> = {
+export const CTOSPlayerInputSchema: SDTypeLookup<ClientToServerMessage, 'playerInput'> = {
   inputSequenceNumber: 'uint32',
   keys: PlayerInputKeyBitmask,
   weapon: {...PlayerWeaponEnumSchema, unset: 0},

@@ -2,7 +2,7 @@ import {IClientSocket} from '../clientSocket';
 import {ClientGame, ClientGameOptions} from './clientGame';
 import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
 import keyboardJS from 'keyboardjs';
@@ -153,7 +153,7 @@ export class ClientGameUI extends ClientGame {
       }
     }*/
 
-    if (GameConstants.debugClient) {
+    if (GameDebug.client) {
       context.save();
       context.font = '22px bold';
       context.fillStyle = 'white';
@@ -169,7 +169,7 @@ export class ClientGameUI extends ClientGame {
       context.restore();
     }
 
-    if (GameConstants.debugCollisions) {
+    if (GameDebug.collisions) {
       context.save();
       context.beginPath();
       context.scale(gameData.view.scale, gameData.view.scale);

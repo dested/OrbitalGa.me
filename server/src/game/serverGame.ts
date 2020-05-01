@@ -1,6 +1,6 @@
 import {unreachable} from '@common/utils/unreachable';
 import {nextId} from '@common/utils/uuid';
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
@@ -113,13 +113,18 @@ export class ServerGame extends Game {
   }
 
   processInputs() {
-    const noInputThisTick = Utils.toDictionary(
-      this.users.array.filter((a) => a.entity),
-      (a) => a.entity!.entityId
-    );
-
     const time = +new Date();
     let stopped = false;
+
+    for (const user of this.users.array) {
+      if (user.entity) {
+        user.entity.xInputsThisTick = false;
+        user.entity.yInputsThisTick = false;
+        user.entity.inputsThisTick = 0;
+      }
+    }
+
+    const requeuedMessages: ServerGame['queuedMessages'] = [];
 
     for (let i = 0; i < this.queuedMessages.length; i++) {
       if (time + 100 < +new Date()) {
@@ -150,21 +155,21 @@ export class ServerGame extends Game {
           const connection = this.serverSocket.connections.lookup(q.connectionId);
           if (user && connection && user.entity) {
             connection.lastAction = +new Date();
-            delete noInputThisTick[user.entity.entityId];
-            /*if (Math.abs(q.message.inputSequenceNumber - user.entity.lastProcessedInputSequenceNumber) > 20) {
-                console.log(
-                  'User input sequence too far off',
-                  q.message.inputSequenceNumber,
-                  user.entity.lastProcessedInputSequenceNumber
-                );
-                this.serverSocket.disconnect(connection.connectionId);
-              } else*/ {
-              user.entity.applyInput({
-                // todo clean this up
-                ...q.message.keys,
-                inputSequenceNumber: q.message.inputSequenceNumber,
-                weapon: q.message.weapon,
-              });
+            user.entity.inputsThisTick++;
+            if (user.entity.inputsThisTick > 3) {
+              this.serverSocket.disconnect(connection.connectionId);
+              continue;
+            }
+            if (user.entity.inputsThisTick > 1) {
+              requeuedMessages.push(q);
+            } else {
+              user.entity.applyInput(
+                {
+                  ...q.message.keys,
+                  weapon: q.message.weapon,
+                },
+                q.message.inputSequenceNumber
+              );
             }
           }
           break;
@@ -179,18 +184,8 @@ export class ServerGame extends Game {
     } else {
       console.log(this.queuedMessages.length, 'remaining');
     }
+    this.queuedMessages.unshift(...requeuedMessages);
 
-    for (const key in noInputThisTick) {
-      noInputThisTick[key].entity!.applyInput({
-        down: false,
-        up: false,
-        right: false,
-        left: false,
-        shoot: false,
-        weapon: noInputThisTick[key].entity!.selectedWeapon,
-        inputSequenceNumber: noInputThisTick[key].entity!.lastProcessedInputSequenceNumber,
-      });
-    }
   }
 
   processMessage(connectionId: number, message: ClientToServerMessage) {
@@ -238,7 +233,7 @@ export class ServerGame extends Game {
     )) {
       const enemies = grouping.entities.filter((a) => a.type === 'swoopingEnemy').length;
       const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.type === 'player').length, 4) * 1.5);
-      if (enemies < players) {
+      if (false && enemies < players) {
         for (let i = enemies; i < players; i++) {
           const swoopingEnemyEntity = new SwoopingEnemyEntity(this, {
             entityId: nextId(),
@@ -257,7 +252,29 @@ export class ServerGame extends Game {
       const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
       // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
-    if (tickIndex % 50 === 0) {
+    if (tickIndex % 1000 === -1) {
+      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
+      groupings[groupings.length - 1].x1 - groupings[0].x0;
+
+      for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
+        const meteor = new MeteorEntity(this, {
+          entityId: nextId(),
+          x: i,
+          y: GameConstants.screenSize.height * 0.55,
+          meteorColor: 'brown',
+          size: 'big',
+          meteorType: '4',
+          hit: false,
+          rotate: 100,
+        });
+        meteor.momentumY = 20;
+        meteor.startingMomentumY = 20;
+        meteor.momentumX = 0;
+        meteor.rotateSpeed = 3;
+        this.entities.push(meteor);
+      }
+
+      /*
       for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
         for (let i = 0; i < 10; i++) {
           const {meteorColor, type, size} = MeteorEntity.randomMeteor();
@@ -275,6 +292,7 @@ export class ServerGame extends Game {
           this.entities.push(meteor);
         }
       }
+*/
     }
 
     this.entityGroupingsThisTick = this.entityClusterer.getGroupings((a) => a.type === 'player');
@@ -502,7 +520,7 @@ export class ServerGame extends Game {
       serializedEntity: entity.serialize() as EntityModels,
     }));
 
-    if (!GameConstants.debugDontFilterEntities) {
+    if (!GameDebug.dontFilterEntities) {
       for (let i = myEntities.length - 1; i >= 0; i--) {
         const myEntity = myEntities[i];
         const x = myEntity.entity.realX;
@@ -555,7 +573,7 @@ export class ServerGame extends Game {
           serializedEntity: user.entity.serializeLive(),
         });
 
-        if (!GameConstants.debugDontFilterEntities) {
+        if (!GameDebug.dontFilterEntities) {
           for (const entity of items) {
             if (entity.item.entity !== user.entity) {
               if (
@@ -573,7 +591,7 @@ export class ServerGame extends Game {
           maxX: user.deadXY!.x + GameConstants.screenRange / 2,
         });
 
-        if (!GameConstants.debugDontFilterEntities) {
+        if (!GameDebug.dontFilterEntities) {
           for (const entity of items) {
             if (!entity.item.entity.onlyVisibleToPlayerEntityId) {
               myEntities.push(entity.item);
@@ -581,6 +599,10 @@ export class ServerGame extends Game {
           }
         }
       }
+      /*  const serializedEntity = myEntities.find((a) => a.serializedEntity.type === 'livePlayer')?.serializedEntity;
+      if (serializedEntity?.type === 'livePlayer') {
+        console.log('s', serializedEntity.lastProcessedInputSequenceNumber);
+      }*/
 
       this.sendMessageToClient(user.connectionId, {
         totalPlayers,

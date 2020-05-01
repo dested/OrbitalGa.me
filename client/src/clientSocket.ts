@@ -1,4 +1,4 @@
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {ClientConfig} from './clientConfig';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
@@ -47,7 +47,7 @@ export class ClientSocket implements IClientSocket {
       if (GameConstants.binaryTransport) {
         totalLength += (e.data as ArrayBuffer).byteLength;
         const messages = SchemaDefiner.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction);
-        if (GameConstants.throttleClient) {
+        if (GameDebug.throttleClient) {
           options.onMessage(messages);
         } else {
           options.onMessage(messages);
@@ -89,7 +89,7 @@ export class ClientSocket implements IClientSocket {
       throw new Error('Not connected');
     }
     try {
-      if (GameConstants.throttleClient) {
+      if (GameDebug.throttleClient) {
         this.throttle.sendMessage(data);
       } else {
         this.socket.send(data);
@@ -116,9 +116,9 @@ export interface IClientSocket {
 
 export class QueuedThrottle {
   execute?: (message: any) => void;
-  maxTime = 350;
+  maxTime = 200;
   messages: {lag: number; message: any; timeSent: number}[] = [];
-  minTime = 150;
+  minTime = 0;
 
   sendMessage(message: any) {
     const timeSent = this.messages[this.messages.length - 1]

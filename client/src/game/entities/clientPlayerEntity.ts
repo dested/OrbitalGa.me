@@ -1,15 +1,22 @@
-import {LivePlayerModel, PlayerBadges, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
+import {LivePlayerModel, PlayerBadges, PlayerEntity, PlayerInput, PlayerModel} from '@common/entities/playerEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {unreachable} from '@common/utils/unreachable';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
+  static _greenPlayer?: HTMLCanvasElement;
   static _whitePlayer?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
   hitTimer = 0;
+  unreconciledActions: ({inputSequenceNumber: number} & (
+    | {input: PlayerInput; type: 'input'}
+    | {type: 'no-input'}
+    | {momentumX: number; momentumY: number; type: 'bounce'}
+  ))[] = [];
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
@@ -41,7 +48,16 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   draw(context: CanvasRenderingContext2D): void {
     const ship = this.ship;
 
+    if (GameDebug.clientServerView) {
+      context.save();
+      context.globalAlpha = 0.7;
+      context.translate(this.x, this.y);
+      context.drawImage(ClientPlayerEntity.greenPlayer(), -ship.size.width / 2, -ship.size.height / 2);
+      context.restore();
+      return;
+    }
     this.drawFire(context);
+
     context.save();
     context.translate(this.drawX, this.drawY);
     context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
@@ -54,7 +70,6 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
       this.hitTimer -= 1;
     }
     context.restore();
-
     this.drawHealthAndRank(context);
   }
 
@@ -121,6 +136,12 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
         curBadgeY += badgeSize + badgePadding;
       }
     }
+  }
+  static greenPlayer() {
+    if (!this._greenPlayer) {
+      this._greenPlayer = CanvasUtils.mask(OrbitalAssets.assets['Ships.playerShip1_blue'], 0, 255, 0);
+    }
+    return this._greenPlayer!;
   }
 
   static whitePlayer() {

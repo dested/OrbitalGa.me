@@ -23,7 +23,6 @@ export type PlayerInputKeys = {
   up: boolean;
 };
 export type PlayerInput = PlayerInputKeys & {
-  inputSequenceNumber: number;
   weapon: PlayerWeapon | 'unset';
 };
 export type PlayerColor = 'blue' | 'green' | 'orange' | 'red';
@@ -34,7 +33,6 @@ export type PlayerBadges = {
 };
 
 export class PlayerEntity extends Entity implements Weapon {
-  aliveTick = 0;
   availableWeapons: AvailablePlayerWeapon[] = [
     {ammo: 0, weapon: 'laser1'},
     {ammo: 5, weapon: 'rocket'},
@@ -53,7 +51,6 @@ export class PlayerEntity extends Entity implements Weapon {
   momentumX = 0;
   momentumY = 0;
   ownerPlayerEntityId: number;
-  pendingInputs: PlayerInput[] = [];
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon = 'laser1';
   shootTimer: number = 1;
@@ -148,8 +145,7 @@ export class PlayerEntity extends Entity implements Weapon {
     }
   }
 
-  applyInput(input: PlayerInput) {
-    this.aliveTick++;
+  applyInput(input: PlayerInput, inputSequenceNumber: number) {
     this.lastPlayerInput = input;
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
@@ -320,15 +316,14 @@ export class PlayerEntity extends Entity implements Weapon {
     this.game.explode(this, 'big');
   }
 
-  gameTick(): void {
+  gameTick(duration: number): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
     this.updatedPositionFromMomentum();
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
     const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
-    this.momentumX += x;
-    this.momentumY += y;
+    this.bounce(x, y);
     if (!this.game.isClient) {
       this.game.gameLeaderboard?.increaseEntry(this.entityId, 'damageTaken', damage);
     }
@@ -457,6 +452,11 @@ export class PlayerEntity extends Entity implements Weapon {
       this.y = GameConstants.screenSize.height * 1.1;
       this.momentumY = 0;
     }
+  }
+
+  protected bounce(momentumX: number, momentumY: number) {
+    this.momentumX += momentumX;
+    this.momentumY += momentumY;
   }
 
   static randomEnemyColor() {

@@ -3,15 +3,18 @@ import {ServerGame} from '../serverGame';
 import {ImpliedEntityType} from '@common/models/serverToClientMessages';
 
 export class ServerPlayerEntity extends PlayerEntity {
+  inputsThisTick: number = 0;
+
   constructor(private serverGame: ServerGame, messageModel: ImpliedEntityType<PlayerModel>) {
     super(serverGame, messageModel);
   }
-  applyInput(input: PlayerInput) {
-    super.applyInput(input);
-    this.lastProcessedInputSequenceNumber = input.inputSequenceNumber;
+  applyInput(input: PlayerInput, inputSequenceNumber: number) {
+    super.applyInput(input, inputSequenceNumber);
+    this.lastProcessedInputSequenceNumber = inputSequenceNumber;
   }
-  gameTick(): void {
-    super.gameTick();
+
+  gameTick(duration: number): void {
+    super.gameTick(duration);
     const groupings = this.serverGame.entityGroupingsThisTick;
     const x0 = groupings[0].x0;
     const x1 = groupings[groupings.length - 1].x1;

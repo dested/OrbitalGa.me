@@ -62,7 +62,6 @@ export class ClientGame extends Game {
         this.connected = false;
       },
       onMessage: (messages) => {
-        this.processMessages(messages);
         this.messagesToProcess.push(...messages);
       },
     });
@@ -84,8 +83,10 @@ export class ClientGame extends Game {
   }
 
   gameTick(duration: number) {
-    this.processInputs(duration);
-    this.liveEntity?.gameTick();
+    this.processMessages(this.messagesToProcess);
+
+    this.liveEntity?.processInput(duration);
+    this.liveEntity?.gameTick(duration);
     for (const entity of this.entities.array) {
       entity.updatePolygon();
     }
@@ -93,6 +94,9 @@ export class ClientGame extends Game {
     this.liveEntity?.checkCollisions();
     for (const entity of this.entities.array) {
       if (entity.type === 'drop') {
+        entity.checkCollisions();
+      }
+      if (entity.type === 'meteor') {
         entity.checkCollisions();
       }
     }
@@ -144,10 +148,6 @@ export class ClientGame extends Game {
     for (const entity of this.entities.array) {
       entity.interpolateEntity(renderTimestamp);
     }
-  }
-
-  private processInputs(duration: number) {
-    this.liveEntity?.processInput(duration);
   }
 
   private processMessages(messages: ServerToClientMessage[]) {

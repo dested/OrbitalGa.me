@@ -97,6 +97,7 @@ export class EntityClusterer {
   }
 
   getNewPlayerXPosition(): number {
+    return 500;
     const padding = 300;
     const groups = this.getGroupings((a) => a.type === 'player');
     while (true) {

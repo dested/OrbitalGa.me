@@ -6,6 +6,7 @@ import {Provider} from 'mobx-react';
 import {ApolloProvider} from 'react-apollo-hooks';
 import {App} from './app';
 import {apolloClient} from './schema/apolloClient';
+import {mplayTester} from './mplayTester';
 ReactDOM.render(
   <Provider {...stores}>
     <ApolloProvider client={apolloClient}>
@@ -14,3 +15,5 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('root')
 );
+
+// mplayTester();

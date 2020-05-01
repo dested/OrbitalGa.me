@@ -1,6 +1,6 @@
 import {IClientSocket, QueuedThrottle} from '../clientSocket';
 import {ClientConfig} from '../clientConfig';
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {WebSocketClient} from './webSocketClient';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {
@@ -87,7 +87,7 @@ export class LocalClientSocket implements IClientSocket {
       throw new Error('Not connected');
     }
     try {
-      if (GameConstants.throttleClient) {
+      if (GameDebug.throttleClient) {
         this.throttle.sendMessage(data);
       } else {
         this.socket.send(data);

@@ -3,8 +3,9 @@ import {assertType, Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
+import {unreachable} from '@common/utils/unreachable';
 
 type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
@@ -21,7 +22,12 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   mainTick = 0;
 
-  positionLerp?: {duration: number; startTime: number; x: number; y: number};
+  positionLerp: {duration: number; startTime: number; x: number; y: number} = {
+    x: this.x,
+    y: this.y,
+    startTime: +new Date(),
+    duration: GameConstants.serverTickRate,
+  };
   zIndex = DrawZIndex.Player;
   constructor(clientGame: ClientGame, public messageModel: LivePlayerModel) {
     super(clientGame, messageModel);
@@ -29,37 +35,29 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
 
   get drawX(): number {
-    if (!this.positionLerp) {
-      return this.x;
+    const {x, y, startTime, duration} = this.positionLerp;
+    const now = +new Date();
+    if ((now - startTime) / duration >= 1) {
+      return Math.round(this.x);
     } else {
-      const {x, y, startTime, duration} = this.positionLerp;
-      const now = +new Date();
-      if ((now - startTime) / duration >= 1) {
-        return Math.round(this.x);
-      } else {
-        return Math.round(Utils.lerp(x, this.x, (now - startTime) / duration));
-      }
+      return Math.round(Utils.lerp(x, this.x, (now - startTime) / duration));
     }
   }
 
   get drawY(): number {
-    if (!this.positionLerp) {
-      return this.y;
+    const {x, y, startTime, duration} = this.positionLerp;
+    const now = +new Date();
+    if ((now - startTime) / duration >= 1) {
+      return Math.round(this.y);
     } else {
-      const {x, y, startTime, duration} = this.positionLerp;
-      const now = +new Date();
-      if ((now - startTime) / duration >= 1) {
-        return Math.round(this.y);
-      } else {
-        return Math.round(Utils.lerp(y, this.y, (now - startTime) / duration));
-      }
+      return Math.round(Utils.lerp(y, this.y, (now - startTime) / duration));
     }
   }
 
   draw(context: CanvasRenderingContext2D): void {
     super.draw(context);
 
-    if (GameConstants.debugClient) {
+    if (GameDebug.client) {
       context.save();
       context.font = '20px kenney_spaceregular';
       context.strokeStyle = '#f0f0f0';
@@ -76,36 +74,25 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     }
   }
 
+  gameTick(duration: number): void {
+    this.positionLerp.x = this.x;
+    this.positionLerp.y = this.y;
+    this.positionLerp.startTime = +new Date();
+    this.positionLerp.duration = duration;
+    super.gameTick(duration);
+  }
+
   interpolateEntity(renderTimestamp: number) {
     // live entity does not need to interpolate anything
   }
 
   processInput(duration: number) {
-    if (!this.positionLerp) {
-      this.positionLerp = {
-        x: this.x,
-        y: this.y,
-        startTime: +new Date(),
-        duration,
-      };
-    } else {
-      this.positionLerp.x = this.x;
-      this.positionLerp.y = this.y;
-      this.positionLerp.startTime = +new Date();
-      this.positionLerp.duration = duration;
-    }
-
-    const input = {
-      ...this.keys,
-      inputSequenceNumber: this.inputSequenceNumber++,
-    };
-
-    this.pendingInputs.push(input);
-    const weaponChanged = !!this.keys.weapon;
-    this.applyInput(input);
-
+    const weaponChanged = this.keys.weapon !== 'unset';
     if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
-      this.clientGame.sendInput(input, input.inputSequenceNumber);
+      this.unreconciledActions.push({type: 'input', inputSequenceNumber: this.inputSequenceNumber, input: this.keys});
+      this.applyInput(this.keys, this.inputSequenceNumber);
+      this.clientGame.sendInput(this.keys, this.inputSequenceNumber);
+      this.inputSequenceNumber++;
     }
     this.keys.weapon = 'unset';
   }
@@ -113,6 +100,8 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {
     assertType<LivePlayerModel>(messageModel);
     const wasHit = this.hit;
+    const oldY = this.y;
+
     super.reconcileFromServerLive(messageModel);
     if (this.hit !== wasHit) {
       this.hitTimer = 5;
@@ -121,18 +110,36 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     if (this.dead) {
       this.clientGame.died();
     }
-    let spliceIndex = -1;
-    for (let i = 0; i < this.pendingInputs.length; i++) {
-      const input = this.pendingInputs[i];
-      if (input.inputSequenceNumber <= messageModel.lastProcessedInputSequenceNumber) {
-        spliceIndex = i;
-      } else {
-        this.applyInput(input);
-        this.updatedPositionFromMomentum();
+
+    this.unreconciledActions = this.unreconciledActions.filter(
+      (action) => action.inputSequenceNumber > messageModel.lastProcessedInputSequenceNumber
+    );
+    console.log(
+      Math.round(oldY),
+      Math.round(this.y),
+      messageModel.lastProcessedInputSequenceNumber,
+      this.unreconciledActions.map((a) => a.inputSequenceNumber).join(',')
+    );
+
+    for (const pendingAction of this.unreconciledActions) {
+      switch (pendingAction.type) {
+        case 'input':
+          this.applyInput(pendingAction.input, pendingAction.inputSequenceNumber);
+          this.updatedPositionFromMomentum();
+          console.log('---', Math.round(this.y), pendingAction.inputSequenceNumber);
+          break;
+        case 'no-input':
+          this.updatedPositionFromMomentum();
+          break;
+        case 'bounce':
+          // console.log('bounce');
+          /*this.momentumX = pendingAction.momentumX;
+          this.momentumY = pendingAction.momentumY;
+          this.updatedPositionFromMomentum();*/
+          break;
+        default:
+          unreachable(pendingAction);
       }
-    }
-    if (spliceIndex >= 0) {
-      this.pendingInputs.splice(0, spliceIndex + 1);
     }
   }
 
@@ -165,5 +172,15 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
   tick() {
     this.mainTick++;
+  }
+
+  protected bounce(momentumX: number, momentumY: number) {
+    super.bounce(momentumX, momentumY);
+    this.unreconciledActions.push({
+      inputSequenceNumber: this.inputSequenceNumber,
+      type: 'bounce',
+      momentumX: this.momentumX,
+      momentumY: this.momentumY,
+    });
   }
 }
