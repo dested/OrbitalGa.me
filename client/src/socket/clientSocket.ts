@@ -1,5 +1,5 @@
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
-import {ClientConfig} from './clientConfig';
+import {ClientConfig} from '../clientConfig';
 import {SchemaDefiner} from '@common/schemaDefiner/schemaDefiner';
 import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
 import {
@@ -7,8 +7,9 @@ import {
   ClientToServerSchemaAdderFunction,
   ClientToServerSchemaAdderSizeFunction,
 } from '@common/models/clientToServerMessages';
-import {Jwt} from './utils/jwt';
-import {Utils} from '@common/utils/utils';
+import {Jwt} from '../utils/jwt';
+import {QueuedThrottle} from './queuedThrottle';
+import {IClientSocket} from './IClientSocket';
 
 export class ClientSocket implements IClientSocket {
   private socket?: WebSocket;
@@ -47,11 +48,7 @@ export class ClientSocket implements IClientSocket {
       if (GameConstants.binaryTransport) {
         totalLength += (e.data as ArrayBuffer).byteLength;
         const messages = SchemaDefiner.startReadSchemaBuffer(e.data, ServerToClientSchemaReaderFunction);
-        if (GameDebug.throttleClient) {
-          options.onMessage(messages);
-        } else {
-          options.onMessage(messages);
-        }
+        options.onMessage(messages);
       } else {
         totalLength += e.data.length;
         options.onMessage(JSON.parse(e.data));
@@ -84,6 +81,7 @@ export class ClientSocket implements IClientSocket {
       this.socketSend(JSON.stringify(message));
     }
   }
+
   private socketSend(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
     if (!this.socket) {
       throw new Error('Not connected');
@@ -97,44 +95,5 @@ export class ClientSocket implements IClientSocket {
     } catch (ex) {
       console.error('disconnected??', ex);
     }
-  }
-}
-
-export interface IClientSocket {
-  connect(
-    serverPath: string,
-    options: {
-      onDisconnect: () => void;
-      onMessage: (messages: ServerToClientMessage[]) => void;
-      onOpen: () => void;
-    }
-  ): void;
-  disconnect(): void;
-  isConnected(): boolean;
-  sendMessage(message: ClientToServerMessage): void;
-}
-
-export class QueuedThrottle {
-  execute?: (message: any) => void;
-  maxTime = 200;
-  messages: {lag: number; message: any; timeSent: number}[] = [];
-  minTime = 0;
-
-  sendMessage(message: any) {
-    const timeSent = this.messages[this.messages.length - 1]
-      ? this.messages[this.messages.length - 1].timeSent + this.messages[this.messages.length - 1].lag
-      : +new Date();
-    this.messages.push({
-      message,
-      timeSent,
-      lag: Utils.randomInRange(this.minTime, this.maxTime),
-    });
-
-    const timeout =
-      this.messages[this.messages.length - 1].timeSent + this.messages[this.messages.length - 1].lag - +new Date();
-    setTimeout(() => {
-      this.execute?.(this.messages[0].message);
-      this.messages.splice(0, 1);
-    }, timeout);
   }
 }

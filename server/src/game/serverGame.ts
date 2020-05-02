@@ -186,6 +186,11 @@ export class ServerGame extends Game {
     }
     this.queuedMessages.unshift(...requeuedMessages);
 
+    for (const user of this.users.array) {
+      if (user.entity?.inputsThisTick === 0) {
+        user.entity.lastProcessedInputSequenceNumber++;
+      }
+    }
   }
 
   processMessage(connectionId: number, message: ClientToServerMessage) {

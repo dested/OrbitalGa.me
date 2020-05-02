@@ -45,7 +45,6 @@ export class PlayerEntity extends Entity implements Weapon {
   explosionIntensity = 2;
   health = GameRules.player.base.startingHealth;
   hit = false;
-  inputSequenceNumber: number = 1;
   isWeapon = true as const;
   lastProcessedInputSequenceNumber: number = 0;
   momentumX = 0;

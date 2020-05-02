@@ -12,11 +12,14 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   static _whitePlayer?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
   hitTimer = 0;
-  unreconciledActions: ({inputSequenceNumber: number} & (
-    | {input: PlayerInput; type: 'input'}
-    | {type: 'no-input'}
-    | {momentumX: number; momentumY: number; type: 'bounce'}
-  ))[] = [];
+  storedActions: {
+    input: PlayerInput;
+    momentumX: number;
+    momentumY: number;
+    sequenceNumber: number;
+    x: number;
+    y: number;
+  }[] = [];
   zIndex = DrawZIndex.Player;
 
   constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {

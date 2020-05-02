@@ -3,7 +3,7 @@ import {w3cwebsocket} from 'websocket';
 import {Utils} from '@common/utils/utils';
 import ApolloClient, {InMemoryCache, IntrospectionFragmentMatcher} from 'apollo-boost';
 import fetch from 'node-fetch';
-import {ClientSocket} from '../../client/src/clientSocket';
+import {ClientSocket} from '../../client/src/socket/clientSocket';
 import {BotClientGame} from '../../client/src/game/botClientGame';
 import {ClientGame} from '../../client/src/game/clientGame';
 import {

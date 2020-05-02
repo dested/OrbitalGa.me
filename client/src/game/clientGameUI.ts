@@ -1,4 +1,3 @@
-import {IClientSocket} from '../clientSocket';
 import {ClientGame, ClientGameOptions} from './clientGame';
 import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
@@ -6,6 +5,7 @@ import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/entities/entity';
 import keyboardJS from 'keyboardjs';
+import {IClientSocket} from '../socket/IClientSocket';
 
 export class ClientGameUI extends ClientGame {
   drawTick = 0;

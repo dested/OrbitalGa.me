@@ -11,6 +11,7 @@ type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
 export class ClientLivePlayerEntity extends ClientPlayerEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
+  inputSequenceNumber: number = 1;
   keys: KeyInput = {
     up: false,
     down: false,
@@ -88,12 +89,12 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   processInput(duration: number) {
     const weaponChanged = this.keys.weapon !== 'unset';
-    if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
-      this.unreconciledActions.push({type: 'input', inputSequenceNumber: this.inputSequenceNumber, input: this.keys});
-      this.applyInput(this.keys, this.inputSequenceNumber);
-      this.clientGame.sendInput(this.keys, this.inputSequenceNumber);
-      this.inputSequenceNumber++;
-    }
+    this.xInputsThisTick = false;
+    this.yInputsThisTick = false;
+    // if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
+    this.applyInput(this.keys, this.inputSequenceNumber);
+    this.clientGame.sendInput(this.keys, this.inputSequenceNumber);
+    // }
     this.keys.weapon = 'unset';
   }
 
@@ -101,6 +102,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     assertType<LivePlayerModel>(messageModel);
     const wasHit = this.hit;
     const oldY = this.y;
+    const oldMomentumY = this.momentumY;
 
     super.reconcileFromServerLive(messageModel);
     if (this.hit !== wasHit) {
@@ -110,36 +112,29 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     if (this.dead) {
       this.clientGame.died();
     }
-
-    this.unreconciledActions = this.unreconciledActions.filter(
-      (action) => action.inputSequenceNumber > messageModel.lastProcessedInputSequenceNumber
+    const oldStoredActions = this.storedActions;
+    this.storedActions = this.storedActions.filter(
+      (action) => action.sequenceNumber > messageModel.lastProcessedInputSequenceNumber
     );
+
     console.log(
-      Math.round(oldY),
-      Math.round(this.y),
-      messageModel.lastProcessedInputSequenceNumber,
-      this.unreconciledActions.map((a) => a.inputSequenceNumber).join(',')
+      this.inputSequenceNumber + '-' + Math.round(oldY) + '-' + Math.round(oldMomentumY),
+      messageModel.lastProcessedInputSequenceNumber +
+        '-' +
+        Math.round(messageModel.y) +
+        '-' +
+        Math.round(messageModel.momentumY),
+      this.storedActions.map((a) => a.sequenceNumber + '-' + Math.round(a.y) + '-' + Math.round(a.momentumY)).join(',')
     );
 
-    for (const pendingAction of this.unreconciledActions) {
-      switch (pendingAction.type) {
-        case 'input':
-          this.applyInput(pendingAction.input, pendingAction.inputSequenceNumber);
-          this.updatedPositionFromMomentum();
-          console.log('---', Math.round(this.y), pendingAction.inputSequenceNumber);
-          break;
-        case 'no-input':
-          this.updatedPositionFromMomentum();
-          break;
-        case 'bounce':
-          // console.log('bounce');
-          /*this.momentumX = pendingAction.momentumX;
-          this.momentumY = pendingAction.momentumY;
-          this.updatedPositionFromMomentum();*/
-          break;
-        default:
-          unreachable(pendingAction);
+    for (const pendingAction of this.storedActions) {
+      this.applyInput(pendingAction.input, pendingAction.sequenceNumber);
+      this.updatedPositionFromMomentum();
+      if (Math.abs(this.y - pendingAction.y) > 1) {
+        console.log('bad', this.y.toFixed(1), pendingAction.y.toFixed(1), pendingAction.sequenceNumber);
+        debugger;
       }
+      // console.log('---', Math.round(this.y), pendingAction.sequenceNumber);
     }
   }
 
@@ -176,11 +171,5 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   protected bounce(momentumX: number, momentumY: number) {
     super.bounce(momentumX, momentumY);
-    this.unreconciledActions.push({
-      inputSequenceNumber: this.inputSequenceNumber,
-      type: 'bounce',
-      momentumX: this.momentumX,
-      momentumY: this.momentumY,
-    });
   }
 }

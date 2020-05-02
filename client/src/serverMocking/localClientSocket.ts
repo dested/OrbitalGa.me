@@ -1,4 +1,3 @@
-import {IClientSocket, QueuedThrottle} from '../clientSocket';
 import {ClientConfig} from '../clientConfig';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {WebSocketClient} from './webSocketClient';
@@ -10,6 +9,8 @@ import {
 } from '@common/models/clientToServerMessages';
 import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
 import {Jwt} from '../utils/jwt';
+import {QueuedThrottle} from '../socket/queuedThrottle';
+import {IClientSocket} from '../socket/IClientSocket';
 
 export class LocalClientSocket implements IClientSocket {
   private socket?: WebSocketClient;

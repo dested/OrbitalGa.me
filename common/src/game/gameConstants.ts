@@ -1,13 +1,13 @@
 const screenSize = {width: 1950, height: 900};
 
 export class GameDebug {
-  static client = true;
+  static client = false;
   static clientServerView = false;
   static collisions = false;
   static dontFilterEntities = false;
   static noBackground = false;
   static noTimeout = false;
-  static throttleClient = true;
+  static throttleClient = false;
 }
 
 export class GameConstants {

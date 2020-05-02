@@ -1,5 +1,4 @@
 import {unreachable} from '@common/utils/unreachable';
-import {IClientSocket} from '../clientSocket';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
 import {assertType, Utils} from '@common/utils/utils';
@@ -14,6 +13,7 @@ import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
 import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {PlayerEntity} from '@common/entities/playerEntity';
+import {IClientSocket} from '../socket/IClientSocket';
 
 export type ClientGameOptions = {
   onDied: (me: ClientGame) => void;
@@ -85,8 +85,19 @@ export class ClientGame extends Game {
   gameTick(duration: number) {
     this.processMessages(this.messagesToProcess);
 
-    this.liveEntity?.processInput(duration);
-    this.liveEntity?.gameTick(duration);
+    if (this.liveEntity) {
+      this.liveEntity.processInput(duration);
+      this.liveEntity.gameTick(duration);
+
+      this.liveEntity.storedActions.push({
+        sequenceNumber: this.liveEntity.inputSequenceNumber++,
+        input: {...this.liveEntity.keys},
+        momentumX: this.liveEntity.momentumX,
+        momentumY: this.liveEntity.momentumY,
+        x: this.liveEntity.x,
+        y: this.liveEntity.y,
+      });
+    }
     for (const entity of this.entities.array) {
       entity.updatePolygon();
     }
@@ -100,6 +111,7 @@ export class ClientGame extends Game {
         entity.checkCollisions();
       }
     }
+
     for (const entity of this.entities.array) {
       if (entity.markToDestroy) {
         assertType<Entity & ClientEntity>(entity);
@@ -116,6 +128,10 @@ export class ClientGame extends Game {
   killPlayer(player: PlayerEntity): void {}
 
   sendInput(input: ClientLivePlayerEntity['keys'], inputSequenceNumber: number) {
+    console.log(
+      'sending',
+      JSON.stringify({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input})
+    );
     this.sendMessageToServer({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input});
   }
 
