@@ -4,7 +4,7 @@ import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
 import {JoinButton, LeaderboardButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
 import {GoFullScreen} from '../../components/goFullScreen';
-import {GameConstants} from '@common/game/gameConstants';
+import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
 import {ClientGame} from '../../game/clientGame';
 import {unreachable} from '@common/utils/unreachable';
@@ -31,9 +31,11 @@ export const LoginScreen: React.FC = observer((props) => {
   const apolloClient = useApolloClient();
 
   useEffect(() => {
-    setTimeout(() => {
-      onJoin();
-    }, 100);
+    if (GameDebug.autoSignIn) {
+      setTimeout(() => {
+        onJoin();
+      }, 100);
+    }
   }, []);
 
   const onLeaderboard = useCallback(() => {

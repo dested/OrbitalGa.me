@@ -14,11 +14,9 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   hitTimer = 0;
   storedActions: {
     input: PlayerInput;
-    momentumX: number;
-    momentumY: number;
+    nonKeyMomentumX: number;
+    nonKeyMomentumY: number;
     sequenceNumber: number;
-    x: number;
-    y: number;
   }[] = [];
   zIndex = DrawZIndex.Player;
 

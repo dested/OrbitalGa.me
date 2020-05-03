@@ -19,19 +19,23 @@ export const LoadingScreen: React.FC = observer((props) => {
         jsonify: true,
       });
       await hydrate('uiStore', uiStore);
-      try {
-        const result = await apolloClient.query<SpectateQuery>({query: SpectateDocument});
-        if (result.data.spectate && result.data.spectate.gameModel) {
-          GameData.start();
-          uiStore.setSpectateJwt(result.data.spectate.spectateJwt);
-          GameData.spectateGame(result.data.spectate.gameModel.serverUrl);
-        } else {
+      if (GameConstants.isSinglePlayer) {
+        GameData.start();
+      } else {
+        try {
+          const result = await apolloClient.query<SpectateQuery>({query: SpectateDocument});
+          if (result.data.spectate && result.data.spectate.gameModel) {
+            GameData.start();
+            uiStore.setSpectateJwt(result.data.spectate.spectateJwt);
+            GameData.spectateGame(result.data.spectate.gameModel.serverUrl);
+          } else {
+            uiStore.setServerDown(true);
+            GameData.start();
+          }
+        } catch (ex) {
           uiStore.setServerDown(true);
           GameData.start();
         }
-      } catch (ex) {
-        uiStore.setServerDown(true);
-        GameData.start();
       }
     }
 

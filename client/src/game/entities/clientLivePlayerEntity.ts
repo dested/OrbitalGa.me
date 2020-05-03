@@ -91,10 +91,10 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     const weaponChanged = this.keys.weapon !== 'unset';
     this.xInputsThisTick = false;
     this.yInputsThisTick = false;
-    // if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
     this.applyInput(this.keys, this.inputSequenceNumber);
-    this.clientGame.sendInput(this.keys, this.inputSequenceNumber);
-    // }
+    if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
+      this.clientGame.sendInput(this.keys, this.inputSequenceNumber);
+    }
     this.keys.weapon = 'unset';
   }
 
@@ -112,29 +112,19 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     if (this.dead) {
       this.clientGame.died();
     }
-    const oldStoredActions = this.storedActions;
     this.storedActions = this.storedActions.filter(
       (action) => action.sequenceNumber > messageModel.lastProcessedInputSequenceNumber
     );
 
-    console.log(
-      this.inputSequenceNumber + '-' + Math.round(oldY) + '-' + Math.round(oldMomentumY),
-      messageModel.lastProcessedInputSequenceNumber +
-        '-' +
-        Math.round(messageModel.y) +
-        '-' +
-        Math.round(messageModel.momentumY),
-      this.storedActions.map((a) => a.sequenceNumber + '-' + Math.round(a.y) + '-' + Math.round(a.momentumY)).join(',')
-    );
-
     for (const pendingAction of this.storedActions) {
       this.applyInput(pendingAction.input, pendingAction.sequenceNumber);
-      this.updatedPositionFromMomentum();
-      if (Math.abs(this.y - pendingAction.y) > 1) {
-        console.log('bad', this.y.toFixed(1), pendingAction.y.toFixed(1), pendingAction.sequenceNumber);
-        debugger;
+      if (pendingAction.nonKeyMomentumX !== 0) {
+        this.momentumX += pendingAction.nonKeyMomentumX;
       }
-      // console.log('---', Math.round(this.y), pendingAction.sequenceNumber);
+      if (pendingAction.nonKeyMomentumY !== 0) {
+        this.momentumY += pendingAction.nonKeyMomentumY;
+      }
+      this.updatedPositionFromMomentum();
     }
   }
 
@@ -171,5 +161,8 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   protected bounce(momentumX: number, momentumY: number) {
     super.bounce(momentumX, momentumY);
+    const lastStoredAction = this.storedActions[this.storedActions.length - 1];
+    lastStoredAction.nonKeyMomentumX = momentumX;
+    lastStoredAction.nonKeyMomentumY = momentumY;
   }
 }

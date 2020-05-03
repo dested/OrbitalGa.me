@@ -233,72 +233,7 @@ export class ServerGame extends Game {
 
     this.processInputs();
 
-    for (const grouping of this.entityClusterer.getGroupings(
-      (a) => a.type === 'player' || a.type === 'swoopingEnemy'
-    )) {
-      const enemies = grouping.entities.filter((a) => a.type === 'swoopingEnemy').length;
-      const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.type === 'player').length, 4) * 1.5);
-      if (false && enemies < players) {
-        for (let i = enemies; i < players; i++) {
-          const swoopingEnemyEntity = new SwoopingEnemyEntity(this, {
-            entityId: nextId(),
-            x: this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
-            y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
-            enemyColor: SwoopingEnemyEntity.randomEnemyColor(),
-            health: GameRules.enemies.swoopingEnemy.startingHealth,
-            hit: false,
-          });
-          this.entities.push(swoopingEnemyEntity);
-        }
-      }
-    }
-
-    if (tickIndex === 50) {
-      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
-      // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
-    }
-    if (tickIndex % 1000 === -1) {
-      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
-      groupings[groupings.length - 1].x1 - groupings[0].x0;
-
-      for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
-        const meteor = new MeteorEntity(this, {
-          entityId: nextId(),
-          x: i,
-          y: GameConstants.screenSize.height * 0.55,
-          meteorColor: 'brown',
-          size: 'big',
-          meteorType: '4',
-          hit: false,
-          rotate: 100,
-        });
-        meteor.momentumY = 20;
-        meteor.startingMomentumY = 20;
-        meteor.momentumX = 0;
-        meteor.rotateSpeed = 3;
-        this.entities.push(meteor);
-      }
-
-      /*
-      for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
-        for (let i = 0; i < 10; i++) {
-          const {meteorColor, type, size} = MeteorEntity.randomMeteor();
-          const meteor = new MeteorEntity(this, {
-            entityId: nextId(),
-            x: Utils.randomInRange(grouping.x0, grouping.x1),
-            y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
-            meteorColor,
-            size,
-            meteorType: type,
-            hit: false,
-            rotate: Math.random() * 255,
-          });
-
-          this.entities.push(meteor);
-        }
-      }
-*/
-    }
+    this.processGameRules(tickIndex);
 
     this.entityGroupingsThisTick = this.entityClusterer.getGroupings((a) => a.type === 'player');
     for (let i = this.entities.length - 1; i >= 0; i--) {
@@ -475,6 +410,76 @@ export class ServerGame extends Game {
   private initGame() {
     this.entities.push(new SpectatorEntity(this, {entityId: nextId(), x: 0, y: 0}));
     this.updateSpectatorPosition();
+  }
+
+  private processGameRules(tickIndex: number) {
+    if (!GameDebug.noEnemies) {
+      for (const grouping of this.entityClusterer.getGroupings(
+        (a) => a.type === 'player' || a.type === 'swoopingEnemy'
+      )) {
+        const enemies = grouping.entities.filter((a) => a.type === 'swoopingEnemy').length;
+        const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.type === 'player').length, 4) * 1.5);
+        if (enemies < players) {
+          for (let i = enemies; i < players; i++) {
+            const swoopingEnemyEntity = new SwoopingEnemyEntity(this, {
+              entityId: nextId(),
+              x: this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
+              y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+              enemyColor: SwoopingEnemyEntity.randomEnemyColor(),
+              health: GameRules.enemies.swoopingEnemy.startingHealth,
+              hit: false,
+            });
+            this.entities.push(swoopingEnemyEntity);
+          }
+        }
+      }
+    }
+
+    if (tickIndex === 50) {
+      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
+      // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
+    }
+
+    if (tickIndex % 50 === 1) {
+      if (GameDebug.meteorCluster) {
+        const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
+        for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
+          const meteor = new MeteorEntity(this, {
+            entityId: nextId(),
+            x: i,
+            y: GameConstants.screenSize.height * 0.55,
+            meteorColor: 'brown',
+            size: 'big',
+            meteorType: '4',
+            hit: false,
+            rotate: 100,
+          });
+          meteor.momentumY = 20;
+          meteor.startingMomentumY = 20;
+          meteor.momentumX = 0;
+          meteor.rotateSpeed = 3;
+          this.entities.push(meteor);
+        }
+      } else {
+        for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
+          for (let i = 0; i < 10; i++) {
+            const {meteorColor, type, size} = MeteorEntity.randomMeteor();
+            const meteor = new MeteorEntity(this, {
+              entityId: nextId(),
+              x: Utils.randomInRange(grouping.x0, grouping.x1),
+              y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+              meteorColor,
+              size,
+              meteorType: type,
+              hit: false,
+              rotate: Math.random() * 255,
+            });
+
+            this.entities.push(meteor);
+          }
+        }
+      }
+    }
   }
 
   private sendLeaderboard() {

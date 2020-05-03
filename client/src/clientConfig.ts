@@ -1,7 +1,8 @@
+import {GameDebug} from '@common/game/gameConstants';
+
 export class ClientConfig {
-  static isLocal = false;
   static get graphqlEndpoint() {
-    switch (this.isLocal) {
+    switch (GameDebug.isLocal) {
       case true:
         return 'http://localhost:3116/graphql';
       case false:
@@ -9,9 +10,9 @@ export class ClientConfig {
     }
   }
   static websocketUrl(serverPath: string) {
-    switch (this.isLocal) {
+    switch (GameDebug.isLocal) {
       case true:
-        return 'ws://192.168.86.21:8081';
+        return 'ws://localhost:8081';
       case false:
         return `wss://game.orbitalga.me/${serverPath}`;
     }

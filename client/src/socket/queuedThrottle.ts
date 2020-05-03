@@ -2,9 +2,9 @@ import {Utils} from '@common/utils/utils';
 
 export class QueuedThrottle {
   execute?: (message: any) => void;
-  maxTime = 150;
+  maxTime = 50;
   messages: {lag: number; message: any; timeSent: number}[] = [];
-  minTime = 0;
+  minTime = 50;
 
   sendMessage(message: any) {
     const timeSent = this.messages[this.messages.length - 1]

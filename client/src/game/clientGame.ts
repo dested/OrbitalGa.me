@@ -92,10 +92,8 @@ export class ClientGame extends Game {
       this.liveEntity.storedActions.push({
         sequenceNumber: this.liveEntity.inputSequenceNumber++,
         input: {...this.liveEntity.keys},
-        momentumX: this.liveEntity.momentumX,
-        momentumY: this.liveEntity.momentumY,
-        x: this.liveEntity.x,
-        y: this.liveEntity.y,
+        nonKeyMomentumX: 0,
+        nonKeyMomentumY: 0,
       });
     }
     for (const entity of this.entities.array) {
@@ -128,10 +126,6 @@ export class ClientGame extends Game {
   killPlayer(player: PlayerEntity): void {}
 
   sendInput(input: ClientLivePlayerEntity['keys'], inputSequenceNumber: number) {
-    console.log(
-      'sending',
-      JSON.stringify({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input})
-    );
     this.sendMessageToServer({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input});
   }
 

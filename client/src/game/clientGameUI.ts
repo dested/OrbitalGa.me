@@ -89,6 +89,9 @@ export class ClientGameUI extends ClientGame {
       if (!gameData.view.contains(entity.realX, entity.realY)) {
         continue;
       }
+      if(!entity.draw){
+        debugger;
+      }
       entity.draw(context);
     }
 

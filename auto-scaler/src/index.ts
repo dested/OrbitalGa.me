@@ -242,9 +242,7 @@ async function spinDown() {
 
 async function postDeploy() {
   console.log('Running post deploy');
-  const ec2 = new EC2({region: 'us-west-2'});
   const elbv2 = new ELBv2({region: 'us-west-2'});
-  const scaling = new AutoScaling({region: 'us-west-2'});
 
   const targetGroups = await elbv2.describeTargetGroups({LoadBalancerArn: config.loadBalancerArn}).promise();
 
@@ -258,13 +256,17 @@ async function postDeploy() {
     console.log('Found bad target');
     removeTargets.push(result.TargetHealthDescriptions[0].Target.Id);
   }
-
-  await elbv2
-    .deregisterTargets({
-      TargetGroupArn: config.defaultTargetGroupArn,
-      Targets: removeTargets.map((t) => ({Id: t, Port: config.websocketPort})),
-    })
-    .promise();
+  if (removeTargets.length > 0) {
+    await elbv2
+      .deregisterTargets({
+        TargetGroupArn: config.defaultTargetGroupArn,
+        Targets: removeTargets.map((t) => ({Id: t, Port: config.websocketPort})),
+      })
+      .promise();
+  } else {
+    console.log('No bad targets');
+  }
+  console.log('Done');
 }
 
 async function setupFresh() {
