@@ -80,7 +80,6 @@ export class ServerSocket implements IServerSocket {
     });
 
     this.wss.on('connection', (ws, request) => {
-      debugger;
       if (!request.url) {
         ws.close();
         return;

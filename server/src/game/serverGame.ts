@@ -453,11 +453,10 @@ export class ServerGame extends Game {
             meteorType: '4',
             hit: false,
             rotate: 100,
+            momentumX: 0,
+            momentumY: 20,
+            rotateSpeed: 3,
           });
-          meteor.momentumY = 20;
-          meteor.startingMomentumY = 20;
-          meteor.momentumX = 0;
-          meteor.rotateSpeed = 3;
           this.entities.push(meteor);
         }
       } else {
@@ -473,6 +472,9 @@ export class ServerGame extends Game {
               meteorType: type,
               hit: false,
               rotate: Math.random() * 255,
+              momentumX: Math.random() * 10 - 5,
+              rotateSpeed: Math.round(1 + Math.random() * 3),
+              momentumY: 5 + Math.random() * 10,
             });
 
             this.entities.push(meteor);

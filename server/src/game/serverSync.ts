@@ -6,11 +6,10 @@ import {ServerStatCreateInput} from '@prisma/client';
 import {prisma} from '../utils/db';
 
 export class ServerSync implements IServerSync {
-  constructor(private serverPath: string) {}
-
   leaderboard: {[sessionId: string]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
   serverStats: Omit<ServerStatCreateInput, 'server'>[] = [];
   private serverId?: number;
+  constructor(private serverPath: string) {}
 
   setLeaderboardEntry(activePlayerScore: LeaderboardEntry & LeaderboardEntryUserDetails): void {
     this.leaderboard[activePlayerScore.sessionId] = activePlayerScore;

@@ -16,11 +16,11 @@ export class MeteorEntity extends Entity {
   hit = false;
   meteorColor: 'brown' | 'grey';
   meteorType: '1' | '2' | '3' | '4';
-  momentumX = Math.random() * 10 - 5;
+  momentumX: number;
   momentumY: number;
   positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
   rotate: number;
-  rotateSpeed = Math.round(1 + Math.random() * 3);
+  rotateSpeed: number;
   size: Size;
   startingMomentumY: number;
   type = 'meteor' as const;
@@ -32,8 +32,10 @@ export class MeteorEntity extends Entity {
     this.size = messageModel.size;
     this.meteorType = messageModel.meteorType;
     this.rotate = messageModel.rotate;
-    this.startingMomentumY = 5 + Math.random() * 10;
-    this.momentumY = this.startingMomentumY;
+    this.startingMomentumY = messageModel.momentumY;
+    this.momentumX = messageModel.momentumX;
+    this.momentumY = messageModel.momentumY;
+    this.rotateSpeed = messageModel.rotateSpeed;
 
     switch (messageModel.size) {
       case 'big':
@@ -194,6 +196,12 @@ export class MeteorEntity extends Entity {
       y: messageModel.y,
       rotate: messageModel.rotate,
     });
+    this.momentumX = messageModel.momentumX;
+    this.momentumY = messageModel.momentumY;
+    /*this.x = messageModel.x;
+    this.y = messageModel.y;
+    this.rotate = messageModel.rotate;*/
+    this.rotateSpeed = messageModel.rotateSpeed;
     this.meteorColor = messageModel.meteorColor;
     this.size = messageModel.size;
     this.meteorType = messageModel.meteorType;
@@ -206,6 +214,9 @@ export class MeteorEntity extends Entity {
       meteorType: this.meteorType,
       meteorColor: this.meteorColor,
       size: this.size,
+      momentumX: this.momentumX,
+      momentumY: this.momentumY,
+      rotateSpeed: this.rotateSpeed,
       rotate: this.rotate,
       type: 'meteor',
       hit: this.hit,
@@ -258,7 +269,10 @@ export type MeteorModel = EntityModel & {
   hit: boolean;
   meteorColor: 'brown' | 'grey';
   meteorType: '1' | '2' | '3' | '4';
+  momentumX: number;
+  momentumY: number;
   rotate: number;
+  rotateSpeed: number;
   size: 'big' | 'med' | 'small' | 'tiny';
   type: 'meteor';
 };
@@ -266,6 +280,9 @@ export const MeteorModelSchema: EntityModelSchemaType<'meteor'> = {
   ...EntityModelSchema,
   rotate: 'uint8',
   hit: 'boolean',
+  rotateSpeed: 'int8',
+  momentumX: 'float32',
+  momentumY: 'float32',
   size: {
     flag: 'enum',
     big: 1,

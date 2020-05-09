@@ -26,26 +26,28 @@ export abstract class Game {
 
   explode(entity: Entity, explosionSize: 'small' | 'medium' | 'big') {
     entity.destroy();
-    let size = 0;
-    switch (explosionSize) {
-      case 'small':
-        size = 3;
-        break;
-      case 'medium':
-        size = 5;
-        break;
-      case 'big':
-        size = 8;
-        break;
-    }
-    for (let i = 0; i < size; i++) {
-      const deathExplosion = new ExplosionEntity(this, {
-        entityId: nextId(),
-        x: entity.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
-        y: entity.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
-        intensity: 2,
-      });
-      this.entities.push(deathExplosion);
+    if (!this.isClient) {
+      let size = 0;
+      switch (explosionSize) {
+        case 'small':
+          size = 3;
+          break;
+        case 'medium':
+          size = 5;
+          break;
+        case 'big':
+          size = 8;
+          break;
+      }
+      for (let i = 0; i < size; i++) {
+        const deathExplosion = new ExplosionEntity(this, {
+          entityId: nextId(),
+          x: entity.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
+          y: entity.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
+          intensity: 2,
+        });
+        this.entities.push(deathExplosion);
+      }
     }
   }
 
