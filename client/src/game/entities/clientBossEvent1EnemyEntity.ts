@@ -4,20 +4,21 @@ import {OrbitalAssets} from '../../utils/assetManager';
 import {BossEvent1EnemyEntity, BossEvent1EnemyModel} from '@common/entities/bossEvent1EnemyEntity';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Player;
 
-  constructor(public clientGame: ClientGame, messageModel: BossEvent1EnemyModel) {
+  constructor(public clientGame: OrbitalGame, messageModel: BossEvent1EnemyModel) {
     super(clientGame, messageModel);
     this.updatePolygon();
   }
   get drawX() {
-    return this.x + this.xOffset;
+    return this.position.x + this.xOffset;
   }
   get drawY() {
-    return this.y + this.yOffset;
+    return this.position.y + this.yOffset;
   }
 
   get piece() {

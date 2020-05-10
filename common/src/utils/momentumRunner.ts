@@ -1,4 +1,5 @@
-import {Entity} from '../entities/entity';
+import {Entity} from '../baseEntities/entity';
+import {PhysicsEntity} from '../baseEntities/physicsEntity';
 
 type MomentumPoint = {x: number; y: number};
 export type MomentumEntry<TPhase> = {
@@ -20,7 +21,7 @@ export class MomentumRunner<TPhase> {
   startY: number;
 
   ticks = 0;
-  constructor(private paths: MomentumEntry<TPhase>[], private entity: Entity) {
+  constructor(private paths: MomentumEntry<TPhase>[], private entity: PhysicsEntity) {
     this.startX = entity.x;
     this.startY = entity.y;
     this.pathPoint = 0;

@@ -1,15 +1,16 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {Utils} from '../utils/utils';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class PlayerWeaponEntity extends Entity implements Weapon {
+export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 150}];
   damage: number;
@@ -38,11 +39,11 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   }
 
   get realX() {
-    return this.x;
+    return this.position.x;
   }
 
   get realY() {
-    return this.y;
+    return this.position.y;
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {
@@ -106,7 +107,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   }
 }
 
-export type PlayerWeaponModel = EntityModel & {
+export type PlayerWeaponModel = PhysicsEntityModel & {
   offsetX: number;
   ownerEntityId: number;
   sprayAngle: number;
@@ -116,7 +117,7 @@ export type PlayerWeaponModel = EntityModel & {
 };
 
 export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
   sprayAngle: 'uint8',
   startY: 'int32',

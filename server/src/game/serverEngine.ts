@@ -7,7 +7,7 @@ import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {EntityModels, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {ArrayHash} from '@common/utils/arrayHash';
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {IServerSync} from './IServerSync';

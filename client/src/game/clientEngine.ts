@@ -6,7 +6,7 @@ import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {STOCWorldState, WorldModelCastToEntityModel} from '@common/models/serverToClientMessages';
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import {ClientEntity} from './entities/clientEntity';
 import {RollingAverage} from '@common/utils/rollingAverage';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';

@@ -1,8 +1,9 @@
 import {Sync, SyncStrategy} from './syncStrategy';
 import {ClientEngine} from '../clientEngine';
 import {assertType, Utils} from '@common/utils/utils';
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import {ClientEntity} from '../entities/clientEntity';
+import {PhysicsEntity, PhysicsEntityModel} from '@common/baseEntities/physicsEntity';
 
 const defaults = {
   syncsBufferLength: 5,
@@ -14,8 +15,9 @@ const defaults = {
   bendingIncrements: 10, // the bending should be applied increments (how many steps for entire bend)
 };
 
-type PlayerInput = {
-  key: string;
+export type PlayerKeyInput = {
+  input: string;
+  messageIndex: number;
   movement: boolean;
   step: number;
 };
@@ -26,7 +28,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     onEveryStep: {MAX_LEAD: 7, MAX_LAG: 4}, // max step lead/lag allowed at every step
     clientReset: 40, // if we are behind this many steps, just reset the step counter
   };
-  private recentInputs: {[stepNumber: number]: PlayerInput[]};
+  private recentInputs: {[stepNumber: number]: PlayerKeyInput[]};
   constructor(clientEngine: ClientEngine, public options: typeof defaults) {
     super(clientEngine, {...defaults, ...options});
 
@@ -83,7 +85,9 @@ export class ExtrapolateStrategy extends SyncStrategy {
 
         if (!this.gameEngine.entities.lookup(messageModel.entityId)) {
           const newObj = this.addNewObject(messageModel);
-          newObj.saveState(foundEntityShadow.serialize());
+          if (newObj instanceof PhysicsEntity) {
+            newObj.saveState(foundEntityShadow.serialize() as PhysicsEntityModel);
+          }
         }
         this.gameEngine.entities.remove(foundEntityShadow);
       } else {
@@ -91,7 +95,9 @@ export class ExtrapolateStrategy extends SyncStrategy {
         if (!foundEntity) {
           foundEntity = this.addNewObject(messageModel);
         } else {
-          foundEntity.saveState();
+          if (foundEntity instanceof PhysicsEntity) {
+            foundEntity.saveState();
+          }
           foundEntity.reconcileFromServer(messageModel);
         }
       }
@@ -112,7 +118,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
         for (const inputDesc of this.recentInputs[game.stepCount]) {
           if (!inputDesc.movement) continue;
           console.trace(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]: ${inputDesc.input}`);
-          this.gameEngine.processInput(inputDesc);
+          this.gameEngine.processInput(inputDesc, this.gameEngine.clientPlayerId!);
         }
       }
 
@@ -127,11 +133,11 @@ export class ExtrapolateStrategy extends SyncStrategy {
     for (const entity of this.gameEngine.entities.array) {
       // shadow objects are not bent
       if (entity.shadowEntity) continue;
-
-      const isLocal = entity.playerId === this.gameEngine.playerId; // eslint-disable-line eqeqeq
-      const bending = isLocal ? this.options.localObjBending : this.options.remoteObjBending;
-      entity.bendToCurrentState(bending, isLocal, this.options.bendingIncrements);
-      entity.refreshRenderObject();
+      if (entity instanceof PhysicsEntity) {
+        const isLocal = entity.owningPlayerId === this.gameEngine.clientPlayerId; // eslint-disable-line eqeqeq
+        const bending = isLocal ? this.options.localObjBending : this.options.remoteObjBending;
+        entity.bendToCurrentState(bending, isLocal, this.options.bendingIncrements);
+      }
     }
 
     return 'SYNC_APPLIED';
@@ -147,7 +153,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
   }
 
   // keep a buffer of inputs so that we can replay them on extrapolation
-  clientInputSave(inputEvent: PlayerInput) {
+  clientInputSave(inputEvent: PlayerKeyInput) {
     // if no inputs have been stored for this step, create an array
     if (!this.recentInputs[inputEvent.step]) {
       this.recentInputs[inputEvent.step] = [];

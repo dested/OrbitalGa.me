@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
@@ -14,6 +14,7 @@ import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDArray, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -32,7 +33,7 @@ export type PlayerBadges = {
   rank: 'bolt' | 'shield' | 'star' | 'badge';
 };
 
-export class PlayerEntity extends Entity implements Weapon {
+export class PlayerEntity extends PhysicsEntity implements Weapon {
   availableWeapons: AvailablePlayerWeapon[] = [
     {ammo: 0, weapon: 'laser1'},
     {ammo: 5, weapon: 'rocket'},
@@ -463,7 +464,7 @@ export class PlayerEntity extends Entity implements Weapon {
   }
 }
 
-export type PlayerModel = EntityModel & {
+export type PlayerModel = PhysicsEntityModel & {
   badges: PlayerBadges[];
   health: number;
   hit: boolean;
@@ -472,7 +473,7 @@ export type PlayerModel = EntityModel & {
   type: 'player';
 };
 
-export type LivePlayerModel = EntityModel & {
+export type LivePlayerModel = PhysicsEntityModel & {
   availableWeapons: {ammo: number; weapon: PlayerWeapon}[];
   badges: PlayerBadges[];
   dead: boolean;
@@ -497,7 +498,7 @@ export const PlayerBadgesModelSchema: SDArray<SDSimpleObject<PlayerBadges>> = {
 };
 
 export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   health: 'uint8',
   playerColor: {
     flag: 'enum',
@@ -506,7 +507,6 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
     orange: 3,
     red: 4,
   },
-  create: 'boolean',
   hit: 'boolean',
   availableWeapons: {
     flag: 'array-uint8',
@@ -523,7 +523,7 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
 };
 
 export const PlayerModelSchema: SDTypeElement<PlayerModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   health: 'uint8',
   playerColor: {
     flag: 'enum',
@@ -533,7 +533,6 @@ export const PlayerModelSchema: SDTypeElement<PlayerModel> = {
     red: 4,
   },
   badges: PlayerBadgesModelSchema,
-  create: 'boolean',
   hit: 'boolean',
   playerInputKeys: PlayerInputKeyBitmask,
 };

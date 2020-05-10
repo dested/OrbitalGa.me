@@ -23,12 +23,6 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
   mainTick = 0;
 
-  positionLerp: {duration: number; startTime: number; x: number; y: number} = {
-    x: this.x,
-    y: this.y,
-    startTime: +new Date(),
-    duration: GameConstants.serverTickRate,
-  };
   zIndex = DrawZIndex.Player;
   constructor(clientGame: OrbitalGame, public messageModel: LivePlayerModel) {
     super(clientGame, messageModel);
@@ -36,23 +30,11 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
 
   get drawX(): number {
-    const {x, y, startTime, duration} = this.positionLerp;
-    const now = +new Date();
-    if ((now - startTime) / duration >= 1) {
-      return Math.round(this.x);
-    } else {
-      return Math.round(Utils.lerp(x, this.x, (now - startTime) / duration));
-    }
+    return this.position.x;
   }
 
   get drawY(): number {
-    const {x, y, startTime, duration} = this.positionLerp;
-    const now = +new Date();
-    if ((now - startTime) / duration >= 1) {
-      return Math.round(this.y);
-    } else {
-      return Math.round(Utils.lerp(y, this.y, (now - startTime) / duration));
-    }
+    return this.position.y;
   }
 
   draw(context: CanvasRenderingContext2D): void {
@@ -73,18 +55,6 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
 
       context.restore();
     }
-  }
-
-  gameTick(duration: number): void {
-    this.positionLerp.x = this.x;
-    this.positionLerp.y = this.y;
-    this.positionLerp.startTime = +new Date();
-    this.positionLerp.duration = duration;
-    super.gameTick(duration);
-  }
-
-  interpolateEntity(renderTimestamp: number) {
-    // live entity does not need to interpolate anything
   }
 
   processInput(duration: number) {

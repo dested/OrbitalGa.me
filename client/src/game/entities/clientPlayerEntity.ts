@@ -47,7 +47,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     if (GameDebug.clientServerView) {
       context.save();
       context.globalAlpha = 0.7;
-      context.translate(this.x, this.y);
+      context.translate(this.position.x, this.position.y);
       context.drawImage(ClientPlayerEntity.greenPlayer(), -ship.size.width / 2, -ship.size.height / 2);
       context.restore();
       return;

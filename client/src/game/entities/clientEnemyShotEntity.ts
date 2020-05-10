@@ -12,10 +12,10 @@ export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEnti
     super(game, messageModel);
   }
   get drawX() {
-    return this.x;
+    return this.position.x;
   }
   get drawY() {
-    return this.y;
+    return this.position.y;
   }
   destroyClient(): void {}
   draw(context: CanvasRenderingContext2D): void {

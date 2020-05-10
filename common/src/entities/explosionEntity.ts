@@ -1,10 +1,11 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class ExplosionEntity extends Entity {
+export class ExplosionEntity extends PhysicsEntity{
   static totalAliveDuration = 5;
   aliveDuration = ExplosionEntity.totalAliveDuration;
   intensity: number;
@@ -21,17 +22,17 @@ export class ExplosionEntity extends Entity {
   get realX() {
     const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
-      return this.x;
+      return this.position.x;
     }
-    return this.x + owner.realX;
+    return this.position.x + owner.position.realX;
   }
 
   get realY() {
     const owner = this.ownerEntityId && this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
-      return this.y;
+      return this.position.y;
     }
-    return this.y + owner.realY;
+    return this.position.y + owner.position.realY;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -61,14 +62,14 @@ export class ExplosionEntity extends Entity {
   }
 }
 
-export type ExplosionModel = EntityModel & {
+export type ExplosionModel = PhysicsEntityModel & {
   intensity: number;
   ownerEntityId?: number;
   type: 'explosion';
 };
 
 export const ExplosionModelSchema: SDTypeElement<ExplosionModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   intensity: 'uint8',
   ownerEntityId: 'int32Optional',
 };

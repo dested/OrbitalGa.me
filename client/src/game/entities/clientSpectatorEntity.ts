@@ -11,10 +11,10 @@ export class ClientSpectatorEntity extends SpectatorEntity implements ClientEnti
     game.spectatorEntity = this;
   }
   get drawX() {
-    return this.x;
+    return this.position.x;
   }
   get drawY() {
-    return this.y;
+    return this.position.y;
   }
   destroyClient(): void {}
   draw(context: CanvasRenderingContext2D): void {}

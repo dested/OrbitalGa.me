@@ -1,15 +1,16 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';
-export class BossEvent1Entity extends Entity {
+export class BossEvent1Entity extends PhysicsEntity {
   aliveTick: number = 0;
   alwaysPresent = true;
   boundingBoxes = [
@@ -220,8 +221,7 @@ export class BossEvent1Entity extends Entity {
     if (this.health <= 0) {
       const drop = new DropEntity(this.game, {
         entityId: nextId(),
-        x: this.x,
-        y: this.y,
+        position: this.position.model(),
         drop: DropEntity.randomDrop('big'),
       });
       this.game.entities.push(drop);
@@ -245,14 +245,14 @@ export class BossEvent1Entity extends Entity {
   }
 }
 
-export type BossEvent1Model = EntityModel & {
+export type BossEvent1Model = PhysicsEntityModel & {
   health: number;
   type: 'bossEvent1';
   width: number;
 };
 
 export const BossEvent1ModelSchema: SDTypeElement<BossEvent1Model> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   width: 'uint32',
   health: 'uint16',
 };

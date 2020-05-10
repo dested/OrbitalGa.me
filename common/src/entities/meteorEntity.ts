@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {nextId} from '../utils/uuid';
@@ -8,17 +8,15 @@ import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
-export class MeteorEntity extends Entity {
+export class MeteorEntity extends PhysicsEntity {
   health: number;
   hit = false;
   meteorColor: 'brown' | 'grey';
   meteorType: '1' | '2' | '3' | '4';
-  momentumX: number;
-  momentumY: number;
-  positionBuffer: {rotate: number; time: number; x: number; y: number}[] = [];
   rotate: number;
   rotateSpeed: number;
   size: Size;
@@ -33,8 +31,6 @@ export class MeteorEntity extends Entity {
     this.meteorType = messageModel.meteorType;
     this.rotate = messageModel.rotate;
     this.startingMomentumY = messageModel.momentumY;
-    this.momentumX = messageModel.momentumX;
-    this.momentumY = messageModel.momentumY;
     this.rotateSpeed = messageModel.rotateSpeed;
 
     switch (messageModel.size) {
@@ -103,11 +99,11 @@ export class MeteorEntity extends Entity {
   }
 
   get realX() {
-    return this.x;
+    return this.position.x;
   }
 
   get realY() {
-    return this.y;
+    return this.position.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -145,34 +141,6 @@ export class MeteorEntity extends Entity {
     }
   }
 
-  interpolateEntity(renderTimestamp: number) {
-    const buffer = this.positionBuffer;
-
-    while (buffer.length >= 2 && buffer[1].time <= renderTimestamp) {
-      buffer.shift();
-    }
-
-    if (buffer.length >= 2 && buffer[0].time <= renderTimestamp) {
-      const x0 = buffer[0].x;
-      const x1 = buffer[1].x;
-
-      const y0 = buffer[0].y;
-      const y1 = buffer[1].y;
-
-      const rotate0 = buffer[0].rotate;
-      let rotate1 = buffer[1].rotate;
-
-      if (rotate1 < rotate0) {
-        rotate1 += 255;
-      }
-      const t0 = buffer[0].time;
-      const t1 = buffer[1].time;
-
-      this.x = x0 + ((x1 - x0) * (renderTimestamp - t0)) / (t1 - t0);
-      this.y = y0 + ((y1 - y0) * (renderTimestamp - t0)) / (t1 - t0);
-      this.rotate = rotate0 + ((rotate1 - rotate0) * (renderTimestamp - t0)) / (t1 - t0);
-    }
-  }
 
   postTick() {
     super.postTick();
@@ -180,27 +148,7 @@ export class MeteorEntity extends Entity {
   }
 
   reconcileFromServer(messageModel: MeteorModel) {
-    if (messageModel.create) {
-      this.x = messageModel.x;
-      this.y = messageModel.y;
-      this.positionBuffer.push({
-        time: +new Date() - GameConstants.serverTickRate,
-        x: messageModel.x,
-        y: messageModel.y,
-        rotate: messageModel.rotate,
-      });
-    }
-    this.positionBuffer.push({
-      time: +new Date(),
-      x: messageModel.x,
-      y: messageModel.y,
-      rotate: messageModel.rotate,
-    });
-    this.momentumX = messageModel.momentumX;
-    this.momentumY = messageModel.momentumY;
-    /*this.x = messageModel.x;
-    this.y = messageModel.y;
-    this.rotate = messageModel.rotate;*/
+    super.reconcileFromServer(messageModel);
     this.rotateSpeed = messageModel.rotateSpeed;
     this.meteorColor = messageModel.meteorColor;
     this.size = messageModel.size;
@@ -242,8 +190,7 @@ export class MeteorEntity extends Entity {
         if (Utils.random(50)) {
           const drop = new DropEntity(this.game, {
             entityId: nextId(),
-            x: this.x,
-            y: this.y,
+            position: this.position.model(),
             drop: DropEntity.randomDrop(this.size),
           });
           this.game.entities.push(drop);
@@ -265,7 +212,7 @@ export class MeteorEntity extends Entity {
   }
 }
 
-export type MeteorModel = EntityModel & {
+export type MeteorModel = PhysicsEntityModel & {
   hit: boolean;
   meteorColor: 'brown' | 'grey';
   meteorType: '1' | '2' | '3' | '4';
@@ -277,7 +224,7 @@ export type MeteorModel = EntityModel & {
   type: 'meteor';
 };
 export const MeteorModelSchema: EntityModelSchemaType<'meteor'> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   rotate: 'uint8',
   hit: 'boolean',
   rotateSpeed: 'int8',

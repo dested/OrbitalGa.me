@@ -2,7 +2,7 @@ import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {ClientEntity} from './entities/clientEntity';
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import keyboardJS from 'keyboardjs';
 import {IClientSocket} from '../socket/IClientSocket';
 

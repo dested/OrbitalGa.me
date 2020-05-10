@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {PlayerEntity} from './playerEntity';
@@ -10,6 +10,7 @@ import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
 export type DropType =
   | {
@@ -22,7 +23,7 @@ export type DropType =
     }
   | {ammo: number; type: 'weapon'; weapon: PlayerWeapon};
 
-export class DropEntity extends Entity {
+export class DropEntity extends PhysicsEntity {
   boundingBoxes = [{width: 50, height: 50}];
   drop: DropType;
   type = 'drop' as const;
@@ -34,11 +35,11 @@ export class DropEntity extends Entity {
   }
 
   get realX() {
-    return this.x;
+    return this.position.x;
   }
 
   get realY() {
-    return this.y;
+    return this.position.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -111,13 +112,13 @@ export class DropEntity extends Entity {
   }
 }
 
-export type DropModel = EntityModel & {
+export type DropModel = PhysicsEntityModel & {
   drop: DropType;
   type: 'drop';
 };
 
 export const DropModelSchema: SDTypeElement<DropModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   drop: {
     flag: 'type-lookup',
     elements: {

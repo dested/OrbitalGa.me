@@ -1,14 +1,15 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
-export class PlayerShieldEntity extends Entity {
+export class PlayerShieldEntity extends PhysicsEntity {
   boundingBoxes = [];
   depleted: boolean;
   health: number;
@@ -34,17 +35,17 @@ export class PlayerShieldEntity extends Entity {
   get realX() {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
-      return this.x;
+      return this.position.x;
     }
-    return this.x + owner.realX;
+    return this.position.x + owner.realX;
   }
 
   get realY() {
     const owner = this.game.entities.lookup(this.ownerEntityId);
     if (!owner) {
-      return this.y;
+      return this.position.y;
     }
-    return this.y + owner.realY;
+    return this.position.y + owner.realY;
   }
 
   get shieldConfig() {
@@ -108,7 +109,7 @@ export class PlayerShieldEntity extends Entity {
   }
 }
 
-export type PlayerShieldModel = EntityModel & {
+export type PlayerShieldModel = PhysicsEntityModel & {
   depleted: boolean;
   health: number;
   ownerEntityId: number;
@@ -117,7 +118,7 @@ export type PlayerShieldModel = EntityModel & {
 };
 
 export const PlayerShieldModelSchema: SDTypeElement<PlayerShieldModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   health: 'uint8',
   depleted: 'boolean',
   ownerEntityId: 'uint32',

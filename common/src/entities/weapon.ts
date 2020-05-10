@@ -1,4 +1,4 @@
-import {Entity} from './entity';
+import {Entity} from '../baseEntities/entity';
 
 export interface Weapon {
   damage: number;

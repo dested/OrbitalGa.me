@@ -11,10 +11,10 @@ export class ClientBossEvent1Entity extends BossEvent1Entity implements ClientEn
     super(game, messageModel);
   }
   get drawX() {
-    return this.x;
+    return this.position.x;
   }
   get drawY() {
-    return this.y;
+    return this.position.y;
   }
   destroyClient(): void {}
 

@@ -1,10 +1,11 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class SpectatorEntity extends Entity {
+export class SpectatorEntity extends PhysicsEntity{
   type = 'spectator' as const;
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<SpectatorModel>) {
     super(game, messageModel);
@@ -33,10 +34,10 @@ export class SpectatorEntity extends Entity {
   }
 }
 
-export type SpectatorModel = EntityModel & {
+export type SpectatorModel = PhysicsEntityModel & {
   type: 'spectator';
 };
 
 export const SpectatorModelSchema: SDTypeElement<SpectatorModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
 };

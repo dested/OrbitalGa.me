@@ -1,10 +1,12 @@
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {Result} from 'collisions';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class ScoreEntity extends Entity {
+//todo make not physics entity
+export class ScoreEntity extends PhysicsEntity {
   score: number;
   type = 'score' as const;
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ScoreModel>) {
@@ -42,14 +44,14 @@ export class ScoreEntity extends Entity {
     };
   }
 }
-export type ScoreModel = EntityModel & {
+export type ScoreModel = PhysicsEntityModel & {
   onlyVisibleToPlayerEntityId: number;
   score: number;
   type: 'score';
 };
 
 export const ScoreModelSchema: SDTypeElement<ScoreModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   score: 'uint16',
   onlyVisibleToPlayerEntityId: 'uint32',
 };

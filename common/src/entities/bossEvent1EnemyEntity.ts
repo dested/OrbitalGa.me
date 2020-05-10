@@ -1,12 +1,13 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class BossEvent1EnemyEntity extends Entity implements Weapon {
+export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
   aliveTick: number = 0;
   damage = 2;
   explosionIntensity = 4;
@@ -32,11 +33,11 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   }
 
   get realX() {
-    return this.x + this.xOffset;
+    return this.position.x + this.xOffset;
   }
 
   get realY() {
-    return this.y + this.yOffset;
+    return this.position.y + this.yOffset;
   }
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
@@ -109,7 +110,7 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   }
 }
 
-export type BossEvent1EnemyModel = EntityModel & {
+export type BossEvent1EnemyModel = PhysicsEntityModel & {
   ownerEntityId: number;
   pieceType: BossEvent1PieceType;
   rotate: number;
@@ -119,7 +120,7 @@ export type BossEvent1EnemyModel = EntityModel & {
 };
 
 export const BossEvent1EnemyModelSchema: SDTypeElement<BossEvent1EnemyModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   xOffset: 'int32',
   yOffset: 'int32',
   ownerEntityId: 'uint32',

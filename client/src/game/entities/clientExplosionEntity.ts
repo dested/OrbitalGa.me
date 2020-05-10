@@ -2,7 +2,7 @@ import {ExplosionEntity, ExplosionModel} from '@common/entities/explosionEntity'
 import {ClientEntity, DrawZIndex} from './clientEntity';
 
 import {ShakeGame} from '../../utils/shakeUtils';
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
@@ -15,26 +15,21 @@ export class ClientExplosionEntity extends ExplosionEntity implements ClientEnti
 
   constructor(game: OrbitalGame, messageModel: ExplosionModel) {
     super(game, messageModel);
-    if (messageModel.create) {
-      if (!('isBot' in game)) {
-        ShakeGame(messageModel.intensity);
-      }
-    }
     this.updatePolygon();
   }
   get drawX() {
     const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
     if (!owner) {
-      return this.x;
+      return this.position.x;
     }
-    return this.x + owner.drawX;
+    return this.position.x + owner.drawX;
   }
   get drawY() {
     const owner = this.ownerEntityId && this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
     if (!owner) {
-      return this.y;
+      return this.position.y;
     }
-    return this.y + owner.drawY;
+    return this.position.y + owner.drawY;
   }
   destroyClient(): void {}
   draw(context: CanvasRenderingContext2D): void {

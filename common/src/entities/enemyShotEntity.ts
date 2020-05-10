@@ -1,13 +1,14 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class EnemyShotEntity extends Entity implements Weapon {
+export class EnemyShotEntity extends PhysicsEntity implements Weapon {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 100}];
   damage = 1;
@@ -26,11 +27,11 @@ export class EnemyShotEntity extends Entity implements Weapon {
   }
 
   get realX() {
-    return this.x;
+    return this.position.x;
   }
 
   get realY() {
-    return this.y;
+    return this.position.y;
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {}
@@ -64,12 +65,12 @@ export class EnemyShotEntity extends Entity implements Weapon {
   }
 }
 
-export type EnemyShotModel = EntityModel & {
+export type EnemyShotModel = PhysicsEntityModel & {
   ownerEntityId: number;
   type: 'enemyShot';
 };
 
 export const EnemyShotModelSchema: SDTypeElement<EnemyShotModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   ownerEntityId: 'uint32',
 };

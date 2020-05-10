@@ -1,4 +1,4 @@
-import {Entity} from '../entities/entity';
+import {Entity} from '../baseEntities/entity';
 import {Utils} from './utils';
 
 type PathPoint = {offset?: 'currentPosition' | 'static' | 'staticX' | 'staticY'; x: number; y: number};

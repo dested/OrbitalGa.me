@@ -1,13 +1,17 @@
 import {Collisions, Result} from 'collisions';
-import {Entity} from '../entities/entity';
+import {Entity} from '../baseEntities/entity';
 import {ArrayHash} from '../utils/arrayHash';
 import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
 import {GameLeaderboard} from './gameLeaderboard';
 import {PlayerEntity} from '../entities/playerEntity';
+import {assertType} from '../utils/utils';
+import {PhysicsEntity} from '../baseEntities/physicsEntity';
+import {PlayerKeyInput} from '../../../client/src/game/synchronizer/extrapolateStrategy';
 
 export abstract class Game {
+  clientPlayerId?: number;
   collisionEngine: Collisions;
   readonly collisionResult: Result;
   entities = new ArrayHash<Entity>('entityId');
@@ -23,21 +27,27 @@ export abstract class Game {
     this.entityClusterer = new EntityClusterer(this.entities, 3);
   }
 
+  addObjectToWorld(curObj: Entity) {
+    this.entities.push(curObj);
+  }
+
   getPlayerRange(padding: number, filter: (e: Entity) => boolean) {
     const range = {x0: Number.POSITIVE_INFINITY, x1: Number.NEGATIVE_INFINITY};
-    const playerEntities = this.entities.filter(filter);
+    const playerEntities = this.entities.filter(filter) as PhysicsEntity[];
 
     if (playerEntities.length === 0) {
       return {x0: -padding, x1: padding};
     }
     for (const entity of playerEntities) {
-      range.x0 = Math.min(range.x0, entity.x);
-      range.x1 = Math.max(range.x1, entity.x);
+      range.x0 = Math.min(range.x0, entity.position.x);
+      range.x1 = Math.max(range.x1, entity.position.x);
     }
     return {x0: range.x0 - padding, x1: range.x1 + padding};
   }
 
   abstract postTick(tickIndex: number, duration: number): void;
+
+  processInput(inputDesc: PlayerKeyInput, playerId: number) {}
 
   abstract step(reenact: boolean, tickIndex: number, duration: number): void;
 
@@ -46,19 +56,15 @@ export abstract class Game {
 
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.getIndex(i);
-      entity.checkCollisions();
+      if (entity instanceof PhysicsEntity) {
+        entity.checkCollisions();
+      }
     }
   }
-
-  addObjectToWorld(curObj: Entity) {
-    this.entities.push(curObj);
-  }
-
-  processInput(inputDesc: {key: string; movement: boolean}, playerId: number) {}
 }
 
 export class OrbitalGame extends Game {
-  explode(entity: Entity, explosionSize: 'small' | 'medium' | 'big') {
+  explode(entity: PhysicsEntity, explosionSize: 'small' | 'medium' | 'big') {
     entity.destroy();
     if (!this.isClient) {
       let size = 0;
@@ -76,8 +82,8 @@ export class OrbitalGame extends Game {
       for (let i = 0; i < size; i++) {
         const deathExplosion = new ExplosionEntity(this, {
           entityId: nextId(),
-          x: entity.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
-          y: entity.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
+          x: entity.position.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
+          y: entity.position.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
           intensity: 2,
         });
         this.entities.push(deathExplosion);
@@ -110,14 +116,13 @@ export class OrbitalGame extends Game {
     }
   }
 
-  step(tickIndex: number, duration: number): void {
+  step(replay: boolean, tickIndex: number, duration: number): void {
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
       entity.gameTick(duration);
-    }
-    for (let i = this.entities.array.length - 1; i >= 0; i--) {
-      const entity = this.entities.array[i];
-      entity.updatePolygon();
+      if (entity instanceof PhysicsEntity) {
+        entity.updatePolygon();
+      }
     }
 
     this.checkCollisions();

@@ -1,9 +1,10 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class WallEntity extends Entity {
+export class WallEntity extends PhysicsEntity {
   type = 'wall' as const;
   constructor(public game: OrbitalGame, messageModel: WallModel) {
     super(game, messageModel);
@@ -17,11 +18,11 @@ export class WallEntity extends Entity {
   }
 
   get realX() {
-    return this.x;
+    return this.position.x;
   }
 
   get realY() {
-    return this.y;
+    return this.position.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -39,14 +40,14 @@ export class WallEntity extends Entity {
     };
   }
 }
-export type WallModel = EntityModel & {
+export type WallModel = PhysicsEntityModel & {
   height: number;
   type: 'wall';
   width: number;
 };
 
 export const WallModelSchema: SDTypeElement<WallModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   width: 'uint16',
   height: 'uint16',
 };

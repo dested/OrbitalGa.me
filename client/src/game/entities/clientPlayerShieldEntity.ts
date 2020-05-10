@@ -1,7 +1,7 @@
 import {PlayerShieldEntity, PlayerShieldModel} from '@common/entities/playerShieldEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
 
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
@@ -16,16 +16,16 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
   get drawX() {
     const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
     if (!owner) {
-      return this.x;
+      return this.position.x;
     }
-    return this.x + owner.drawX;
+    return this.position.x + owner.drawX;
   }
   get drawY() {
     const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
     if (!owner) {
-      return this.y;
+      return this.position.y;
     }
-    return this.y + owner.drawY;
+    return this.position.y + owner.drawY;
   }
   destroyClient(): void {}
 

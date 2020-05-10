@@ -1,4 +1,4 @@
-import {Entity} from '@common/entities/entity';
+import {Entity} from '@common/baseEntities/entity';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {GameConstants} from '@common/game/gameConstants';
 import {Utils} from '@common/utils/utils';

@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {Utils} from '../utils/utils';
 import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from './entity';
+import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {GameRules} from '../game/gameRules';
@@ -12,10 +12,11 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {ScoreEntity} from './scoreEntity';
 import {LeaderboardEntryWeight} from '../game/gameLeaderboard';
+import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
-export class SwoopingEnemyEntity extends Entity implements Weapon {
+export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
   aliveTick: number = 0;
   // width = 112;
   // height = 75;
@@ -220,7 +221,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
 
 class SwoopingEnemyEntityImpl extends SwoopingEnemyEntity {}
 
-export type SwoopingEnemyModel = EntityModel & {
+export type SwoopingEnemyModel = PhysicsEntityModel & {
   enemyColor: EnemyColor;
   health: number;
   hit: boolean;
@@ -228,7 +229,7 @@ export type SwoopingEnemyModel = EntityModel & {
 };
 
 export const SwoopingEnemyModelSchema: SDTypeElement<SwoopingEnemyModel> = {
-  ...EntityModelSchema,
+  ...PhysicsEntityModelSchema,
   health: 'uint8',
   hit: 'boolean',
   enemyColor: {

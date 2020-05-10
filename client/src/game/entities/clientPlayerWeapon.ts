@@ -64,9 +64,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     switch (this.weaponType) {
       case 'rocket': {
         const fire =
-          this.game.drawTick % 8 < 4
-            ? OrbitalAssets.assets['Effects.fire14']
-            : OrbitalAssets.assets['Effects.fire15'];
+          this.game.drawTick % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }
@@ -76,37 +74,13 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
         break;
       case 'torpedo': {
         const fire =
-          this.game.drawTick % 8 < 4
-            ? OrbitalAssets.assets['Effects.fire14']
-            : OrbitalAssets.assets['Effects.fire15'];
+          this.game.drawTick % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }
       default:
         unreachable(this.weaponType);
         break;
-    }
-  }
-
-  reconcileFromServer(messageModel: PlayerWeaponModel) {
-    super.reconcileFromServer(messageModel);
-    if (messageModel.create) {
-      if (this.owner && this.owner === this.game.liveEntity && this.game.liveEntity) {
-        this.x = this.owner.x + this.offsetX;
-        this.y = this.owner.y;
-        this.positionBuffer[0].x = this.x;
-        this.positionBuffer[0].y = this.y;
-        if (this.sprayAngle > 0) {
-          const config = WeaponConfigs[this.weaponType];
-          this.positionBuffer[1].x =
-            this.x - Math.cos(Utils.degToRad(this.sprayAngle)) * config.speed * (GameConstants.serverTickRate / 1000);
-          this.positionBuffer[1].y =
-            this.y - Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (GameConstants.serverTickRate / 1000);
-        }
-      } else {
-        this.y = messageModel.startY;
-        this.positionBuffer[0].y = messageModel.startY;
-      }
     }
   }
 

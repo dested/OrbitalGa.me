@@ -19,6 +19,15 @@ export class MathUtils {
   static inSquare(x: number, y: number, bx: number, by: number, bw: number, bh: number) {
     return x > bx && x < bx + bw && y > by && y < by + bh;
   }
+  static interpolateDeltaWithWrapping(start: number, end: number, percent: number, wrapMin: number, wrapMax: number) {
+    const wrapTest = wrapMax - wrapMin;
+    if (start - end > wrapTest / 2) end += wrapTest;
+    else if (end - start > wrapTest / 2) start += wrapTest;
+    if (Math.abs(start - end) > wrapTest / 3) {
+      console.log('wrap interpolation is close to limit.  Not sure which edge to wrap to.');
+    }
+    return (end - start) * percent;
+  }
 
   static makeSquare(x: number, y: number, width: number, height: number) {
     return {x, y, width, height};
