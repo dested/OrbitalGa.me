@@ -14,7 +14,7 @@ export class OrbitalServerEngine extends ServerEngine {
   gameTick(tickIndex: number, duration: number): void {
     this.processGameRules(tickIndex);
 
-    this.game.gameTick(tickIndex, duration);
+    this.game.step(tickIndex, duration);
 
     if (tickIndex % 15 === 0) {
       this.updateSpectatorPosition();

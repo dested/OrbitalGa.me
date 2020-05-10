@@ -5,7 +5,7 @@ import {assertType, Utils} from '@common/utils/utils';
 import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
 import {ClientEntityTypes} from './entities/clientEntityTypeModels';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {WorldModelCastToEntityModel} from '@common/models/serverToClientMessages';
+import {STOCWorldState, WorldModelCastToEntityModel} from '@common/models/serverToClientMessages';
 import {Entity} from '@common/entities/entity';
 import {ClientEntity} from './entities/clientEntity';
 import {RollingAverage} from '@common/utils/rollingAverage';
@@ -14,6 +14,11 @@ import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMes
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {IClientSocket} from '../socket/IClientSocket';
+import {Scheduler} from '@common/utils/scheduler';
+import {ExtrapolateStrategy} from './synchronizer/extrapolateStrategy';
+
+const STEP_DELAY_MSEC = 12; // if forward drift detected, delay next execution by this amount
+const STEP_HURRY_MSEC = 8; // if backward drift detected, hurry next execution by this amount
 
 export type ClientGameOptions = {
   onDied: (me: ClientEngine) => void;
@@ -36,16 +41,43 @@ export abstract class ClientEngine {
   protected spectatorMode: boolean = false;
   private connected = false;
   private messagesToProcess: ServerToClientMessage[] = [];
+  private scheduler?: Scheduler;
   private serverVersion: number = -1;
   private totalPlayers: number = 0;
+  private synchronizer: ExtrapolateStrategy;
 
   constructor(
     private serverPath: string,
     public options: ClientGameOptions,
     public socket: IClientSocket,
-    protected game: Game
+    public game: Game
   ) {
     this.connect();
+  }
+
+  checkDrift(checkType: 'onServerSync' | 'onEveryStep') {
+    if (!this.game.highestServerStep) return;
+
+    const thresholds = this.synchronizer.syncStrategy.STEP_DRIFT_THRESHOLDS;
+    const maxLead = thresholds[checkType].MAX_LEAD;
+    const maxLag = thresholds[checkType].MAX_LAG;
+    const clientStep = this.game.stepCount;
+    const serverStep = this.game.highestServerStep;
+    if (clientStep > serverStep + maxLead) {
+      console.warn(
+        `step drift ${checkType}. [${clientStep} > ${serverStep} + ${maxLead}] Client is ahead of server.  Delaying next step.`
+      );
+      if (this.scheduler) this.scheduler.delayTick();
+      this.lastStepTime += STEP_DELAY_MSEC;
+      this.correction += STEP_DELAY_MSEC;
+    } else if (serverStep > clientStep + maxLag) {
+      console.warn(
+        `step drift ${checkType}. [${serverStep} > ${clientStep} + ${maxLag}] Client is behind server.  Hurrying next step.`
+      );
+      if (this.scheduler) this.scheduler.hurryTick();
+      this.lastStepTime -= STEP_HURRY_MSEC;
+      this.correction -= STEP_HURRY_MSEC;
+    }
   }
 
   clearDebug(key: string) {
@@ -67,7 +99,7 @@ export abstract class ClientEngine {
       },
     });
 
-    this.startTick();
+    this.init();
   }
 
   died() {
@@ -87,7 +119,7 @@ export abstract class ClientEngine {
     this.processMessages(this.messagesToProcess);
     this.liveEntity?.processInput(duration);
 
-    this.game.gameTick(0, duration);
+    this.game.step(0, duration);
 
     for (const entity of this.game.entities.array) {
       if (entity.markToDestroy) {
@@ -95,6 +127,16 @@ export abstract class ClientEngine {
         (entity as ClientEntity).destroyClient();
       }
     }
+  }
+
+  init() {
+    this.synchronizer = new ExtrapolateStrategy(this);
+    this.scheduler = new Scheduler({
+      period: 1000 / 60,
+      tick: this.step,
+      delay: STEP_DELAY_MSEC,
+    });
+    this.scheduler!.start();
   }
 
   joinGame() {
@@ -121,6 +163,26 @@ export abstract class ClientEngine {
     this.lastXY = undefined;
     this.sendMessageToServer({type: 'spectate'});
   }
+
+  step = (t: number, dt: number, physicsOnly: boolean) => {
+    // physics only case
+    if (physicsOnly) {
+      this.game.step(false, t, dt, physicsOnly);
+      return;
+    }
+
+    this.processMessages(this.messagesToProcess);
+    this.messagesToProcess.length = 0;
+
+    // check for server/client step drift without update
+    this.checkDrift('onEveryStep');
+
+    this.handleOutboundInput();
+
+    this.game.step(false, t, dt);
+    this.synchronizer.syncStep({dt});
+    // this.game.emit('client__postStep', {dt});
+  };
 
   private processMessages(messages: ServerToClientMessage[]) {
     for (const message of messages) {
@@ -173,34 +235,13 @@ export abstract class ClientEngine {
           break;
         case 'worldState':
           this.totalPlayers = message.totalPlayers;
-          const entityMap = Utils.toDictionary(message.entities, (a) => a.entityId);
-          for (let i = this.game.entities.length - 1; i >= 0; i--) {
-            const entity = this.game.entities.getIndex(i);
-            assertType<Entity & ClientEntity>(entity);
-            if (entity.clientDestroyedTick !== undefined) {
-              entity.clientDestroyedTick--;
-              if (entity.clientDestroyedTick <= 0) {
-                entity.clientDestroyedTick = undefined;
-              }
-            }
-            if (entityMap[entity.entityId]) {
-              continue;
-            }
-            entity.destroy();
-            this.game.entities.remove(entity);
-          }
 
-          for (const messageModel of message.entities) {
-            let foundEntity = this.game.entities.lookup(messageModel.entityId);
-            if (!foundEntity) {
-              foundEntity = new ClientEntityTypes[messageModel.type](
-                this.game,
-                messageModel as WorldModelCastToEntityModel
-              );
-              this.game.entities.push(foundEntity);
-            }
-            foundEntity.reconcileFromServer(messageModel);
-          }
+          if (!this.game.highestServerStep || message.stepCount > this.game.highestServerStep)
+            this.game.highestServerStep = message.stepCount;
+
+          this.processSync(message);
+
+          this.checkDrift('onServerSync');
           break;
         default:
           unreachable(message);
@@ -209,18 +250,19 @@ export abstract class ClientEngine {
     }
   }
 
-  private startTick() {
-    const pingInterval = setInterval(() => {
-      /*
-      if (!this.connected) {
-        clearInterval(pingInterval);
-        return;
-      }
-      this.pingIndex++;
-      this.pings[this.pingIndex] = +new Date();
-      this.socket.sendMessage({type: 'ping', ping: this.pingIndex});
-*/
-    }, GameConstants.pingInterval);
+  private processSync(message: STOCWorldState) {
+    this.synchronizer.collectSync(message);
+
+    if (message.stepCount > this.game.stepCount + this.synchronizer.STEP_DRIFT_THRESHOLDS.clientReset) {
+      console.log(
+        `========== world step count updated from ${this.game.stepCount} to  ${message.stepCount} ==========`
+      );
+      this.game.emit('client__stepReset', {
+        oldStep: this.game.stepCount,
+        newStep: message.stepCount,
+      });
+      this.game.stepCount = message.stepCount;
+    }
   }
 }
 

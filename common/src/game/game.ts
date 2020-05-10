@@ -13,6 +13,8 @@ export abstract class Game {
   entities = new ArrayHash<Entity>('entityId');
   entityClusterer: EntityClusterer;
   gameLeaderboard: any = null;
+  highestServerStep?: number;
+  stepCount: number = 0;
   totalPlayers: number = 0;
 
   constructor(public isClient: boolean) {
@@ -20,8 +22,6 @@ export abstract class Game {
     this.collisionResult = this.collisionEngine.createResult();
     this.entityClusterer = new EntityClusterer(this.entities, 3);
   }
-
-  abstract gameTick(tickIndex: number, duration: number): void;
 
   getPlayerRange(padding: number, filter: (e: Entity) => boolean) {
     const range = {x0: Number.POSITIVE_INFINITY, x1: Number.NEGATIVE_INFINITY};
@@ -39,6 +39,8 @@ export abstract class Game {
 
   abstract postTick(tickIndex: number, duration: number): void;
 
+  abstract step(tickIndex: number, duration: number): void;
+
   protected checkCollisions() {
     this.collisionEngine.update();
 
@@ -46,6 +48,10 @@ export abstract class Game {
       const entity = this.entities.getIndex(i);
       entity.checkCollisions();
     }
+  }
+
+  addObjectToWorld(curObj: Entity) {
+    this.entities.push(curObj);
   }
 }
 
@@ -77,19 +83,6 @@ export class OrbitalGame extends Game {
     }
   }
 
-  gameTick(tickIndex: number, duration: number): void {
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities.array[i];
-      entity.gameTick(duration);
-    }
-    for (let i = this.entities.array.length - 1; i >= 0; i--) {
-      const entity = this.entities.array[i];
-      entity.updatePolygon();
-    }
-
-    this.checkCollisions();
-  }
-
   killPlayer(player: PlayerEntity): void {
     // todo emit this.gameLeaderboard!.removePlayer(player.entityId);
     for (const user of this.users.array) {
@@ -113,5 +106,18 @@ export class OrbitalGame extends Game {
         entity.postTick();
       }
     }
+  }
+
+  step(tickIndex: number, duration: number): void {
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities.array[i];
+      entity.gameTick(duration);
+    }
+    for (let i = this.entities.array.length - 1; i >= 0; i--) {
+      const entity = this.entities.array[i];
+      entity.updatePolygon();
+    }
+
+    this.checkCollisions();
   }
 }
