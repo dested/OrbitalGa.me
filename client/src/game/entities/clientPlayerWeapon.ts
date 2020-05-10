@@ -1,18 +1,19 @@
 import {PlayerWeaponEntity, PlayerWeaponModel} from '@common/entities/playerWeaponEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {OrbitalAssets} from '../../utils/assetManager';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 import {GameConstants} from '@common/game/gameConstants';
 import {WeaponConfigs} from '@common/game/gameRules';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(private clientGame: ClientGame, messageModel: PlayerWeaponModel) {
+  constructor(clientGame: OrbitalGame, messageModel: PlayerWeaponModel) {
     super(clientGame, messageModel);
   }
 
@@ -63,7 +64,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     switch (this.weaponType) {
       case 'rocket': {
         const fire =
-          this.clientGame.drawTick % 8 < 4
+          this.game.drawTick % 8 < 4
             ? OrbitalAssets.assets['Effects.fire14']
             : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
@@ -75,7 +76,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
         break;
       case 'torpedo': {
         const fire =
-          this.clientGame.drawTick % 8 < 4
+          this.game.drawTick % 8 < 4
             ? OrbitalAssets.assets['Effects.fire14']
             : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
@@ -90,7 +91,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
   reconcileFromServer(messageModel: PlayerWeaponModel) {
     super.reconcileFromServer(messageModel);
     if (messageModel.create) {
-      if (this.owner && this.owner === this.clientGame.liveEntity && this.clientGame.liveEntity) {
+      if (this.owner && this.owner === this.game.liveEntity && this.game.liveEntity) {
         this.x = this.owner.x + this.offsetX;
         this.y = this.owner.y;
         this.positionBuffer[0].x = this.x;

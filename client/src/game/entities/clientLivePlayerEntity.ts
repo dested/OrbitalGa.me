@@ -1,11 +1,11 @@
 import {LivePlayerModel, PlayerInput, PlayerModel} from '@common/entities/playerEntity';
 import {assertType, Utils} from '@common/utils/utils';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
 import {ClientPlayerEntity} from './clientPlayerEntity';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {unreachable} from '@common/utils/unreachable';
+import {OrbitalGame} from '@common/game/game';
 
 type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
@@ -30,7 +30,7 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     duration: GameConstants.serverTickRate,
   };
   zIndex = DrawZIndex.Player;
-  constructor(clientGame: ClientGame, public messageModel: LivePlayerModel) {
+  constructor(clientGame: OrbitalGame, public messageModel: LivePlayerModel) {
     super(clientGame, messageModel);
     this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
   }
@@ -101,30 +101,14 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {
     assertType<LivePlayerModel>(messageModel);
     const wasHit = this.hit;
-    const oldY = this.y;
-    const oldMomentumY = this.momentumY;
-
     super.reconcileFromServerLive(messageModel);
+
     if (this.hit !== wasHit) {
       this.hitTimer = 5;
     }
 
     if (this.dead) {
       this.clientGame.died();
-    }
-    this.storedActions = this.storedActions.filter(
-      (action) => action.sequenceNumber > messageModel.lastProcessedInputSequenceNumber
-    );
-
-    for (const pendingAction of this.storedActions) {
-      this.applyInput(pendingAction.input, pendingAction.sequenceNumber);
-      if (pendingAction.nonKeyMomentumX !== 0) {
-        this.momentumX += pendingAction.nonKeyMomentumX;
-      }
-      if (pendingAction.nonKeyMomentumY !== 0) {
-        this.momentumY += pendingAction.nonKeyMomentumY;
-      }
-      this.updatedPositionFromMomentum();
     }
   }
 
@@ -157,12 +141,5 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
   }
   tick() {
     this.mainTick++;
-  }
-
-  protected bounce(momentumX: number, momentumY: number) {
-    super.bounce(momentumX, momentumY);
-    const lastStoredAction = this.storedActions[this.storedActions.length - 1];
-    lastStoredAction.nonKeyMomentumX = momentumX;
-    lastStoredAction.nonKeyMomentumY = momentumY;
   }
 }

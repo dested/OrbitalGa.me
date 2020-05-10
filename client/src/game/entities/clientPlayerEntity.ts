@@ -1,26 +1,21 @@
 import {LivePlayerModel, PlayerBadges, PlayerEntity, PlayerInput, PlayerModel} from '@common/entities/playerEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {unreachable} from '@common/utils/unreachable';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
   static _greenPlayer?: HTMLCanvasElement;
   static _whitePlayer?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
   hitTimer = 0;
-  storedActions: {
-    input: PlayerInput;
-    nonKeyMomentumX: number;
-    nonKeyMomentumY: number;
-    sequenceNumber: number;
-  }[] = [];
   zIndex = DrawZIndex.Player;
 
-  constructor(protected clientGame: ClientGame, messageModel: PlayerModel | LivePlayerModel) {
+  constructor(clientGame: OrbitalGame, messageModel: PlayerModel | LivePlayerModel) {
     super(clientGame, messageModel);
   }
 
@@ -88,7 +83,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     if (this.lastPlayerInput?.up) {
       context.save();
       const fire =
-        this.clientGame.drawTick % 8 < 4
+        this.game.drawTick % 8 < 4
           ? OrbitalAssets.assets['Effects.fire16']
           : OrbitalAssets.assets['Effects.fire17'];
       context.drawImage(fire.image, this.drawX - 30, this.drawY + 20);
@@ -97,9 +92,7 @@ export class ClientPlayerEntity extends PlayerEntity implements ClientEntity {
     } else if (this.lastPlayerInput?.down || this.lastPlayerInput?.left || this.lastPlayerInput?.right) {
       context.save();
       const fire =
-        this.clientGame.drawTick % 8 < 4
-          ? OrbitalAssets.assets['Effects.fire16']
-          : OrbitalAssets.assets['Effects.fire17'];
+        this.game.drawTick % 8 < 4 ? OrbitalAssets.assets['Effects.fire16'] : OrbitalAssets.assets['Effects.fire17'];
       context.drawImage(fire.image, this.drawX - 30, this.drawY + 10);
       context.drawImage(fire.image, this.drawX + 16, this.drawY + 10);
       context.restore();

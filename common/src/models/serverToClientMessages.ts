@@ -48,7 +48,7 @@ export type WorldModelCastToEntityModel = any;
 
 export type ImpliedEntityType<T> = Omit<T, 'type'>;
 
-type STOCJoined = {player: Omit<LivePlayerModel, 'type'>; serverVersion: number; type: 'joined'};
+type STOCJoined = {playerEntityId: number; serverVersion: number; type: 'joined'};
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
 type STOCPong = {ping: number; type: 'pong'};
 export type STOCError =
@@ -73,7 +73,7 @@ const STOCErrorSchema: SDTypeLookup<ServerToClientMessage, 'error'> = {
 };
 const STOCJoinedSchema: SDTypeLookup<ServerToClientMessage, 'joined'> = {
   serverVersion: 'uint8',
-  player: LivePlayerModelSchema,
+  playerEntityId: 'int32',
 };
 const STOCLeaderboardSchema: SDTypeLookup<ServerToClientMessage, 'leaderboard'> = {
   scores: {

@@ -2,15 +2,14 @@ import {GameView} from './gameView';
 import {GameConstants} from '@common/game/gameConstants';
 import {ClientGameUI} from './clientGameUI';
 import {ClientSocket} from '../socket/clientSocket';
-import {ServerGame} from '../../../server/src/game/serverGame';
 import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
 import {BotClientGame} from './botClientGame';
-import {ClientGame, ClientGameOptions} from './clientGame';
 import {STOCError} from '@common/models/serverToClientMessages';
 import {ServerStatSync} from '../../../server/src/game/IServerSync';
 import {uiStore} from '../store/uiStore';
 import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
+import {ClientGameOptions} from './clientEngine';
 
 export class GameData {
   static client?: ClientGameUI;

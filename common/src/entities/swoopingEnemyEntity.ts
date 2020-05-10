@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
 import {Utils} from '../utils/utils';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
@@ -81,7 +81,7 @@ export class SwoopingEnemyEntity extends Entity implements Weapon {
     this
   );
 
-  constructor(game: Game, messageModel: ImpliedEntityType<SwoopingEnemyModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<SwoopingEnemyModel>) {
     super(game, messageModel);
     this.health = messageModel.health;
     this.enemyColor = messageModel.enemyColor;

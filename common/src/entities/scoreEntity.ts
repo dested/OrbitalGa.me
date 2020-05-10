@@ -1,4 +1,4 @@
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {Result} from 'collisions';
@@ -7,7 +7,7 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 export class ScoreEntity extends Entity {
   score: number;
   type = 'score' as const;
-  constructor(game: Game, messageModel: ImpliedEntityType<ScoreModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ScoreModel>) {
     super(game, messageModel);
     this.score = messageModel.score;
     this.onlyVisibleToPlayerEntityId = messageModel.onlyVisibleToPlayerEntityId;

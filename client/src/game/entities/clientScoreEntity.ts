@@ -1,15 +1,11 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {ScoreEntity, ScoreModel} from '@common/entities/scoreEntity';
 
 export class ClientScoreEntity extends ScoreEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   updateY: number = 0;
   zIndex = DrawZIndex.Scenery;
-
-  constructor(game: ClientGame, messageModel: ScoreModel) {
-    super(game, messageModel);
-  }
 
   get drawX() {
     return this.realX;

@@ -1,5 +1,5 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {OrbitalAssets} from '../../utils/assetManager';
 import {BossEvent1EnemyEntity, BossEvent1EnemyModel} from '@common/entities/bossEvent1EnemyEntity';
 import {unreachable} from '@common/utils/unreachable';

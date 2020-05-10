@@ -1,12 +1,13 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {BossEvent1Entity, BossEvent1Model} from '@common/entities/bossEvent1Entity';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientBossEvent1Entity extends BossEvent1Entity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Player;
 
-  constructor(game: ClientGame, messageModel: BossEvent1Model) {
+  constructor(game: OrbitalGame, messageModel: BossEvent1Model) {
     super(game, messageModel);
   }
   get drawX() {

@@ -1,4 +1,3 @@
-import {ClientGame, ClientGameOptions} from './clientGame';
 import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
@@ -88,9 +87,6 @@ export class ClientGameUI extends ClientGame {
     for (const entity of sortedEntities) {
       if (!gameData.view.contains(entity.realX, entity.realY)) {
         continue;
-      }
-      if(!entity.draw){
-        debugger;
       }
       entity.draw(context);
     }

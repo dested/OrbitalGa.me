@@ -1,11 +1,12 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientSpectatorEntity extends SpectatorEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
-  constructor(game: ClientGame, messageModel: SpectatorModel) {
+  constructor(game: OrbitalGame, messageModel: SpectatorModel) {
     super(game, messageModel);
     game.spectatorEntity = this;
   }

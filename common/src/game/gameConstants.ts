@@ -18,13 +18,14 @@ export class GameConstants {
   static binaryTransport = true;
   static capOnServerSpectators = 200;
   static capOnServerUsers = 200;
+  static gameStepRate = 60;
 
   static isSinglePlayer = typeof window === 'object' && window.location.pathname.indexOf('single') >= 0;
-  static lastActionTimeout = 120_000 * (GameDebug.noTimeout ? 100_000 : 1);
-  static lastPingTimeout = 30_000 * (GameDebug.noTimeout ? 100_000 : 1);
-  static noMessageDuration = 3_000 * (GameDebug.noTimeout ? 100_000 : 1);
+  static lastActionTimeout = 120_000 * (GameDebug.noTimeout ? 100_000_000 : 1);
+  static lastPingTimeout = 30_000 * (GameDebug.noTimeout ? 100_000_000 : 1);
+  static noMessageDuration = 3_000 * (GameDebug.noTimeout ? 100_000_000 : 1);
   static numberOfSinglePlayerBots = 0;
-  static pingInterval = 3_000 * (GameDebug.noTimeout ? 100_000 : 1);
+  static pingInterval = 3_000 * (GameDebug.noTimeout ? 100_000_000 : 100_000_000);
   static playerStartingY = screenSize.height * 0.8;
   static screenRange = screenSize.width * 1.4;
   static screenSize = screenSize;

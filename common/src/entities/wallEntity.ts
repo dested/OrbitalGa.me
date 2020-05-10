@@ -1,11 +1,11 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class WallEntity extends Entity {
   type = 'wall' as const;
-  constructor(game: Game, messageModel: WallModel) {
+  constructor(public game: OrbitalGame, messageModel: WallModel) {
     super(game, messageModel);
     this.width = messageModel.width;
     this.height = messageModel.height;

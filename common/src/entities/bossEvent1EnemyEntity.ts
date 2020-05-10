@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
@@ -20,7 +20,7 @@ export class BossEvent1EnemyEntity extends Entity implements Weapon {
   xOffset: number;
   yOffset: number;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<BossEvent1EnemyModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<BossEvent1EnemyModel>) {
     super(game, messageModel);
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.xOffset = messageModel.xOffset;

@@ -6,7 +6,6 @@ import {JoinButton, LeaderboardButton, LoginBox, Logo, NameBox, Status, Wrapper}
 import {GoFullScreen} from '../../components/goFullScreen';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
-import {ClientGame} from '../../game/clientGame';
 import {unreachable} from '@common/utils/unreachable';
 import {Leaderboard} from '../../components/leaderboard';
 import {STOCError} from '@common/models/serverToClientMessages';

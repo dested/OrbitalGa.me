@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
@@ -11,7 +11,7 @@ export class ExplosionEntity extends Entity {
   ownerEntityId?: number;
   type = 'explosion' as const;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<ExplosionModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ExplosionModel>) {
     super(game, messageModel);
     this.intensity = messageModel.intensity;
     this.ownerEntityId = messageModel.ownerEntityId;

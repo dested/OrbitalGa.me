@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
@@ -18,7 +18,7 @@ export class PlayerShieldEntity extends Entity {
   tickIndex = 0;
   type = 'playerShield' as const;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<PlayerShieldModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<PlayerShieldModel>) {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.shieldStrength = messageModel.shieldStrength;

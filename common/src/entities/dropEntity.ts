@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
@@ -27,7 +27,7 @@ export class DropEntity extends Entity {
   drop: DropType;
   type = 'drop' as const;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<DropModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<DropModel>) {
     super(game, messageModel);
     this.drop = messageModel.drop;
     this.createPolygon();

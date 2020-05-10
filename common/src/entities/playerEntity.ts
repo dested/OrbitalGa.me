@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
@@ -64,7 +64,7 @@ export class PlayerEntity extends Entity implements Weapon {
   protected lastPlayerInput?: PlayerInputKeys;
   private shieldEntityId?: number;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
     super(game, messageModel);
     this.ownerPlayerEntityId = messageModel.entityId;
     this.health = messageModel.health;

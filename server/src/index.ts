@@ -3,6 +3,9 @@ import {ServerSocket} from './utils/serverSocket';
 import {ServerSync} from './game/serverSync';
 import {SecureConfig, Config} from '../../api/server-common';
 import {ServerUtils} from './utils/serverUtils';
+import {ServerEngine} from './game/serverEngine';
+import {Game, OrbitalGame} from '@common/game/game';
+import {OrbitalServerEngine} from './game/orbitalServerEngine';
 
 async function main() {
   console.log('Getting config');
@@ -15,7 +18,7 @@ async function main() {
   const serverSync = new ServerSync(path);
 
   console.log('Starting game');
-  const serverGame = new ServerGame(serverSocket, serverSync);
+  const serverGame = new OrbitalServerEngine(serverSocket, serverSync, new OrbitalGame(false));
   serverGame.init();
   console.log('Ready');
 }

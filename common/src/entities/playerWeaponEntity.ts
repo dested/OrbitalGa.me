@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
@@ -24,7 +24,7 @@ export class PlayerWeaponEntity extends Entity implements Weapon {
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<PlayerWeaponModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<PlayerWeaponModel>) {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.ownerPlayerEntityId = messageModel.ownerEntityId;

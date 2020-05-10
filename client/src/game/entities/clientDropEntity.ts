@@ -1,15 +1,16 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {DropEntity, DropModel} from '@common/entities/dropEntity';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {unreachable} from '@common/utils/unreachable';
 import {CanvasUtils} from '../../utils/canvasUtils';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientDropEntity extends DropEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Scenery;
 
-  constructor(game: ClientGame, messageModel: DropModel) {
+  constructor(game: OrbitalGame, messageModel: DropModel) {
     super(game, messageModel);
   }
 

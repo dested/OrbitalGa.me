@@ -1,20 +1,18 @@
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {MeteorEntity, MeteorModel} from '@common/entities/meteorEntity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {AssetKeys} from '../../assets';
+import {OrbitalClientEngine} from '../clientEngine';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
   clientDestroyedTick?: number = undefined;
   hitTimer = 0;
   zIndex = DrawZIndex.Scenery;
-
-  constructor(private clientGame: ClientGame, messageModel: MeteorModel) {
-    super(clientGame, messageModel);
-  }
 
   get drawX() {
     return this.realX;

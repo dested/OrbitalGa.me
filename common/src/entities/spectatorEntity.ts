@@ -1,12 +1,12 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 
 export class SpectatorEntity extends Entity {
   type = 'spectator' as const;
-  constructor(game: Game, messageModel: ImpliedEntityType<SpectatorModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<SpectatorModel>) {
     super(game, messageModel);
     this.createPolygon();
   }

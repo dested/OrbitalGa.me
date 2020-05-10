@@ -1,13 +1,14 @@
 import {EnemyShotEntity, EnemyShotModel} from '@common/entities/enemyShotEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {OrbitalAssets} from '../../utils/assetManager';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(game: ClientGame, messageModel: EnemyShotModel) {
+  constructor(game: OrbitalGame, messageModel: EnemyShotModel) {
     super(game, messageModel);
   }
   get drawX() {

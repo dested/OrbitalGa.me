@@ -1,24 +1,19 @@
 import {unreachable} from '@common/utils/unreachable';
-import {nextId} from '@common/utils/uuid';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
-import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {EntityModels} from '@common/models/serverToClientMessages';
-import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
+import {EntityModels, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {PlayerEntity} from '@common/entities/playerEntity';
-import {MeteorEntity} from '@common/entities/meteorEntity';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {Entity} from '@common/entities/entity';
 import {RBushXOnly} from '@common/utils/rbushXOnly';
-import {EntityGrouping} from './entityClusterer';
-import {GameRules} from '@common/game/gameRules';
 import {ClientToServerMessage} from '@common/models/clientToServerMessages';
-import {ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {IServerSync} from './IServerSync';
 import {IServerSocket} from '@common/socket/models';
+import {Scheduler} from '@common/utils/scheduler';
+import {GameLeaderboard} from '@common/game/gameLeaderboard';
 
 type Spectator = {connectionId: number};
 type User = {
@@ -28,18 +23,15 @@ type User = {
   name: string;
 };
 
-export class ServerGame extends Game {
-  entityGroupingsThisTick: EntityGrouping[] = [];
-  queuedMessages: {
-    connectionId: number;
-    message: ClientToServerMessage;
-  }[] = [];
+export abstract class ServerEngine {
+  gameLeaderboard?: GameLeaderboard;
+  queuedMessages: {connectionId: number; message: ClientToServerMessage}[] = [];
   queuedMessagesToSend: {[connectionId: number]: ServerToClientMessage[]} = {};
   spectators = new ArrayHash<Spectator>('connectionId');
   users = new ArrayHash<User>('connectionId');
+  private scheduler?: Scheduler;
 
-  constructor(private serverSocket: IServerSocket, private serverSync: IServerSync) {
-    super(false);
+  constructor(protected serverSocket: IServerSocket, protected serverSync: IServerSync, protected game: Game) {
     this.gameLeaderboard?.setServerSync(serverSync);
     serverSocket.start({
       onJoin: (connectionId) => {
@@ -57,49 +49,24 @@ export class ServerGame extends Game {
     }
   }
 
+  abstract gameTick(tickIndex: number, duration: number): void;
+
   init() {
-    let serverTick = 0;
-    let time = +new Date();
-    let tickTime = 0;
-
     this.initGame();
-
-    const processTick = () => {
-      try {
-        const now = +new Date();
-        const duration = now - time;
-        if (duration > GameConstants.serverTickRate * 1.2) {
-          console.log('bad duration', duration);
-        }
-        time = +new Date();
-        // console.time('server tick');
-        const newTickTime = +new Date();
-        this.serverTick(++serverTick, duration, tickTime);
-        tickTime = +new Date() - newTickTime;
-        // console.timeEnd('server tick');
-        // console.time('gc');
-        // global.gc();
-        // console.timeEnd('gc');
-
-        if (serverTick % 15 === 0) {
-          this.updateSpectatorPosition();
-        }
-
-        setTimeout(() => {
-          processTick();
-        }, Math.max(Math.min(GameConstants.serverTickRate, GameConstants.serverTickRate - tickTime), 1));
-
-        if (serverTick % 30 === 0) {
-          this.serverSync.syncLeaderboard();
-        }
-      } catch (ex) {
-        console.error(ex);
-      }
-    };
-    setTimeout(() => {
-      processTick();
-    }, 1000 / 5);
+    let serverTick = 0;
+    let last = +new Date();
+    this.scheduler = new Scheduler({
+      tick: () => {
+        serverTick++;
+        this.serverTick(serverTick, +new Date() - last);
+        last = +new Date();
+      },
+      period: 150,
+      delay: 150 / 3,
+    }).start();
   }
+
+  abstract initGame(): void;
 
   killPlayer(player: PlayerEntity): void {
     this.gameLeaderboard!.removePlayer(player.entityId);
@@ -124,7 +91,7 @@ export class ServerGame extends Game {
       }
     }
 
-    const requeuedMessages: ServerGame['queuedMessages'] = [];
+    const requeuedMessages: ServerEngine['queuedMessages'] = [];
 
     for (let i = 0; i < this.queuedMessages.length; i++) {
       if (time + 100 < +new Date()) {
@@ -203,10 +170,10 @@ export class ServerGame extends Game {
     }
   }
 
-  serverTick(tickIndex: number, duration: number, tickTime: number) {
+  serverTick(tickIndex: number, duration: number) {
     if (!GameConstants.isSinglePlayer) {
-      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
-      const groups = Utils.groupBy(this.entities.array, (a) => a.type);
+      const groupings = this.game.entityClusterer.getGroupings((a) => a.type === 'player');
+      const groups = Utils.groupBy(this.game.entities.array, (a) => a.type);
       const memoryUsage = process.memoryUsage();
 
       this.serverSync.setStat({
@@ -214,8 +181,8 @@ export class ServerGame extends Game {
         bytesReceived: this.serverSocket.totalBytesSentPerSecond,
         bytesSent: this.serverSocket.totalBytesSent,
         connections: this.serverSocket.connections.length,
-        duration: tickTime,
-        entities: this.entities.length,
+        duration,
+        entities: this.game.entities.length,
         users: this.users.length,
         spectators: this.spectators.length,
         entityGroupCount: Utils.safeKeys(groups)
@@ -233,19 +200,7 @@ export class ServerGame extends Game {
 
     this.processInputs();
 
-    this.processGameRules(tickIndex);
-
-    this.entityGroupingsThisTick = this.entityClusterer.getGroupings((a) => a.type === 'player');
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities.array[i];
-      entity.gameTick(duration);
-    }
-    for (let i = this.entities.array.length - 1; i >= 0; i--) {
-      const entity = this.entities.array[i];
-      entity.updatePolygon();
-    }
-
-    this.checkCollisions();
+    this.gameTick(tickIndex, duration);
 
     if (tickIndex % 10 === 0) {
       this.sendLeaderboard();
@@ -271,17 +226,7 @@ export class ServerGame extends Game {
       }
     }
 
-    for (let i = this.entities.length - 1; i >= 0; i--) {
-      const entity = this.entities.getIndex(i);
-      if (entity.markToDestroy) {
-        if (entity instanceof PlayerEntity) {
-          this.killPlayer(entity);
-        }
-        this.entities.remove(entity);
-      } else {
-        entity.postTick();
-      }
-    }
+    this.game.postTick(tickIndex, duration);
 
     const now = +new Date();
     for (let i = this.serverSocket.connections.array.length - 1; i >= 0; i--) {
@@ -341,11 +286,10 @@ export class ServerGame extends Game {
       return;
     }
 
-    const name = connection.jwt.userName;
     if (this.users.length > GameConstants.capOnServerUsers) {
       this.serverSocket.sendMessage(connectionId, [{type: 'error', reason: 'userCapacity'}]);
       this.serverSocket.disconnect(connectionId);
-      return;
+      return undefined;
     }
 
     const spectator = this.spectators.lookup(connectionId);
@@ -357,39 +301,7 @@ export class ServerGame extends Game {
       this.userLeave(connectionId);
       this.queuedMessagesToSend[connectionId] = [];
     }
-
-    const startingPos = this.entityClusterer.getNewPlayerXPosition();
-    const playerEntity = new ServerPlayerEntity(this, {
-      entityId: nextId(),
-      playerColor: PlayerEntity.randomEnemyColor(),
-      health: GameRules.player.base.startingHealth,
-      x: startingPos,
-      y: GameConstants.playerStartingY,
-      playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
-      hit: false,
-      badges: [],
-    });
-    this.gameLeaderboard!.addPlayer(playerEntity.entityId, connection.jwt.userId);
-    this.users.push({name, connectionId, entity: playerEntity});
-    this.entities.push(playerEntity);
-
-    const playerShieldEntity = new PlayerShieldEntity(this, {
-      entityId: nextId(),
-      ownerEntityId: playerEntity.entityId,
-      shieldStrength: 'small',
-      health: GameRules.playerShield.small.maxHealth,
-      depleted: false,
-      x: 0,
-      y: 0,
-    });
-    this.entities.push(playerShieldEntity);
-    playerEntity.setShieldEntity(playerShieldEntity.entityId);
-
-    this.sendMessageToClient(connectionId, {
-      type: 'joined',
-      serverVersion: GameConstants.serverVersion,
-      player: playerEntity.serializeLive(),
-    });
+    return connection;
   }
 
   userLeave(connectionId: number) {
@@ -405,83 +317,6 @@ export class ServerGame extends Game {
     if (user.entity) user.entity.die();
     this.users.remove(user);
     delete this.queuedMessagesToSend[connectionId];
-  }
-
-  private initGame() {
-    this.entities.push(new SpectatorEntity(this, {entityId: nextId(), x: 0, y: 0}));
-    this.updateSpectatorPosition();
-  }
-
-  private processGameRules(tickIndex: number) {
-    if (!GameDebug.noEnemies) {
-      for (const grouping of this.entityClusterer.getGroupings(
-        (a) => a.type === 'player' || a.type === 'swoopingEnemy'
-      )) {
-        const enemies = grouping.entities.filter((a) => a.type === 'swoopingEnemy').length;
-        const players = Math.ceil(Math.min(grouping.entities.filter((a) => a.type === 'player').length, 4) * 1.5);
-        if (enemies < players) {
-          for (let i = enemies; i < players; i++) {
-            const swoopingEnemyEntity = new SwoopingEnemyEntity(this, {
-              entityId: nextId(),
-              x: this.entityClusterer.getNewEnemyXPositionInGroup(grouping),
-              y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
-              enemyColor: SwoopingEnemyEntity.randomEnemyColor(),
-              health: GameRules.enemies.swoopingEnemy.startingHealth,
-              hit: false,
-            });
-            this.entities.push(swoopingEnemyEntity);
-          }
-        }
-      }
-    }
-
-    if (tickIndex === 50) {
-      const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
-      // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
-    }
-
-    if (tickIndex % 50 === 1) {
-      if (GameDebug.meteorCluster) {
-        const groupings = this.entityClusterer.getGroupings((a) => a.type === 'player');
-        for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
-          const meteor = new MeteorEntity(this, {
-            entityId: nextId(),
-            x: i,
-            y: GameConstants.screenSize.height * 0.55,
-            meteorColor: 'brown',
-            size: 'big',
-            meteorType: '4',
-            hit: false,
-            rotate: 100,
-            momentumX: 0,
-            momentumY: 20,
-            rotateSpeed: 3,
-          });
-          this.entities.push(meteor);
-        }
-      } else {
-        for (const grouping of this.entityClusterer.getGroupings((a) => a.type === 'player')) {
-          for (let i = 0; i < 10; i++) {
-            const {meteorColor, type, size} = MeteorEntity.randomMeteor();
-            const meteor = new MeteorEntity(this, {
-              entityId: nextId(),
-              x: Utils.randomInRange(grouping.x0, grouping.x1),
-              y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
-              meteorColor,
-              size,
-              meteorType: type,
-              hit: false,
-              rotate: Math.random() * 255,
-              momentumX: Math.random() * 10 - 5,
-              rotateSpeed: Math.round(1 + Math.random() * 3),
-              momentumY: 5 + Math.random() * 10,
-            });
-
-            this.entities.push(meteor);
-          }
-        }
-      }
-    }
   }
 
   private sendLeaderboard() {
@@ -517,17 +352,17 @@ export class ServerGame extends Game {
   }
 
   private sendSpectatorWorldState() {
-    const spectator = this.entities.array.find((a) => a instanceof SpectatorEntity);
+    const spectator = this.game.entities.array.find((a) => a instanceof SpectatorEntity);
     if (!spectator) {
       return;
     }
-    const totalPlayers = this.entities.filter((a) => a.type === 'player').length;
+    const totalPlayers = this.game.entities.filter((a) => a.type === 'player').length;
     const box = {
       x0: spectator.x - GameConstants.screenRange / 2,
       x1: spectator.x + GameConstants.screenRange / 2,
     };
 
-    const myEntities = this.entities.map((entity) => ({
+    const myEntities = this.game.entities.map((entity) => ({
       entity,
       serializedEntity: entity.serialize() as EntityModels,
     }));
@@ -555,11 +390,11 @@ export class ServerGame extends Game {
 
   private sendWorldState() {
     if (this.users.array.length === 0) return;
-    const totalPlayers = this.entities.filter((a) => a.type === 'player').length;
+    const totalPlayers = this.game.entities.filter((a) => a.type === 'player').length;
 
     const bush = new RBushXOnly<{entity: Entity; serializedEntity: EntityModels}>();
 
-    for (const entity of this.entities.array) {
+    for (const entity of this.game.entities.array) {
       bush.insert({
         maxX: entity.realX,
         minX: entity.realX,
@@ -623,14 +458,5 @@ export class ServerGame extends Game {
       });
     }
   }
-
-  private updateSpectatorPosition() {
-    const range = this.getPlayerRange(0, (e) => e.y > 30);
-    const spectator = this.entities.array.find((a) => a instanceof SpectatorEntity);
-    if (!spectator) {
-      return;
-    }
-    spectator.x = range.x0 + Math.random() * (range.x1 - range.x0);
-    spectator.y = 0;
-  }
 }
+

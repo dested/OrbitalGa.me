@@ -1,5 +1,5 @@
 import {Result} from 'collisions';
-import {Game} from '../game/game';
+import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weapon';
@@ -25,7 +25,7 @@ export class BossEvent1Entity extends Entity {
   type = 'bossEvent1' as const;
   weaponSide = 'enemy' as const;
 
-  constructor(game: Game, messageModel: ImpliedEntityType<BossEvent1Model>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<BossEvent1Model>) {
     super(game, messageModel);
     this.health = messageModel.health;
     this.width = messageModel.width;

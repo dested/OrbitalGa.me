@@ -19,6 +19,7 @@ export class BotClientGame extends ClientGame {
     };
     doAction();
   }
+  postTick(tickIndex: number, duration: number): void {}
   private tryNextMoves() {
     const liveEntity = this.liveEntity;
     if (!liveEntity) {

@@ -1,10 +1,11 @@
 import {ExplosionEntity, ExplosionModel} from '@common/entities/explosionEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {ShakeGame} from '../../utils/shakeUtils';
 import {Entity} from '@common/entities/entity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientExplosionEntity extends ExplosionEntity implements ClientEntity {
   clientDestroyedTick?: number = undefined;
@@ -12,7 +13,7 @@ export class ClientExplosionEntity extends ExplosionEntity implements ClientEnti
 
   zIndex = DrawZIndex.Effect;
 
-  constructor(game: ClientGame, messageModel: ExplosionModel) {
+  constructor(game: OrbitalGame, messageModel: ExplosionModel) {
     super(game, messageModel);
     if (messageModel.create) {
       if (!('isBot' in game)) {

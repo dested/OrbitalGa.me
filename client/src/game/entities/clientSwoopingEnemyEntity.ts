@@ -1,9 +1,10 @@
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '@common/entities/swoopingEnemyEntity';
 import {ClientEntity, DrawZIndex} from './clientEntity';
-import {ClientGame} from '../clientGame';
+
 import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
 import {CanvasUtils} from '../../utils/canvasUtils';
+import {OrbitalGame} from '@common/game/game';
 
 export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
   static _whiteEnemy?: HTMLCanvasElement;
@@ -12,7 +13,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
   hitTimer = 0;
   zIndex = DrawZIndex.Player;
 
-  constructor(game: ClientGame, messageModel: SwoopingEnemyModel) {
+  constructor(game: OrbitalGame, messageModel: SwoopingEnemyModel) {
     super(game, messageModel);
   }
 
