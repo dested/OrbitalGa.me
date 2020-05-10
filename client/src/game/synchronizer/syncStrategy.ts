@@ -15,7 +15,7 @@ export abstract class SyncStrategy {
     onEveryStep: {MAX_LAG: number; MAX_LEAD: number};
     onServerSync: {MAX_LAG: number; MAX_LEAD: number};
   };
-  constructor(protected clientEngine: ClientEngine, protected options: {}) {
+  constructor(protected clientEngine: ClientEngine, public options: {}) {
     this.clientEngine = clientEngine;
     this.gameEngine = clientEngine.game;
     /*
@@ -25,7 +25,7 @@ export abstract class SyncStrategy {
   }
 
   // add an object to our world
-  addNewObject(objId: number, messageModel: EntityModels) {
+  addNewObject(messageModel: EntityModels): Entity {
     const curObj = new ClientEntityTypes[messageModel.type](
       this.gameEngine,
       messageModel as WorldModelCastToEntityModel

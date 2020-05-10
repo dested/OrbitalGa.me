@@ -39,7 +39,7 @@ export abstract class Game {
 
   abstract postTick(tickIndex: number, duration: number): void;
 
-  abstract step(tickIndex: number, duration: number): void;
+  abstract step(reenact: boolean, tickIndex: number, duration: number): void;
 
   protected checkCollisions() {
     this.collisionEngine.update();
@@ -53,6 +53,8 @@ export abstract class Game {
   addObjectToWorld(curObj: Entity) {
     this.entities.push(curObj);
   }
+
+  processInput(inputDesc: {key: string; movement: boolean}, playerId: number) {}
 }
 
 export class OrbitalGame extends Game {

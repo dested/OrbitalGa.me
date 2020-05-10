@@ -18,11 +18,14 @@ export abstract class Entity {
   create: boolean = true;
   entityId: number;
   height: number = 0;
+  inputId: number;
   markToDestroy: boolean = false;
   momentumX = 0;
   momentumY = 0;
   onlyVisibleToPlayerEntityId?: number;
   positionBuffer: {time: number; x: number; y: number}[] = [];
+  shadowEntity: boolean;
+  savedCopy?: EntityModel;
   abstract type: EntityModels['type'];
   width: number = 0;
   x: number = 0;
@@ -30,6 +33,7 @@ export abstract class Entity {
 
   constructor(protected game: Game, messageModel: EntityModel) {
     this.entityId = messageModel.entityId;
+    this.inputId = messageModel.inputId;
     this.x = messageModel.x;
     this.y = messageModel.y;
   }
@@ -118,6 +122,7 @@ export abstract class Entity {
       if (messageModel.create) {
         this.x = messageModel.x;
         this.y = messageModel.y;
+        this.inputId = messageModel.inputId;
         this.positionBuffer.push({
           time: +new Date() - GameConstants.serverTickRate,
           x: messageModel.x,
@@ -127,12 +132,16 @@ export abstract class Entity {
       this.positionBuffer.push({time: +new Date(), x: messageModel.x, y: messageModel.y});
     }
   }
+  saveState(entityModel?: EntityModel) {
+    this.savedCopy = entityModel ?? this.serialize();
+  }
 
   serialize(): EntityModel {
     return {
       entityId: this.entityId,
       x: this.x,
       y: this.y,
+      inputId: this.inputId,
       create: this.create,
     };
   }
@@ -153,6 +162,7 @@ export abstract class Entity {
 export type EntityModel = {
   create?: boolean;
   entityId: number;
+  inputId: number;
   x: number;
   y: number;
 };
@@ -160,6 +170,7 @@ export type EntityModel = {
 export const EntityModelSchema: SDSimpleObject<EntityModel> = {
   x: 'float32',
   y: 'float32',
+  inputId: 'uint32',
   entityId: 'uint32',
   create: 'boolean',
 };
