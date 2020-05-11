@@ -17,11 +17,10 @@ import {
 
 export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   aliveDuration = 3000;
-  boundingBoxes = [{width: 9, height: 150}];
+  boundingBoxes = [{width: 9, height: 28}];
   damage: number;
   explosionIntensity: number;
   isWeapon = true as const;
-  offsetX: number;
   ownerEntityId: number;
   ownerPlayerEntityId: number;
   sprayAngle: number;
@@ -33,11 +32,14 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
-    this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
     this.sprayAngle = messageModel.sprayAngle;
     this.damage = WeaponConfigs[this.weaponType].damage;
     this.explosionIntensity = WeaponConfigs[this.weaponType].explosionIntensity;
+    const config = WeaponConfigs[this.weaponType];
+    if (!config.rampUp) {
+      this.velocity.add({x: 0, y: -config.speed});
+    }
     this.createPolygon();
   }
 
@@ -60,14 +62,12 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   gameTick(duration: number) {
     const config = WeaponConfigs[this.weaponType];
     if (config.rampUp) {
-      this.momentumY += config.speed * (duration / 1000);
-      this.y -= this.momentumY;
+      this.velocity.add({x: 0, y: -config.speed * (duration / 1000)});
     } else {
       if (this.sprayAngle > 0) {
-        this.x -= Math.cos(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);
-        this.y -= Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);
-      } else {
-        this.y -= config.speed * (duration / 1000);
+        /* todo angular momentum   
+     this.x -= Math.cos(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);
+        this.y -= Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);*/
       }
     }
     this.aliveDuration -= duration;
@@ -83,7 +83,6 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   reconcileFromServer(messageModel: PlayerWeaponModel) {
     super.reconcileFromServer(messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
-    this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
     this.sprayAngle = messageModel.sprayAngle;
   }
@@ -92,7 +91,6 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
     return {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
-      offsetX: this.offsetX,
       sprayAngle: this.sprayAngle,
       weaponType: this.weaponType,
       type: 'playerWeapon',
@@ -101,7 +99,6 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
 }
 
 export type PlayerWeaponModel = PhysicsEntityModel & {
-  offsetX: number;
   ownerEntityId: number;
   sprayAngle: number;
   type: 'playerWeapon';
@@ -112,6 +109,5 @@ export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
   ...PhysicsEntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
   sprayAngle: 'uint8',
-  offsetX: 'int32',
   ownerEntityId: 'uint32',
 };

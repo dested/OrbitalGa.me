@@ -6,7 +6,7 @@ import {GameRules} from '@common/game/gameRules';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {OrbitalGame} from '@common/game/game';
 
-export class ClientSwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
+export class SwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
   static _whiteEnemy?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
 
@@ -43,7 +43,7 @@ export class ClientSwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
     if (this.hitTimer > 0) {
       context.save();
       context.globalAlpha = this.hitTimer / 5;
-      context.drawImage(ClientSwoopingEnemyActor.whiteEnemy(), -ship.size.width / 2, -ship.size.height / 2);
+      context.drawImage(SwoopingEnemyActor.whiteEnemy(), -ship.size.width / 2, -ship.size.height / 2);
       context.restore();
       this.hitTimer -= 1;
     }

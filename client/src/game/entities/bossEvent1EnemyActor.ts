@@ -1,11 +1,10 @@
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
-
 import {OrbitalAssets} from '../../utils/assetManager';
 import {BossEvent1EnemyEntity} from '@common/entities/bossEvent1EnemyEntity';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 
-export class ClientBossEvent1EnemyActor extends ClientActor<BossEvent1EnemyEntity> {
+export class BossEvent1EnemyActor extends ClientActor<BossEvent1EnemyEntity> {
   zIndex = DrawZIndex.Player;
 
   get drawX() {

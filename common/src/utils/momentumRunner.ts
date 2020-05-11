@@ -22,8 +22,8 @@ export class MomentumRunner<TPhase> {
 
   ticks = 0;
   constructor(private paths: MomentumEntry<TPhase>[], private entity: PhysicsEntity) {
-    this.startX = entity.x;
-    this.startY = entity.y;
+    this.startX = entity.position.x;
+    this.startY = entity.position.y;
     this.pathPoint = 0;
 
     this.setCurrentVariability();
@@ -66,8 +66,8 @@ export class MomentumRunner<TPhase> {
         if (this.paths.length === this.pathIndex) {
           return 'done';
         }
-        this.startX = this.entity.x;
-        this.startY = this.entity.y;
+        this.startX = this.entity.position.x;
+        this.startY = this.entity.position.y;
         this.setCurrentVariability();
       }
     }
@@ -85,26 +85,26 @@ export class MomentumRunner<TPhase> {
     const curX = curPoint.x + this.currentVariabilityX;
     const curY = curPoint.y + this.currentVariabilityY;
 
-    if (this.entity.momentumX !== curX) {
+    if (this.entity.velocity.x !== curX) {
       const rampSpeed = 10;
-      if (this.entity.momentumX > curX) {
-        this.entity.momentumX = Math.max(this.entity.momentumX - rampSpeed, curX);
+      if (this.entity.velocity.x > curX) {
+        this.entity.velocity.x = Math.max(this.entity.velocity.x - rampSpeed, curX);
       }
-      if (this.entity.momentumX < curX) {
-        this.entity.momentumX = Math.min(this.entity.momentumX + rampSpeed, curX);
+      if (this.entity.velocity.x < curX) {
+        this.entity.velocity.x = Math.min(this.entity.velocity.x + rampSpeed, curX);
       }
     }
-    if (this.entity.momentumY !== curY) {
+    if (this.entity.velocity.y !== curY) {
       const rampSpeed = 10;
-      if (this.entity.momentumY > curY) {
-        this.entity.momentumY = Math.max(this.entity.momentumY - rampSpeed, curY);
+      if (this.entity.velocity.y > curY) {
+        this.entity.velocity.y = Math.max(this.entity.velocity.y - rampSpeed, curY);
       }
-      if (this.entity.momentumY < curY) {
-        this.entity.momentumY = Math.min(this.entity.momentumY + rampSpeed, curY);
+      if (this.entity.velocity.y < curY) {
+        this.entity.velocity.y = Math.min(this.entity.velocity.y + rampSpeed, curY);
       }
     }
-    this.entity.x += this.entity.momentumX;
-    this.entity.y += this.entity.momentumY;
+    this.entity.position.x += this.entity.velocity.x;
+    this.entity.position.y += this.entity.velocity.y;
   }
 
   private setCurrentVariability() {

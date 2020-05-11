@@ -2,12 +2,13 @@ import {PlayerWeaponEntity, PlayerWeaponModel} from '@common/entities/playerWeap
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {OrbitalAssets} from '../../utils/assetManager';
-import {ClientPlayerActor} from './clientPlayerActor';
+import {PlayerActor} from './playerActor';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 import {GameConstants} from '@common/game/gameConstants';
 import {WeaponConfigs} from '@common/game/gameRules';
 import {OrbitalGame} from '@common/game/game';
+import {PlayerEntity} from '@common/entities/playerEntity';
 
 export class ClientPlayerWeaponActor extends ClientActor<PlayerWeaponEntity> {
   clientDestroyedTick?: number = undefined;
@@ -39,7 +40,7 @@ export class ClientPlayerWeaponActor extends ClientActor<PlayerWeaponEntity> {
   }
 
   get owner() {
-    return this.entity.game.entities.lookup<ClientPlayerActor>(this.entity.ownerEntityId);
+    return this.entity.game.entities.lookup<PlayerEntity>(this.entity.ownerEntityId);
   }
 
   draw(context: CanvasRenderingContext2D): void {

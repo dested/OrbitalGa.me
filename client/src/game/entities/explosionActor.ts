@@ -7,7 +7,7 @@ import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
 
-export class ClientExplosionActor extends ClientActor<ExplosionEntity> {
+export class ExplosionActor extends ClientActor<ExplosionEntity> {
   clientDestroyedTick?: number = undefined;
   rotate = Math.random() * 360;
 

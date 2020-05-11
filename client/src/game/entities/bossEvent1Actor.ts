@@ -1,7 +1,7 @@
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 import {BossEvent1Entity} from '@common/entities/bossEvent1Entity';
 
-export class ClientBossEvent1Actor extends ClientActor<BossEvent1Entity> {
+export class BossEvent1Actor extends ClientActor<BossEvent1Entity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Player;
 

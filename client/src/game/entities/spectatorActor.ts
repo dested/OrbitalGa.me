@@ -2,7 +2,7 @@ import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';
 
-export class ClientSpectatorActor extends ClientActor<SpectatorEntity> {
+export class SpectatorActor extends ClientActor<SpectatorEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 

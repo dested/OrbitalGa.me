@@ -10,7 +10,7 @@ import {IClientSocket} from '../socket/IClientSocket';
 import {Scheduler} from '@common/utils/scheduler';
 import {ExtrapolateStrategy} from './synchronizer/extrapolateStrategy';
 import {Entity} from '@common/baseEntities/entity';
-import {ActorEntityTypes, EntityTypes} from './entities/clientEntityTypeModels';
+import {ActorEntityTypes, EntityTypes} from './entities/entityTypeModels';
 import {assertType} from '@common/utils/utils';
 
 const STEP_DELAY_MSEC = 12; // if forward drift detected, delay next execution by this amount

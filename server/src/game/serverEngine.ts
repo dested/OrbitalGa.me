@@ -74,7 +74,7 @@ export abstract class ServerEngine extends Engine {
     this.gameLeaderboard!.removePlayer(player.entityId);
     for (const user of this.users.array) {
       if (user.entity === player) {
-        user.deadXY = {x: player.realX, y: player.realY};
+        user.deadXY = {x: player.position.x, y: player.position.y};
         user.entity = undefined;
         break;
       }
@@ -84,17 +84,6 @@ export abstract class ServerEngine extends Engine {
   processInputs() {
     const time = +new Date();
     let stopped = false;
-
-    for (const user of this.users.array) {
-      if (user.entity) {
-        user.entity.xInputsThisTick = false;
-        user.entity.yInputsThisTick = false;
-        user.entity.inputsThisTick = 0;
-      }
-    }
-
-    const requeuedMessages: ServerEngine['queuedMessages'] = [];
-
     for (let i = 0; i < this.queuedMessages.length; i++) {
       if (time + 100 < +new Date()) {
         console.log('stopped');
@@ -124,22 +113,7 @@ export abstract class ServerEngine extends Engine {
           const connection = this.serverSocket.connections.lookup(q.connectionId);
           if (user && connection && user.entity) {
             connection.lastAction = +new Date();
-            user.entity.inputsThisTick++;
-            if (user.entity.inputsThisTick > 3) {
-              this.serverSocket.disconnect(connection.connectionId);
-              continue;
-            }
-            if (user.entity.inputsThisTick > 1) {
-              requeuedMessages.push(q);
-            } else {
-              user.entity.applyInput(
-                {
-                  ...q.message.keys,
-                  weapon: q.message.weapon,
-                },
-                q.message.inputSequenceNumber
-              );
-            }
+            user.entity.applyInput(q.message);
           }
           break;
         }
@@ -152,13 +126,6 @@ export abstract class ServerEngine extends Engine {
       this.queuedMessages.length = 0;
     } else {
       console.log(this.queuedMessages.length, 'remaining');
-    }
-    this.queuedMessages.unshift(...requeuedMessages);
-
-    for (const user of this.users.array) {
-      if (user.entity?.inputsThisTick === 0) {
-        user.entity.lastProcessedInputSequenceNumber++;
-      }
     }
   }
 
@@ -383,6 +350,7 @@ export abstract class ServerEngine extends Engine {
       this.serverSocket.sendMessage(c.connectionId, [
         {
           type: 'worldState',
+          stepCount: this.game.stepCount,
           totalPlayers,
           entities: myEntities.map((a) => a.serializedEntity),
         },
@@ -398,8 +366,8 @@ export abstract class ServerEngine extends Engine {
 
     for (const entity of this.game.entities.array) {
       bush.insert({
-        maxX: entity.realX,
-        minX: entity.realX,
+        maxX: entity.x,
+        minX: entity.y,
         item: {
           entity,
           serializedEntity: entity.serialize() as EntityModels,

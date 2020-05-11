@@ -37,21 +37,6 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
     this.createPolygon();
   }
 
-  isVisibleAtCoordinate(
-    viewX: number,
-    viewY: number,
-    viewWidth: number,
-    viewHeight: number,
-    playerId: number
-  ): boolean {
-    return (
-      this.position.x + this.xOffset > viewX &&
-      this.position.x + this.xOffset < viewX + viewWidth &&
-      this.position.y + this.yOffset > viewY &&
-      this.position.y + this.yOffset < viewY + viewHeight
-    );
-  }
-
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
 
@@ -74,6 +59,9 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
     }
 */
     return false;
+  }
+  createPolygon() {
+    super.createPolygon(this.position.x + this.xOffset, this.position.y + this.yOffset);
   }
 
   gameTick(duration: number): void {
@@ -99,6 +87,21 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
       this.game.explode(this, 'medium');
     }
 */
+  }
+
+  isVisibleAtCoordinate(
+    viewX: number,
+    viewY: number,
+    viewWidth: number,
+    viewHeight: number,
+    playerId: number
+  ): boolean {
+    return (
+      this.position.x + this.xOffset > viewX &&
+      this.position.x + this.xOffset < viewX + viewWidth &&
+      this.position.y + this.yOffset > viewY &&
+      this.position.y + this.yOffset < viewY + viewHeight
+    );
   }
 
   reconcileFromServer(messageModel: BossEvent1EnemyModel) {

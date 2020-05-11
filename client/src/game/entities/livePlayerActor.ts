@@ -1,14 +1,14 @@
 import {LivePlayerModel, PlayerInput, PlayerModel} from '@common/entities/playerEntity';
 import {assertType} from '@common/utils/utils';
 import {DrawZIndex} from '@common/baseEntities/clientActor';
-import {ClientPlayerActor} from './clientPlayerActor';
+import {PlayerActor} from './playerActor';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
 
 type KeyInput = Omit<PlayerInput, 'inputSequenceNumber'>;
 
-export class ClientLivePlayerActor extends ClientPlayerActor {
+export class LivePlayerActor extends PlayerActor {
   clientDestroyedTick?: number = undefined;
   inputSequenceNumber: number = 1;
   keys: KeyInput = {

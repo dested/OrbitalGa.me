@@ -54,9 +54,7 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   health = GameRules.player.base.startingHealth;
   hit = false;
   isWeapon = true as const;
-  lastProcessedInputSequenceNumber: number = 0;
-  momentumX = 0;
-  momentumY = 0;
+  lastPlayerInput?: PlayerInputKeys;
   ownerPlayerEntityId: number;
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon = 'laser1';
@@ -68,7 +66,6 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   type = 'player' as const;
   weaponSide = 'player' as const;
   private shieldEntityId?: number;
-  lastPlayerInput?: PlayerInputKeys;
 
   constructor(
     public game: OrbitalGame,
@@ -91,9 +88,11 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
         e.position.x < this.position.x - GameConstants.screenSize.width / 2
     ).length;
   }
+
   set playersToLeft(value: number) {
     this.staticPlayersToLeft = value;
   }
+
   get playersToRight() {
     if (this.staticPlayersToRight !== undefined) return this.staticPlayersToRight;
     return this.game.entities.filter(
@@ -103,6 +102,7 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
         e.position.x > this.position.x + GameConstants.screenSize.width / 2
     ).length;
   }
+
   set playersToRight(value: number) {
     this.staticPlayersToRight = value;
   }
@@ -158,76 +158,72 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
       this.selectedWeapon = input.weapon;
     }
     if (input.keys.shoot) {
-      if (!this.game.isClient) {
-        if (this.shootTimer <= 0) {
-          const availableWeapon = this.availableWeapons.find((w) => w.weapon === this.selectedWeapon);
-          const config = WeaponConfigs[this.selectedWeapon];
-          if (availableWeapon) {
-            let canFire = false;
-            switch (config.ammoType) {
-              case 'infinite':
+      if (this.shootTimer <= 0) {
+        const availableWeapon = this.availableWeapons.find((w) => w.weapon === this.selectedWeapon);
+        const config = WeaponConfigs[this.selectedWeapon];
+        if (availableWeapon) {
+          let canFire = false;
+          switch (config.ammoType) {
+            case 'infinite':
+              canFire = true;
+              break;
+            case 'per-shot':
+              if (availableWeapon.ammo > 0) {
                 canFire = true;
-                break;
-              case 'per-shot':
-                if (availableWeapon.ammo > 0) {
-                  canFire = true;
-                }
-                break;
-              case 'time':
-                if (availableWeapon.ammo > 0) {
-                  canFire = true;
-                }
-
-                break;
-            }
-            if (canFire) {
-              this.game.gameLeaderboard?.increaseEntry(this.entityId, 'shotsFired', 1);
-              let offsetX = 0;
-              if (config.alternateSide) {
-                offsetX = this.shotSide === 'left' ? -42 : 42;
               }
-              if (config.spray) {
-                for (let i = 1; i < config.spray; i++) {
-                  const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
-                    entityId: nextId(),
-                    position: {x: this.position.x + offsetX, y: this.position.y - 6},
-                    ownerEntityId: this.entityId,
-                    offsetX,
-                    weaponType: this.selectedWeapon,
-                    sprayAngle: Math.round(i * (180 / config.spray)),
-                  });
-                  this.game.entities.push(playerWeaponEntity);
-                }
-              } else {
+              break;
+            case 'time':
+              if (availableWeapon.ammo > 0) {
+                canFire = true;
+              }
+
+              break;
+          }
+          if (canFire) {
+            this.game.gameLeaderboard?.increaseEntry(this.entityId, 'shotsFired', 1);
+            let offsetX = 0;
+            if (config.alternateSide) {
+              offsetX = this.shotSide === 'left' ? -42 : 42;
+            }
+            if (config.spray) {
+              for (let i = 1; i < config.spray; i++) {
                 const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
                   entityId: nextId(),
                   position: {x: this.position.x + offsetX, y: this.position.y - 6},
                   ownerEntityId: this.entityId,
-                  offsetX,
                   weaponType: this.selectedWeapon,
-                  sprayAngle: 0,
+                  sprayAngle: Math.round(i * (180 / config.spray)),
                 });
                 this.game.entities.push(playerWeaponEntity);
               }
-              if (config.alternateSide) {
-                this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
-              }
-              this.shootTimer = config.resetShootTimer;
+            } else {
+              const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
+                entityId: nextId(),
+                position: {x: this.position.x + offsetX, y: this.position.y - 6},
+                ownerEntityId: this.entityId,
+                weaponType: this.selectedWeapon,
+                sprayAngle: 0,
+              });
+              this.game.entities.push(playerWeaponEntity);
+            }
+            if (config.alternateSide) {
+              this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
+            }
+            this.shootTimer = config.resetShootTimer;
 
-              switch (config.ammoType) {
-                case 'infinite':
-                  break;
-                case 'per-shot':
-                  availableWeapon.ammo--;
-                  if (availableWeapon.ammo <= 0) {
-                    const index = this.availableWeapons.findIndex((a) => a.weapon === this.selectedWeapon);
-                    this.selectedWeapon = this.availableWeapons[(index + 1) % this.availableWeapons.length].weapon;
-                    this.availableWeapons.splice(this.availableWeapons.indexOf(availableWeapon), 1);
-                  }
-                  break;
-                case 'time':
-                  break;
-              }
+            switch (config.ammoType) {
+              case 'infinite':
+                break;
+              case 'per-shot':
+                availableWeapon.ammo--;
+                if (availableWeapon.ammo <= 0) {
+                  const index = this.availableWeapons.findIndex((a) => a.weapon === this.selectedWeapon);
+                  this.selectedWeapon = this.availableWeapons[(index + 1) % this.availableWeapons.length].weapon;
+                  this.availableWeapons.splice(this.availableWeapons.indexOf(availableWeapon), 1);
+                }
+                break;
+              case 'time':
+                break;
             }
           }
         }
@@ -236,28 +232,16 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
 
     const ramp = GameRules.player.base.speedRamp;
     if (input.keys.left) {
-      this.momentumX -= ramp;
-      if (this.momentumX < -GameRules.player.base.maxSideSpeed) {
-        this.momentumX = -GameRules.player.base.maxSideSpeed;
-      }
+      this.velocity.add({x: -ramp, y: 0});
     }
     if (input.keys.right) {
-      this.momentumX += ramp;
-      if (this.momentumX > GameRules.player.base.maxSideSpeed) {
-        this.momentumX = GameRules.player.base.maxSideSpeed;
-      }
+      this.velocity.add({x: ramp, y: 0});
     }
     if (input.keys.up) {
-      this.momentumY -= ramp;
-      if (this.momentumY < -GameRules.player.base.maxForwardSpeed) {
-        this.momentumY = -GameRules.player.base.maxForwardSpeed;
-      }
+      this.velocity.add({x: 0, y: -ramp});
     }
     if (input.keys.down) {
-      this.momentumY += ramp;
-      if (this.momentumY > GameRules.player.base.maxReverseSpeed) {
-        this.momentumY = GameRules.player.base.maxReverseSpeed;
-      }
+      this.velocity.add({x: 0, y: ramp});
     }
   }
 
@@ -271,16 +255,22 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
+      // todo bounce
+      /*
       this.x -= collisionResult.overlap * collisionResult.overlap_x;
       this.y -= collisionResult.overlap * collisionResult.overlap_y;
+*/
       this.updatePolygon();
       return true;
     }
     if (otherEntity instanceof PlayerEntity) {
+      // todo bounce
+      /*
       this.momentumX -= collisionResult.overlap * collisionResult.overlap_x;
       this.momentumY -= collisionResult.overlap * collisionResult.overlap_y;
       otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x;
       otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y;
+*/
       this.updatePolygon();
       return true;
     }
@@ -375,16 +365,12 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   }
 
   reconcileFromServerLive(messageModel: LivePlayerModel) {
-    this.x = messageModel.x;
-    this.y = messageModel.y;
+    super.reconcileFromServer(messageModel);
     this.health = messageModel.health;
     this.hit = messageModel.hit;
     this.dead = messageModel.dead;
     this.playerColor = messageModel.playerColor;
     this.badges = messageModel.badges;
-    this.lastProcessedInputSequenceNumber = messageModel.lastProcessedInputSequenceNumber;
-    this.momentumX = messageModel.momentumX;
-    this.momentumY = messageModel.momentumY;
     this.availableWeapons = messageModel.availableWeapons;
     this.selectedWeapon = messageModel.selectedWeapon;
     this.playersToLeft = messageModel.playersToLeft;
@@ -406,11 +392,9 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   serializeLive(): LivePlayerModel {
     return {
       ...this.serialize(),
-      momentumX: this.momentumX,
-      momentumY: this.momentumY,
+      shootTimer: this.shootTimer,
       playersToLeft: this.playersToLeft,
       playersToRight: this.playersToRight,
-      lastProcessedInputSequenceNumber: this.lastProcessedInputSequenceNumber,
       dead: this.dead,
       type: 'livePlayer',
       selectedWeapon: this.selectedWeapon,
@@ -423,37 +407,22 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   }
 
   updatedPositionFromMomentum() {
-    this.x += this.momentumX;
-    this.y += this.momentumY;
-
-    const momentumDeceleration = GameRules.player.base.momentumDeceleration;
-
-    if (!this.xInputsThisTick) {
-      this.momentumX = this.momentumX * momentumDeceleration;
+    if (this.position.y < GameConstants.screenSize.height * 0.1) {
+      this.position.y = GameConstants.screenSize.height * 0.1;
+      this.velocity.set(this.velocity.x, 0);
     }
-    if (!this.yInputsThisTick) {
-      this.momentumY = this.momentumY * momentumDeceleration;
-    }
-    if (Math.abs(this.momentumX) < 3) {
-      this.momentumX = 0;
-    }
-    if (Math.abs(this.momentumY) < 3) {
-      this.momentumY = 0;
-    }
-
-    if (this.y < GameConstants.screenSize.height * 0.1) {
-      this.y = GameConstants.screenSize.height * 0.1;
-      this.momentumY = 0;
-    }
-    if (this.y > GameConstants.screenSize.height * 1.1) {
-      this.y = GameConstants.screenSize.height * 1.1;
-      this.momentumY = 0;
+    if (this.position.y > GameConstants.screenSize.height * 1.1) {
+      this.position.y = GameConstants.screenSize.height * 1.1;
+      this.velocity.set(this.velocity.x, 0);
     }
   }
 
   protected bounce(momentumX: number, momentumY: number) {
+    /*
+ todo bounce
     this.momentumX += momentumX;
     this.momentumY += momentumY;
+*/
   }
 
   static randomEnemyColor() {
@@ -476,13 +445,11 @@ export type LivePlayerModel = PhysicsEntityModel & {
   dead: boolean;
   health: number;
   hit: boolean;
-  lastProcessedInputSequenceNumber: number;
-  momentumX: number;
-  momentumY: number;
   playerColor: PlayerColor;
   playersToLeft: number;
   playersToRight: number;
   selectedWeapon: PlayerWeapon;
+  shootTimer: number;
   type: 'livePlayer';
 };
 
@@ -505,15 +472,13 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
     red: 4,
   },
   hit: 'boolean',
+  shootTimer: 'uint8',
   availableWeapons: {
     flag: 'array-uint8',
     elements: {ammo: 'uint16', weapon: PlayerWeaponEnumSchema},
   },
   badges: PlayerBadgesModelSchema,
   dead: 'boolean',
-  lastProcessedInputSequenceNumber: 'uint32',
-  momentumX: 'float32',
-  momentumY: 'float32',
   playersToLeft: 'uint16',
   playersToRight: 'uint16',
   selectedWeapon: PlayerWeaponEnumSchema,

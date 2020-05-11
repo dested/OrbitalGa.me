@@ -20,23 +20,15 @@ export type Size = 'big' | 'med' | 'small' | 'tiny';
 export class MeteorEntity extends PhysicsEntity {
   health: number;
   hit = false;
-  meteorColor: 'brown' | 'grey';
-  meteorType: '1' | '2' | '3' | '4';
-  rotate: number;
-  rotateSpeed: number;
-  size: Size;
-  startingMomentumY: number;
+  meteorColor!: 'brown' | 'grey';
+  meteorType!: '1' | '2' | '3' | '4';
+  rotateSpeed!: number;
+  size!: Size;
   type = 'meteor' as const;
 
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<MeteorModel>>) {
     super(game, messageModel);
-
-    this.meteorColor = messageModel.meteorColor;
-    this.size = messageModel.size;
-    this.meteorType = messageModel.meteorType;
-    this.rotate = messageModel.rotate;
-    this.startingMomentumY = messageModel.momentumY;
-    this.rotateSpeed = messageModel.rotateSpeed;
+    this.reconcileFromServer(messageModel as MeteorModel);
 
     switch (messageModel.size) {
       case 'big':
@@ -123,17 +115,12 @@ export class MeteorEntity extends PhysicsEntity {
   }
 
   gameTick(duration: number) {
-    this.rotate += this.rotateSpeed;
-    this.x += this.momentumX;
-    this.y += this.momentumY;
+    this.angle += this.rotateSpeed;
 
-    if (this.momentumY < this.startingMomentumY) {
-      this.momentumY += 0.1;
-    }
-    if (this.y > GameConstants.screenSize.height * 1.3) {
+    if (this.position.y > GameConstants.screenSize.height * 1.3) {
       this.destroy();
     }
-    if (this.y < -GameConstants.screenSize.height * 1.3) {
+    if (this.position.y < -GameConstants.screenSize.height * 1.3) {
       this.destroy();
     }
   }
@@ -158,10 +145,7 @@ export class MeteorEntity extends PhysicsEntity {
       meteorType: this.meteorType,
       meteorColor: this.meteorColor,
       size: this.size,
-      momentumX: this.momentumX,
-      momentumY: this.momentumY,
       rotateSpeed: this.rotateSpeed,
-      rotate: this.rotate,
       type: 'meteor',
       hit: this.hit,
     };
@@ -169,7 +153,7 @@ export class MeteorEntity extends PhysicsEntity {
 
   updatePolygon() {
     super.updatePolygon();
-    if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.rotate);
+    if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.angle);
   }
 
   private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
@@ -179,19 +163,16 @@ export class MeteorEntity extends PhysicsEntity {
     }
     this.health -= damage;
     this.hit = true;
-    this.momentumX += x;
-    this.momentumY += y;
-    if (!this.game.isClient) {
-      if (this.health <= 0) {
-        if (Utils.random(50)) {
-          const drop = new DropEntity(this.game, {
-            entityId: nextId(),
-            position: this.position.model(),
-            drop: DropEntity.randomDrop(this.size),
-          });
-          this.game.entities.push(drop);
-          this.game.explode(this, 'small');
-        }
+    //todo bounce
+    if (this.health <= 0) {
+      if (Utils.random(50)) {
+        const drop = new DropEntity(this.game, {
+          entityId: nextId(),
+          position: this.position.model(),
+          drop: DropEntity.randomDrop(this.size),
+        });
+        this.game.entities.push(drop);
+        this.game.explode(this, 'small');
       }
     }
   }
@@ -212,20 +193,14 @@ export type MeteorModel = PhysicsEntityModel & {
   hit: boolean;
   meteorColor: 'brown' | 'grey';
   meteorType: '1' | '2' | '3' | '4';
-  momentumX: number;
-  momentumY: number;
-  rotate: number;
   rotateSpeed: number;
   size: 'big' | 'med' | 'small' | 'tiny';
   type: 'meteor';
 };
 export const MeteorModelSchema: EntityModelSchemaType<'meteor'> = {
   ...PhysicsEntityModelSchema,
-  rotate: 'uint8',
   hit: 'boolean',
   rotateSpeed: 'int8',
-  momentumX: 'float32',
-  momentumY: 'float32',
   size: {
     flag: 'enum',
     big: 1,

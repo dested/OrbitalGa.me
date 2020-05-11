@@ -12,6 +12,9 @@ export class Utils {
   static byteDegToRad(deg: number) {
     return deg * (360 / 255) * 0.0174533;
   }
+  static byteDegToDeg(deg: number) {
+    return deg * (360 / 255);
+  }
 
   static checksum(a: Uint8Array): number {
     const len = a.length;

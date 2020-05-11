@@ -15,7 +15,6 @@ import {
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
 export class PlayerShieldEntity extends PhysicsEntity {
-  boundingBoxes = [];
   depleted: boolean;
   health: number;
   lastHit = 0;

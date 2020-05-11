@@ -120,9 +120,7 @@ export class OrbitalServerEngine extends ServerEngine {
             size: 'big',
             meteorType: '4',
             hit: false,
-            rotate: 100,
-            momentumX: 0,
-            momentumY: 20,
+            velocity:{x:0,y:20},
             rotateSpeed: 3,
           });
           this.game.entities.push(meteor);

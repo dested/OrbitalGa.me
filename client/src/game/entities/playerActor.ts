@@ -8,7 +8,7 @@ import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {OrbitalGame} from '@common/game/game';
 import {DropEntity} from '@common/entities/dropEntity';
 
-export class ClientPlayerActor extends ClientActor<PlayerEntity> {
+export class PlayerActor extends ClientActor<PlayerEntity> {
   static _greenPlayer?: HTMLCanvasElement;
   static _whitePlayer?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
@@ -43,7 +43,7 @@ export class ClientPlayerActor extends ClientActor<PlayerEntity> {
       context.save();
       context.globalAlpha = 0.7;
       context.translate(this.entity.position.x, this.entity.position.y);
-      context.drawImage(ClientPlayerActor.greenPlayer(), -ship.size.width / 2, -ship.size.height / 2);
+      context.drawImage(PlayerActor.greenPlayer(), -ship.size.width / 2, -ship.size.height / 2);
       context.restore();
       return;
     }
@@ -56,7 +56,7 @@ export class ClientPlayerActor extends ClientActor<PlayerEntity> {
     if (this.hitTimer > 0) {
       context.save();
       context.globalAlpha = this.hitTimer / 5;
-      context.drawImage(ClientPlayerActor.whitePlayer(), -ship.size.width / 2, -ship.size.height / 2);
+      context.drawImage(PlayerActor.whitePlayer(), -ship.size.width / 2, -ship.size.height / 2);
       context.restore();
       this.hitTimer -= 1;
     }
@@ -125,7 +125,7 @@ export class ClientPlayerActor extends ClientActor<PlayerEntity> {
     const maxWidth = ship.size.width + 20;
 
     for (const badge of this.entity.badges) {
-      const badgeAsset = ClientPlayerActor.getBadgeAsset(badge);
+      const badgeAsset = PlayerActor.getBadgeAsset(badge);
       context.drawImage(badgeAsset.image, curBadgeX + startBadgeX, curBadgeY + startBadgeY, badgeSize, badgeSize);
       curBadgeX += badgeSize + badgePadding;
       if (curBadgeX > maxWidth) {

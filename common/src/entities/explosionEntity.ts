@@ -21,7 +21,6 @@ export class ExplosionEntity extends PhysicsEntity {
     super(game, messageModel);
     this.intensity = messageModel.intensity;
     this.ownerEntityId = messageModel.ownerEntityId;
-    this.createPolygon();
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

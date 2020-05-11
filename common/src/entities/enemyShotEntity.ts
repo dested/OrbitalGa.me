@@ -29,6 +29,7 @@ export class EnemyShotEntity extends PhysicsEntity implements Weapon {
     this.ownerEntityId = messageModel.ownerEntityId;
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.createPolygon();
+    this.velocity.set(0, GameRules.enemyShots.base.shotSpeedPerSecond);
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {}
@@ -43,7 +44,6 @@ export class EnemyShotEntity extends PhysicsEntity implements Weapon {
   }
 
   gameTick(duration: number) {
-    this.y += GameRules.enemyShots.base.shotSpeedPerSecond * (duration / 1000);
     this.aliveDuration -= duration;
     if (this.aliveDuration <= 0) {
       this.destroy();

@@ -15,7 +15,7 @@ export class TwoVector {
    * @param {TwoVector} other the other vector
    * @return {TwoVector} returns self
    */
-  add(other: TwoVector) {
+  add(other: TwoVectorModel) {
     this.x += other.x;
     this.y += other.y;
 

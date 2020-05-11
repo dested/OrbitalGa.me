@@ -21,6 +21,7 @@ export class ScoreEntity extends PhysicsEntity {
     super(game, messageModel);
     this.score = messageModel.score;
     this.onlyVisibleToPlayerEntityId = messageModel.onlyVisibleToPlayerEntityId;
+    this.velocity.set(0, -3);
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

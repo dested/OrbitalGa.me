@@ -2,7 +2,7 @@ import {WallEntity, WallModel} from '@common/entities/wallEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 import {OrbitalGame} from '@common/game/game';
 
-export class ClientWallActor extends ClientActor<WallEntity> {
+export class WallActor extends ClientActor<WallEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Scenery;
 

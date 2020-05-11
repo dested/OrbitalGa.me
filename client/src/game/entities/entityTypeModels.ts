@@ -1,21 +1,21 @@
-import {ClientSpectatorActor} from './clientSpectatorActor';
+import {SpectatorActor} from './spectatorActor';
 import {EntityType, EntityModels} from '@common/models/serverToClientMessages';
-import {ClientExplosionActor} from './clientExplosionActor';
-import {ClientPlayerShieldActor} from './clientPlayerShieldActor';
-import {ClientSwoopingEnemyActor} from './clientSwoopingEnemyActor';
+import {ExplosionActor} from './explosionActor';
+import {PlayerShieldActor} from './playerShieldActor';
+import {SwoopingEnemyActor} from './swoopingEnemyActor';
 import {ClientPlayerWeaponActor} from './clientPlayerWeaponActor';
-import {ClientWallActor} from './clientWallActor';
+import {WallActor} from './wallActor';
 
-import {ClientPlayerActor} from './clientPlayerActor';
-import {ClientEnemyShotActor} from './clientEnemyShotActor';
-import {ClientMeteorActor} from './clientMeteorActor';
-import {ClientLivePlayerActor} from './clientLivePlayerActor';
-import {ClientBossEvent1EnemyActor} from './clientBossEvent1EnemyActor';
-import {ClientScoreActor} from './clientScoreActor';
+import {PlayerActor} from './playerActor';
+import {EnemyShotActor} from './enemyShotActor';
+import {MeteorActor} from './meteorActor';
+import {LivePlayerActor} from './livePlayerActor';
+import {BossEvent1EnemyActor} from './bossEvent1EnemyActor';
+import {ScoreActor} from './scoreActor';
 import {OrbitalGame} from '@common/game/game';
 import {ClientActor} from '@common/baseEntities/clientActor';
-import {ClientDropActor} from './clientDropActor';
-import {ClientBossEvent1Actor} from './clientBossEvent1Actor';
+import {DropActor} from './dropActor';
+import {BossEvent1Actor} from './bossEvent1Actor';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {BossEvent1Entity} from '@common/entities/bossEvent1Entity';
 import {ScoreEntity} from '@common/entities/scoreEntity';
@@ -33,20 +33,20 @@ import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 export const ActorEntityTypes: {
   [key in EntityModels['type']]: new (entity: EntityType[key]['entity']) => ClientActor<EntityType[key]['entity']>;
 } = {
-  player: ClientPlayerActor,
-  enemyShot: ClientEnemyShotActor,
+  player: PlayerActor,
+  enemyShot: EnemyShotActor,
   playerWeapon: ClientPlayerWeaponActor,
-  explosion: ClientExplosionActor,
-  swoopingEnemy: ClientSwoopingEnemyActor,
-  wall: ClientWallActor,
-  spectator: ClientSpectatorActor,
-  playerShield: ClientPlayerShieldActor,
-  meteor: ClientMeteorActor,
-  livePlayer: ClientLivePlayerActor,
-  drop: ClientDropActor,
-  bossEvent1: ClientBossEvent1Actor,
-  bossEvent1Enemy: ClientBossEvent1EnemyActor,
-  score: ClientScoreActor,
+  explosion: ExplosionActor,
+  swoopingEnemy: SwoopingEnemyActor,
+  wall: WallActor,
+  spectator: SpectatorActor,
+  playerShield: PlayerShieldActor,
+  meteor: MeteorActor,
+  livePlayer: LivePlayerActor,
+  drop: DropActor,
+  bossEvent1: BossEvent1Actor,
+  bossEvent1Enemy: BossEvent1EnemyActor,
+  score: ScoreActor,
 };
 
 export const EntityTypes: {

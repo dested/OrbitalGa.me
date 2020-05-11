@@ -1,13 +1,12 @@
 import {PlayerShieldEntity, PlayerShieldModel} from '@common/entities/playerShieldEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
-
 import {Entity} from '@common/baseEntities/entity';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
 import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
-export class ClientPlayerShieldActor extends ClientActor<PlayerShieldEntity> {
+export class PlayerShieldActor extends ClientActor<PlayerShieldEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Effect;
 

@@ -4,16 +4,24 @@ import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {TwoVector, TwoVectorModel, TwoVectorSchema} from '../utils/twoVector';
 import {MathUtils} from '../utils/mathUtils';
+import {Utils} from '../utils/utils';
 
 type PartialOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type ImpliedDefaultPhysics<T extends PhysicsEntityModel> = PartialOptional<
   T,
   'friction' | 'velocity' | 'position' | 'angle'
 >;
-
+type BoundingBox = {
+  height: number;
+  offsetX?: number;
+  offsetY?: number;
+  polygon?: Polygon;
+  width: number;
+};
 export abstract class PhysicsEntity extends Entity {
   angle!: number;
   bendingIncrements = 0;
+  boundingBoxes: BoundingBox[] = [];
   friction!: TwoVector;
   height: number = 0;
   maxSpeed?: number;
@@ -27,7 +35,7 @@ export abstract class PhysicsEntity extends Entity {
 
   constructor(game: Game, messageModel: ImpliedDefaultPhysics<PhysicsEntityModel>) {
     super(game, messageModel);
-    messageModel.angle = messageModel.angle ?? 90;
+    messageModel.angle = messageModel.angle ?? Utils.byteDegToDeg(90);
     messageModel.friction = messageModel.friction ?? new TwoVector(1, 1);
     messageModel.position = messageModel.position ?? new TwoVector(0, 0);
     messageModel.velocity = messageModel.velocity ?? new TwoVector(0, 0);
@@ -142,9 +150,7 @@ export abstract class PhysicsEntity extends Entity {
 
   abstract collide(otherEntity: Entity, collisionResult: Result): boolean;
 
-  createPolygon(): void {
-    const x = this.position.realx;
-    const y = this.position.realy;
+  createPolygon(x = this.position.x, y = this.position.y): void {
     // todo physics this needs to call update polygon and anything that really uses realx needs to update accordingly
     if (this.width !== 0 && this.height !== 0) {
       for (const boundingBox of this.boundingBoxes) {
@@ -185,7 +191,6 @@ export abstract class PhysicsEntity extends Entity {
         boundingBox.polygon = undefined;
       }
     }
-    this.markToDestroy = true;
   }
   inView(view: {height: number; width: number; x: number; y: number}): boolean {
     return (

@@ -2,16 +2,15 @@ import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {ScoreEntity, ScoreModel} from '@common/entities/scoreEntity';
 
-export class ClientScoreActor extends ClientActor<ScoreEntity> {
+export class ScoreActor extends ClientActor<ScoreEntity> {
   clientDestroyedTick?: number = undefined;
-  updateY: number = 0;
   zIndex = DrawZIndex.Scenery;
 
   get drawX() {
     return this.entity.position.x;
   }
   get drawY() {
-    return this.entity.position.y - this.updateY;
+    return this.entity.position.y;
   }
 
   draw(context: CanvasRenderingContext2D): void {
@@ -22,9 +21,5 @@ export class ClientScoreActor extends ClientActor<ScoreEntity> {
     context.fillStyle = '#49d7b8';
     context.fillText(this.entity.score.toString(), this.drawX, this.drawY);
     context.restore();
-  }
-
-  tick() {
-    this.updateY += 2;
   }
 }

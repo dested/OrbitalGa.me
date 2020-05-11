@@ -5,7 +5,7 @@ import {CanvasUtils} from '../../utils/canvasUtils';
 import {OrbitalGame} from '@common/game/game';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
-export class ClientDropActor extends ClientActor<DropEntity> {
+export class DropActor extends ClientActor<DropEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Scenery;
 

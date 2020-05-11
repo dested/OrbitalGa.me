@@ -6,7 +6,7 @@ import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {AssetKeys} from '../../assets';
 
-export class ClientMeteorActor extends ClientActor<MeteorEntity> {
+export class MeteorActor extends ClientActor<MeteorEntity> {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
   clientDestroyedTick?: number = undefined;
   hitTimer = 0;
@@ -34,7 +34,7 @@ export class ClientMeteorActor extends ClientActor<MeteorEntity> {
     if (this.hitTimer > 0) {
       context.save();
       context.globalAlpha = this.hitTimer / 5;
-      context.drawImage(ClientMeteorActor.whiteMeteor(asset), -meteor.size.width / 2, -meteor.size.height / 2);
+      context.drawImage(MeteorActor.whiteMeteor(asset), -meteor.size.width / 2, -meteor.size.height / 2);
       context.restore();
       this.hitTimer -= 1;
     }

@@ -7,8 +7,10 @@ export abstract class ClientActor<TEntity extends Entity> {
   destroyClient(): void {
     this.clientDestroyedTick = this.entity.game.stepCount;
   }
+
   abstract draw(context: CanvasRenderingContext2D): void;
-  abstract staticDraw(context: CanvasRenderingContext2D): void;
+  staticDraw(context: CanvasRenderingContext2D): void {}
+  tick(duration: number): void {}
 }
 
 export enum DrawZIndex {

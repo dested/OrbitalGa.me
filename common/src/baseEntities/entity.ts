@@ -1,21 +1,11 @@
-import {Polygon} from 'collisions';
 import {Game} from '../game/game';
 import {EntityModels} from '../models/serverToClientMessages';
 import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 import {ClientActor} from './clientActor';
 
-type BoundingBox = {
-  height: number;
-  offsetX?: number;
-  offsetY?: number;
-  polygon?: Polygon;
-  width: number;
-};
-
 export abstract class Entity {
   actor?: ClientActor<this>;
 
-  boundingBoxes: BoundingBox[] = [];
   entityId: number;
   inputId: number;
   markToDestroy: boolean = false;
@@ -29,12 +19,6 @@ export abstract class Entity {
   }
 
   destroy() {
-    for (const boundingBox of this.boundingBoxes) {
-      if (boundingBox.polygon) {
-        this.game.collisionEngine.remove(boundingBox.polygon);
-        boundingBox.polygon = undefined;
-      }
-    }
     this.markToDestroy = true;
   }
 

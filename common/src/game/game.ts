@@ -9,8 +9,8 @@ import {PhysicsEntity} from '../baseEntities/physicsEntity';
 import {SpectatorEntity} from '../entities/spectatorEntity';
 import {CTOSPlayerInput} from '../models/clientToServerMessages';
 import {TwoVector} from '../utils/twoVector';
-import {EntityModels, WorldModelCastToEntityModel} from '../models/serverToClientMessages';
-import {EntityTypes} from '../../../client/src/game/entities/clientEntityTypeModels';
+import {EntityModels} from '../models/serverToClientMessages';
+import {EntityTypes} from '../../../client/src/game/entities/entityTypeModels';
 const dx = new TwoVector(0, 0);
 
 export abstract class Game {
