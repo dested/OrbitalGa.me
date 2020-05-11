@@ -16,7 +16,8 @@ export abstract class SyncStrategy {
     onEveryStep: {MAX_LAG: number; MAX_LEAD: number};
     onServerSync: {MAX_LAG: number; MAX_LEAD: number};
   };
-  constructor(protected clientEngine: ClientEngine, public options: {}) {
+
+  constructor(protected clientEngine: ClientEngine) {
     this.clientEngine = clientEngine;
     this.gameEngine = clientEngine.game;
     /*

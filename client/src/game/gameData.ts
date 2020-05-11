@@ -4,12 +4,14 @@ import {ClientGameUI} from './clientGameUI';
 import {ClientSocket} from '../socket/clientSocket';
 import {LocalClientSocket} from '../serverMocking/localClientSocket';
 import {LocalServerSocket} from '../serverMocking/localServerSocket';
-import {BotClientGame} from './botClientGame';
 import {STOCError} from '@common/models/serverToClientMessages';
 import {ServerStatSync} from '../../../server/src/game/IServerSync';
 import {uiStore} from '../store/uiStore';
 import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
-import {ClientGameOptions} from './clientEngine';
+import {ClientEngine, ClientGameOptions} from './clientEngine';
+import {OrbitalServerEngine} from '../../../server/src/game/orbitalServerEngine';
+import {OrbitalGame} from '@common/game/game';
+import {BotClientEngine} from './botClientEngine';
 
 export class GameData {
   static client?: ClientGameUI;
@@ -26,13 +28,13 @@ export class GameData {
   }
 
   static joinGame(serverPath: string, options: ClientGameOptions) {
-    this.client?.disconnect();
+    this.client?.clientEngine.disconnect();
     this.serverPath = serverPath;
     this.client = new ClientGameUI(this.serverPath, options, this.getClientSocket());
   }
 
   static setOptions(options: ClientGameOptions) {
-    this.client?.setOptions(options);
+    this.client?.clientEngine.setOptions(options);
   }
 
   static spectateGame(serverPath: string) {
@@ -40,12 +42,12 @@ export class GameData {
     this.client = new ClientGameUI(
       this.serverPath,
       {
-        onError: (client: ClientGame, error: STOCError) => {},
+        onError: (client: ClientEngine, error: STOCError) => {},
         onDied: () => {},
         onUIUpdate: () => {},
         onReady: () => {},
         onOpen: () => {
-          this.client!.spectateGame();
+          this.client!.clientEngine.spectateGame();
         },
         onDisconnect: () => {},
       },
@@ -66,18 +68,22 @@ export class GameData {
 
     if (GameConstants.isSinglePlayer) {
       const serverSocket = new LocalServerSocket();
-      const serverGame = new ServerGame(serverSocket, {
-        async setStat(serverStat: ServerStatSync): Promise<void> {},
-        async startServer(): Promise<void> {},
-        async syncLeaderboard(): Promise<void> {},
-        setLeaderboardEntry(activePlayerScore: LeaderboardEntry & LeaderboardEntryUserDetails): void {},
-      });
+      const serverGame = new OrbitalServerEngine(
+        serverSocket,
+        {
+          async setStat(serverStat: ServerStatSync): Promise<void> {},
+          async startServer(): Promise<void> {},
+          async syncLeaderboard(): Promise<void> {},
+          setLeaderboardEntry(activePlayerScore: LeaderboardEntry & LeaderboardEntryUserDetails): void {},
+        },
+        new OrbitalGame(true)
+      );
       serverGame.init();
       for (let i = 0; i < GameConstants.numberOfSinglePlayerBots; i++) {
-        new BotClientGame(
+        new BotClientEngine(
           '1',
           {
-            onError: (client: ClientGame, error: STOCError) => {},
+            onError: () => {},
             onDied: (client) => {
               client.joinGame();
             },
@@ -88,7 +94,8 @@ export class GameData {
             },
             onDisconnect: () => {},
           },
-          this.getClientSocket()
+          this.getClientSocket(),
+          new OrbitalGame(false)
         );
       }
     }

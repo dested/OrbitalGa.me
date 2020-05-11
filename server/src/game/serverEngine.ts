@@ -453,10 +453,10 @@ export abstract class ServerEngine {
 
       this.sendMessageToClient(user.connectionId, {
         totalPlayers,
+        stepCount: this.game.stepCount,
         type: 'worldState',
         entities: myEntities.map((a) => a.serializedEntity),
       });
     }
   }
 }
-

@@ -19,16 +19,16 @@ const styles = {
 
 export const Leaderboard = (props: {tick: number}) => {
   const client = GameData.client;
-  const liveEntity = client?.liveEntity;
+  const playerEntityId = client?.clientEngine.playerEntityId;
 
-  return (client?.leaderboardScores.length ?? 0) > 0 ? (
+  return (client?.clientEngine.leaderboardScores.length ?? 0) > 0 ? (
     <ul style={styles.wrapper}>
       <li style={{fontWeight: 'bold', fontSize: '1.3em', marginBottom: '1em'}}>Leaderboard</li>
-      {client?.leaderboardScores.map((score) => (
+      {client?.clientEngine.leaderboardScores.map((score) => (
         <li
           key={score.userId}
           style={{
-            fontWeight: score.userId === liveEntity?.entityId ? 'bold' : 'initial',
+            fontWeight: score.userId === playerEntityId ? 'bold' : 'initial',
           }}
         >
           {score.rank}: {score.username} - {score.calculatedScore} {/*JSON.stringify(score, null, 2)*/}

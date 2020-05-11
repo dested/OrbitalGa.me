@@ -64,7 +64,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
     switch (this.weaponType) {
       case 'rocket': {
         const fire =
-          this.game.drawTick % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
+          this.game.stepCount % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }
@@ -74,7 +74,7 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
         break;
       case 'torpedo': {
         const fire =
-          this.game.drawTick % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
+          this.game.stepCount % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }

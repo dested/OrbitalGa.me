@@ -5,7 +5,7 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
 
-export class SpectatorEntity extends PhysicsEntity{
+export class SpectatorEntity extends PhysicsEntity {
   type = 'spectator' as const;
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<SpectatorModel>) {
     super(game, messageModel);

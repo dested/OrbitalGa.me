@@ -15,6 +15,7 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDArray, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {CTOSPlayerInput} from '../models/clientToServerMessages';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -60,9 +61,6 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   staticPlayersToRight?: number;
   type = 'player' as const;
   weaponSide = 'player' as const;
-  xInputsThisTick: boolean = false;
-  yInputsThisTick: boolean = false;
-  protected lastPlayerInput?: PlayerInputKeys;
   private shieldEntityId?: number;
 
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
@@ -145,14 +143,11 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
     }
   }
 
-  applyInput(input: PlayerInput, inputSequenceNumber: number) {
-    this.lastPlayerInput = input;
-    this.xInputsThisTick = false;
-    this.yInputsThisTick = false;
+  applyInput(input: CTOSPlayerInput) {
     if (input.weapon !== 'unset') {
       this.selectedWeapon = input.weapon;
     }
-    if (input.shoot) {
+    if (input.keys.shoot) {
       if (!this.game.isClient) {
         if (this.shootTimer <= 0) {
           const availableWeapon = this.availableWeapons.find((w) => w.weapon === this.selectedWeapon);
@@ -234,29 +229,25 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
     }
 
     const ramp = GameRules.player.base.speedRamp;
-    if (input.left) {
-      this.xInputsThisTick = true;
+    if (input.keys.left) {
       this.momentumX -= ramp;
       if (this.momentumX < -GameRules.player.base.maxSideSpeed) {
         this.momentumX = -GameRules.player.base.maxSideSpeed;
       }
     }
-    if (input.right) {
-      this.xInputsThisTick = true;
+    if (input.keys.right) {
       this.momentumX += ramp;
       if (this.momentumX > GameRules.player.base.maxSideSpeed) {
         this.momentumX = GameRules.player.base.maxSideSpeed;
       }
     }
-    if (input.up) {
-      this.yInputsThisTick = true;
+    if (input.keys.up) {
       this.momentumY -= ramp;
       if (this.momentumY < -GameRules.player.base.maxForwardSpeed) {
         this.momentumY = -GameRules.player.base.maxForwardSpeed;
       }
     }
-    if (input.down) {
-      this.yInputsThisTick = true;
+    if (input.keys.down) {
       this.momentumY += ramp;
       if (this.momentumY > GameRules.player.base.maxReverseSpeed) {
         this.momentumY = GameRules.player.base.maxReverseSpeed;

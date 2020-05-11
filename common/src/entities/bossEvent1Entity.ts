@@ -167,8 +167,6 @@ export class BossEvent1Entity extends PhysicsEntity {
               xOffset: item.offsetX + x,
               yOffset: item.offsetY,
               rotate: item.rotate,
-              x: 0,
-              y: 0,
             })
           );
         }
@@ -178,11 +176,11 @@ export class BossEvent1Entity extends PhysicsEntity {
   }
 
   get realX() {
-    return this.x;
+    return this.position.x;
   }
 
   get realY() {
-    return this.y;
+    return this.position.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

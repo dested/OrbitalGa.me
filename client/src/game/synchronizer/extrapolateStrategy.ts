@@ -4,6 +4,7 @@ import {assertType, Utils} from '@common/utils/utils';
 import {Entity} from '@common/baseEntities/entity';
 import {ClientEntity} from '../entities/clientEntity';
 import {PhysicsEntity, PhysicsEntityModel} from '@common/baseEntities/physicsEntity';
+import {CTOSPlayerInput} from '@common/models/clientToServerMessages';
 
 const defaults = {
   syncsBufferLength: 5,
@@ -15,25 +16,19 @@ const defaults = {
   bendingIncrements: 10, // the bending should be applied increments (how many steps for entire bend)
 };
 
-export type PlayerKeyInput = {
-  input: string;
-  messageIndex: number;
-  movement: boolean;
-  step: number;
-};
-
 export class ExtrapolateStrategy extends SyncStrategy {
+  options: typeof defaults;
   STEP_DRIFT_THRESHOLDS = {
     onServerSync: {MAX_LEAD: 2, MAX_LAG: 3}, // max step lead/lag allowed after every server sync
     onEveryStep: {MAX_LEAD: 7, MAX_LAG: 4}, // max step lead/lag allowed at every step
     clientReset: 40, // if we are behind this many steps, just reset the step counter
   };
-  private recentInputs: {[stepNumber: number]: PlayerKeyInput[]};
-  constructor(clientEngine: ClientEngine, public options: typeof defaults) {
-    super(clientEngine, {...defaults, ...options});
+  private recentInputs: {[stepNumber: number]: CTOSPlayerInput[]};
+  constructor(clientEngine: ClientEngine, options?: typeof defaults) {
+    super(clientEngine);
+    this.options = {...defaults, ...options};
 
     this.recentInputs = {};
-    this.gameEngine.on('client__processInput', this.clientInputSave.bind(this));
   }
 
   // apply a new sync
@@ -117,7 +112,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
       if (this.recentInputs[game.stepCount]) {
         for (const inputDesc of this.recentInputs[game.stepCount]) {
           if (!inputDesc.movement) continue;
-          console.trace(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]: ${inputDesc.input}`);
+          console.trace(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]`);
           this.gameEngine.processInput(inputDesc, this.gameEngine.clientPlayerId!);
         }
       }
@@ -153,7 +148,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
   }
 
   // keep a buffer of inputs so that we can replay them on extrapolation
-  clientInputSave(inputEvent: PlayerKeyInput) {
+  clientInputSave(inputEvent: CTOSPlayerInput) {
     // if no inputs have been stored for this step, create an array
     if (!this.recentInputs[inputEvent.step]) {
       this.recentInputs[inputEvent.step] = [];

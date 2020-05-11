@@ -57,17 +57,6 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     }
   }
 
-  processInput(duration: number) {
-    const weaponChanged = this.keys.weapon !== 'unset';
-    this.xInputsThisTick = false;
-    this.yInputsThisTick = false;
-    this.applyInput(this.keys, this.inputSequenceNumber);
-    if (this.keys.shoot || this.keys.left || this.keys.right || this.keys.up || this.keys.down || weaponChanged) {
-      this.clientGame.sendInput(this.keys, this.inputSequenceNumber);
-    }
-    this.keys.weapon = 'unset';
-  }
-
   reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {
     assertType<LivePlayerModel>(messageModel);
     const wasHit = this.hit;
@@ -80,10 +69,6 @@ export class ClientLivePlayerEntity extends ClientPlayerEntity implements Client
     if (this.dead) {
       this.clientGame.died();
     }
-  }
-
-  setKey<Key extends keyof KeyInput>(input: Key, value: KeyInput[Key]) {
-    this.keys[input] = value;
   }
 
   staticDraw(context: CanvasRenderingContext2D) {

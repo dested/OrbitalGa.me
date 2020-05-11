@@ -9,8 +9,19 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
 import {Utils} from '@common/utils/utils';
 import {ServerEngine} from './serverEngine';
+import {Game, OrbitalGame} from '@common/game/game';
+import {IServerSync} from './IServerSync';
+import {IServerSocket} from '@common/socket/models';
+import {TwoVector} from '@common/utils/twoVector';
 
 export class OrbitalServerEngine extends ServerEngine {
+  game: OrbitalGame;
+
+  constructor(serverSocket: IServerSocket, serverSync: IServerSync, game: OrbitalGame) {
+    super(serverSocket, serverSync, game);
+    this.game = game;
+  }
+
   gameTick(tickIndex: number, duration: number): void {
     this.processGameRules(tickIndex);
 
@@ -25,7 +36,7 @@ export class OrbitalServerEngine extends ServerEngine {
   }
 
   initGame(): void {
-    this.game.entities.push(new SpectatorEntity(this.game, {entityId: nextId(), x: 0, y: 0}));
+    this.game.entities.push(new SpectatorEntity(this.game, {entityId: nextId()}));
     this.updateSpectatorPosition();
   }
 
@@ -38,8 +49,7 @@ export class OrbitalServerEngine extends ServerEngine {
       entityId: nextId(),
       playerColor: PlayerEntity.randomEnemyColor(),
       health: GameRules.player.base.startingHealth,
-      x: startingPos,
-      y: GameConstants.playerStartingY,
+      position: new TwoVector(startingPos, GameConstants.playerStartingY),
       playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
       hit: false,
       badges: [],
@@ -54,8 +64,6 @@ export class OrbitalServerEngine extends ServerEngine {
       shieldStrength: 'small',
       health: GameRules.playerShield.small.maxHealth,
       depleted: false,
-      x: 0,
-      y: 0,
     });
     this.game.entities.push(playerShieldEntity);
     playerEntity.setShieldEntity(playerShieldEntity.entityId);
@@ -79,8 +87,10 @@ export class OrbitalServerEngine extends ServerEngine {
           for (let i = enemies; i < players; i++) {
             const swoopingEnemyEntity = new SwoopingEnemyEntity(this.game, {
               entityId: nextId(),
-              x: this.game.entityClusterer.getNewEnemyXPositionInGroup(grouping),
-              y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+              position: new TwoVector(
+                this.game.entityClusterer.getNewEnemyXPositionInGroup(grouping),
+                -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+              ),
               enemyColor: SwoopingEnemyEntity.randomEnemyColor(),
               health: GameRules.enemies.swoopingEnemy.startingHealth,
               hit: false,
@@ -102,8 +112,7 @@ export class OrbitalServerEngine extends ServerEngine {
         for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
           const meteor = new MeteorEntity(this.game, {
             entityId: nextId(),
-            x: i,
-            y: GameConstants.screenSize.height * 0.55,
+            position: new TwoVector(i, GameConstants.screenSize.height * 0.55),
             meteorColor: 'brown',
             size: 'big',
             meteorType: '4',
@@ -121,8 +130,10 @@ export class OrbitalServerEngine extends ServerEngine {
             const {meteorColor, type, size} = MeteorEntity.randomMeteor();
             const meteor = new MeteorEntity(this.game, {
               entityId: nextId(),
-              x: Utils.randomInRange(grouping.x0, grouping.x1),
-              y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+              position: new TwoVector(
+                Utils.randomInRange(grouping.x0, grouping.x1),
+                -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
+              ),
               meteorColor,
               size,
               meteorType: type,
@@ -142,11 +153,10 @@ export class OrbitalServerEngine extends ServerEngine {
 
   private updateSpectatorPosition() {
     const range = this.game.getPlayerRange(0, (e) => e.y > 30);
-    const spectator = this.game.entities.array.find((a) => a instanceof SpectatorEntity);
+    const spectator = this.game.spectatorEntity;
     if (!spectator) {
       return;
     }
-    spectator.x = range.x0 + Math.random() * (range.x1 - range.x0);
-    spectator.y = 0;
+    spectator.position.set(range.x0 + Math.random() * (range.x1 - range.x0), 0);
   }
 }

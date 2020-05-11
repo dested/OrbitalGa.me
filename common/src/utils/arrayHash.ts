@@ -1,3 +1,4 @@
+// todo add multiple ways to lookup
 export class ArrayHash<T> {
   array: T[] = [];
   hash: {[key: number]: T} = {};

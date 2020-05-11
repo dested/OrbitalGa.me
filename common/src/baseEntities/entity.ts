@@ -4,6 +4,7 @@ import {EntityModels} from '../models/serverToClientMessages';
 import {GameConstants} from '../game/gameConstants';
 import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 import {PhysicsEntityModel} from './physicsEntity';
+import {GameView} from '../../../client/src/game/gameView';
 
 type BoundingBox = {
   height: number;
@@ -23,7 +24,6 @@ export abstract class Entity {
 
   shadowEntity: boolean = false;
   abstract type: EntityModels['type'];
-
   constructor(protected game: Game, messageModel: EntityModel) {
     this.entityId = messageModel.entityId;
     this.inputId = messageModel.inputId;
@@ -41,7 +41,7 @@ export abstract class Entity {
 
   abstract gameTick(duration: number): void;
 
-  isVisibleAtCoordinate(viewX: number, viewY: number, viewWidth: number, viewHeight: number) {
+  inView(view: {height: number; width: number; x: number; y: number}): boolean {
     return true;
   }
 

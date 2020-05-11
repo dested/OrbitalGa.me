@@ -4,11 +4,10 @@ import {ArrayHash} from '../utils/arrayHash';
 import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
-import {GameLeaderboard} from './gameLeaderboard';
 import {PlayerEntity} from '../entities/playerEntity';
-import {assertType} from '../utils/utils';
 import {PhysicsEntity} from '../baseEntities/physicsEntity';
-import {PlayerKeyInput} from '../../../client/src/game/synchronizer/extrapolateStrategy';
+import {SpectatorEntity} from '../entities/spectatorEntity';
+import {CTOSPlayerInput} from '../models/clientToServerMessages';
 
 export abstract class Game {
   clientPlayerId?: number;
@@ -25,6 +24,18 @@ export abstract class Game {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
     this.entityClusterer = new EntityClusterer(this.entities, 3);
+    // this.timer = new Timer(); todo timer
+    // this.timer.play();
+  }
+
+  get clientPlayer(): PlayerEntity | undefined {
+    if (this.clientPlayerId) {
+      return this.entities.lookup<PlayerEntity>(this.clientPlayerId);
+    }
+    return undefined;
+  }
+  get spectatorEntity(): SpectatorEntity | undefined {
+    return this.entities.filter((a) => a.type === 'spectator')[0] as SpectatorEntity | undefined;
   }
 
   addObjectToWorld(curObj: Entity) {
@@ -45,11 +56,47 @@ export abstract class Game {
     return {x0: range.x0 - padding, x1: range.x1 + padding};
   }
 
+  physicsStep(isReenact: boolean, dt?: number) {
+    for (const entity of this.entities.array) {
+      // skip physics for shadow objects during re-enactment
+      if (isReenact && entity.shadowEntity) {
+        continue;
+      }
+      if (entity instanceof PhysicsEntity) {
+        //physics
+        entity.updatePolygon();
+      }
+    }
+
+    this.checkCollisions();
+  }
+
   abstract postTick(tickIndex: number, duration: number): void;
 
-  processInput(inputDesc: PlayerKeyInput, playerId: number) {}
+  processInput(inputDesc: CTOSPlayerInput, playerId: number) {
+    this.entities.lookup<PlayerEntity>(playerId)?.applyInput(inputDesc);
+  }
 
-  abstract step(reenact: boolean, tickIndex: number, duration: number): void;
+  staticDraw(context: CanvasRenderingContext2D) {}
+
+  step(isReenact: boolean, t?: number, dt?: number, physicsOnly?: boolean): void {
+    if (physicsOnly) {
+      if (dt) dt /= 1000; // physics engines work in seconds
+      this.physicsStep(isReenact, dt);
+      return;
+    }
+
+    const step = ++this.stepCount;
+
+    if (dt) dt /= 1000; // physics engines work in seconds
+    this.physicsStep(isReenact, dt);
+
+    /*
+    if (!isReenact) {
+      this.timer.tick();
+    }
+*/
+  }
 
   protected checkCollisions() {
     this.collisionEngine.update();
@@ -92,11 +139,10 @@ export class OrbitalGame extends Game {
   }
 
   killPlayer(player: PlayerEntity): void {
-    // todo emit this.gameLeaderboard!.removePlayer(player.entityId);
-    for (const user of this.users.array) {
-      if (user.entity === player) {
+    // todo leaderboard this.gameLeaderboard!.removePlayer(player.entityId);
+    for (const user of this.entities.array) {
+      if (user === player) {
         user.deadXY = {x: player.realX, y: player.realY};
-        user.entity = undefined;
         break;
       }
     }
@@ -116,15 +162,10 @@ export class OrbitalGame extends Game {
     }
   }
 
-  step(replay: boolean, tickIndex: number, duration: number): void {
+  step(replay: boolean, t: number, dt: number): void {
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
-      entity.gameTick(duration);
-      if (entity instanceof PhysicsEntity) {
-        entity.updatePolygon();
-      }
+      entity.gameTick(dt);
     }
-
-    this.checkCollisions();
   }
 }

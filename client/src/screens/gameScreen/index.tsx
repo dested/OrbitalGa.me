@@ -10,7 +10,6 @@ import {EventData, JoystickManager, JoystickOutputData} from 'nipplejs';
 import {GameData} from '../../game/gameData';
 import {Weapons} from '../../components/weapons';
 import {JoinButton, LoginBox, Logo, Wrapper} from '../loginScreen/index.styles';
-import {ClientGame} from '../../game/clientGame';
 import {Leaderboard} from '../../components/leaderboard';
 import {STOCError} from '@common/models/serverToClientMessages';
 
@@ -78,7 +77,7 @@ export const GameScreen: React.FC = observer((props) => {
 
   useEffect(() => {
     GameData.setOptions({
-      onError: (client: ClientGame, error: STOCError) => {},
+      onError: (client, error) => {},
       onDied: () => {
         setDied(true);
       },
@@ -98,7 +97,7 @@ export const GameScreen: React.FC = observer((props) => {
 
   const connect = useCallback(() => {
     GameData.joinGame(uiStore.serverPath!, {
-      onError: (client: ClientGame, error: STOCError) => {},
+      onError: () => {},
       onDied: () => {
         setDied(true);
       },
@@ -124,33 +123,33 @@ export const GameScreen: React.FC = observer((props) => {
 
   const managerListenerMove = useCallback((manager: JoystickManager) => {
     const onMove = (evt: EventData, stick: JoystickOutputData) => {
-      GameData.client?.liveEntity?.setKey('left', false);
-      GameData.client?.liveEntity?.setKey('down', false);
-      GameData.client?.liveEntity?.setKey('right', false);
-      GameData.client?.liveEntity?.setKey('up', false);
+      GameData.client?.clientEngine.setKey('left', false);
+      GameData.client?.clientEngine.setKey('down', false);
+      GameData.client?.clientEngine.setKey('right', false);
+      GameData.client?.clientEngine.setKey('up', false);
       switch (true) {
         case stick.vector.x < -0.3:
-          GameData.client?.liveEntity?.setKey('left', true);
+          GameData.client?.clientEngine.setKey('left', true);
           break;
         case stick.vector.x > 0.3:
-          GameData.client?.liveEntity?.setKey('right', true);
+          GameData.client?.clientEngine.setKey('right', true);
           break;
       }
       switch (true) {
         case stick.vector.y > 0.3:
-          GameData.client?.liveEntity?.setKey('up', true);
+          GameData.client?.clientEngine.setKey('up', true);
           break;
         case stick.vector.y < -0.3:
-          GameData.client?.liveEntity?.setKey('down', true);
+          GameData.client?.clientEngine.setKey('down', true);
           break;
       }
     };
 
     const onEnd = () => {
-      GameData.client?.liveEntity?.setKey('left', false);
-      GameData.client?.liveEntity?.setKey('down', false);
-      GameData.client?.liveEntity?.setKey('right', false);
-      GameData.client?.liveEntity?.setKey('up', false);
+      GameData.client?.clientEngine.setKey('left', false);
+      GameData.client?.clientEngine.setKey('down', false);
+      GameData.client?.clientEngine.setKey('right', false);
+      GameData.client?.clientEngine.setKey('up', false);
     };
 
     manager.on('move', onMove);
@@ -163,11 +162,11 @@ export const GameScreen: React.FC = observer((props) => {
 
   const managerListenerShoot = useCallback((manager: any) => {
     const onMove = (e: any, stick: any) => {
-      GameData.client?.liveEntity?.setKey('shoot', true);
+      GameData.client?.clientEngine.setKey('shoot', true);
     };
 
     const onEnd = () => {
-      GameData.client?.liveEntity?.setKey('shoot', false);
+      GameData.client?.clientEngine.setKey('shoot', false);
     };
 
     manager.on('move', onMove);
@@ -200,34 +199,34 @@ export const GameScreen: React.FC = observer((props) => {
           <LoginBox>
             <Logo>You Died</Logo>
             <div style={{marginLeft: '1rem', marginRight: '1rem', marginBottom: '0.5rem'}}>
-              <div style={styles.score}>Rank: {GameData.client?.myScore?.rank}</div>
+              <div style={styles.score}>Rank: {GameData.client?.clientEngine.myScore?.rank}</div>
               <div style={styles.scoreItem}>
                 <span>Score</span>
-                <span>{GameData.client?.myScore?.calculatedScore}</span>
+                <span>{GameData.client?.clientEngine.myScore?.calculatedScore}</span>
               </div>
               <div style={styles.scoreItem}>
                 <span>Alive Time</span>
-                <span>{Math.round((GameData.client?.myScore?.aliveTime ?? 0) / 1000)} seconds</span>
+                <span>{Math.round((GameData.client?.clientEngine.myScore?.aliveTime ?? 0) / 1000)} seconds</span>
               </div>
               <div style={styles.scoreItem}>
                 <span>Damage Given</span>
-                <span>{GameData.client?.myScore?.damageGiven}</span>
+                <span>{GameData.client?.clientEngine.myScore?.damageGiven}</span>
               </div>
               <div style={styles.scoreItem}>
                 <span>Damage Taken</span>
-                <span>{GameData.client?.myScore?.damageTaken}</span>
+                <span>{GameData.client?.clientEngine.myScore?.damageTaken}</span>
               </div>
               <div style={styles.scoreItem}>
                 <span>Enemies Killed</span>
-                <span>{GameData.client?.myScore?.enemiesKilled}</span>
+                <span>{GameData.client?.clientEngine.myScore?.enemiesKilled}</span>
               </div>
               <div style={styles.scoreItem}>
                 <span>Events Participated In</span>
-                <span>{GameData.client?.myScore?.eventsParticipatedIn}</span>
+                <span>{GameData.client?.clientEngine.myScore?.eventsParticipatedIn}</span>
               </div>
               <div style={styles.scoreItem}>
                 <span>Shots Fired</span>
-                <span>{GameData.client?.myScore?.shotsFired}</span>
+                <span>{GameData.client?.clientEngine.myScore?.shotsFired}</span>
               </div>
             </div>
             <JoinButton onClick={revive}>Revive</JoinButton>

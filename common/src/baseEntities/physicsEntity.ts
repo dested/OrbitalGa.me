@@ -8,13 +8,11 @@ import {MathUtils} from '../utils/mathUtils';
 export abstract class PhysicsEntity extends Entity {
   angle: number = 90;
   bendingIncrements = 0;
-  friction: TwoVector;
+  friction: TwoVector = new TwoVector(1, 1);
   height: number = 0;
-
-  position!: TwoVector;
-
+  position: TwoVector = new TwoVector(0, 0);
   savedCopy?: PhysicsEntityModel;
-  velocity!: TwoVector;
+  velocity: TwoVector = new TwoVector(0, 0);
   width: number = 0;
   private bendingAngleDelta?: number;
 
@@ -23,7 +21,6 @@ export abstract class PhysicsEntity extends Entity {
 
   constructor(protected game: Game, messageModel: PhysicsEntityModel) {
     super(game, messageModel);
-    this.friction = new TwoVector(1, 1);
     this.reconcileFromServer(messageModel);
   }
 
@@ -181,6 +178,14 @@ export abstract class PhysicsEntity extends Entity {
       }
     }
     this.markToDestroy = true;
+  }
+  inView(view: {height: number; width: number; x: number; y: number}): boolean {
+    return (
+      view.x < this.position.x &&
+      view.x + view.width > this.position.x &&
+      view.y < this.position.y &&
+      view.y + view.height > this.position.y
+    );
   }
 
   isVisibleAtCoordinate(viewX: number, viewY: number, viewWidth: number, viewHeight: number) {

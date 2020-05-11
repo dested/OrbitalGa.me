@@ -7,9 +7,12 @@ import {SchemaDefiner} from '../schemaDefiner/schemaDefiner';
 type CTOSJoin = {type: 'join'};
 type CTOSSpectate = {type: 'spectate'};
 type CTOSPing = {ping: number; type: 'ping'};
-type CTOSPlayerInput = {
-  inputSequenceNumber: number;
+
+export type CTOSPlayerInput = {
   keys: PlayerInputKeys;
+  messageIndex: number;
+  movement: boolean;
+  step: number;
   type: 'playerInput';
   weapon: PlayerWeapon | 'unset';
 };
@@ -23,7 +26,9 @@ const CTOSJoinSchema: SDTypeLookup<ClientToServerMessage, 'join'> = {};
 const CTOSSpectateSchema: SDTypeLookup<ClientToServerMessage, 'spectate'> = {};
 
 export const CTOSPlayerInputSchema: SDTypeLookup<ClientToServerMessage, 'playerInput'> = {
-  inputSequenceNumber: 'uint32',
+  messageIndex: 'uint32',
+  movement: 'boolean',
+  step: 'uint32',
   keys: PlayerInputKeyBitmask,
   weapon: {...PlayerWeaponEnumSchema, unset: 0},
 };

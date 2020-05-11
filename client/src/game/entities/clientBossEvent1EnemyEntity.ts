@@ -44,7 +44,7 @@ export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implement
   draw(context: CanvasRenderingContext2D): void {
     const piece = this.piece;
     context.save();
-    context.translate(Math.cos(this.clientGame.drawTick / 20) * 5, Math.sin(this.clientGame.drawTick / 10) * 5);
+    context.translate(Math.cos(this.clientGame.stepCount / 20) * 5, Math.sin(this.clientGame.stepCount / 10) * 5);
     context.save();
     context.translate(this.drawX, this.drawY);
     context.rotate(Utils.degToRad(this.rotate));

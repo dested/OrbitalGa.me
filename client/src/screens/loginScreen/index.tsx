@@ -65,7 +65,7 @@ export const LoginScreen: React.FC = observer((props) => {
     }
     setConnectingStatus('connecting');
     GameData.joinGame(uiStore.serverPath!, {
-      onError: (client: ClientGame, errorMessage: STOCError) => {
+      onError: (client, errorMessage) => {
         switch (errorMessage.reason) {
           case 'nameInUse':
             setError('This username is already taken');

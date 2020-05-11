@@ -43,23 +43,26 @@ const styles = {
 
 export const Weapons = (props: {tick: number}) => {
   const client = GameData.client;
-  const liveEntity = client?.liveEntity;
+  const liveEntity = client?.clientEngine.playerEntityId;
 
-  const selectWeapon = useCallback((weapon: PlayerWeapon) => {
-    return () => {
-      const player = GameData.client?.liveEntity;
-      if (!player) {
-        return;
-      }
-      player.setKey('weapon', weapon);
-    };
-  }, []);
+  const selectWeapon = useCallback(
+    (weapon: PlayerWeapon) => {
+      return () => {
+        if (!liveEntity) {
+          return;
+        }
+        // client?.clientEngine.setKey('weapon', weapon);//todo weapon
+      };
+    },
+    [liveEntity]
+  );
 
   if (!liveEntity) {
     return <></>;
   }
   return (
     <div style={styles.wrapper}>
+      {/*
       {liveEntity.availableWeapons.map((weapon) => (
         <div key={weapon.weapon} style={styles.weaponBody}>
           <span style={styles.ammo}>
@@ -79,6 +82,7 @@ export const Weapons = (props: {tick: number}) => {
           </SelectWeaponBox>
         </div>
       ))}
+*/}
     </div>
   );
 };

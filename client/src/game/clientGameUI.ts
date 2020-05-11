@@ -5,14 +5,17 @@ import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/baseEntities/entity';
 import keyboardJS from 'keyboardjs';
 import {IClientSocket} from '../socket/IClientSocket';
+import {ClientEngine, ClientGameOptions} from './clientEngine';
+import {OrbitalGame} from '@common/game/game';
 
-export class ClientGameUI extends ClientGame {
+export class ClientGameUI {
+  clientEngine: ClientEngine;
   drawTick = 0;
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
 
   constructor(serverPath: string, options: ClientGameOptions, socket: IClientSocket) {
-    super(serverPath, options, socket);
+    this.clientEngine = new ClientEngine(serverPath, options, socket, new OrbitalGame(true));
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d')!;
 
@@ -29,29 +32,29 @@ export class ClientGameUI extends ClientGame {
 
     keyboardJS.bind(
       'w',
-      () => this.liveEntity?.setKey('up', true),
-      () => this.liveEntity?.setKey('up', false)
+      () => this.clientEngine.setKey('up', true),
+      () => this.clientEngine.setKey('up', false)
     );
     keyboardJS.bind(
       'a',
-      () => this.liveEntity?.setKey('left', true),
-      () => this.liveEntity?.setKey('left', false)
+      () => this.clientEngine.setKey('left', true),
+      () => this.clientEngine.setKey('left', false)
     );
     keyboardJS.bind(
       's',
-      () => this.liveEntity?.setKey('down', true),
-      () => this.liveEntity?.setKey('down', false)
+      () => this.clientEngine.setKey('down', true),
+      () => this.clientEngine.setKey('down', false)
     );
 
     keyboardJS.bind(
       'd',
-      () => this.liveEntity?.setKey('right', true),
-      () => this.liveEntity?.setKey('right', false)
+      () => this.clientEngine.setKey('right', true),
+      () => this.clientEngine.setKey('right', false)
     );
     keyboardJS.bind(
       'space',
-      () => this.liveEntity?.setKey('shoot', true),
-      () => this.liveEntity?.setKey('shoot', false)
+      () => this.clientEngine.setKey('shoot', true),
+      () => this.clientEngine.setKey('shoot', false)
     );
 
     const requestNextFrame = () => {
@@ -62,6 +65,7 @@ export class ClientGameUI extends ClientGame {
     };
     requestNextFrame();
   }
+
   draw() {
     this.drawTick++;
     this.canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -74,25 +78,24 @@ export class ClientGameUI extends ClientGame {
     this.centerView();
 
     context.save();
-    const outerBox = gameData.view.outerViewBox;
     const box = gameData.view.viewBox;
     context.scale(gameData.view.scale, gameData.view.scale);
     context.translate(-box.x, -box.y);
 
     context.font = '25px bold';
-    const entities = this.entities.array;
+    const entities = this.clientEngine.game.entities.array;
     assertType<(Entity & ClientEntity)[]>(entities);
     const sortedEntities = entities.sort((a, b) => a.zIndex - b.zIndex);
 
     for (const entity of sortedEntities) {
-      if (!gameData.view.contains(entity.realX, entity.realY)) {
+      if (!entity.inView(gameData.view.outerViewBox)) {
         continue;
       }
       entity.draw(context);
     }
 
     context.restore();
-    this.liveEntity?.staticDraw(context);
+    this.clientEngine.game.staticDraw(context);
     /*const nose = OrbitalAssets.assets['Rocket_parts.spaceRocketParts_008'];
     if (nose) {
       this.drawTick++;
@@ -158,13 +161,10 @@ export class ClientGameUI extends ClientGame {
       context.fillStyle = 'white';
       context.textBaseline = 'top';
       let debugY = context.canvas.height - 22;
-      for (const key of Object.keys(this.debugValues)) {
-        context.fillText(`${key}: ${this.debugValues[key]}`, 0, debugY);
+      for (const key of Object.keys(this.clientEngine.debugValues)) {
+        context.fillText(`${key}: ${this.clientEngine.debugValues[key]}`, 0, debugY);
         debugY -= 22;
       }
-      context.fillText(`Average Lag between ticks: ${this.lagAverage.average.toFixed(1)}ms`, 0, debugY);
-      debugY -= 22;
-      context.fillText(`Latency: ${this.latency.toFixed(1)}ms`, 0, debugY);
       context.restore();
     }
 
@@ -173,7 +173,7 @@ export class ClientGameUI extends ClientGame {
       context.beginPath();
       context.scale(gameData.view.scale, gameData.view.scale);
       context.translate(-box.x, -box.y);
-      this.collisionEngine.draw(context);
+      this.clientEngine.game.collisionEngine.draw(context);
       context.fillStyle = 'rgba(255,0,85,0.4)';
       context.fill();
       context.restore();
@@ -181,22 +181,24 @@ export class ClientGameUI extends ClientGame {
   }
 
   private centerView() {
-    if (this.liveEntity) {
+    if (this.clientEngine.game.clientPlayer) {
       GameData.view.setCenterPosition(
-        GameData.view.transformPoint(this.liveEntity.drawX),
-        GameData.view.transformPoint(GameData.view.viewHeight / 2 + this.liveEntity.drawY / 5 /*todo this isnt good*/)
+        GameData.view.transformPoint(this.clientEngine.game.clientPlayer.position.x),
+        GameData.view.transformPoint(
+          GameData.view.viewHeight / 2 + this.clientEngine.game.clientPlayer.position.y / 5 /*todo this isnt good*/
+        )
       );
     }
-    if (this.spectatorMode && this.spectatorEntity) {
+    if (this.clientEngine.spectatorMode && this.clientEngine.game.spectatorEntity) {
       GameData.view.setCenterPosition(
-        GameData.view.transformPoint(this.spectatorEntity.x),
+        GameData.view.transformPoint(this.clientEngine.game.spectatorEntity.position.x),
         GameData.view.transformPoint(GameData.view.viewHeight / 2 + GameConstants.playerStartingY / 5)
       );
     }
-    if (this.lastXY) {
+    if (this.clientEngine.lastXY) {
       GameData.view.setCenterPosition(
-        GameData.view.transformPoint(this.lastXY.x),
-        GameData.view.transformPoint(GameData.view.viewHeight / 2 + this.lastXY.y / 5)
+        GameData.view.transformPoint(this.clientEngine.lastXY.x),
+        GameData.view.transformPoint(GameData.view.viewHeight / 2 + this.clientEngine.lastXY.y / 5)
       );
     }
   }

@@ -1,24 +1,21 @@
 import {unreachable} from '@common/utils/unreachable';
 import {GameConstants} from '@common/game/gameConstants';
 import {Game} from '@common/game/game';
-import {assertType, Utils} from '@common/utils/utils';
-import {ClientLivePlayerEntity} from './entities/clientLivePlayerEntity';
-import {ClientEntityTypes} from './entities/clientEntityTypeModels';
-import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {STOCWorldState, WorldModelCastToEntityModel} from '@common/models/serverToClientMessages';
+import {assertType} from '@common/utils/utils';
+import {STOCWorldState} from '@common/models/serverToClientMessages';
 import {Entity} from '@common/baseEntities/entity';
 import {ClientEntity} from './entities/clientEntity';
-import {RollingAverage} from '@common/utils/rollingAverage';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
 import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMessages';
-import {ClientToServerMessage} from '@common/models/clientToServerMessages';
-import {PlayerEntity} from '@common/entities/playerEntity';
+import {ClientToServerMessage, CTOSPlayerInput} from '@common/models/clientToServerMessages';
+import {PlayerEntity, PlayerInputKeys} from '@common/entities/playerEntity';
 import {IClientSocket} from '../socket/IClientSocket';
 import {Scheduler} from '@common/utils/scheduler';
 import {ExtrapolateStrategy} from './synchronizer/extrapolateStrategy';
 
 const STEP_DELAY_MSEC = 12; // if forward drift detected, delay next execution by this amount
 const STEP_HURRY_MSEC = 8; // if backward drift detected, hurry next execution by this amount
+const TIME_RESET_THRESHOLD = 100;
 
 export type ClientGameOptions = {
   onDied: (me: ClientEngine) => void;
@@ -29,22 +26,34 @@ export type ClientGameOptions = {
   onUIUpdate: (me: ClientEngine) => void;
 };
 
-export abstract class ClientEngine {
+export class ClientEngine {
   debugValues: {[key: string]: number | string} = {};
   drawTick = 0;
   isDead: boolean = false;
+
+  keys: PlayerInputKeys = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+    shoot: false,
+  };
   lastXY?: {x: number; y: number};
   leaderboardScores: LeaderboardEntryRanked[] = [];
   myScore?: LeaderboardEntryRanked;
   playerEntityId?: number;
+  spectatorMode: boolean = false;
 
-  protected spectatorMode: boolean = false;
   private connected = false;
+  private correction: number = 0;
+  private doReset: boolean = false;
+  private lastStepTime: number = 0;
+  private messageIndex: number = 0;
   private messagesToProcess: ServerToClientMessage[] = [];
   private scheduler?: Scheduler;
   private serverVersion: number = -1;
-  private totalPlayers: number = 0;
   private synchronizer: ExtrapolateStrategy;
+  private totalPlayers: number = 0;
 
   constructor(
     private serverPath: string,
@@ -52,13 +61,14 @@ export abstract class ClientEngine {
     public socket: IClientSocket,
     public game: Game
   ) {
+    this.synchronizer = new ExtrapolateStrategy(this);
     this.connect();
   }
 
   checkDrift(checkType: 'onServerSync' | 'onEveryStep') {
     if (!this.game.highestServerStep) return;
 
-    const thresholds = this.synchronizer.syncStrategy.STEP_DRIFT_THRESHOLDS;
+    const thresholds = this.synchronizer.STEP_DRIFT_THRESHOLDS;
     const maxLead = thresholds[checkType].MAX_LEAD;
     const maxLag = thresholds[checkType].MAX_LAG;
     const clientStep = this.game.stepCount;
@@ -84,6 +94,42 @@ export abstract class ClientEngine {
     delete this.debugValues[key];
   }
 
+  clientStep = () => {
+    const t = +new Date();
+    const p = 1000 / 60;
+    let dt = 0;
+
+    // reset step time if we passed a threshold
+    if (this.doReset || t > this.lastStepTime + TIME_RESET_THRESHOLD) {
+      this.doReset = false;
+      this.lastStepTime = t - p / 2;
+      this.correction = p / 2;
+    }
+
+    // catch-up missed steps
+    while (t > this.lastStepTime + p) {
+      this.step(this.lastStepTime + p, p + this.correction, false);
+      this.lastStepTime += p;
+      this.correction = 0;
+    }
+
+    // if not ready for a real step yet, return
+    // this might happen after catch up above
+    if (t < this.lastStepTime) {
+      dt = t - this.lastStepTime + this.correction;
+      if (dt < 0) dt = 0;
+      this.correction = this.lastStepTime - t;
+      this.step(t, dt, true);
+      return;
+    }
+
+    // render-controlled step
+    dt = t - this.lastStepTime + this.correction;
+    this.lastStepTime += p;
+    this.correction = this.lastStepTime - t;
+    this.step(t, dt, false);
+  };
+
   connect() {
     this.connected = true;
     this.socket.connect(this.serverPath, {
@@ -104,9 +150,12 @@ export abstract class ClientEngine {
 
   died() {
     if (!this.isDead) {
+      // todo dead
+      /*
       this.isDead = true;
       this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
       this.liveEntity = undefined;
+*/
       this.options.onDied(this);
     }
   }
@@ -115,25 +164,10 @@ export abstract class ClientEngine {
     this.socket.disconnect();
   }
 
-  gameTick(duration: number) {
-    this.processMessages(this.messagesToProcess);
-    this.liveEntity?.processInput(duration);
-
-    this.game.step(0, duration);
-
-    for (const entity of this.game.entities.array) {
-      if (entity.markToDestroy) {
-        assertType<Entity & ClientEntity>(entity);
-        (entity as ClientEntity).destroyClient();
-      }
-    }
-  }
-
   init() {
-    this.synchronizer = new ExtrapolateStrategy(this);
     this.scheduler = new Scheduler({
       period: 1000 / 60,
-      tick: this.step,
+      tick: this.clientStep,
       delay: STEP_DELAY_MSEC,
     });
     this.scheduler!.start();
@@ -146,15 +180,15 @@ export abstract class ClientEngine {
 
   killPlayer(player: PlayerEntity): void {}
 
-  sendInput(input: ClientLivePlayerEntity['keys'], inputSequenceNumber: number) {
-    this.sendMessageToServer({type: 'playerInput', inputSequenceNumber, weapon: input.weapon, keys: input});
-  }
-
   sendMessageToServer(message: ClientToServerMessage) {
     this.socket.sendMessage(message);
   }
   setDebug(key: string, value: number | string) {
     this.debugValues[key] = value;
+  }
+
+  setKey<Key extends keyof PlayerInputKeys>(input: Key, value: PlayerInputKeys[Key]) {
+    this.keys[input] = value;
   }
   setOptions(options: ClientGameOptions) {
     this.options = options;
@@ -167,25 +201,44 @@ export abstract class ClientEngine {
   step = (t: number, dt: number, physicsOnly: boolean) => {
     // physics only case
     if (physicsOnly) {
-      this.game.step(false, t, dt, physicsOnly);
+      this.game.step(false, t, dt, true);
       return;
     }
 
-    this.processMessages(this.messagesToProcess);
-    this.messagesToProcess.length = 0;
+    this.handleKeys();
+
+    this.processMessages();
 
     // check for server/client step drift without update
     this.checkDrift('onEveryStep');
 
-    this.handleOutboundInput();
-
-    this.game.step(false, t, dt);
+    this.game.step(false, t, dt, false);
     this.synchronizer.syncStep({dt});
-    // this.game.emit('client__postStep', {dt});
+    for (const entity of this.game.entities.array) {
+      if (entity.markToDestroy) {
+        assertType<Entity & ClientEntity>(entity);
+        (entity as ClientEntity).destroyClient();
+      }
+    }
   };
 
-  private processMessages(messages: ServerToClientMessage[]) {
-    for (const message of messages) {
+  private handleKeys() {
+    const inputEvent: CTOSPlayerInput = {
+      type: 'playerInput',
+      messageIndex: this.messageIndex,
+      step: this.game.stepCount,
+      weapon: 'unset', // todo
+      keys: this.keys,
+      movement: this.keys.up || this.keys.right || this.keys.left || this.keys.down,
+    };
+    this.synchronizer.clientInputSave(inputEvent);
+    this.game.processInput(inputEvent, this.game.clientPlayerId!);
+    this.sendMessageToServer(inputEvent);
+    this.messageIndex++;
+  }
+
+  private processMessages() {
+    for (const message of this.messagesToProcess) {
       switch (message.type) {
         case 'joined':
           this.serverVersion = message.serverVersion;
@@ -248,6 +301,7 @@ export abstract class ClientEngine {
           break;
       }
     }
+    this.messagesToProcess.length = 0;
   }
 
   private processSync(message: STOCWorldState) {
@@ -257,10 +311,7 @@ export abstract class ClientEngine {
       console.log(
         `========== world step count updated from ${this.game.stepCount} to  ${message.stepCount} ==========`
       );
-      this.game.emit('client__stepReset', {
-        oldStep: this.game.stepCount,
-        newStep: message.stepCount,
-      });
+      this.doReset = true;
       this.game.stepCount = message.stepCount;
     }
   }

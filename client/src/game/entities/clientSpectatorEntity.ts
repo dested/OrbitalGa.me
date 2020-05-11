@@ -8,7 +8,6 @@ export class ClientSpectatorEntity extends SpectatorEntity implements ClientEnti
   zIndex = DrawZIndex.Ordinance;
   constructor(game: OrbitalGame, messageModel: SpectatorModel) {
     super(game, messageModel);
-    game.spectatorEntity = this;
   }
   get drawX() {
     return this.position.x;
