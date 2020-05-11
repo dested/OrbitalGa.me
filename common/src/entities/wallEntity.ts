@@ -2,11 +2,17 @@ import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
+import {ImpliedEntityType} from '../models/serverToClientMessages';
 
 export class WallEntity extends PhysicsEntity {
   type = 'wall' as const;
-  constructor(public game: OrbitalGame, messageModel: WallModel) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<WallModel>>) {
     super(game, messageModel);
     this.width = messageModel.width;
     this.height = messageModel.height;
@@ -15,14 +21,6 @@ export class WallEntity extends PhysicsEntity {
       height: this.height,
     });
     this.createPolygon();
-  }
-
-  get realX() {
-    return this.position.x;
-  }
-
-  get realY() {
-    return this.position.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

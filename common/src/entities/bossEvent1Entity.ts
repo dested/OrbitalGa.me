@@ -7,7 +7,12 @@ import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export type BossEvent1PieceType = 'nose' | 'body1' | 'body2' | 'body3' | 'bodyBack1' | 'bodyBack2';
 export class BossEvent1Entity extends PhysicsEntity {
@@ -26,7 +31,7 @@ export class BossEvent1Entity extends PhysicsEntity {
   type = 'bossEvent1' as const;
   weaponSide = 'enemy' as const;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<BossEvent1Model>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<BossEvent1Model>>) {
     super(game, messageModel);
     this.health = messageModel.health;
     this.width = messageModel.width;
@@ -167,20 +172,13 @@ export class BossEvent1Entity extends PhysicsEntity {
               xOffset: item.offsetX + x,
               yOffset: item.offsetY,
               rotate: item.rotate,
+              position: {x: 0, y: 0},
             })
           );
         }
       }
     }
     this.createPolygon();
-  }
-
-  get realX() {
-    return this.position.x;
-  }
-
-  get realY() {
-    return this.position.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -225,6 +223,16 @@ export class BossEvent1Entity extends PhysicsEntity {
       this.game.entities.push(drop);
       this.game.explode(this, 'medium');
     }
+  }
+
+  isVisibleAtCoordinate(
+    viewX: number,
+    viewY: number,
+    viewWidth: number,
+    viewHeight: number,
+    playerId: number
+  ): boolean {
+    return true;
   }
 
   reconcileFromServer(messageModel: BossEvent1Model) {

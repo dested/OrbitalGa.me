@@ -1,24 +1,20 @@
 import {PlayerWeaponEntity, PlayerWeaponModel} from '@common/entities/playerWeaponEntity';
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {OrbitalAssets} from '../../utils/assetManager';
-import {ClientPlayerEntity} from './clientPlayerEntity';
+import {ClientPlayerActor} from './clientPlayerActor';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 import {GameConstants} from '@common/game/gameConstants';
 import {WeaponConfigs} from '@common/game/gameRules';
 import {OrbitalGame} from '@common/game/game';
 
-export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEntity {
+export class ClientPlayerWeaponActor extends ClientActor<PlayerWeaponEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(clientGame: OrbitalGame, messageModel: PlayerWeaponModel) {
-    super(clientGame, messageModel);
-  }
-
   get asset() {
-    switch (this.weaponType) {
+    switch (this.entity.weaponType) {
       case 'rocket':
         return OrbitalAssets.assets['Missiles.spaceMissiles_001'];
       case 'laser1':
@@ -30,30 +26,29 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
       case 'torpedo':
         return OrbitalAssets.assets['Missiles.spaceMissiles_004'];
       default:
-        throw unreachable(this.weaponType);
+        throw unreachable(this.entity.weaponType);
     }
   }
 
   get drawX() {
-    return this.x;
+    return this.entity.position.x;
   }
 
   get drawY() {
-    return this.y;
+    return this.entity.position.y;
   }
 
   get owner() {
-    return this.game.entities.lookup<ClientPlayerEntity>(this.ownerEntityId);
+    return this.entity.game.entities.lookup<ClientPlayerActor>(this.entity.ownerEntityId);
   }
-  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const asset = this.asset;
     context.save();
     context.translate(this.drawX, this.drawY);
     this.drawFire(context);
-    if (this.sprayAngle > 0) {
-      context.rotate(Utils.degToRad(90 + this.sprayAngle));
+    if (this.entity.sprayAngle > 0) {
+      context.rotate(Utils.degToRad(90 + this.entity.sprayAngle));
     }
     context.drawImage(asset.image, -asset.size.width / 2, -asset.size.height / 2);
     context.restore();
@@ -61,10 +56,12 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
 
   drawFire(context: CanvasRenderingContext2D) {
     const asset = this.asset;
-    switch (this.weaponType) {
+    switch (this.entity.weaponType) {
       case 'rocket': {
         const fire =
-          this.game.stepCount % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
+          this.entity.game.stepCount % 8 < 4
+            ? OrbitalAssets.assets['Effects.fire14']
+            : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }
@@ -74,12 +71,14 @@ export class ClientPlayerWeapon extends PlayerWeaponEntity implements ClientEnti
         break;
       case 'torpedo': {
         const fire =
-          this.game.stepCount % 8 < 4 ? OrbitalAssets.assets['Effects.fire14'] : OrbitalAssets.assets['Effects.fire15'];
+          this.entity.game.stepCount % 8 < 4
+            ? OrbitalAssets.assets['Effects.fire14']
+            : OrbitalAssets.assets['Effects.fire15'];
         context.drawImage(fire.image, -fire.size.width / 2, asset.size.height / 2);
         break;
       }
       default:
-        unreachable(this.weaponType);
+        unreachable(this.entity.weaponType);
         break;
     }
   }

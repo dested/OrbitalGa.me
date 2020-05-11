@@ -3,36 +3,44 @@ import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {Result} from 'collisions';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
-//todo make not physics entity
+// todo make not physics entity
 export class ScoreEntity extends PhysicsEntity {
+  aliveTick = 0;
+  onlyVisibleToPlayerEntityId: number;
   score: number;
   type = 'score' as const;
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ScoreModel>) {
+
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<ScoreModel>>) {
     super(game, messageModel);
     this.score = messageModel.score;
     this.onlyVisibleToPlayerEntityId = messageModel.onlyVisibleToPlayerEntityId;
   }
 
-  get realX() {
-    return this.x;
-  }
-
-  get realY() {
-    return this.y;
-  }
-
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     return false;
   }
-
-  aliveTick = 0;
   gameTick(): void {
     this.aliveTick++;
     if (this.aliveTick > 3) {
       this.destroy();
     }
+  }
+  isVisibleAtCoordinate(
+    viewX: number,
+    viewY: number,
+    viewWidth: number,
+    viewHeight: number,
+    playerId: number
+  ): boolean {
+    const result = super.isVisibleAtCoordinate(viewX, viewY, viewWidth, viewHeight, playerId);
+    return result && this.onlyVisibleToPlayerEntityId === playerId;
   }
 
   serialize(): ScoreModel {

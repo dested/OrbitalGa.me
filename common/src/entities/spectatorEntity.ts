@@ -3,21 +3,18 @@ import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export class SpectatorEntity extends PhysicsEntity {
   type = 'spectator' as const;
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<SpectatorModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<SpectatorModel>>) {
     super(game, messageModel);
     this.createPolygon();
-  }
-
-  get realX() {
-    return this.x;
-  }
-
-  get realY() {
-    return this.y;
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

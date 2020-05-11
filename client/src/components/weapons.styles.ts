@@ -1,9 +1,9 @@
 import glamorous from 'glamorous';
-import {ClientLivePlayerEntity} from '../game/entities/clientLivePlayerEntity';
+import {ClientLivePlayerActor} from '../game/entities/clientLivePlayerActor';
 import {AvailablePlayerWeapon} from '@common/entities/playerEntity';
 export const boxSize = '7.5vh';
 
-export const SelectWeaponBox = glamorous.div<{liveEntity: ClientLivePlayerEntity; weapon: AvailablePlayerWeapon}>(
+export const SelectWeaponBox = glamorous.div<{liveEntity: ClientLivePlayerActor; weapon: AvailablePlayerWeapon}>(
   ({weapon, liveEntity}) => ({
     width: boxSize,
     height: boxSize,

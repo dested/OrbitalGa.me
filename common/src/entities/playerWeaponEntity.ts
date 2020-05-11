@@ -8,7 +8,12 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {Utils} from '../utils/utils';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   aliveDuration = 3000;
@@ -20,30 +25,20 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   ownerEntityId: number;
   ownerPlayerEntityId: number;
   sprayAngle: number;
-  startY: number;
   type = 'playerWeapon' as const;
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<PlayerWeaponModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<PlayerWeaponModel>>) {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
-    this.startY = messageModel.startY;
     this.sprayAngle = messageModel.sprayAngle;
     this.damage = WeaponConfigs[this.weaponType].damage;
     this.explosionIntensity = WeaponConfigs[this.weaponType].explosionIntensity;
     this.createPolygon();
-  }
-
-  get realX() {
-    return this.position.x;
-  }
-
-  get realY() {
-    return this.position.y;
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {
@@ -90,7 +85,6 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
     this.ownerEntityId = messageModel.ownerEntityId;
     this.offsetX = messageModel.offsetX;
     this.weaponType = messageModel.weaponType;
-    this.startY = messageModel.startY;
     this.sprayAngle = messageModel.sprayAngle;
   }
 
@@ -99,7 +93,6 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
       ...super.serialize(),
       ownerEntityId: this.ownerEntityId,
       offsetX: this.offsetX,
-      startY: this.startY,
       sprayAngle: this.sprayAngle,
       weaponType: this.weaponType,
       type: 'playerWeapon',
@@ -111,7 +104,6 @@ export type PlayerWeaponModel = PhysicsEntityModel & {
   offsetX: number;
   ownerEntityId: number;
   sprayAngle: number;
-  startY: number;
   type: 'playerWeapon';
   weaponType: PlayerWeapon;
 };
@@ -120,7 +112,6 @@ export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
   ...PhysicsEntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
   sprayAngle: 'uint8',
-  startY: 'int32',
   offsetX: 'int32',
   ownerEntityId: 'uint32',
 };

@@ -2,13 +2,14 @@ import {Entity} from '@common/baseEntities/entity';
 import {ArrayHash} from '@common/utils/arrayHash';
 import {GameConstants} from '@common/game/gameConstants';
 import {Utils} from '@common/utils/utils';
+import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
-export type EntityGrouping = {entities: Entity[]; x0: number; x1: number};
+export type EntityGrouping = {entities: PhysicsEntity[]; x0: number; x1: number};
 
 export class EntityClusterer {
-  constructor(private entities: ArrayHash<Entity>, private idealSize: number) {}
+  constructor(private entities: ArrayHash<PhysicsEntity>, private idealSize: number) {}
 
-  getGroupings(filter: (entity: Entity) => boolean): EntityGrouping[] {
+  getGroupings(filter: (entity: PhysicsEntity) => boolean): EntityGrouping[] {
     const items = this.entities.array.filter(filter);
     const screenWidth = GameConstants.screenSize.width;
 
@@ -16,10 +17,11 @@ export class EntityClusterer {
       return [{entities: [], x0: 0, x1: screenWidth}];
     }
 
-    items.sort((a, b) => a.x - b.x);
+    items.sort((a, b) => a.position.x - b.position.x);
 
-    const startScreenX = items[0].x - Utils.mod(items[0].x, screenWidth);
-    const endScreenX = items[items.length - 1].x - Utils.mod(items[items.length - 1].x, screenWidth) + screenWidth;
+    const startScreenX = items[0].position.x - Utils.mod(items[0].position.x, screenWidth);
+    const endScreenX =
+      items[items.length - 1].position.x - Utils.mod(items[items.length - 1].position.x, screenWidth) + screenWidth;
 
     const groupings: EntityGrouping[] = [];
     for (let x = startScreenX; x <= endScreenX; x += screenWidth) {
@@ -32,7 +34,7 @@ export class EntityClusterer {
 
     for (const item of items) {
       for (const grouping of groupings) {
-        if (item.x > grouping.x0 && item.x < grouping.x1) {
+        if (item.position.x > grouping.x0 && item.position.x < grouping.x1) {
           grouping.entities.push(item);
           break;
         }
@@ -53,7 +55,7 @@ export class EntityClusterer {
     const groups = Utils.randomizeArray(
       this.getGroupings((a) => a.type === 'player').filter((a) => a.entities.length < this.idealSize)
     );
-    const enemyXs = this.entities.filter((a) => a.type === 'swoopingEnemy').map((a) => a.x);
+    const enemyXs = this.entities.filter((a) => a.type === 'swoopingEnemy').map((a) => a.position.x);
     const enemyMultiple = 2;
     if (groups.length === 0) {
       return 0;
@@ -83,8 +85,8 @@ export class EntityClusterer {
     const padding = 150;
     const ranges: {x0: number; x1: number}[] = [{x0: group.x0 + padding, x1: 0}];
     for (const entity of group.entities.filter((a) => a.type === 'swoopingEnemy')) {
-      ranges[ranges.length - 1].x1 = entity.x - padding;
-      ranges.push({x0: entity.x + padding, x1: 0});
+      ranges[ranges.length - 1].x1 = entity.position.x - padding;
+      ranges.push({x0: entity.position.x + padding, x1: 0});
     }
     ranges[ranges.length - 1].x1 = group.x1 - padding;
 
@@ -104,8 +106,8 @@ export class EntityClusterer {
       const bestGroup = Utils.randomElement(groups.filter((a) => a.entities.length < this.idealSize));
       const ranges: {x0: number; x1: number}[] = [{x0: bestGroup.x0 + padding, x1: 0}];
       for (const entity of bestGroup.entities) {
-        ranges[ranges.length - 1].x1 = entity.x - padding;
-        ranges.push({x0: entity.x + padding, x1: 0});
+        ranges[ranges.length - 1].x1 = entity.position.x - padding;
+        ranges.push({x0: entity.position.x + padding, x1: 0});
       }
       ranges[ranges.length - 1].x1 = bestGroup.x1 - padding;
 

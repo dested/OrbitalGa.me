@@ -2,7 +2,6 @@ import {ClientEngine} from '../clientEngine';
 import {Game} from '@common/game/game';
 import {Entity, EntityModel} from '@common/baseEntities/entity';
 import {EntityModels, STOCWorldState, WorldModelCastToEntityModel} from '@common/models/serverToClientMessages';
-import {ClientEntityTypes} from '../entities/clientEntityTypeModels';
 import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
 export type Sync = STOCWorldState;
@@ -28,13 +27,8 @@ export abstract class SyncStrategy {
 
   // add an object to our world
   addNewObject(messageModel: EntityModels): Entity {
-    const curObj = new ClientEntityTypes[messageModel.type](
-      this.gameEngine,
-      messageModel as WorldModelCastToEntityModel
-    );
-    curObj.reconcileFromServer(messageModel);
+    const curObj = this.gameEngine.instantiateEntity(messageModel);
     this.gameEngine.addObjectToWorld(curObj);
-
     return curObj;
   }
 

@@ -5,7 +5,12 @@ import {Weapon} from './weapon';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
   aliveTick: number = 0;
@@ -21,7 +26,7 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
   xOffset: number;
   yOffset: number;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<BossEvent1EnemyModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<BossEvent1EnemyModel>>) {
     super(game, messageModel);
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.xOffset = messageModel.xOffset;
@@ -32,13 +37,21 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
     this.createPolygon();
   }
 
-  get realX() {
-    return this.position.x + this.xOffset;
+  isVisibleAtCoordinate(
+    viewX: number,
+    viewY: number,
+    viewWidth: number,
+    viewHeight: number,
+    playerId: number
+  ): boolean {
+    return (
+      this.position.x + this.xOffset > viewX &&
+      this.position.x + this.xOffset < viewX + viewWidth &&
+      this.position.y + this.yOffset > viewY &&
+      this.position.y + this.yOffset < viewY + viewHeight
+    );
   }
 
-  get realY() {
-    return this.position.y + this.yOffset;
-  }
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
 

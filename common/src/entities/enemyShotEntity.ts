@@ -6,7 +6,12 @@ import {GameRules} from '../game/gameRules';
 import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export class EnemyShotEntity extends PhysicsEntity implements Weapon {
   aliveDuration = 3000;
@@ -19,19 +24,11 @@ export class EnemyShotEntity extends PhysicsEntity implements Weapon {
   type = 'enemyShot' as const;
   weaponSide = 'enemy' as const;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<EnemyShotModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<EnemyShotModel>>) {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.createPolygon();
-  }
-
-  get realX() {
-    return this.position.x;
-  }
-
-  get realY() {
-    return this.position.y;
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {}

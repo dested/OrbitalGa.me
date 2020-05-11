@@ -5,23 +5,33 @@ import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {TwoVector, TwoVectorModel, TwoVectorSchema} from '../utils/twoVector';
 import {MathUtils} from '../utils/mathUtils';
 
+type PartialOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type ImpliedDefaultPhysics<T extends PhysicsEntityModel> = PartialOptional<
+  T,
+  'friction' | 'velocity' | 'position' | 'angle'
+>;
+
 export abstract class PhysicsEntity extends Entity {
-  angle: number = 90;
+  angle!: number;
   bendingIncrements = 0;
-  friction: TwoVector = new TwoVector(1, 1);
+  friction!: TwoVector;
   height: number = 0;
-  position: TwoVector = new TwoVector(0, 0);
+  maxSpeed?: number;
+  position!: TwoVector;
   savedCopy?: PhysicsEntityModel;
-  velocity: TwoVector = new TwoVector(0, 0);
+  velocity!: TwoVector;
   width: number = 0;
   private bendingAngleDelta?: number;
-
   private bendingPositionDelta?: TwoVector;
   private bendingVelocityDelta?: TwoVector;
 
-  constructor(protected game: Game, messageModel: PhysicsEntityModel) {
+  constructor(game: Game, messageModel: ImpliedDefaultPhysics<PhysicsEntityModel>) {
     super(game, messageModel);
-    this.reconcileFromServer(messageModel);
+    messageModel.angle = messageModel.angle ?? 90;
+    messageModel.friction = messageModel.friction ?? new TwoVector(1, 1);
+    messageModel.position = messageModel.position ?? new TwoVector(0, 0);
+    messageModel.velocity = messageModel.velocity ?? new TwoVector(0, 0);
+    this.reconcileFromServer(messageModel as PhysicsEntityModel);
   }
 
   get bending(): {
@@ -41,9 +51,6 @@ export abstract class PhysicsEntity extends Entity {
   } {
     return {};
   }
-
-  abstract get realX(): number;
-  abstract get realY(): number;
 
   accelerate(acceleration: number, angle: number) {
     const rad = angle * (Math.PI / 180);
@@ -136,8 +143,9 @@ export abstract class PhysicsEntity extends Entity {
   abstract collide(otherEntity: Entity, collisionResult: Result): boolean;
 
   createPolygon(): void {
-    const x = this.realX;
-    const y = this.realY;
+    const x = this.position.realx;
+    const y = this.position.realy;
+    // todo physics this needs to call update polygon and anything that really uses realx needs to update accordingly
     if (this.width !== 0 && this.height !== 0) {
       for (const boundingBox of this.boundingBoxes) {
         const polygon = new Polygon(
@@ -188,14 +196,20 @@ export abstract class PhysicsEntity extends Entity {
     );
   }
 
-  isVisibleAtCoordinate(viewX: number, viewY: number, viewWidth: number, viewHeight: number) {
-    return true;
+  isVisibleAtCoordinate(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number) {
+    return (
+      this.position.x > viewX &&
+      this.position.x < viewX + viewWidth &&
+      this.position.y > viewY &&
+      this.position.y < viewY + viewHeight
+    );
   }
 
   reconcileFromServer(messageModel: PhysicsEntityModel) {
     super.reconcileFromServer(messageModel);
     this.position = TwoVector.fromModel(messageModel.position);
     this.velocity = TwoVector.fromModel(messageModel.velocity);
+    this.friction = TwoVector.fromModel(messageModel.friction);
   }
   saveState(entityModel?: PhysicsEntityModel) {
     this.savedCopy = entityModel ?? this.serialize();
@@ -206,18 +220,19 @@ export abstract class PhysicsEntity extends Entity {
       ...super.serialize(),
       position: this.position.serialize(),
       velocity: this.velocity.serialize(),
+      friction: this.friction.serialize(),
       angle: this.angle,
     };
   }
 
-  updatePolygon() {
+  updatePolygon(x = this.position.x, y = this.position.y) {
     if (this.boundingBoxes.length === 0) {
       return;
     }
     for (const boundingBox of this.boundingBoxes) {
       if (boundingBox.polygon) {
-        boundingBox.polygon.x = this.realX;
-        boundingBox.polygon.y = this.realY;
+        boundingBox.polygon.x = x;
+        boundingBox.polygon.y = y;
       }
     }
   }
@@ -225,6 +240,7 @@ export abstract class PhysicsEntity extends Entity {
 
 export type PhysicsEntityModel = EntityModel & {
   angle: number;
+  friction: TwoVectorModel;
   position: TwoVectorModel;
   velocity: TwoVectorModel;
 };
@@ -232,6 +248,7 @@ export type PhysicsEntityModel = EntityModel & {
 export const PhysicsEntityModelSchema: SDSimpleObject<PhysicsEntityModel> = {
   ...EntityModelSchema,
   position: TwoVectorSchema,
+  friction: TwoVectorSchema,
   velocity: TwoVectorSchema,
   angle: 'uint8',
 };

@@ -1,10 +1,8 @@
-import {Polygon, Result} from 'collisions';
+import {Polygon} from 'collisions';
 import {Game} from '../game/game';
 import {EntityModels} from '../models/serverToClientMessages';
-import {GameConstants} from '../game/gameConstants';
 import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntityModel} from './physicsEntity';
-import {GameView} from '../../../client/src/game/gameView';
+import {ClientActor} from './clientActor';
 
 type BoundingBox = {
   height: number;
@@ -15,16 +13,17 @@ type BoundingBox = {
 };
 
 export abstract class Entity {
+  actor?: ClientActor<this>;
+
   boundingBoxes: BoundingBox[] = [];
   entityId: number;
   inputId: number;
   markToDestroy: boolean = false;
-  onlyVisibleToPlayerEntityId?: number;
   owningPlayerId?: number;
 
   shadowEntity: boolean = false;
   abstract type: EntityModels['type'];
-  constructor(protected game: Game, messageModel: EntityModel) {
+  constructor(public game: Game, messageModel: EntityModel) {
     this.entityId = messageModel.entityId;
     this.inputId = messageModel.inputId;
   }

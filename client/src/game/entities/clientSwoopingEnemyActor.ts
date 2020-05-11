@@ -1,32 +1,28 @@
 import {SwoopingEnemyEntity, SwoopingEnemyModel} from '@common/entities/swoopingEnemyEntity';
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {OrbitalGame} from '@common/game/game';
 
-export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements ClientEntity {
+export class ClientSwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
   static _whiteEnemy?: HTMLCanvasElement;
   clientDestroyedTick?: number = undefined;
 
   hitTimer = 0;
   zIndex = DrawZIndex.Player;
 
-  constructor(game: OrbitalGame, messageModel: SwoopingEnemyModel) {
-    super(game, messageModel);
-  }
-
   get drawX() {
-    return this.position.x;
+    return this.entity.position.x;
   }
 
   get drawY() {
-    return this.position.y;
+    return this.entity.position.y;
   }
 
   get ship() {
-    switch (this.enemyColor) {
+    switch (this.entity.enemyColor) {
       case 'black':
         return OrbitalAssets.assets['Enemies.enemyBlack1'];
       case 'blue':
@@ -37,7 +33,6 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
         return OrbitalAssets.assets['Enemies.enemyRed1'];
     }
   }
-  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const ship = this.ship;
@@ -48,7 +43,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     if (this.hitTimer > 0) {
       context.save();
       context.globalAlpha = this.hitTimer / 5;
-      context.drawImage(ClientSwoopingEnemyEntity.whiteEnemy(), -ship.size.width / 2, -ship.size.height / 2);
+      context.drawImage(ClientSwoopingEnemyActor.whiteEnemy(), -ship.size.width / 2, -ship.size.height / 2);
       context.restore();
       this.hitTimer -= 1;
     }
@@ -65,11 +60,12 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
     context.fillRect(
       this.drawX - ship.size.width / 2 + 1,
       this.drawY - ship.size.height / 2 + 1 - 8,
-      (ship.size.width - 2) * (this.health / GameRules.enemies.swoopingEnemy.startingHealth),
+      (ship.size.width - 2) * (this.entity.health / GameRules.enemies.swoopingEnemy.startingHealth),
       3
     );
   }
-
+  /*
+todo
   reconcileFromServer(messageModel: SwoopingEnemyModel) {
     const wasHit = this.hit;
     super.reconcileFromServer(messageModel);
@@ -77,6 +73,7 @@ export class ClientSwoopingEnemyEntity extends SwoopingEnemyEntity implements Cl
       this.hitTimer = 5;
     }
   }
+*/
 
   tick() {}
 

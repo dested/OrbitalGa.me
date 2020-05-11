@@ -14,8 +14,14 @@ import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDArray, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 import {CTOSPlayerInput} from '../models/clientToServerMessages';
+import {TwoVector} from '../utils/twoVector';
 
 export type PlayerInputKeys = {
   down: boolean;
@@ -62,8 +68,12 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
   type = 'player' as const;
   weaponSide = 'player' as const;
   private shieldEntityId?: number;
+  lastPlayerInput?: PlayerInputKeys;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<Omit<PlayerModel, 'playerInputKeys'>>) {
+  constructor(
+    public game: OrbitalGame,
+    messageModel: ImpliedEntityType<ImpliedDefaultPhysics<Omit<PlayerModel, 'playerInputKeys'>>>
+  ) {
     super(game, messageModel);
     this.ownerPlayerEntityId = messageModel.entityId;
     this.health = messageModel.health;
@@ -74,27 +84,27 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
 
   get playersToLeft() {
     if (this.staticPlayersToLeft !== undefined) return this.staticPlayersToLeft;
-    return this.game.entities.filter((e) => e.type === 'player' && e.x < this.x - GameConstants.screenSize.width / 2)
-      .length;
+    return this.game.entities.filter(
+      (e) =>
+        e.type === 'player' &&
+        e instanceof PhysicsEntity &&
+        e.position.x < this.position.x - GameConstants.screenSize.width / 2
+    ).length;
   }
   set playersToLeft(value: number) {
     this.staticPlayersToLeft = value;
   }
   get playersToRight() {
     if (this.staticPlayersToRight !== undefined) return this.staticPlayersToRight;
-    return this.game.entities.filter((e) => e.type === 'player' && e.x > this.x + GameConstants.screenSize.width / 2)
-      .length;
+    return this.game.entities.filter(
+      (e) =>
+        e.type === 'player' &&
+        e instanceof PhysicsEntity &&
+        e.position.x > this.position.x + GameConstants.screenSize.width / 2
+    ).length;
   }
   set playersToRight(value: number) {
     this.staticPlayersToRight = value;
-  }
-
-  get realX() {
-    return this.x;
-  }
-
-  get realY() {
-    return this.y;
   }
 
   addDrop(drop: DropType) {
@@ -180,9 +190,7 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
                 for (let i = 1; i < config.spray; i++) {
                   const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
                     entityId: nextId(),
-                    x: this.x + offsetX,
-                    y: this.y - 6,
-                    startY: this.y - 6,
+                    position: {x: this.position.x + offsetX, y: this.position.y - 6},
                     ownerEntityId: this.entityId,
                     offsetX,
                     weaponType: this.selectedWeapon,
@@ -193,9 +201,7 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
               } else {
                 const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
                   entityId: nextId(),
-                  x: this.x + offsetX,
-                  y: this.y - 6,
-                  startY: this.y - 6,
+                  position: {x: this.position.x + offsetX, y: this.position.y - 6},
                   ownerEntityId: this.entityId,
                   offsetX,
                   weaponType: this.selectedWeapon,

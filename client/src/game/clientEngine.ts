@@ -1,10 +1,7 @@
 import {unreachable} from '@common/utils/unreachable';
 import {GameConstants} from '@common/game/gameConstants';
-import {Game} from '@common/game/game';
-import {assertType} from '@common/utils/utils';
-import {STOCWorldState} from '@common/models/serverToClientMessages';
-import {Entity} from '@common/baseEntities/entity';
-import {ClientEntity} from './entities/clientEntity';
+import {Engine, Game, OrbitalGame} from '@common/game/game';
+import {EntityModels, STOCWorldState} from '@common/models/serverToClientMessages';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
 import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {ClientToServerMessage, CTOSPlayerInput} from '@common/models/clientToServerMessages';
@@ -12,6 +9,9 @@ import {PlayerEntity, PlayerInputKeys} from '@common/entities/playerEntity';
 import {IClientSocket} from '../socket/IClientSocket';
 import {Scheduler} from '@common/utils/scheduler';
 import {ExtrapolateStrategy} from './synchronizer/extrapolateStrategy';
+import {Entity} from '@common/baseEntities/entity';
+import {ActorEntityTypes, EntityTypes} from './entities/clientEntityTypeModels';
+import {assertType} from '@common/utils/utils';
 
 const STEP_DELAY_MSEC = 12; // if forward drift detected, delay next execution by this amount
 const STEP_HURRY_MSEC = 8; // if backward drift detected, hurry next execution by this amount
@@ -26,7 +26,7 @@ export type ClientGameOptions = {
   onUIUpdate: (me: ClientEngine) => void;
 };
 
-export class ClientEngine {
+export class ClientEngine extends Engine {
   debugValues: {[key: string]: number | string} = {};
   drawTick = 0;
   isDead: boolean = false;
@@ -61,8 +61,14 @@ export class ClientEngine {
     public socket: IClientSocket,
     public game: Game
   ) {
+    super();
+    game.setEngine(this);
     this.synchronizer = new ExtrapolateStrategy(this);
     this.connect();
+  }
+
+  assignActor(entity: Entity): void {
+    entity.actor = new ActorEntityTypes[entity.type](entity as any);
   }
 
   checkDrift(checkType: 'onServerSync' | 'onEveryStep') {
@@ -201,7 +207,7 @@ export class ClientEngine {
   step = (t: number, dt: number, physicsOnly: boolean) => {
     // physics only case
     if (physicsOnly) {
-      this.game.step(false, t, dt, true);
+      this.game.step(false, dt, true);
       return;
     }
 
@@ -212,12 +218,11 @@ export class ClientEngine {
     // check for server/client step drift without update
     this.checkDrift('onEveryStep');
 
-    this.game.step(false, t, dt, false);
+    this.game.step(false, dt, false);
     this.synchronizer.syncStep({dt});
     for (const entity of this.game.entities.array) {
       if (entity.markToDestroy) {
-        assertType<Entity & ClientEntity>(entity);
-        (entity as ClientEntity).destroyClient();
+        entity.actor?.destroyClient();
       }
     }
   };

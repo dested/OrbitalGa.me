@@ -5,7 +5,12 @@ import {GameRules} from '../game/gameRules';
 import {PlayerEntity} from './playerEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
@@ -19,7 +24,7 @@ export class PlayerShieldEntity extends PhysicsEntity {
   tickIndex = 0;
   type = 'playerShield' as const;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<PlayerShieldModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<PlayerShieldModel>>) {
     super(game, messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
     this.shieldStrength = messageModel.shieldStrength;
@@ -30,22 +35,6 @@ export class PlayerShieldEntity extends PhysicsEntity {
 
   get player() {
     return this.game.entities.lookup<PlayerEntity>(this.ownerEntityId);
-  }
-
-  get realX() {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
-    if (!owner) {
-      return this.position.x;
-    }
-    return this.position.x + owner.realX;
-  }
-
-  get realY() {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
-    if (!owner) {
-      return this.position.y;
-    }
-    return this.position.y + owner.realY;
   }
 
   get shieldConfig() {
@@ -87,6 +76,26 @@ export class PlayerShieldEntity extends PhysicsEntity {
     }
     this.lastHit = 10;
     return damageLeft;
+  }
+
+  isVisibleAtCoordinate(
+    viewX: number,
+    viewY: number,
+    viewWidth: number,
+    viewHeight: number,
+    playerId: number
+  ): boolean {
+    const owner = this.ownerEntityId && this.game.entities.lookup<PhysicsEntity>(this.ownerEntityId);
+
+    let x = this.position.x;
+    let y = this.position.y;
+
+    if (owner) {
+      x += owner.position.x;
+      y += owner.position.y;
+    }
+
+    return x > viewX && x < viewX + viewWidth && y > viewY && y < viewY + viewHeight;
   }
 
   reconcileFromServer(messageModel: PlayerShieldModel) {

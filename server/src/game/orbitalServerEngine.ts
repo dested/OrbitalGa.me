@@ -13,6 +13,7 @@ import {Game, OrbitalGame} from '@common/game/game';
 import {IServerSync} from './IServerSync';
 import {IServerSocket} from '@common/socket/models';
 import {TwoVector} from '@common/utils/twoVector';
+import {Entity} from '@common/baseEntities/entity';
 
 export class OrbitalServerEngine extends ServerEngine {
   game: OrbitalGame;
@@ -21,11 +22,13 @@ export class OrbitalServerEngine extends ServerEngine {
     super(serverSocket, serverSync, game);
     this.game = game;
   }
+  assignActor(entity: Entity): void {
+  }
 
   gameTick(tickIndex: number, duration: number): void {
     this.processGameRules(tickIndex);
 
-    this.game.step(tickIndex, duration);
+    this.game.step(false, duration);
 
     if (tickIndex % 15 === 0) {
       this.updateSpectatorPosition();
@@ -49,11 +52,11 @@ export class OrbitalServerEngine extends ServerEngine {
       entityId: nextId(),
       playerColor: PlayerEntity.randomEnemyColor(),
       health: GameRules.player.base.startingHealth,
-      position: new TwoVector(startingPos, GameConstants.playerStartingY),
+      position: {x: startingPos, y: GameConstants.playerStartingY},
       playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
       hit: false,
       badges: [],
-    });
+    );
     this.gameLeaderboard!.addPlayer(playerEntity.entityId, socketConnection.jwt.userId);
     this.users.push({name, connectionId, entity: playerEntity});
     this.game.entities.push(playerEntity);
@@ -112,7 +115,7 @@ export class OrbitalServerEngine extends ServerEngine {
         for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
           const meteor = new MeteorEntity(this.game, {
             entityId: nextId(),
-            position: new TwoVector(i, GameConstants.screenSize.height * 0.55),
+            position: {x: i, y: GameConstants.screenSize.height * 0.55},
             meteorColor: 'brown',
             size: 'big',
             meteorType: '4',
@@ -130,10 +133,10 @@ export class OrbitalServerEngine extends ServerEngine {
             const {meteorColor, type, size} = MeteorEntity.randomMeteor();
             const meteor = new MeteorEntity(this.game, {
               entityId: nextId(),
-              position: new TwoVector(
-                Utils.randomInRange(grouping.x0, grouping.x1),
-                -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15
-              ),
+              position: {
+                x: Utils.randomInRange(grouping.x0, grouping.x1),
+                y: -GameConstants.screenSize.height * 0.1 + Math.random() * GameConstants.screenSize.height * 0.15,
+              },
               meteorColor,
               size,
               meteorType: type,

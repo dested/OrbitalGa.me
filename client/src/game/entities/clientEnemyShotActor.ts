@@ -1,23 +1,21 @@
 import {EnemyShotEntity, EnemyShotModel} from '@common/entities/enemyShotEntity';
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
+import {ClientActor} from '@common/baseEntities/clientActor';
 
-export class ClientEnemyShotEntity extends EnemyShotEntity implements ClientEntity {
+export class ClientEnemyShotActor extends ClientActor<EnemyShotEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
-  constructor(game: OrbitalGame, messageModel: EnemyShotModel) {
-    super(game, messageModel);
-  }
   get drawX() {
-    return this.position.x;
+    return this.entity.position.x;
   }
   get drawY() {
-    return this.position.y;
+    return this.entity.position.y;
   }
-  destroyClient(): void {}
+
   draw(context: CanvasRenderingContext2D): void {
     const laserRed = OrbitalAssets.assets['Lasers.laserRed03'];
     context.save();

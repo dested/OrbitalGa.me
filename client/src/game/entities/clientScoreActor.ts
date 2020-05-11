@@ -1,27 +1,26 @@
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {ScoreEntity, ScoreModel} from '@common/entities/scoreEntity';
 
-export class ClientScoreEntity extends ScoreEntity implements ClientEntity {
+export class ClientScoreActor extends ClientActor<ScoreEntity> {
   clientDestroyedTick?: number = undefined;
   updateY: number = 0;
   zIndex = DrawZIndex.Scenery;
 
   get drawX() {
-    return this.realX;
+    return this.entity.position.x;
   }
   get drawY() {
-    return this.realY - this.updateY;
+    return this.entity.position.y - this.updateY;
   }
-  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     context.save();
     context.font = '20px kenney_spaceregular';
     context.strokeStyle = '#f0f0f0';
-    context.strokeText(this.score.toString(), this.drawX, this.drawY);
+    context.strokeText(this.entity.score.toString(), this.drawX, this.drawY);
     context.fillStyle = '#49d7b8';
-    context.fillText(this.score.toString(), this.drawX, this.drawY);
+    context.fillText(this.entity.score.toString(), this.drawX, this.drawY);
     context.restore();
   }
 

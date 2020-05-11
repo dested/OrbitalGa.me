@@ -1,36 +1,33 @@
 import {PlayerShieldEntity, PlayerShieldModel} from '@common/entities/playerShieldEntity';
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {Entity} from '@common/baseEntities/entity';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {OrbitalGame} from '@common/game/game';
+import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
-export class ClientPlayerShieldEntity extends PlayerShieldEntity implements ClientEntity {
+export class ClientPlayerShieldActor extends ClientActor<PlayerShieldEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Effect;
 
-  constructor(game: OrbitalGame, messageModel: PlayerShieldModel) {
-    super(game, messageModel);
-  }
   get drawX() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    const owner = this.entity.game.entities.lookup<PhysicsEntity>(this.entity.ownerEntityId);
     if (!owner) {
-      return this.position.x;
+      return this.entity.position.x;
     }
-    return this.position.x + owner.drawX;
+    return this.entity.position.x + owner.position.x;
   }
   get drawY() {
-    const owner = this.game.entities.lookup<Entity & ClientEntity>(this.ownerEntityId);
+    const owner = this.entity.game.entities.lookup<PhysicsEntity>(this.entity.ownerEntityId);
     if (!owner) {
-      return this.position.y;
+      return this.entity.position.y;
     }
-    return this.position.y + owner.drawY;
+    return this.entity.position.y + owner.position.y;
   }
-  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
-    const owner = this.game.entities.lookup(this.ownerEntityId);
+    const owner = this.entity.game.entities.lookup(this.entity.ownerEntityId);
     if (!owner) {
       return;
     }
@@ -38,7 +35,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
     const shield = this.getShieldAsset();
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.globalAlpha = this.health / GameRules.playerShield[this.shieldStrength].maxHealth;
+    context.globalAlpha = this.entity.health / GameRules.playerShield[this.entity.shieldStrength].maxHealth;
     context.drawImage(shield.image, -shield.size.width / 2, -shield.size.height / 2);
     context.restore();
   }
@@ -46,7 +43,7 @@ export class ClientPlayerShieldEntity extends PlayerShieldEntity implements Clie
   tick() {}
 
   private getShieldAsset() {
-    switch (this.shieldStrength) {
+    switch (this.entity.shieldStrength) {
       case 'small':
         return OrbitalAssets.assets['Effects.shield1'];
       case 'medium':

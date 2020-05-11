@@ -2,9 +2,9 @@ import {Sync, SyncStrategy} from './syncStrategy';
 import {ClientEngine} from '../clientEngine';
 import {assertType, Utils} from '@common/utils/utils';
 import {Entity} from '@common/baseEntities/entity';
-import {ClientEntity} from '../entities/clientEntity';
 import {PhysicsEntity, PhysicsEntityModel} from '@common/baseEntities/physicsEntity';
 import {CTOSPlayerInput} from '@common/models/clientToServerMessages';
+import {Game} from '@common/game/game';
 
 const defaults = {
   syncsBufferLength: 5,
@@ -58,11 +58,11 @@ export class ExtrapolateStrategy extends SyncStrategy {
     const entityMap = Utils.toDictionary(sync.entities, (a) => a.entityId);
     for (let i = this.gameEngine.entities.length - 1; i >= 0; i--) {
       const entity = this.gameEngine.entities.getIndex(i);
-      assertType<Entity & ClientEntity>(entity);
-      if (entity.clientDestroyedTick !== undefined) {
-        entity.clientDestroyedTick--;
-        if (entity.clientDestroyedTick <= 0) {
-          entity.clientDestroyedTick = undefined;
+      assertType<Entity>(entity);
+      if (entity.actor?.clientDestroyedTick !== undefined) {
+        entity.actor.clientDestroyedTick--;
+        if (entity.actor.clientDestroyedTick <= 0) {
+          entity.actor.clientDestroyedTick = undefined;
         }
       }
       if (entityMap[entity.entityId]) {

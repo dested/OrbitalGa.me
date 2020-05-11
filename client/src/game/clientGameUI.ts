@@ -1,7 +1,6 @@
 import {assertType} from '@common/utils/utils';
 import {GameData} from './gameData';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
-import {ClientEntity} from './entities/clientEntity';
 import {Entity} from '@common/baseEntities/entity';
 import keyboardJS from 'keyboardjs';
 import {IClientSocket} from '../socket/IClientSocket';
@@ -84,18 +83,22 @@ export class ClientGameUI {
 
     context.font = '25px bold';
     const entities = this.clientEngine.game.entities.array;
-    assertType<(Entity & ClientEntity)[]>(entities);
-    const sortedEntities = entities.sort((a, b) => a.zIndex - b.zIndex);
+    const sortedEntities = entities.sort((a, b) => a.actor!.zIndex - b.actor!.zIndex);
 
     for (const entity of sortedEntities) {
       if (!entity.inView(gameData.view.outerViewBox)) {
         continue;
       }
-      entity.draw(context);
+      entity.actor!.draw(context);
     }
 
     context.restore();
-    this.clientEngine.game.staticDraw(context);
+    for (const entity of sortedEntities) {
+      if (!entity.inView(gameData.view.outerViewBox)) {
+        continue;
+      }
+      entity.actor!.staticDraw(context);
+    }
     /*const nose = OrbitalAssets.assets['Rocket_parts.spaceRocketParts_008'];
     if (nose) {
       this.drawTick++;

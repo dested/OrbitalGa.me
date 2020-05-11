@@ -1,6 +1,6 @@
 import {unreachable} from '@common/utils/unreachable';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
-import {Game} from '@common/game/game';
+import {Engine, Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
 import {SpectatorEntity} from '@common/entities/spectatorEntity';
@@ -23,7 +23,7 @@ type User = {
   name: string;
 };
 
-export abstract class ServerEngine {
+export abstract class ServerEngine extends Engine {
   gameLeaderboard?: GameLeaderboard;
   queuedMessages: {connectionId: number; message: ClientToServerMessage}[] = [];
   queuedMessagesToSend: {[connectionId: number]: ServerToClientMessage[]} = {};
@@ -32,7 +32,9 @@ export abstract class ServerEngine {
   private scheduler?: Scheduler;
 
   constructor(protected serverSocket: IServerSocket, protected serverSync: IServerSync, protected game: Game) {
+    super();
     this.gameLeaderboard?.setServerSync(serverSync);
+    game.setEngine(this);
     serverSocket.start({
       onJoin: (connectionId) => {
         this.queuedMessagesToSend[connectionId] = [];
@@ -352,14 +354,14 @@ export abstract class ServerEngine {
   }
 
   private sendSpectatorWorldState() {
-    const spectator = this.game.entities.array.find((a) => a instanceof SpectatorEntity);
+    const spectator = this.game.spectatorEntity;
     if (!spectator) {
       return;
     }
     const totalPlayers = this.game.entities.filter((a) => a.type === 'player').length;
     const box = {
-      x0: spectator.x - GameConstants.screenRange / 2,
-      x1: spectator.x + GameConstants.screenRange / 2,
+      x0: spectator.position.x - GameConstants.screenRange / 2,
+      x1: spectator.position.x + GameConstants.screenRange / 2,
     };
 
     const myEntities = this.game.entities.map((entity) => ({

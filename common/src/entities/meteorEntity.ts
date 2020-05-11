@@ -8,7 +8,12 @@ import {isPlayerWeapon} from './weapon';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
@@ -23,7 +28,7 @@ export class MeteorEntity extends PhysicsEntity {
   startingMomentumY: number;
   type = 'meteor' as const;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<MeteorModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<MeteorModel>>) {
     super(game, messageModel);
 
     this.meteorColor = messageModel.meteorColor;
@@ -98,14 +103,6 @@ export class MeteorEntity extends PhysicsEntity {
     this.createPolygon();
   }
 
-  get realX() {
-    return this.position.x;
-  }
-
-  get realY() {
-    return this.position.y;
-  }
-
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (isPlayerWeapon(otherEntity)) {
       otherEntity.hurt(
@@ -140,7 +137,6 @@ export class MeteorEntity extends PhysicsEntity {
       this.destroy();
     }
   }
-
 
   postTick() {
     super.postTick();

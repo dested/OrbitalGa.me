@@ -1,5 +1,5 @@
 import {Collisions, Result} from 'collisions';
-import {Entity} from '../baseEntities/entity';
+import {Entity, EntityModel} from '../baseEntities/entity';
 import {ArrayHash} from '../utils/arrayHash';
 import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
@@ -8,6 +8,10 @@ import {PlayerEntity} from '../entities/playerEntity';
 import {PhysicsEntity} from '../baseEntities/physicsEntity';
 import {SpectatorEntity} from '../entities/spectatorEntity';
 import {CTOSPlayerInput} from '../models/clientToServerMessages';
+import {TwoVector} from '../utils/twoVector';
+import {EntityModels, WorldModelCastToEntityModel} from '../models/serverToClientMessages';
+import {EntityTypes} from '../../../client/src/game/entities/clientEntityTypeModels';
+const dx = new TwoVector(0, 0);
 
 export abstract class Game {
   clientPlayerId?: number;
@@ -19,7 +23,7 @@ export abstract class Game {
   highestServerStep?: number;
   stepCount: number = 0;
   totalPlayers: number = 0;
-
+  protected engine!: Engine;
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
@@ -56,14 +60,26 @@ export abstract class Game {
     return {x0: range.x0 - padding, x1: range.x1 + padding};
   }
 
+  abstract instantiateEntity(messageModel: EntityModels): Entity;
+
   physicsStep(isReenact: boolean, dt?: number) {
+    dt = dt ?? 1;
     for (const entity of this.entities.array) {
       // skip physics for shadow objects during re-enactment
       if (isReenact && entity.shadowEntity) {
         continue;
       }
       if (entity instanceof PhysicsEntity) {
-        //physics
+        // physics
+        const velMagnitude = entity.velocity.length();
+        if (entity.maxSpeed && velMagnitude > entity.maxSpeed) {
+          entity.velocity.multiplyScalar(entity.maxSpeed / velMagnitude);
+        }
+        dx.copy(entity.velocity).multiplyScalar(dt);
+        entity.position.add(dx);
+
+        entity.velocity.multiply(entity.friction);
+
         entity.updatePolygon();
       }
     }
@@ -76,10 +92,11 @@ export abstract class Game {
   processInput(inputDesc: CTOSPlayerInput, playerId: number) {
     this.entities.lookup<PlayerEntity>(playerId)?.applyInput(inputDesc);
   }
+  setEngine(engine: Engine) {
+    this.engine = engine;
+  }
 
-  staticDraw(context: CanvasRenderingContext2D) {}
-
-  step(isReenact: boolean, t?: number, dt?: number, physicsOnly?: boolean): void {
+  step(isReenact: boolean, dt?: number, physicsOnly?: boolean): void {
     if (physicsOnly) {
       if (dt) dt /= 1000; // physics engines work in seconds
       this.physicsStep(isReenact, dt);
@@ -110,7 +127,15 @@ export abstract class Game {
   }
 }
 
+export abstract class Engine {
+  abstract assignActor(entity: Entity): void;
+}
+
 export class OrbitalGame extends Game {
+  constructor(isClient: boolean) {
+    super(isClient);
+  }
+
   explode(entity: PhysicsEntity, explosionSize: 'small' | 'medium' | 'big') {
     entity.destroy();
     if (!this.isClient) {
@@ -129,13 +154,22 @@ export class OrbitalGame extends Game {
       for (let i = 0; i < size; i++) {
         const deathExplosion = new ExplosionEntity(this, {
           entityId: nextId(),
-          x: entity.position.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
-          y: entity.position.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
+          position: {
+            x: entity.position.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
+            y: entity.position.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
+          },
           intensity: 2,
         });
         this.entities.push(deathExplosion);
       }
     }
+  }
+
+  instantiateEntity(messageModel: EntityModels): Entity {
+    const curObj = new EntityTypes[messageModel.type](this, messageModel);
+    curObj.reconcileFromServer(messageModel);
+    this.engine.assignActor(curObj);
+    return curObj;
   }
 
   killPlayer(player: PlayerEntity): void {
@@ -162,7 +196,7 @@ export class OrbitalGame extends Game {
     }
   }
 
-  step(replay: boolean, t: number, dt: number): void {
+  step(replay: boolean, dt: number): void {
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
       entity.gameTick(dt);

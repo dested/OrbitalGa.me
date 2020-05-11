@@ -10,7 +10,12 @@ import {unreachable} from '../utils/unreachable';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export type DropType =
   | {
@@ -28,18 +33,11 @@ export class DropEntity extends PhysicsEntity {
   drop: DropType;
   type = 'drop' as const;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<DropModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<DropModel>>) {
     super(game, messageModel);
     this.drop = messageModel.drop;
     this.createPolygon();
-  }
-
-  get realX() {
-    return this.position.x;
-  }
-
-  get realY() {
-    return this.position.y;
+    this.velocity.set(0, 10);
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -53,8 +51,7 @@ export class DropEntity extends PhysicsEntity {
   }
 
   gameTick(duration: number) {
-    this.y += 10;
-    if (this.y > GameConstants.screenSize.height * 1.2) {
+    if (this.position.y > GameConstants.screenSize.height * 1.2) {
       this.destroy();
     }
   }

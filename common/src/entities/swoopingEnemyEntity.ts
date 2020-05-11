@@ -12,7 +12,12 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {ScoreEntity} from './scoreEntity';
 import {LeaderboardEntryWeight} from '../game/gameLeaderboard';
-import {PhysicsEntity, PhysicsEntityModel, PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
+import {
+  ImpliedDefaultPhysics,
+  PhysicsEntity,
+  PhysicsEntityModel,
+  PhysicsEntityModelSchema,
+} from '../baseEntities/physicsEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -82,24 +87,17 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
     this
   );
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<SwoopingEnemyModel>) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<SwoopingEnemyModel>>) {
     super(game, messageModel);
     this.health = messageModel.health;
     this.enemyColor = messageModel.enemyColor;
     this.ownerPlayerEntityId = messageModel.entityId;
     this.createPolygon();
     if (!this.game.isClient) {
-      this.path.setStartPosition(this.x, this.y);
+      this.path.setStartPosition(this.position.x, this.position.y);
     }
   }
 
-  get realX() {
-    return this.x;
-  }
-
-  get realY() {
-    return this.y;
-  }
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
 
@@ -131,8 +129,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
     ) {
       const shotEntity = new EnemyShotEntity(this.game, {
         entityId: nextId(),
-        x: this.x,
-        y: this.y - 6,
+        position: {x: this.position.x, y: this.position.y - 6},
         ownerEntityId: this.entityId,
       });
       this.game.entities.push(shotEntity);
@@ -164,8 +161,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
       otherEntity.causedKill(this);
       const drop = new DropEntity(this.game, {
         entityId: nextId(),
-        x: this.x,
-        y: this.y,
+        position: {x: this.position.x, y: this.position.y},
         drop: DropEntity.randomDrop('big'),
       });
       this.game.entities.push(drop);
@@ -173,8 +169,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
       this.game.entities.push(
         new ScoreEntity(this.game, {
           entityId: nextId(),
-          x: this.realX,
-          y: this.realY,
+          position: {x: this.position.x, y: this.position.y},
           onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
           score: LeaderboardEntryWeight.enemiesKilled,
         })
@@ -183,8 +178,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
       this.game.entities.push(
         new ScoreEntity(this.game, {
           entityId: nextId(),
-          x: this.realX,
-          y: this.realY,
+          position: {x: this.position.x, y: this.position.y},
           onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
           score: LeaderboardEntryWeight.damageGiven,
         })

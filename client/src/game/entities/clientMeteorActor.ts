@@ -1,49 +1,48 @@
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {MeteorEntity, MeteorModel} from '@common/entities/meteorEntity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {AssetKeys} from '../../assets';
-import {OrbitalClientEngine} from '../clientEngine';
-import {OrbitalGame} from '@common/game/game';
 
-export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
+export class ClientMeteorActor extends ClientActor<MeteorEntity> {
   static _whiteMeteor: {[key in AssetKeys]?: HTMLCanvasElement} = {};
   clientDestroyedTick?: number = undefined;
   hitTimer = 0;
   zIndex = DrawZIndex.Scenery;
 
   get drawX() {
-    return this.realX;
+    return this.entity.position.x;
   }
 
   get drawY() {
-    return this.realY;
+    return this.entity.position.y;
   }
-  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
-    const color = this.meteorColor === 'brown' ? 'Brown' : 'Grey';
+    const color = this.entity.meteorColor === 'brown' ? 'Brown' : 'Grey';
 
-    const asset = `Meteors.meteor${color}_${this.size}${this.meteorType}` as 'Meteors.meteorBrown_big1';
+    const asset = `Meteors.meteor${color}_${this.entity.size}${this.entity.meteorType}` as 'Meteors.meteorBrown_big1';
     const meteor = OrbitalAssets.assets[asset];
 
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.rotate(Utils.byteDegToRad(this.rotate));
+    context.rotate(Utils.byteDegToRad(this.entity.rotate));
     context.drawImage(meteor.image, -meteor.size.width / 2, -meteor.size.height / 2);
 
     if (this.hitTimer > 0) {
       context.save();
       context.globalAlpha = this.hitTimer / 5;
-      context.drawImage(ClientMeteorEntity.whiteMeteor(asset), -meteor.size.width / 2, -meteor.size.height / 2);
+      context.drawImage(ClientMeteorActor.whiteMeteor(asset), -meteor.size.width / 2, -meteor.size.height / 2);
       context.restore();
       this.hitTimer -= 1;
     }
     context.restore();
   }
 
+  /*
+todo
   reconcileFromServer(messageModel: MeteorModel) {
     const wasHit = this.hit;
     super.reconcileFromServer(messageModel);
@@ -51,6 +50,7 @@ export class ClientMeteorEntity extends MeteorEntity implements ClientEntity {
       this.hitTimer = 5;
     }
   }
+*/
 
   tick() {}
 

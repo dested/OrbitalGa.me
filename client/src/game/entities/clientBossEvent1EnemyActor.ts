@@ -1,28 +1,22 @@
-import {ClientEntity, DrawZIndex} from './clientEntity';
+import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {OrbitalAssets} from '../../utils/assetManager';
-import {BossEvent1EnemyEntity, BossEvent1EnemyModel} from '@common/entities/bossEvent1EnemyEntity';
+import {BossEvent1EnemyEntity} from '@common/entities/bossEvent1EnemyEntity';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
-import {OrbitalGame} from '@common/game/game';
 
-export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implements ClientEntity {
-  clientDestroyedTick?: number = undefined;
+export class ClientBossEvent1EnemyActor extends ClientActor<BossEvent1EnemyEntity> {
   zIndex = DrawZIndex.Player;
 
-  constructor(public clientGame: OrbitalGame, messageModel: BossEvent1EnemyModel) {
-    super(clientGame, messageModel);
-    this.updatePolygon();
-  }
   get drawX() {
-    return this.position.x + this.xOffset;
+    return this.entity.position.x + this.entity.xOffset;
   }
   get drawY() {
-    return this.position.y + this.yOffset;
+    return this.entity.position.y + this.entity.yOffset;
   }
 
   get piece() {
-    switch (this.pieceType) {
+    switch (this.entity.pieceType) {
       case 'nose':
         return OrbitalAssets.assets['Rocket_parts.spaceRocketParts_008'];
       case 'body1':
@@ -36,18 +30,17 @@ export class ClientBossEvent1EnemyEntity extends BossEvent1EnemyEntity implement
       case 'bodyBack2':
         return OrbitalAssets.assets['Rocket_parts.spaceRocketParts_033'];
       default:
-        throw unreachable(this.pieceType);
+        throw unreachable(this.entity.pieceType);
     }
   }
-  destroyClient(): void {}
 
   draw(context: CanvasRenderingContext2D): void {
     const piece = this.piece;
     context.save();
-    context.translate(Math.cos(this.clientGame.stepCount / 20) * 5, Math.sin(this.clientGame.stepCount / 10) * 5);
+    context.translate(Math.cos(this.entity.game.stepCount / 20) * 5, Math.sin(this.entity.game.stepCount / 10) * 5);
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.rotate(Utils.degToRad(this.rotate));
+    context.rotate(Utils.degToRad(this.entity.rotate));
     context.drawImage(piece.image, -piece.size.width / 2, -piece.size.height / 2);
     context.restore();
     context.restore();
