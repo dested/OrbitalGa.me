@@ -73,7 +73,7 @@ export abstract class Game {
     dt = dt ?? 1;
     for (const entity of this.entities.array) {
       // skip physics for shadow objects during re-enactment
-      if (isReenact && EntityUtils.isShadowEntity(entity) && entity.shadowEntity) {
+      if (isReenact && EntityUtils.isShadowEntity(entity)) {
         continue;
       }
       if (entity instanceof PhysicsEntity) {

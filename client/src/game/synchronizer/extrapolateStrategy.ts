@@ -133,7 +133,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     //
     for (const entity of this.gameEngine.entities.array) {
       // shadow objects are not bent
-      if (EntityUtils.isShadowEntity(entity) && entity.shadowEntity) continue;
+      if (EntityUtils.isShadowEntity(entity)) continue;
       if (entity instanceof PhysicsEntity) {
         const isLocal = entity.owningPlayerId === this.gameEngine.clientPlayerId; // eslint-disable-line eqeqeq
         const bending = isLocal ? this.options.localObjBending : this.options.remoteObjBending;
