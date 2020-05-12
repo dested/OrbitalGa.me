@@ -9,9 +9,9 @@ import {SpectatorEntity} from '../entities/spectatorEntity';
 import {CTOSPlayerInput} from '../models/clientToServerMessages';
 import {TwoVector} from '../utils/twoVector';
 import {EntityModels} from '../models/serverToClientMessages';
-import {EntityTypes} from '../../../client/src/game/entities/entityTypeModels';
 import {nextId} from '../utils/uuid';
 import {EntityUtils} from '../utils/entityUtils';
+import {EntityTypes} from '../entities/entityTypes';
 const dx = new TwoVector(0, 0);
 
 export abstract class Game {

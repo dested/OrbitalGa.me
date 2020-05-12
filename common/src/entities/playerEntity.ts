@@ -77,6 +77,7 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
     this.playerColor = messageModel.playerColor;
     this.badges = messageModel.badges;
     this.lastPlayerInput = {down: false, left: false, right: false, up: false, shoot: false};
+    this.friction = new TwoVector(0.9, 0.9);
     this.createPolygon();
   }
 

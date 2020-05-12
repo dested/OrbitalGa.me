@@ -5,7 +5,6 @@ import {PlayerShieldActor} from './playerShieldActor';
 import {SwoopingEnemyActor} from './swoopingEnemyActor';
 import {ClientPlayerWeaponActor} from './clientPlayerWeaponActor';
 import {WallActor} from './wallActor';
-
 import {PlayerActor} from './playerActor';
 import {EnemyShotActor} from './enemyShotActor';
 import {MeteorActor} from './meteorActor';
@@ -47,26 +46,4 @@ export const ActorEntityTypes: {
   bossEvent1: BossEvent1Actor,
   bossEvent1Enemy: BossEvent1EnemyActor,
   score: ScoreActor,
-};
-
-export const EntityTypes: {
-  [key in EntityModels['type']]: new (
-    game: OrbitalGame,
-    messageModel: EntityType[key]['model']
-  ) => EntityType[key]['entity'];
-} = {
-  player: PlayerEntity,
-  enemyShot: EnemyShotEntity,
-  playerWeapon: PlayerWeaponEntity,
-  explosion: ExplosionEntity,
-  swoopingEnemy: SwoopingEnemyEntity,
-  wall: WallEntity,
-  spectator: SpectatorEntity,
-  playerShield: PlayerShieldEntity,
-  meteor: MeteorEntity,
-  livePlayer: PlayerEntity,
-  drop: DropEntity,
-  bossEvent1: BossEvent1Entity,
-  bossEvent1Enemy: BossEvent1EnemyEntity,
-  score: ScoreEntity,
 };

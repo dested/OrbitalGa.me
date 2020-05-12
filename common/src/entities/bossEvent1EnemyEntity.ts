@@ -89,7 +89,7 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements WeaponEntity
 */
   }
 
-  isVisibleAtCoordinate(
+  inView(
     viewX: number,
     viewY: number,
     viewWidth: number,

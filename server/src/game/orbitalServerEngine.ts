@@ -58,7 +58,7 @@ export class OrbitalServerEngine extends ServerEngine {
       badges: [],
     });
     this.gameLeaderboard?.addPlayer(playerEntity.entityId, socketConnection.jwt.userId);
-    this.users.push({name, connectionId, entity: playerEntity});
+    this.users.push({name: socketConnection.jwt.userName, connectionId, entity: playerEntity});
     this.game.addObjectToWorld(playerEntity);
 
     const playerShieldEntity = new PlayerShieldEntity(this.game, {
@@ -120,8 +120,8 @@ export class OrbitalServerEngine extends ServerEngine {
             size: 'big',
             meteorType: '4',
             hit: false,
-            velocity: {x: 0, y: 20},
-            rotateSpeed: 3,
+            velocity: {x: 0, y: 100},
+            rotateSpeed: 0.5,
           });
           this.game.addObjectToWorld(meteor);
         }

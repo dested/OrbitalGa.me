@@ -86,7 +86,7 @@ export abstract class ServerEngine extends Engine {
     const time = +new Date();
     let stopped = false;
     for (let i = 0; i < this.queuedMessages.length; i++) {
-      if (time + 100 < +new Date()) {
+      if (time + 16 < +new Date()) {
         console.log('stopped');
         stopped = true;
         this.queuedMessages.splice(0, i);
@@ -114,7 +114,7 @@ export abstract class ServerEngine extends Engine {
           const connection = this.serverSocket.connections.lookup(q.connectionId);
           if (user && connection && user.entity) {
             connection.lastAction = +new Date();
-            user.entity.applyInput(q.message);
+            this.game.processInput(q.message, user.entity.entityId);
           }
           break;
         }
@@ -172,11 +172,14 @@ export abstract class ServerEngine extends Engine {
 
     this.gameTick(tickIndex, duration);
 
-    if (tickIndex % 10 === 0) {
+    if ((tickIndex % 60) * 5 === 0) {
       this.sendLeaderboard();
     }
 
-    this.sendWorldState();
+    if (tickIndex % 10 === 0) {
+      this.sendWorldState();
+      this.sendSpectatorWorldState();
+    }
 
     for (const c of this.users.array) {
       const messages = this.queuedMessagesToSend[c.connectionId];
@@ -185,8 +188,6 @@ export abstract class ServerEngine extends Engine {
         messages.length = 0;
       }
     }
-
-    this.sendSpectatorWorldState();
 
     for (const c of this.spectators.array) {
       const messages = this.queuedMessagesToSend[c.connectionId];
@@ -346,7 +347,7 @@ export abstract class ServerEngine extends Engine {
 
       for (let i = myEntities.length - 1; i >= 0; i--) {
         const myEntity = myEntities[i];
-        if (!myEntity.entity.inView(view)) {
+        if (!myEntity.entity.inView(view.x, view.y, view.width, view.height, -1)) {
           myEntities.splice(i, 1);
         }
       }
@@ -407,9 +408,9 @@ export abstract class ServerEngine extends Engine {
         if (!GameDebug.dontFilterEntities) {
           for (const entity of items) {
             if (entity.item.entity !== user.entity) {
-              if (!entity.item.entity.inView(view)) {
-                myEntities.push(entity.item);
-              }
+              // if (!entity.item.entity.inView(view.x, view.y, view.width, view.height, user.entity.entityId)) { todo inview
+              myEntities.push(entity.item);
+              // }
             }
           }
         }

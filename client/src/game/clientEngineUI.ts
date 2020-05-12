@@ -83,15 +83,19 @@ export class ClientEngineUI {
 
     context.font = '25px bold';
     const entities = this.clientEngine.game.entities.array;
-    for (const entity of entities) {
-      if(!entity.actor){
-        debugger;
-      }
-    }
     const sortedEntities = entities.sort((a, b) => a.actor!.zIndex - b.actor!.zIndex);
 
+    const {outerViewBox} = gameData.view;
     for (const entity of sortedEntities) {
-      if (!entity.inView(gameData.view.outerViewBox)) {
+      if (
+        !entity.inView(
+          outerViewBox.x,
+          outerViewBox.y,
+          outerViewBox.width,
+          outerViewBox.height,
+          this.clientEngine.game.clientPlayerId!
+        )
+      ) {
         continue;
       }
       entity.actor!.draw(context);
@@ -99,7 +103,15 @@ export class ClientEngineUI {
 
     context.restore();
     for (const entity of sortedEntities) {
-      if (!entity.inView(gameData.view.outerViewBox)) {
+      if (
+        !entity.inView(
+          outerViewBox.x,
+          outerViewBox.y,
+          outerViewBox.width,
+          outerViewBox.height,
+          this.clientEngine.game.clientPlayerId!
+        )
+      ) {
         continue;
       }
       entity.actor!.staticDraw(context);

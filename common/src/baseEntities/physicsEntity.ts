@@ -192,16 +192,8 @@ export abstract class PhysicsEntity extends Entity {
       }
     }
   }
-  inView(view: {height: number; width: number; x: number; y: number}): boolean {
-    return (
-      view.x < this.position.x &&
-      view.x + view.width > this.position.x &&
-      view.y < this.position.y &&
-      view.y + view.height > this.position.y
-    );
-  }
 
-  isVisibleAtCoordinate(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number) {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number) {
     return (
       this.position.x > viewX &&
       this.position.x < viewX + viewWidth &&
@@ -212,10 +204,12 @@ export abstract class PhysicsEntity extends Entity {
 
   reconcileFromServer(messageModel: PhysicsEntityModel) {
     super.reconcileFromServer(messageModel);
+    this.angle = messageModel.angle;
     this.position = TwoVector.fromModel(messageModel.position);
     this.velocity = TwoVector.fromModel(messageModel.velocity);
     this.friction = TwoVector.fromModel(messageModel.friction);
   }
+
   saveState(entityModel?: PhysicsEntityModel) {
     this.savedCopy = entityModel ?? this.serialize();
   }

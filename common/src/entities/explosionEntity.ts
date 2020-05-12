@@ -17,10 +17,7 @@ export class ExplosionEntity extends PhysicsEntity {
   ownerEntityId?: number;
   type = 'explosion' as const;
 
-  constructor(
-    public game: OrbitalGame,
-    messageModel: ImpliedEntityType<ImpliedDefaultPhysics<ExplosionModel>>
-  ) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<ExplosionModel>>) {
     super(game, messageModel);
     this.intensity = messageModel.intensity;
     this.ownerEntityId = messageModel.ownerEntityId;
@@ -37,13 +34,7 @@ export class ExplosionEntity extends PhysicsEntity {
     }
   }
 
-  isVisibleAtCoordinate(
-    viewX: number,
-    viewY: number,
-    viewWidth: number,
-    viewHeight: number,
-    playerId: number
-  ): boolean {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     const owner = this.ownerEntityId && this.game.entities.lookup<PhysicsEntity>(this.ownerEntityId);
 
     let x = this.position.x;

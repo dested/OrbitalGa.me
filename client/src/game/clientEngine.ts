@@ -10,8 +10,7 @@ import {IClientSocket} from '../socket/IClientSocket';
 import {Scheduler} from '@common/utils/scheduler';
 import {ExtrapolateStrategy} from './synchronizer/extrapolateStrategy';
 import {Entity} from '@common/baseEntities/entity';
-import {ActorEntityTypes, EntityTypes} from './entities/entityTypeModels';
-import {assertType} from '@common/utils/utils';
+import {ActorEntityTypes} from './entities/entityTypeModels';
 
 const STEP_DELAY_MSEC = 12; // if forward drift detected, delay next execution by this amount
 const STEP_HURRY_MSEC = 8; // if backward drift detected, hurry next execution by this amount
@@ -226,18 +225,20 @@ export class ClientEngine extends Engine {
   };
 
   private handleKeys() {
-    const inputEvent: CTOSPlayerInput = {
-      type: 'playerInput',
-      messageIndex: this.messageIndex,
-      step: this.game.stepCount,
-      weapon: 'unset', // todo
-      keys: this.keys,
-      movement: this.keys.up || this.keys.right || this.keys.left || this.keys.down,
-    };
-    this.synchronizer.clientInputSave(inputEvent);
-    this.game.processInput(inputEvent, this.game.clientPlayerId!);
-    this.sendMessageToServer(inputEvent);
-    this.messageIndex++;
+    if (this.keys.up || this.keys.right || this.keys.left || this.keys.down || this.keys.shoot) {
+      const inputEvent: CTOSPlayerInput = {
+        type: 'playerInput',
+        messageIndex: this.messageIndex,
+        step: this.game.stepCount,
+        weapon: 'unset', // todo weapon
+        keys: this.keys,
+        movement: this.keys.up || this.keys.right || this.keys.left || this.keys.down,
+      };
+      this.synchronizer.clientInputSave(inputEvent);
+      this.game.processInput(inputEvent, this.game.clientPlayerId!);
+      this.sendMessageToServer(inputEvent);
+      this.messageIndex++;
+    }
   }
 
   private processMessages() {

@@ -224,7 +224,7 @@ export class BossEvent1Entity extends PhysicsEntity {
     }
   }
 
-  isVisibleAtCoordinate(
+  inView(
     viewX: number,
     viewY: number,
     viewWidth: number,

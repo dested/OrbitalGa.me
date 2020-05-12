@@ -22,7 +22,7 @@ export abstract class Entity {
 
   abstract gameTick(duration: number): void;
 
-  inView(view: {height: number; width: number; x: number; y: number}): boolean {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     return true;
   }
 

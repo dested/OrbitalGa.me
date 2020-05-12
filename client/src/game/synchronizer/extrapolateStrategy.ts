@@ -25,7 +25,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     onEveryStep: {MAX_LEAD: 7, MAX_LAG: 4}, // max step lead/lag allowed at every step
     clientReset: 40, // if we are behind this many steps, just reset the step counter
   };
-  private recentInputs: {[stepNumber: number]: CTOSPlayerInput[]};
+  private recentInputs: {[stepNumber: number]: CTOSPlayerInput};
   constructor(clientEngine: ClientEngine, options?: typeof defaults) {
     super(clientEngine);
     this.options = {...defaults, ...options};
@@ -117,11 +117,10 @@ export class ExtrapolateStrategy extends SyncStrategy {
     const clientStep = game.stepCount;
     for (game.stepCount = serverStep; game.stepCount < clientStep; ) {
       if (this.recentInputs[game.stepCount]) {
-        for (const inputDesc of this.recentInputs[game.stepCount]) {
-          if (!inputDesc.movement) continue;
-          console.trace(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]`);
-          this.gameEngine.processInput(inputDesc, this.gameEngine.clientPlayerId!);
-        }
+        const inputDesc = this.recentInputs[game.stepCount];
+        if (!inputDesc.movement) continue;
+        console.trace(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]`);
+        this.gameEngine.processInput(inputDesc, this.gameEngine.clientPlayerId!);
       }
 
       // run the game engine step in "reenact" mode
@@ -156,10 +155,6 @@ export class ExtrapolateStrategy extends SyncStrategy {
 
   // keep a buffer of inputs so that we can replay them on extrapolation
   clientInputSave(inputEvent: CTOSPlayerInput) {
-    // if no inputs have been stored for this step, create an array
-    if (!this.recentInputs[inputEvent.step]) {
-      this.recentInputs[inputEvent.step] = [];
-    }
-    this.recentInputs[inputEvent.step].push(inputEvent);
+    this.recentInputs[inputEvent.step] = inputEvent;
   }
 }

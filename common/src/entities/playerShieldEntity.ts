@@ -77,7 +77,7 @@ export class PlayerShieldEntity extends PhysicsEntity {
     return damageLeft;
   }
 
-  isVisibleAtCoordinate(
+  inView(
     viewX: number,
     viewY: number,
     viewWidth: number,

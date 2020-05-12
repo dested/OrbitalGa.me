@@ -33,14 +33,14 @@ export class ScoreEntity extends PhysicsEntity {
       this.destroy();
     }
   }
-  isVisibleAtCoordinate(
+  inView(
     viewX: number,
     viewY: number,
     viewWidth: number,
     viewHeight: number,
     playerId: number
   ): boolean {
-    const result = super.isVisibleAtCoordinate(viewX, viewY, viewWidth, viewHeight, playerId);
+    const result = super.inView(viewX, viewY, viewWidth, viewHeight, playerId);
     return result && this.onlyVisibleToPlayerEntityId === playerId;
   }
 
