@@ -49,6 +49,7 @@ export abstract class Game {
     if (this.isClient && !instantiatedFromSync) {
       entity.entityId += 1000000;
     }
+    this.engine.assignActor(entity);
     this.entities.push(entity);
   }
 
@@ -172,7 +173,6 @@ export class OrbitalGame extends Game {
   instantiateEntity(messageModel: EntityModels): Entity {
     const curObj = new EntityTypes[messageModel.type](this, messageModel as any);
     curObj.reconcileFromServer(messageModel as any); // todo any
-    this.engine.assignActor(curObj);
     return curObj;
   }
 
@@ -201,10 +201,12 @@ export class OrbitalGame extends Game {
     }
   }
 
-  step(replay: boolean, dt: number): void {
+  step(isReenact: boolean, dt?: number, physicsOnly?: boolean): void {
+    super.step(isReenact, dt, physicsOnly);
+    if (physicsOnly) return;
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.array[i];
-      entity.gameTick(dt);
+      entity.gameTick(dt ?? 1);
     }
   }
 }

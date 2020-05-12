@@ -19,7 +19,7 @@ const styles = {
 
 export const Leaderboard = (props: {tick: number}) => {
   const client = GameData.client;
-  const playerEntityId = client?.clientEngine.playerEntityId;
+  const playerEntityId = client?.clientEngine.game.clientPlayerId;
 
   return (client?.clientEngine.leaderboardScores.length ?? 0) > 0 ? (
     <ul style={styles.wrapper}>

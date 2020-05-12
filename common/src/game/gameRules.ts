@@ -10,7 +10,7 @@ export const GameRules = {
       maxReverseSpeed: 100,
       maxForwardSpeed: 150,
       momentumDeceleration: 0.7,
-      speedRamp: 50,
+      speedRamp: 10,
       startingHealth: 20,
     },
   },
@@ -60,7 +60,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     damage: 1,
     explosionIntensity: 1,
     alternateSide: true,
-    resetShootTimer: 1,
+    resetShootTimer: 10,
     spray: 0,
   },
   laser1Spray10: {

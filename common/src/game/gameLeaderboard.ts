@@ -38,6 +38,7 @@ export const LeaderboardEntryWeight: {[key in keyof LeaderboardEntry]: number} =
   shotsFired: 0.1 /**/,
   calculatedScore: 0,
 };
+// todo leaderboard
 
 export class GameLeaderboard {
   activePlayerScores: {[userId: number]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};

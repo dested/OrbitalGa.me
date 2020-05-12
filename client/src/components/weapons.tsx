@@ -43,21 +43,21 @@ const styles = {
 
 export const Weapons = (props: {tick: number}) => {
   const client = GameData.client;
-  const liveEntity = client?.clientEngine.playerEntityId;
+  const liveEntityId = client?.clientEngine.game.clientPlayerId;
 
   const selectWeapon = useCallback(
     (weapon: PlayerWeapon) => {
       return () => {
-        if (!liveEntity) {
+        if (!liveEntityId) {
           return;
         }
         // client?.clientEngine.setKey('weapon', weapon);//todo weapon
       };
     },
-    [liveEntity]
+    [liveEntityId]
   );
 
-  if (!liveEntity) {
+  if (!liveEntityId) {
     return <></>;
   }
   return (

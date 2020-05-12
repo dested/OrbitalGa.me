@@ -29,7 +29,7 @@ export class GameConstants {
   static playerStartingY = screenSize.height * 0.8;
   static screenRange = screenSize.width * 1.4;
   static screenSize = screenSize;
-  static serverTickRate = 150;
+  static serverTickRate = 1000 / 60;
   static serverVersion = 9;
   static totalSpectatorDuration = 30_000;
 }

@@ -24,8 +24,6 @@ export class OrbitalServerEngine extends ServerEngine {
     this.game = game;
   }
 
-  addObjectToWorld(entity: Entity): void {}
-
   assignActor(entity: Entity): void {}
 
   gameTick(tickIndex: number, duration: number): void {
@@ -59,7 +57,7 @@ export class OrbitalServerEngine extends ServerEngine {
       hit: false,
       badges: [],
     });
-    this.gameLeaderboard!.addPlayer(playerEntity.entityId, socketConnection.jwt.userId);
+    this.gameLeaderboard?.addPlayer(playerEntity.entityId, socketConnection.jwt.userId);
     this.users.push({name, connectionId, entity: playerEntity});
     this.game.addObjectToWorld(playerEntity);
 
@@ -111,7 +109,7 @@ export class OrbitalServerEngine extends ServerEngine {
       // new BossEvent1Entity(this, nextId(), groupings[groupings.length - 1].x1 - groupings[0].x0);
     }
 
-    if (tickIndex % 50 === 1) {
+    if (tickIndex % 500 === 1) {
       if (GameDebug.meteorCluster) {
         const groupings = this.game.entityClusterer.getGroupings((a) => a.type === 'player');
         for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {

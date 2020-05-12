@@ -58,7 +58,7 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
   ownerPlayerEntityId: number;
   playerColor: PlayerColor;
   selectedWeapon: PlayerWeapon = 'laser1';
-  shootTimer: number = 1;
+  shootTimer: number = 10;
   shotSide: 'left' | 'right' = 'left';
 
   staticPlayersToLeft?: number;

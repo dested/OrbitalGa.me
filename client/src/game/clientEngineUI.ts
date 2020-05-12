@@ -7,7 +7,7 @@ import {IClientSocket} from '../socket/IClientSocket';
 import {ClientEngine, ClientGameOptions} from './clientEngine';
 import {OrbitalGame} from '@common/game/game';
 
-export class ClientGameUI {
+export class ClientEngineUI {
   clientEngine: ClientEngine;
   drawTick = 0;
   private canvas: HTMLCanvasElement;
@@ -83,6 +83,11 @@ export class ClientGameUI {
 
     context.font = '25px bold';
     const entities = this.clientEngine.game.entities.array;
+    for (const entity of entities) {
+      if(!entity.actor){
+        debugger;
+      }
+    }
     const sortedEntities = entities.sort((a, b) => a.actor!.zIndex - b.actor!.zIndex);
 
     for (const entity of sortedEntities) {

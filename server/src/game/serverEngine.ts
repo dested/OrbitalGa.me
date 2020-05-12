@@ -64,15 +64,15 @@ export abstract class ServerEngine extends Engine {
         this.serverTick(serverTick, +new Date() - last);
         last = +new Date();
       },
-      period: 150,
-      delay: 150 / 3,
+      period: GameConstants.serverTickRate,
+      delay: GameConstants.serverTickRate / 3,
     }).start();
   }
 
   abstract initGame(): void;
 
   killPlayer(player: PlayerEntity): void {
-    this.gameLeaderboard!.removePlayer(player.entityId);
+    this.gameLeaderboard?.removePlayer(player.entityId);
     for (const user of this.users.array) {
       if (user.entity === player) {
         user.deadXY = {x: player.position.x, y: player.position.y};
@@ -292,7 +292,10 @@ export abstract class ServerEngine extends Engine {
   private sendLeaderboard() {
     if (this.users.array.length === 0 && this.spectators.array.length === 0) return;
 
-    const scores = this.gameLeaderboard!.updateScores();
+    const scores = this.gameLeaderboard?.updateScores();
+    if (!scores) {
+      return;
+    }
     for (const score of scores) {
       score.username = this.users.array.find((a) => a.entity?.entityId === score.userId)?.name ?? '';
     }

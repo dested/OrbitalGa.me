@@ -28,7 +28,6 @@ export type ClientGameOptions = {
 
 export class ClientEngine extends Engine {
   debugValues: {[key: string]: number | string} = {};
-  drawTick = 0;
   isDead: boolean = false;
 
   keys: PlayerInputKeys = {
@@ -41,19 +40,18 @@ export class ClientEngine extends Engine {
   lastXY?: {x: number; y: number};
   leaderboardScores: LeaderboardEntryRanked[] = [];
   myScore?: LeaderboardEntryRanked;
-  playerEntityId?: number;
   spectatorMode: boolean = false;
 
   private connected = false;
   private correction: number = 0;
   private doReset: boolean = false;
   private lastStepTime: number = 0;
+  private messageIndex: number = 1;
   private messagesToProcess: ServerToClientMessage[] = [];
   private scheduler?: Scheduler;
   private serverVersion: number = -1;
   private synchronizer: ExtrapolateStrategy;
   private totalPlayers: number = 0;
-  private messageIndex: number = 1;
 
   constructor(
     private serverPath: string,
@@ -255,7 +253,7 @@ export class ClientEngine extends Engine {
           this.isDead = false;
           this.lastXY = undefined;
           this.spectatorMode = false;
-          this.playerEntityId = message.playerEntityId;
+          this.game.clientPlayerId = message.playerEntityId;
           this.options.onReady(this);
           break;
         case 'error':
@@ -278,7 +276,7 @@ export class ClientEngine extends Engine {
           break;
         case 'leaderboard':
           this.leaderboardScores = message.scores;
-          const myScore = message.scores.find((a) => a.userId === this.playerEntityId);
+          const myScore = message.scores.find((a) => a.userId === this.game.clientPlayerId);
           if (myScore) {
             this.myScore = myScore;
           }
@@ -320,7 +318,6 @@ export class ClientEngine extends Engine {
       this.game.stepCount = message.stepCount;
     }
   }
-
 }
 
 export abstract class OrbitalClientEngine extends ClientEngine {}

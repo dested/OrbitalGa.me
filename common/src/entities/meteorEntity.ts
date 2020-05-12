@@ -163,16 +163,18 @@ export class MeteorEntity extends PhysicsEntity {
     }
     this.health -= damage;
     this.hit = true;
-    //todo bounce
+    // todo bounce
     if (this.health <= 0) {
-      if (Utils.random(50)) {
-        const drop = new DropEntity(this.game, {
-          entityId: nextId(),
-          position: this.position.model(),
-          drop: DropEntity.randomDrop(this.size),
-        });
-        this.game.addObjectToWorld(drop);
-        this.game.explode(this, 'small');
+      if (!this.game.isClient) {
+        if (Utils.random(50)) {
+          const drop = new DropEntity(this.game, {
+            entityId: nextId(),
+            position: this.position.model(),
+            drop: DropEntity.randomDrop(this.size),
+          });
+          this.game.addObjectToWorld(drop);
+          this.game.explode(this, 'small');
+        }
       }
     }
   }
