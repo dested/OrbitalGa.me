@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
-import {Weapon} from './weapon';
+import {WeaponEntity} from './weaponEntity';
 import {BossEvent1PieceType} from './bossEvent1Entity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
@@ -12,7 +12,7 @@ import {
   PhysicsEntityModelSchema,
 } from '../baseEntities/physicsEntity';
 
-export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
+export class BossEvent1EnemyEntity extends PhysicsEntity implements WeaponEntity {
   aliveTick: number = 0;
   damage = 2;
   explosionIntensity = 4;
@@ -79,11 +79,11 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements Weapon {
 
     const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
     explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
-    this.game.entities.push(explosionEntity);
+    this.game.addObjectToWorld(explosionEntity);
     if (this.health <= 0) {
       const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
       drop.start(this.x, this.y);
-      this.game.entities.push(drop);
+      this.game.addObjectToWorld(drop);
       this.game.explode(this, 'medium');
     }
 */

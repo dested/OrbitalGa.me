@@ -3,7 +3,7 @@ import {Game, OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameRules} from '../game/gameRules';
-import {Weapon} from './weapon';
+import {WeaponEntity} from './weaponEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {
@@ -13,7 +13,7 @@ import {
   PhysicsEntityModelSchema,
 } from '../baseEntities/physicsEntity';
 
-export class EnemyShotEntity extends PhysicsEntity implements Weapon {
+export class EnemyShotEntity extends PhysicsEntity implements WeaponEntity {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 100}];
   damage = 1;

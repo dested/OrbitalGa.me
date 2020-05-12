@@ -9,7 +9,7 @@ export const SelectWeaponBox = glamorous.div<{liveEntity: LivePlayerActor; weapo
     height: boxSize,
     backgroundColor: 'rgba(0,0,0,.2)',
     margin: '5px',
-    border: 'solid 6px ' + (liveEntity.selectedWeapon === weapon.weapon ? '#c14747' : '#C2C7C8'),
+    border: 'solid 6px ' + (liveEntity.entity.selectedWeapon === weapon.weapon ? '#c14747' : '#C2C7C8'),
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

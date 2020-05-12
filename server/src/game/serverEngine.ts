@@ -14,6 +14,7 @@ import {IServerSync} from './IServerSync';
 import {IServerSocket} from '@common/socket/models';
 import {Scheduler} from '@common/utils/scheduler';
 import {GameLeaderboard} from '@common/game/gameLeaderboard';
+import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
 type Spectator = {connectionId: number};
 type User = {
@@ -326,10 +327,6 @@ export abstract class ServerEngine extends Engine {
       return;
     }
     const totalPlayers = this.game.entities.filter((a) => a.type === 'player').length;
-    const box = {
-      x0: spectator.position.x - GameConstants.screenRange / 2,
-      x1: spectator.position.x + GameConstants.screenRange / 2,
-    };
 
     const myEntities = this.game.entities.map((entity) => ({
       entity,
@@ -337,10 +334,16 @@ export abstract class ServerEngine extends Engine {
     }));
 
     if (!GameDebug.dontFilterEntities) {
+      const view = {
+        x: spectator.position.x - GameConstants.screenRange / 2,
+        y: 0,
+        width: GameConstants.screenRange / 2,
+        height: GameConstants.screenSize.height,
+      };
+
       for (let i = myEntities.length - 1; i >= 0; i--) {
         const myEntity = myEntities[i];
-        const x = myEntity.entity.realX;
-        if (x < box.x0 || x > box.x1) {
+        if (!myEntity.entity.inView(view)) {
           myEntities.splice(i, 1);
         }
       }
@@ -365,24 +368,32 @@ export abstract class ServerEngine extends Engine {
     const bush = new RBushXOnly<{entity: Entity; serializedEntity: EntityModels}>();
 
     for (const entity of this.game.entities.array) {
-      bush.insert({
-        maxX: entity.x,
-        minX: entity.y,
-        item: {
-          entity,
-          serializedEntity: entity.serialize() as EntityModels,
-        },
-        children: undefined!,
-        height: undefined!,
-      });
+      if (entity instanceof PhysicsEntity) {
+        bush.insert({
+          minX: entity.position.x,
+          maxX: entity.position.x,
+          item: {
+            entity,
+            serializedEntity: entity.serialize() as EntityModels,
+          },
+          children: undefined!,
+          height: undefined!,
+        });
+      }
     }
 
     for (const user of this.users.array) {
       const myEntities: typeof bush.data.item[] = [];
       if (user.entity) {
+        const view = {
+          x: user.entity.position.x - GameConstants.screenRange / 2,
+          y: 0,
+          width: GameConstants.screenRange / 2,
+          height: GameConstants.screenSize.height,
+        };
         const items = bush.search({
-          minX: user.entity.realX - GameConstants.screenRange / 2,
-          maxX: user.entity.realX + GameConstants.screenRange / 2,
+          minX: user.entity.position.x - GameConstants.screenRange / 2,
+          maxX: user.entity.position.x + GameConstants.screenRange / 2,
         });
 
         myEntities.push({
@@ -393,10 +404,7 @@ export abstract class ServerEngine extends Engine {
         if (!GameDebug.dontFilterEntities) {
           for (const entity of items) {
             if (entity.item.entity !== user.entity) {
-              if (
-                !entity.item.entity.onlyVisibleToPlayerEntityId ||
-                entity.item.entity.onlyVisibleToPlayerEntityId === user.entity.entityId
-              ) {
+              if (!entity.item.entity.inView(view)) {
                 myEntities.push(entity.item);
               }
             }
@@ -410,16 +418,12 @@ export abstract class ServerEngine extends Engine {
 
         if (!GameDebug.dontFilterEntities) {
           for (const entity of items) {
-            if (!entity.item.entity.onlyVisibleToPlayerEntityId) {
+            if (!('onlyVisibleToPlayerEntityId' in entity.item.entity)) {
               myEntities.push(entity.item);
             }
           }
         }
       }
-      /*  const serializedEntity = myEntities.find((a) => a.serializedEntity.type === 'livePlayer')?.serializedEntity;
-      if (serializedEntity?.type === 'livePlayer') {
-        console.log('s', serializedEntity.lastProcessedInputSequenceNumber);
-      }*/
 
       this.sendMessageToClient(user.connectionId, {
         totalPlayers,

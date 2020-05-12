@@ -1,7 +1,6 @@
 import {Collisions, Result} from 'collisions';
 import {Entity, EntityModel} from '../baseEntities/entity';
 import {ArrayHash} from '../utils/arrayHash';
-import {nextId} from '../utils/uuid';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
 import {PlayerEntity} from '../entities/playerEntity';
@@ -11,6 +10,8 @@ import {CTOSPlayerInput} from '../models/clientToServerMessages';
 import {TwoVector} from '../utils/twoVector';
 import {EntityModels} from '../models/serverToClientMessages';
 import {EntityTypes} from '../../../client/src/game/entities/entityTypeModels';
+import {nextId} from '../utils/uuid';
+import {EntityUtils} from '../utils/entityUtils';
 const dx = new TwoVector(0, 0);
 
 export abstract class Game {
@@ -18,6 +19,7 @@ export abstract class Game {
   collisionEngine: Collisions;
   readonly collisionResult: Result;
   entities = new ArrayHash<Entity>('entityId');
+
   entityClusterer: EntityClusterer;
   gameLeaderboard: any = null;
   highestServerStep?: number;
@@ -38,12 +40,16 @@ export abstract class Game {
     }
     return undefined;
   }
+
   get spectatorEntity(): SpectatorEntity | undefined {
     return this.entities.filter((a) => a.type === 'spectator')[0] as SpectatorEntity | undefined;
   }
 
-  addObjectToWorld(curObj: Entity) {
-    this.entities.push(curObj);
+  addObjectToWorld(entity: Entity, instantiatedFromSync: boolean = false) {
+    if (this.isClient && !instantiatedFromSync) {
+      entity.entityId += 1000000;
+    }
+    this.entities.push(entity);
   }
 
   getPlayerRange(padding: number, filter: (e: Entity) => boolean) {
@@ -66,7 +72,7 @@ export abstract class Game {
     dt = dt ?? 1;
     for (const entity of this.entities.array) {
       // skip physics for shadow objects during re-enactment
-      if (isReenact && entity.shadowEntity) {
+      if (isReenact && EntityUtils.isShadowEntity(entity) && entity.shadowEntity) {
         continue;
       }
       if (entity instanceof PhysicsEntity) {
@@ -138,36 +144,34 @@ export class OrbitalGame extends Game {
 
   explode(entity: PhysicsEntity, explosionSize: 'small' | 'medium' | 'big') {
     entity.destroy();
-    if (!this.isClient) {
-      let size = 0;
-      switch (explosionSize) {
-        case 'small':
-          size = 3;
-          break;
-        case 'medium':
-          size = 5;
-          break;
-        case 'big':
-          size = 8;
-          break;
-      }
-      for (let i = 0; i < size; i++) {
-        const deathExplosion = new ExplosionEntity(this, {
-          entityId: nextId(),
-          position: {
-            x: entity.position.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
-            y: entity.position.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
-          },
-          intensity: 2,
-        });
-        this.entities.push(deathExplosion);
-      }
+    let size = 0;
+    switch (explosionSize) {
+      case 'small':
+        size = 3;
+        break;
+      case 'medium':
+        size = 5;
+        break;
+      case 'big':
+        size = 8;
+        break;
+    }
+    for (let i = 0; i < size; i++) {
+      const deathExplosion = new ExplosionEntity(this, {
+        entityId: nextId(),
+        position: {
+          x: entity.position.x - entity.boundingBoxes[0].width / 2 + Math.random() * entity.boundingBoxes[0].width,
+          y: entity.position.y - entity.boundingBoxes[0].height / 2 + Math.random() * entity.boundingBoxes[0].height,
+        },
+        intensity: 2,
+      });
+      this.addObjectToWorld(deathExplosion);
     }
   }
 
   instantiateEntity(messageModel: EntityModels): Entity {
-    const curObj = new EntityTypes[messageModel.type](this, messageModel);
-    curObj.reconcileFromServer(messageModel);
+    const curObj = new EntityTypes[messageModel.type](this, messageModel as any);
+    curObj.reconcileFromServer(messageModel as any); // todo any
     this.engine.assignActor(curObj);
     return curObj;
   }
@@ -176,7 +180,8 @@ export class OrbitalGame extends Game {
     // todo leaderboard this.gameLeaderboard!.removePlayer(player.entityId);
     for (const user of this.entities.array) {
       if (user === player) {
-        user.deadXY = {x: player.realX, y: player.realY};
+        // todo deadxy
+        // user.deadXY = {x: player.realX, y: player.realY};
         break;
       }
     }

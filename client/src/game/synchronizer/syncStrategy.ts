@@ -19,16 +19,12 @@ export abstract class SyncStrategy {
   constructor(protected clientEngine: ClientEngine) {
     this.clientEngine = clientEngine;
     this.gameEngine = clientEngine.game;
-    /*
-    this.gameEngine.on('client__postStep', this.syncStep.bind(this));
-    this.gameEngine.on('client__syncReceived', this.collectSync.bind(this));
-*/
   }
 
   // add an object to our world
   addNewObject(messageModel: EntityModels): Entity {
     const curObj = this.gameEngine.instantiateEntity(messageModel);
-    this.gameEngine.addObjectToWorld(curObj);
+    this.gameEngine.addObjectToWorld(curObj, true);
     return curObj;
   }
 

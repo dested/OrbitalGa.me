@@ -17,7 +17,10 @@ export class ExplosionEntity extends PhysicsEntity {
   ownerEntityId?: number;
   type = 'explosion' as const;
 
-  constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<ExplosionModel>>) {
+  constructor(
+    public game: OrbitalGame,
+    messageModel: ImpliedEntityType<ImpliedDefaultPhysics<ExplosionModel>>
+  ) {
     super(game, messageModel);
     this.intensity = messageModel.intensity;
     this.ownerEntityId = messageModel.ownerEntityId;

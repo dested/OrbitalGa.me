@@ -1,9 +1,13 @@
 import {PlayerInput, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ImpliedEntityType} from '@common/models/serverToClientMessages';
-import {Game, OrbitalGame} from '@common/game/game';
+import {OrbitalGame} from '@common/game/game';
+import {ImpliedDefaultPhysics} from '@common/baseEntities/physicsEntity';
 
 export class ServerPlayerEntity extends PlayerEntity {
-  constructor(private serverGame: OrbitalGame, messageModel: ImpliedEntityType<PlayerModel>) {
+  constructor(
+    private serverGame: OrbitalGame,
+    messageModel: ImpliedEntityType<ImpliedDefaultPhysics<Omit<PlayerModel, 'playerInputKeys'>>>
+  ) {
     super(serverGame, messageModel);
   }
 

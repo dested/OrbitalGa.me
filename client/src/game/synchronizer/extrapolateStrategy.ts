@@ -5,6 +5,8 @@ import {Entity} from '@common/baseEntities/entity';
 import {PhysicsEntity, PhysicsEntityModel} from '@common/baseEntities/physicsEntity';
 import {CTOSPlayerInput} from '@common/models/clientToServerMessages';
 import {Game} from '@common/game/game';
+import {ShadowableEntity, ShadowEntityModel} from '@common/baseEntities/shadowableEntity';
+import {EntityUtils} from '@common/utils/entityUtils';
 
 const defaults = {
   syncsBufferLength: 5,
@@ -73,7 +75,12 @@ export class ExtrapolateStrategy extends SyncStrategy {
     }
 
     for (const messageModel of sync.entities) {
-      const foundEntityShadow = this.gameEngine.entities.array.find((a) => a.inputId === messageModel.inputId);
+      const foundEntityShadow =
+        'inputId' in messageModel &&
+        this.gameEngine.entities.array.find(
+          (entity) => EntityUtils.isShadowEntity(entity) && entity.inputId === messageModel.inputId
+        );
+
       if (foundEntityShadow) {
         // case 1: this object has a local shadow object on the client
         console.log(`object ${messageModel.entityId} replacing local shadow ${foundEntityShadow.entityId}`);
@@ -127,7 +134,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     //
     for (const entity of this.gameEngine.entities.array) {
       // shadow objects are not bent
-      if (entity.shadowEntity) continue;
+      if (EntityUtils.isShadowEntity(entity) && entity.shadowEntity) continue;
       if (entity instanceof PhysicsEntity) {
         const isLocal = entity.owningPlayerId === this.gameEngine.clientPlayerId; // eslint-disable-line eqeqeq
         const bending = isLocal ? this.options.localObjBending : this.options.remoteObjBending;

@@ -8,7 +8,7 @@ import {WallEntity} from './wallEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Utils} from '../utils/utils';
-import {isEnemyWeapon, Weapon} from './weapon';
+import {isEnemyWeapon, WeaponEntity} from './weaponEntity';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
@@ -40,7 +40,7 @@ export type PlayerBadges = {
   rank: 'bolt' | 'shield' | 'star' | 'badge';
 };
 
-export class PlayerEntity extends PhysicsEntity implements Weapon {
+export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
   availableWeapons: AvailablePlayerWeapon[] = [
     {ammo: 0, weapon: 'laser1'},
     {ammo: 5, weapon: 'rocket'},
@@ -76,6 +76,7 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
     this.badges = messageModel.badges;
+    this.lastPlayerInput = {down: false, left: false, right: false, up: false, shoot: false};
     this.createPolygon();
   }
 
@@ -189,22 +190,24 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
               for (let i = 1; i < config.spray; i++) {
                 const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
                   entityId: nextId(),
+                  inputId: input.messageIndex,
                   position: {x: this.position.x + offsetX, y: this.position.y - 6},
                   ownerEntityId: this.entityId,
                   weaponType: this.selectedWeapon,
                   sprayAngle: Math.round(i * (180 / config.spray)),
                 });
-                this.game.entities.push(playerWeaponEntity);
+                this.game.addObjectToWorld(playerWeaponEntity);
               }
             } else {
               const playerWeaponEntity = new PlayerWeaponEntity(this.game, {
                 entityId: nextId(),
+                inputId: input.messageIndex,
                 position: {x: this.position.x + offsetX, y: this.position.y - 6},
                 ownerEntityId: this.entityId,
                 weaponType: this.selectedWeapon,
                 sprayAngle: 0,
               });
-              this.game.entities.push(playerWeaponEntity);
+              this.game.addObjectToWorld(playerWeaponEntity);
             }
             if (config.alternateSide) {
               this.shotSide = this.shotSide === 'left' ? 'right' : 'left';
@@ -275,23 +278,21 @@ export class PlayerEntity extends PhysicsEntity implements Weapon {
       return true;
     }
 
-    if (!this.game.isClient) {
-      if (isEnemyWeapon(otherEntity)) {
-        otherEntity.hurt(
-          otherEntity.damage,
-          this,
-          collisionResult.overlap * collisionResult.overlap_x,
-          collisionResult.overlap * collisionResult.overlap_y
-        );
-        this.hurt(
-          otherEntity.damage,
-          otherEntity,
-          -collisionResult.overlap * collisionResult.overlap_x,
-          -collisionResult.overlap * collisionResult.overlap_y
-        );
+    if (isEnemyWeapon(otherEntity)) {
+      otherEntity.hurt(
+        otherEntity.damage,
+        this,
+        collisionResult.overlap * collisionResult.overlap_x,
+        collisionResult.overlap * collisionResult.overlap_y
+      );
+      this.hurt(
+        otherEntity.damage,
+        otherEntity,
+        -collisionResult.overlap * collisionResult.overlap_x,
+        -collisionResult.overlap * collisionResult.overlap_y
+      );
 
-        return true;
-      }
+      return true;
     }
     return false;
   }

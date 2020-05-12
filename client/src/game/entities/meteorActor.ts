@@ -28,7 +28,7 @@ export class MeteorActor extends ClientActor<MeteorEntity> {
 
     context.save();
     context.translate(this.drawX, this.drawY);
-    context.rotate(Utils.byteDegToRad(this.entity.rotate));
+    context.rotate(Utils.byteDegToRad(this.entity.angle));
     context.drawImage(meteor.image, -meteor.size.width / 2, -meteor.size.height / 2);
 
     if (this.hitTimer > 0) {

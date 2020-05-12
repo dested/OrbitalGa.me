@@ -2,7 +2,7 @@ import {Result} from 'collisions';
 import {Game, OrbitalGame} from '../game/game';
 import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {nextId} from '../utils/uuid';
-import {isPlayerWeapon} from './weapon';
+import {isPlayerWeapon} from './weaponEntity';
 import {DropEntity} from './dropEntity';
 import {BossEvent1EnemyEntity} from './bossEvent1EnemyEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
@@ -164,7 +164,7 @@ export class BossEvent1Entity extends PhysicsEntity {
 
       for (let x = 0; x < messageModel.width; x += entityWidth) {
         for (const item of items) {
-          this.game.entities.push(
+          this.game.addObjectToWorld(
             new BossEvent1EnemyEntity(this.game, {
               entityId: nextId(),
               ownerEntityId: this.entityId,
@@ -178,7 +178,6 @@ export class BossEvent1Entity extends PhysicsEntity {
         }
       }
     }
-    this.createPolygon();
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -220,7 +219,7 @@ export class BossEvent1Entity extends PhysicsEntity {
         position: this.position.model(),
         drop: DropEntity.randomDrop('big'),
       });
-      this.game.entities.push(drop);
+      this.game.addObjectToWorld(drop);
       this.game.explode(this, 'medium');
     }
   }

@@ -6,7 +6,7 @@ import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {GameRules} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
-import {isPlayerWeapon, Weapon} from './weapon';
+import {isPlayerWeapon, WeaponEntity} from './weaponEntity';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
@@ -21,7 +21,7 @@ import {
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
-export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
+export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
   aliveTick: number = 0;
   // width = 112;
   // height = 75;
@@ -93,9 +93,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
     this.enemyColor = messageModel.enemyColor;
     this.ownerPlayerEntityId = messageModel.entityId;
     this.createPolygon();
-    if (!this.game.isClient) {
-      this.path.setStartPosition(this.position.x, this.position.y);
-    }
+    this.path.setStartPosition(this.position.x, this.position.y);
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {}
@@ -132,7 +130,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
         position: {x: this.position.x, y: this.position.y - 6},
         ownerEntityId: this.entityId,
       });
-      this.game.entities.push(shotEntity);
+      this.game.addObjectToWorld(shotEntity);
     }
 
     const result = this.path.progress();
@@ -164,9 +162,9 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
         position: {x: this.position.x, y: this.position.y},
         drop: DropEntity.randomDrop('big'),
       });
-      this.game.entities.push(drop);
+      this.game.addObjectToWorld(drop);
       this.game.explode(this, 'medium');
-      this.game.entities.push(
+      this.game.addObjectToWorld(
         new ScoreEntity(this.game, {
           entityId: nextId(),
           position: {x: this.position.x, y: this.position.y},
@@ -175,7 +173,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements Weapon {
         })
       );
     } else {
-      this.game.entities.push(
+      this.game.addObjectToWorld(
         new ScoreEntity(this.game, {
           entityId: nextId(),
           position: {x: this.position.x, y: this.position.y},

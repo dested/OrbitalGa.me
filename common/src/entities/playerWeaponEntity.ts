@@ -3,23 +3,24 @@ import {Game, OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {PlayerWeapon, WeaponConfigs} from '../game/gameRules';
-import {Weapon} from './weapon';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {Utils} from '../utils/utils';
 import {
   ImpliedDefaultPhysics,
   PhysicsEntity,
   PhysicsEntityModel,
   PhysicsEntityModelSchema,
 } from '../baseEntities/physicsEntity';
+import {ShadowableEntity, ShadowEntityModel, ShadowEntityModelSchema} from '../baseEntities/shadowableEntity';
+import {WeaponEntity} from './weaponEntity';
 
-export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
+export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, ShadowableEntity {
   aliveDuration = 3000;
   boundingBoxes = [{width: 9, height: 28}];
   damage: number;
   explosionIntensity: number;
+  inputId: number;
   isWeapon = true as const;
   ownerEntityId: number;
   ownerPlayerEntityId: number;
@@ -34,6 +35,7 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
     this.ownerPlayerEntityId = messageModel.ownerEntityId;
     this.weaponType = messageModel.weaponType;
     this.sprayAngle = messageModel.sprayAngle;
+    this.inputId = messageModel.inputId;
     this.damage = WeaponConfigs[this.weaponType].damage;
     this.explosionIntensity = WeaponConfigs[this.weaponType].explosionIntensity;
     const config = WeaponConfigs[this.weaponType];
@@ -41,6 +43,10 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
       this.velocity.add({x: 0, y: -config.speed});
     }
     this.createPolygon();
+  }
+
+  get shadowEntity() {
+    return this.entityId > 1000000;
   }
 
   causedDamage(damage: number, otherEntity: Entity): void {
@@ -83,6 +89,7 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   reconcileFromServer(messageModel: PlayerWeaponModel) {
     super.reconcileFromServer(messageModel);
     this.ownerEntityId = messageModel.ownerEntityId;
+    this.inputId = messageModel.inputId;
     this.weaponType = messageModel.weaponType;
     this.sprayAngle = messageModel.sprayAngle;
   }
@@ -90,6 +97,7 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   serialize(): PlayerWeaponModel {
     return {
       ...super.serialize(),
+      inputId: this.inputId,
       ownerEntityId: this.ownerEntityId,
       sprayAngle: this.sprayAngle,
       weaponType: this.weaponType,
@@ -98,15 +106,17 @@ export class PlayerWeaponEntity extends PhysicsEntity implements Weapon {
   }
 }
 
-export type PlayerWeaponModel = PhysicsEntityModel & {
-  ownerEntityId: number;
-  sprayAngle: number;
-  type: 'playerWeapon';
-  weaponType: PlayerWeapon;
-};
+export type PlayerWeaponModel = PhysicsEntityModel &
+  ShadowEntityModel & {
+    ownerEntityId: number;
+    sprayAngle: number;
+    type: 'playerWeapon';
+    weaponType: PlayerWeapon;
+  };
 
 export const PlayerWeaponModelSchema: SDTypeElement<PlayerWeaponModel> = {
   ...PhysicsEntityModelSchema,
+  ...ShadowEntityModelSchema,
   weaponType: PlayerWeaponEnumSchema,
   sprayAngle: 'uint8',
   ownerEntityId: 'uint32',

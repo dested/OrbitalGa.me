@@ -48,12 +48,12 @@ export class ClientEngine extends Engine {
   private correction: number = 0;
   private doReset: boolean = false;
   private lastStepTime: number = 0;
-  private messageIndex: number = 0;
   private messagesToProcess: ServerToClientMessage[] = [];
   private scheduler?: Scheduler;
   private serverVersion: number = -1;
   private synchronizer: ExtrapolateStrategy;
   private totalPlayers: number = 0;
+  private messageIndex: number = 1;
 
   constructor(
     private serverPath: string,
@@ -320,6 +320,7 @@ export class ClientEngine extends Engine {
       this.game.stepCount = message.stepCount;
     }
   }
+
 }
 
 export abstract class OrbitalClientEngine extends ClientEngine {}

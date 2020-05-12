@@ -4,7 +4,7 @@ import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {nextId} from '../utils/uuid';
-import {isPlayerWeapon} from './weapon';
+import {isPlayerWeapon} from './weaponEntity';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
@@ -171,7 +171,7 @@ export class MeteorEntity extends PhysicsEntity {
           position: this.position.model(),
           drop: DropEntity.randomDrop(this.size),
         });
-        this.game.entities.push(drop);
+        this.game.addObjectToWorld(drop);
         this.game.explode(this, 'small');
       }
     }

@@ -44,8 +44,6 @@ export type EntityType = {
 
 export type EntityModels = EntityType[keyof EntityType]['model'];
 
-export type WorldModelCastToEntityModel = any;
-
 export type ImpliedEntityType<T> = Omit<T, 'type'>;
 
 type STOCJoined = {playerEntityId: number; serverVersion: number; type: 'joined'};

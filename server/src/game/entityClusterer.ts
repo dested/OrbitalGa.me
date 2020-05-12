@@ -7,10 +7,11 @@ import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 export type EntityGrouping = {entities: PhysicsEntity[]; x0: number; x1: number};
 
 export class EntityClusterer {
-  constructor(private entities: ArrayHash<PhysicsEntity>, private idealSize: number) {}
+  constructor(private entities: ArrayHash<Entity>, private idealSize: number) {}
 
   getGroupings(filter: (entity: PhysicsEntity) => boolean): EntityGrouping[] {
-    const items = this.entities.array.filter(filter);
+    const physicsEntities = this.entities.filter((a) => a instanceof PhysicsEntity) as PhysicsEntity[];
+    const items = physicsEntities.filter(filter);
     const screenWidth = GameConstants.screenSize.width;
 
     if (items.length === 0) {
@@ -55,7 +56,8 @@ export class EntityClusterer {
     const groups = Utils.randomizeArray(
       this.getGroupings((a) => a.type === 'player').filter((a) => a.entities.length < this.idealSize)
     );
-    const enemyXs = this.entities.filter((a) => a.type === 'swoopingEnemy').map((a) => a.position.x);
+    const physicsEntities = this.entities.filter((a) => a instanceof PhysicsEntity) as PhysicsEntity[];
+    const enemyXs = physicsEntities.filter((a) => a.type === 'swoopingEnemy').map((a) => a.position.x);
     const enemyMultiple = 2;
     if (groups.length === 0) {
       return 0;
@@ -99,7 +101,6 @@ export class EntityClusterer {
   }
 
   getNewPlayerXPosition(): number {
-    return 500;
     const padding = 300;
     const groups = this.getGroupings((a) => a.type === 'player');
     while (true) {

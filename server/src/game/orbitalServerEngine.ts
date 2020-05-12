@@ -14,6 +14,7 @@ import {IServerSync} from './IServerSync';
 import {IServerSocket} from '@common/socket/models';
 import {TwoVector} from '@common/utils/twoVector';
 import {Entity} from '@common/baseEntities/entity';
+import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
 export class OrbitalServerEngine extends ServerEngine {
   game: OrbitalGame;
@@ -22,8 +23,10 @@ export class OrbitalServerEngine extends ServerEngine {
     super(serverSocket, serverSync, game);
     this.game = game;
   }
-  assignActor(entity: Entity): void {
-  }
+
+  addObjectToWorld(entity: Entity): void {}
+
+  assignActor(entity: Entity): void {}
 
   gameTick(tickIndex: number, duration: number): void {
     this.processGameRules(tickIndex);
@@ -39,7 +42,7 @@ export class OrbitalServerEngine extends ServerEngine {
   }
 
   initGame(): void {
-    this.game.entities.push(new SpectatorEntity(this.game, {entityId: nextId()}));
+    this.game.addObjectToWorld(new SpectatorEntity(this.game, {entityId: nextId()}));
     this.updateSpectatorPosition();
   }
 
@@ -53,13 +56,12 @@ export class OrbitalServerEngine extends ServerEngine {
       playerColor: PlayerEntity.randomEnemyColor(),
       health: GameRules.player.base.startingHealth,
       position: {x: startingPos, y: GameConstants.playerStartingY},
-      playerInputKeys: {shoot: false, right: false, left: false, down: false, up: false},
       hit: false,
       badges: [],
-    );
+    });
     this.gameLeaderboard!.addPlayer(playerEntity.entityId, socketConnection.jwt.userId);
     this.users.push({name, connectionId, entity: playerEntity});
-    this.game.entities.push(playerEntity);
+    this.game.addObjectToWorld(playerEntity);
 
     const playerShieldEntity = new PlayerShieldEntity(this.game, {
       entityId: nextId(),
@@ -68,13 +70,13 @@ export class OrbitalServerEngine extends ServerEngine {
       health: GameRules.playerShield.small.maxHealth,
       depleted: false,
     });
-    this.game.entities.push(playerShieldEntity);
+    this.game.addObjectToWorld(playerShieldEntity);
     playerEntity.setShieldEntity(playerShieldEntity.entityId);
 
     this.sendMessageToClient(connectionId, {
       type: 'joined',
       serverVersion: GameConstants.serverVersion,
-      player: playerEntity.serializeLive(),
+      playerEntityId: playerEntity.entityId,
     });
     return socketConnection;
   }
@@ -98,7 +100,7 @@ export class OrbitalServerEngine extends ServerEngine {
               health: GameRules.enemies.swoopingEnemy.startingHealth,
               hit: false,
             });
-            this.game.entities.push(swoopingEnemyEntity);
+            this.game.addObjectToWorld(swoopingEnemyEntity);
           }
         }
       }
@@ -120,10 +122,10 @@ export class OrbitalServerEngine extends ServerEngine {
             size: 'big',
             meteorType: '4',
             hit: false,
-            velocity:{x:0,y:20},
+            velocity: {x: 0, y: 20},
             rotateSpeed: 3,
           });
-          this.game.entities.push(meteor);
+          this.game.addObjectToWorld(meteor);
         }
       } else {
         for (const grouping of this.game.entityClusterer.getGroupings((a) => a.type === 'player')) {
@@ -139,13 +141,12 @@ export class OrbitalServerEngine extends ServerEngine {
               size,
               meteorType: type,
               hit: false,
-              rotate: Math.random() * 255,
-              momentumX: Math.random() * 10 - 5,
+              angle: Math.random() * 255,
+              velocity: {x: Math.random() * 10 - 5, y: 5 + Math.random() * 10},
               rotateSpeed: Math.round(1 + Math.random() * 3),
-              momentumY: 5 + Math.random() * 10,
             });
 
-            this.game.entities.push(meteor);
+            this.game.addObjectToWorld(meteor);
           }
         }
       }
@@ -153,7 +154,7 @@ export class OrbitalServerEngine extends ServerEngine {
   }
 
   private updateSpectatorPosition() {
-    const range = this.game.getPlayerRange(0, (e) => e.y > 30);
+    const range = this.game.getPlayerRange(0, (e) => e instanceof PhysicsEntity && e.position.y > 30);
     const spectator = this.game.spectatorEntity;
     if (!spectator) {
       return;
