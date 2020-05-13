@@ -15,20 +15,17 @@ import {
 export type ShieldStrength = 'small' | 'medium' | 'big';
 
 export class PlayerShieldEntity extends PhysicsEntity {
-  depleted: boolean;
-  health: number;
+  depleted!: boolean;
+  health!: number;
   lastHit = 0;
-  ownerEntityId: number;
-  shieldStrength: ShieldStrength;
+  ownerEntityId!: number;
+  shieldStrength!: ShieldStrength;
   tickIndex = 0;
   type = 'playerShield' as const;
 
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<PlayerShieldModel>>) {
     super(game, messageModel);
-    this.ownerEntityId = messageModel.ownerEntityId;
-    this.shieldStrength = messageModel.shieldStrength;
-    this.health = messageModel.health;
-    this.depleted = messageModel.depleted;
+    this.reconcileFromServer(messageModel as PlayerShieldModel);
     this.createPolygon();
   }
 
@@ -45,6 +42,8 @@ export class PlayerShieldEntity extends PhysicsEntity {
   }
 
   gameTick(duration: number) {
+    if (this.game.isClient) return;
+
     this.tickIndex++;
     if (!this.depleted && this.health <= 0) {
       if (this.shieldStrength === 'small') {
@@ -77,13 +76,7 @@ export class PlayerShieldEntity extends PhysicsEntity {
     return damageLeft;
   }
 
-  inView(
-    viewX: number,
-    viewY: number,
-    viewWidth: number,
-    viewHeight: number,
-    playerId: number
-  ): boolean {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     const owner = this.ownerEntityId && this.game.entities.lookup<PhysicsEntity>(this.ownerEntityId);
 
     let x = this.position.x;

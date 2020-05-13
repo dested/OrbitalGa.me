@@ -31,10 +31,10 @@ export class OrbitalServerEngine extends ServerEngine {
 
     this.game.step(false, duration);
 
-    if (tickIndex % 15 === 0) {
+    if (tickIndex % 120 === 0) {
       this.updateSpectatorPosition();
     }
-    if (tickIndex % 30 === 0) {
+    if (tickIndex % 180 === 0) {
       this.serverSync.syncLeaderboard();
     }
   }
@@ -43,6 +43,7 @@ export class OrbitalServerEngine extends ServerEngine {
     this.game.addObjectToWorld(new SpectatorEntity(this.game, {entityId: nextId()}));
     this.updateSpectatorPosition();
   }
+  setDebug(key: string, value: number | string): void {}
 
   userJoin(connectionId: number) {
     const socketConnection = super.userJoin(connectionId);
@@ -50,6 +51,7 @@ export class OrbitalServerEngine extends ServerEngine {
 
     const startingPos = this.game.entityClusterer.getNewPlayerXPosition();
     const playerEntity = new ServerPlayerEntity(this.game, {
+      type: 'player',
       entityId: nextId(),
       playerColor: PlayerEntity.randomEnemyColor(),
       health: GameRules.player.base.startingHealth,
@@ -139,9 +141,9 @@ export class OrbitalServerEngine extends ServerEngine {
               size,
               meteorType: type,
               hit: false,
-              angle: Math.random() * 255,
-              velocity: {x: Math.random() * 10 - 5, y: 5 + Math.random() * 10},
-              rotateSpeed: Math.round(1 + Math.random() * 3),
+              angle: Math.round(Math.random() * 255),
+              velocity: {x: Math.random() * 100 - 50, y: 50 + Math.random() * 100},
+              rotateSpeed: Math.random() * 0.5 + 0.3,
             });
 
             this.game.addObjectToWorld(meteor);

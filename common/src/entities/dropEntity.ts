@@ -37,7 +37,7 @@ export class DropEntity extends PhysicsEntity {
     super(game, messageModel);
     this.drop = messageModel.drop;
     this.createPolygon();
-    this.velocity.set(0, 10);
+    this.velocity.set(0, 50);
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {

@@ -5,8 +5,6 @@ import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {unreachable} from '@common/utils/unreachable';
 import {GameConstants, GameDebug} from '@common/game/gameConstants';
-import {OrbitalGame} from '@common/game/game';
-import {DropEntity} from '@common/entities/dropEntity';
 
 export class PlayerActor extends ClientActor<PlayerEntity> {
   static _greenPlayer?: HTMLCanvasElement;
@@ -64,20 +62,17 @@ export class PlayerActor extends ClientActor<PlayerEntity> {
     this.drawHealthAndRank(context);
   }
 
-  /* todo maybe make this on the actor class, add PlayerModel as static type on entity idk
   reconcileFromServer(messageModel: PlayerModel) {
-    const wasHit = this.entity.hit;
-    this.entity.reconcileFromServer(messageModel);
-    if (this.entity.hit !== wasHit) {
+    super.reconcileFromServer(messageModel);
+    if (this.entity.hit) {
       this.hitTimer = 5;
     }
   }
-*/
 
   tick() {}
 
   private drawFire(context: CanvasRenderingContext2D) {
-    if (this.entity.lastPlayerInput?.up) {
+    if (this.entity.playerInputKeys?.up) {
       context.save();
       const fire =
         this.entity.game.stepCount % 8 < 4
@@ -87,9 +82,9 @@ export class PlayerActor extends ClientActor<PlayerEntity> {
       context.drawImage(fire.image, this.drawX + 16, this.drawY + 20);
       context.restore();
     } else if (
-      this.entity.lastPlayerInput?.down ||
-      this.entity.lastPlayerInput?.left ||
-      this.entity.lastPlayerInput?.right
+      this.entity.playerInputKeys?.down ||
+      this.entity.playerInputKeys?.left ||
+      this.entity.playerInputKeys?.right
     ) {
       context.save();
       const fire =

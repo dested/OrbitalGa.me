@@ -185,6 +185,10 @@ export class ClientEngineUI {
         context.fillText(`${key}: ${this.clientEngine.debugValues[key]}`, 0, debugY);
         debugY -= 22;
       }
+      // todo lag? context.fillText(`Average Lag between ticks: ${this.clientEngine.lagAverage.average.toFixed(1)}ms`, 0, debugY);
+      // debugY -= 22;
+      context.fillText(`Latency: ${this.clientEngine.latency.toFixed(1)}ms`, 0, debugY);
+      context.restore();
       context.restore();
     }
 

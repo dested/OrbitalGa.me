@@ -41,7 +41,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     }
     const game = this.gameEngine;
 
-    console.log('extrapolate applying sync');
+    console.debug('extrapolate applying sync');
 
     //
     //    scan all the objects in the sync
@@ -83,7 +83,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
 
       if (foundEntityShadow) {
         // case 1: this object has a local shadow object on the client
-        console.log(`object ${messageModel.entityId} replacing local shadow ${foundEntityShadow.entityId}`);
+        console.debug(`object ${messageModel.entityId} replacing local shadow ${foundEntityShadow.entityId}`);
 
         if (!this.gameEngine.entities.lookup(messageModel.entityId)) {
           const newObj = this.addNewObject(messageModel);
@@ -97,10 +97,14 @@ export class ExtrapolateStrategy extends SyncStrategy {
         if (!foundEntity) {
           foundEntity = this.addNewObject(messageModel);
         } else {
+          console.info(`object before syncTo: ${JSON.stringify(foundEntity.serialize())}`);
           if (foundEntity instanceof PhysicsEntity) {
             foundEntity.saveState();
           }
           foundEntity.reconcileFromServer(messageModel);
+          console.info(
+            `object after syncTo: ${JSON.stringify(foundEntity.serialize())} synced to step[${sync.stepCount}]`
+          );
         }
       }
     }
@@ -116,10 +120,9 @@ export class ExtrapolateStrategy extends SyncStrategy {
 
     const clientStep = game.stepCount;
     for (game.stepCount = serverStep; game.stepCount < clientStep; ) {
-      if (this.recentInputs[game.stepCount]) {
+      if (this.recentInputs[game.stepCount]?.movement) {
         const inputDesc = this.recentInputs[game.stepCount];
-        if (!inputDesc.movement) continue;
-        console.trace(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]`);
+        console.info(`extrapolate re-enacting movement input[${inputDesc.messageIndex}]`);
         this.gameEngine.processInput(inputDesc, this.gameEngine.clientPlayerId!);
       }
 
@@ -138,6 +141,12 @@ export class ExtrapolateStrategy extends SyncStrategy {
         const isLocal = entity.owningPlayerId === this.gameEngine.clientPlayerId; // eslint-disable-line eqeqeq
         const bending = isLocal ? this.options.localObjBending : this.options.remoteObjBending;
         entity.bendToCurrentState(bending, isLocal, this.options.bendingIncrements);
+
+        const bendingString = entity.bendingIncrements
+          ? `ΔPos=${entity.bendingPositionDelta} ΔVel=${entity.bendingVelocityDelta} ΔAngle=${entity.bendingAngleDelta} increments=${entity.bendingIncrements}`
+          : 'no bending';
+
+        console.info(() => `object[${entity.entityId}] ${bendingString}`);
       }
     }
 

@@ -47,34 +47,30 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
       {
         phase: 'swoop' as const,
         type: 'linear',
-        duration: 7,
-        variability: 10,
+        duration: 20,
+        variability: 2,
         points: [
           {
-            x: -10,
-            y: 30,
+            x: -2,
+            y: 10,
           },
-          {x: -10, y: 15},
-          {x: -20, y: -30},
-          {x: 25, y: 10},
-          {x: 20, y: -20},
         ],
       },
       {
         phase: 'bounce' as const,
         type: 'loop',
         loopCount: 6,
-        duration: 5,
-        variability: 10,
+        duration: 5 * 10,
+        variability: 2,
         points: [
-          {x: 0, y: 25},
-          {x: 0, y: -25},
+          {x: 0, y: 1},
+          {x: 0, y: -3},
         ],
       },
       {
         phase: 'exit' as const,
         type: 'linear',
-        duration: 20,
+        duration: 20 * 10,
         variability: 0,
         points: [
           {
@@ -122,7 +118,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
 
   gameTick(duration: number): void {
     if (
-      this.aliveTick % 4 === 0 &&
+      this.aliveTick % (4 * 6) === 0 &&
       (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
     ) {
       const shotEntity = new EnemyShotEntity(this.game, {

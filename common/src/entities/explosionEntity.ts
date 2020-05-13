@@ -11,7 +11,7 @@ import {
 } from '../baseEntities/physicsEntity';
 
 export class ExplosionEntity extends PhysicsEntity {
-  static totalAliveDuration = 5;
+  static totalAliveDuration = 5 * 10;
   aliveDuration = ExplosionEntity.totalAliveDuration;
   intensity: number;
   ownerEntityId?: number;

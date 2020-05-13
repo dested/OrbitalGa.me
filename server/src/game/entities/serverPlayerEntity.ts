@@ -6,7 +6,7 @@ import {ImpliedDefaultPhysics} from '@common/baseEntities/physicsEntity';
 export class ServerPlayerEntity extends PlayerEntity {
   constructor(
     private serverGame: OrbitalGame,
-    messageModel: ImpliedEntityType<ImpliedDefaultPhysics<Omit<PlayerModel, 'playerInputKeys'>>>
+    messageModel: ImpliedDefaultPhysics<Omit<PlayerModel, 'playerInputKeys'>>
   ) {
     super(serverGame, messageModel);
   }

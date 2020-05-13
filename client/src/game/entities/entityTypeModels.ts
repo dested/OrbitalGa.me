@@ -11,28 +11,18 @@ import {MeteorActor} from './meteorActor';
 import {LivePlayerActor} from './livePlayerActor';
 import {BossEvent1EnemyActor} from './bossEvent1EnemyActor';
 import {ScoreActor} from './scoreActor';
-import {OrbitalGame} from '@common/game/game';
 import {ClientActor} from '@common/baseEntities/clientActor';
 import {DropActor} from './dropActor';
 import {BossEvent1Actor} from './bossEvent1Actor';
-import {SpectatorEntity} from '@common/entities/spectatorEntity';
-import {BossEvent1Entity} from '@common/entities/bossEvent1Entity';
-import {ScoreEntity} from '@common/entities/scoreEntity';
-import {PlayerWeaponEntity} from '@common/entities/playerWeaponEntity';
-import {PlayerShieldEntity} from '@common/entities/playerShieldEntity';
-import {DropEntity} from '@common/entities/dropEntity';
-import {WallEntity} from '@common/entities/wallEntity';
-import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
-import {PlayerEntity} from '@common/entities/playerEntity';
-import {BossEvent1EnemyEntity} from '@common/entities/bossEvent1EnemyEntity';
-import {ExplosionEntity} from '@common/entities/explosionEntity';
-import {MeteorEntity} from '@common/entities/meteorEntity';
-import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
+import {ClientEngine} from '../clientEngine';
 
 export const ActorEntityTypes: {
-  [key in EntityModels['type']]: new (entity: EntityType[key]['entity']) => ClientActor<EntityType[key]['entity']>;
+  [key in EntityModels['type']]: new (engine: ClientEngine, entity: EntityType[key]['entity']) => ClientActor<
+    EntityType[key]['entity']
+  >;
 } = {
   player: PlayerActor,
+  livePlayer: LivePlayerActor,
   enemyShot: EnemyShotActor,
   playerWeapon: ClientPlayerWeaponActor,
   explosion: ExplosionActor,
@@ -41,7 +31,6 @@ export const ActorEntityTypes: {
   spectator: SpectatorActor,
   playerShield: PlayerShieldActor,
   meteor: MeteorActor,
-  livePlayer: LivePlayerActor,
   drop: DropActor,
   bossEvent1: BossEvent1Actor,
   bossEvent1Enemy: BossEvent1EnemyActor,

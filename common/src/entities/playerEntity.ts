@@ -46,7 +46,7 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
     {ammo: 5, weapon: 'rocket'},
     {ammo: 3, weapon: 'torpedo'},
   ];
-  badges: PlayerBadges[];
+  badges!: PlayerBadges[];
   boundingBoxes = [{width: 99, height: 75}];
   damage = 2;
   dead: boolean = false;
@@ -54,30 +54,23 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
   health = GameRules.player.base.startingHealth;
   hit = false;
   isWeapon = true as const;
-  lastPlayerInput?: PlayerInputKeys;
-  ownerPlayerEntityId: number;
-  playerColor: PlayerColor;
+  ownerPlayerEntityId!: number;
+  playerColor!: PlayerColor;
+  playerInputKeys?: PlayerInputKeys;
   selectedWeapon: PlayerWeapon = 'laser1';
   shootTimer: number = 10;
   shotSide: 'left' | 'right' = 'left';
-
   staticPlayersToLeft?: number;
   staticPlayersToRight?: number;
-  type = 'player' as const;
+  type: 'player' | 'livePlayer';
   weaponSide = 'player' as const;
   private shieldEntityId?: number;
 
-  constructor(
-    public game: OrbitalGame,
-    messageModel: ImpliedEntityType<ImpliedDefaultPhysics<Omit<PlayerModel, 'playerInputKeys'>>>
-  ) {
+  constructor(public game: OrbitalGame, messageModel: ImpliedDefaultPhysics<PlayerModel | LivePlayerModel>) {
     super(game, messageModel);
-    this.ownerPlayerEntityId = messageModel.entityId;
-    this.health = messageModel.health;
-    this.playerColor = messageModel.playerColor;
-    this.badges = messageModel.badges;
-    this.lastPlayerInput = {down: false, left: false, right: false, up: false, shoot: false};
-    this.friction = new TwoVector(0.9, 0.9);
+    this.type = messageModel.type;
+    messageModel.friction = new TwoVector(0.9, 0.9);
+    this.reconcileFromServer(messageModel as Required<PlayerModel | LivePlayerModel>);
     this.createPolygon();
   }
 
@@ -144,9 +137,11 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
         if (shield) {
           if (drop.level === 'medium' && shield.shieldStrength === 'big') {
             shield.health = GameRules.playerShield.big.maxHealth;
+            shield.depleted = false;
           } else {
             shield.health = GameRules.playerShield[drop.level].maxHealth;
             shield.shieldStrength = drop.level;
+            shield.depleted = false;
           }
         }
         break;
@@ -259,22 +254,23 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
     if (otherEntity instanceof WallEntity) {
-      // todo bounce
-      /*
-      this.x -= collisionResult.overlap * collisionResult.overlap_x;
-      this.y -= collisionResult.overlap * collisionResult.overlap_y;
-*/
+      this.position.add({
+        x: -collisionResult.overlap * collisionResult.overlap_x,
+        y: -collisionResult.overlap * collisionResult.overlap_y,
+      });
+      this.velocity.set(0, 0);
       this.updatePolygon();
       return true;
     }
     if (otherEntity instanceof PlayerEntity) {
-      // todo bounce
-      /*
-      this.momentumX -= collisionResult.overlap * collisionResult.overlap_x;
-      this.momentumY -= collisionResult.overlap * collisionResult.overlap_y;
-      otherEntity.momentumX += collisionResult.overlap * collisionResult.overlap_x;
-      otherEntity.momentumY += collisionResult.overlap * collisionResult.overlap_y;
-*/
+      this.velocity.add({
+        x: -collisionResult.overlap * collisionResult.overlap_x,
+        y: -collisionResult.overlap * collisionResult.overlap_y,
+      });
+      otherEntity.velocity.add({
+        x: collisionResult.overlap * collisionResult.overlap_x,
+        y: collisionResult.overlap * collisionResult.overlap_y,
+      });
       this.updatePolygon();
       return true;
     }
@@ -357,26 +353,22 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
     }
   }
 
-  reconcileFromServer(messageModel: PlayerModel) {
+  reconcileFromServer(messageModel: PlayerModel | LivePlayerModel) {
     super.reconcileFromServer(messageModel);
     this.health = messageModel.health;
     this.playerColor = messageModel.playerColor;
-    this.lastPlayerInput = messageModel.playerInputKeys;
     this.hit = messageModel.hit;
     this.badges = messageModel.badges;
-  }
-
-  reconcileFromServerLive(messageModel: LivePlayerModel) {
-    super.reconcileFromServer(messageModel);
-    this.health = messageModel.health;
-    this.hit = messageModel.hit;
-    this.dead = messageModel.dead;
-    this.playerColor = messageModel.playerColor;
-    this.badges = messageModel.badges;
-    this.availableWeapons = messageModel.availableWeapons;
-    this.selectedWeapon = messageModel.selectedWeapon;
-    this.playersToLeft = messageModel.playersToLeft;
-    this.playersToRight = messageModel.playersToRight;
+    if (messageModel.type === 'player') {
+      this.playerInputKeys = messageModel.playerInputKeys;
+    } else {
+      this.dead = messageModel.dead;
+      this.shootTimer = messageModel.shootTimer;
+      this.availableWeapons = messageModel.availableWeapons;
+      this.selectedWeapon = messageModel.selectedWeapon;
+      this.playersToLeft = messageModel.playersToLeft;
+      this.playersToRight = messageModel.playersToRight;
+    }
   }
 
   serialize(): PlayerModel {
@@ -384,7 +376,7 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
       ...super.serialize(),
       health: this.health,
       playerColor: this.playerColor,
-      playerInputKeys: this.lastPlayerInput ?? {down: false, left: false, right: false, shoot: false, up: false},
+      playerInputKeys: this.playerInputKeys ?? {down: false, left: false, right: false, shoot: false, up: false},
       badges: this.badges,
       hit: this.hit,
       type: 'player',
@@ -420,11 +412,10 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
   }
 
   protected bounce(momentumX: number, momentumY: number) {
-    /*
- todo bounce
-    this.momentumX += momentumX;
-    this.momentumY += momentumY;
-*/
+    this.velocity.add({
+      x: momentumX * 5,
+      y: momentumY * 5,
+    });
   }
 
   static randomEnemyColor() {

@@ -7,11 +7,11 @@ export class GameDebug {
   static collisions = false;
   static dontFilterEntities = false;
   static isLocal = true;
-  static meteorCluster = true;
+  static meteorCluster = false;
   static noBackground = false;
-  static noEnemies = true;
+  static noEnemies = false;
   static noTimeout = false;
-  static throttleClient = true;
+  static throttleClient = false;
 }
 
 export class GameConstants {

@@ -21,7 +21,7 @@ export class ScoreEntity extends PhysicsEntity {
     super(game, messageModel);
     this.score = messageModel.score;
     this.onlyVisibleToPlayerEntityId = messageModel.onlyVisibleToPlayerEntityId;
-    this.velocity.set(0, -3);
+    this.velocity.set(0, -80);
   }
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
@@ -29,17 +29,11 @@ export class ScoreEntity extends PhysicsEntity {
   }
   gameTick(): void {
     this.aliveTick++;
-    if (this.aliveTick > 3) {
+    if (this.aliveTick > 60 * 1) {
       this.destroy();
     }
   }
-  inView(
-    viewX: number,
-    viewY: number,
-    viewWidth: number,
-    viewHeight: number,
-    playerId: number
-  ): boolean {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     const result = super.inView(viewX, viewY, viewWidth, viewHeight, playerId);
     return result && this.onlyVisibleToPlayerEntityId === playerId;
   }

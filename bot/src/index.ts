@@ -1,18 +1,18 @@
 import {w3cwebsocket} from 'websocket';
 (global as any).WebSocket = w3cwebsocket;
+import {OrbitalGame} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import ApolloClient, {InMemoryCache, IntrospectionFragmentMatcher} from 'apollo-boost';
 import fetch from 'node-fetch';
-import {ClientSocket} from '../../client/src/socket/clientSocket';
-import {BotClientGame} from '../../client/src/game/botClientGame';
-import {ClientGame} from '../../client/src/game/clientGame';
+import {ClientConfig} from '../../client/src/clientConfig';
+import {BotClientEngine} from '../../client/src/game/botClientEngine';
 import {
   LoginAnonymousDocument,
   LoginAnonymousMutation,
   LoginAnonymousMutationVariables,
 } from '../../client/src/schema/generated/graphql';
+import {ClientSocket} from '../../client/src/socket/clientSocket';
 import {makeJwt} from '../../client/src/utils/jwt';
-import {ClientConfig} from '../../client/src/clientConfig';
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData: {
@@ -61,7 +61,7 @@ async function main() {
           return;
         case 'LoginSuccess': {
           if (result.data?.loginAnonymous.gameModel) {
-            new BotClientGame(
+            new BotClientEngine(
               result.data?.loginAnonymous.gameModel.serverUrl,
               {
                 onDisconnect: () => {
@@ -69,15 +69,16 @@ async function main() {
                 },
                 onReady: () => {},
                 onError: () => {},
-                onOpen: (me: ClientGame) => {
+                onOpen: (me) => {
                   me.sendMessageToServer({type: 'join'});
                 },
                 onUIUpdate: () => {},
-                onDied: (me: ClientGame) => {
+                onDied: (me) => {
                   me.joinGame();
                 },
               },
-              new ClientSocket(makeJwt(result.data?.loginAnonymous.jwt))
+              new ClientSocket(makeJwt(result.data?.loginAnonymous.jwt)),
+              new OrbitalGame(true)
             );
           } else {
             console.log('server down');

@@ -44,7 +44,7 @@ export abstract class ServerEngine extends Engine {
         this.userLeave(connectionId);
       },
       onMessage: (connectionId, message) => {
-        this.processMessage(connectionId, message);
+        this.queuedMessages.push({connectionId, message});
       },
     });
     if (!GameConstants.isSinglePlayer) {
@@ -61,7 +61,8 @@ export abstract class ServerEngine extends Engine {
     this.scheduler = new Scheduler({
       tick: () => {
         serverTick++;
-        this.serverTick(serverTick, +new Date() - last);
+        const start = +new Date();
+        this.serverTick(serverTick, start - last);
         last = +new Date();
       },
       period: GameConstants.serverTickRate,
@@ -82,7 +83,7 @@ export abstract class ServerEngine extends Engine {
     }
   }
 
-  processInputs() {
+  processMessages() {
     const time = +new Date();
     let stopped = false;
     for (let i = 0; i < this.queuedMessages.length; i++) {
@@ -130,10 +131,6 @@ export abstract class ServerEngine extends Engine {
     }
   }
 
-  processMessage(connectionId: number, message: ClientToServerMessage) {
-    this.queuedMessages.push({connectionId, message});
-  }
-
   sendMessageToClient(connectionId: number, message: ServerToClientMessage) {
     if (this.queuedMessagesToSend[connectionId]) {
       this.queuedMessagesToSend[connectionId].push(message);
@@ -168,57 +165,58 @@ export abstract class ServerEngine extends Engine {
       });
     }
 
-    this.processInputs();
+    this.processMessages();
 
     this.gameTick(tickIndex, duration);
 
-    if ((tickIndex % 60) * 5 === 0) {
+    if (tickIndex % (60 * 5) === 0) {
       this.sendLeaderboard();
     }
 
     if (tickIndex % 10 === 0) {
       this.sendWorldState();
       this.sendSpectatorWorldState();
-    }
 
-    for (const c of this.users.array) {
-      const messages = this.queuedMessagesToSend[c.connectionId];
-      if (messages && messages.length > 0) {
-        this.serverSocket.sendMessage(c.connectionId, messages);
-        messages.length = 0;
+      for (const c of this.users.array) {
+        const messages = this.queuedMessagesToSend[c.connectionId];
+        if (messages && messages.length > 0) {
+          this.serverSocket.sendMessage(c.connectionId, messages);
+          messages.length = 0;
+        }
       }
-    }
 
-    for (const c of this.spectators.array) {
-      const messages = this.queuedMessagesToSend[c.connectionId];
-      if (messages && messages.length > 0) {
-        this.serverSocket.sendMessage(c.connectionId, messages);
-        messages.length = 0;
+      for (const c of this.spectators.array) {
+        const messages = this.queuedMessagesToSend[c.connectionId];
+        if (messages && messages.length > 0) {
+          this.serverSocket.sendMessage(c.connectionId, messages);
+          messages.length = 0;
+        }
       }
     }
 
     this.game.postTick(tickIndex, duration);
-
-    const now = +new Date();
-    for (let i = this.serverSocket.connections.array.length - 1; i >= 0; i--) {
-      const connection = this.serverSocket.connections.array[i];
-      if (this.users.lookup(connection.connectionId)) {
-        if (connection.lastAction + GameConstants.lastActionTimeout < now) {
+    if (tickIndex % 10 === 0) {
+      const now = +new Date();
+      for (let i = this.serverSocket.connections.array.length - 1; i >= 0; i--) {
+        const connection = this.serverSocket.connections.array[i];
+        if (this.users.lookup(connection.connectionId)) {
+          if (connection.lastAction + GameConstants.lastActionTimeout < now) {
+            this.serverSocket.disconnect(connection.connectionId);
+            continue;
+          }
+        } else if (!connection.spectatorJoin && connection.lastAction + GameConstants.noMessageDuration < now) {
           this.serverSocket.disconnect(connection.connectionId);
           continue;
+        } else if (this.spectators.lookup(connection.connectionId)) {
+          if (connection.spectatorJoin! + GameConstants.totalSpectatorDuration < now) {
+            this.serverSocket.disconnect(connection.connectionId);
+            continue;
+          }
         }
-      } else if (!connection.spectatorJoin && connection.lastAction + GameConstants.noMessageDuration < now) {
-        this.serverSocket.disconnect(connection.connectionId);
-        continue;
-      } else if (this.spectators.lookup(connection.connectionId)) {
-        if (connection.spectatorJoin! + GameConstants.totalSpectatorDuration < now) {
-          this.serverSocket.disconnect(connection.connectionId);
-          continue;
-        }
-      }
 
-      if (connection.lastPing + GameConstants.lastPingTimeout < now) {
-        this.serverSocket.disconnect(connection.connectionId);
+        if (connection.lastPing + GameConstants.lastPingTimeout < now) {
+          this.serverSocket.disconnect(connection.connectionId);
+        }
       }
     }
   }

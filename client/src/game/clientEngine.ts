@@ -11,6 +11,7 @@ import {Scheduler} from '@common/utils/scheduler';
 import {ExtrapolateStrategy} from './synchronizer/extrapolateStrategy';
 import {Entity} from '@common/baseEntities/entity';
 import {ActorEntityTypes} from './entities/entityTypeModels';
+import {TwoVectorModel} from '@common/utils/twoVector';
 
 const STEP_DELAY_MSEC = 12; // if forward drift detected, delay next execution by this amount
 const STEP_HURRY_MSEC = 8; // if backward drift detected, hurry next execution by this amount
@@ -28,17 +29,13 @@ export type ClientGameOptions = {
 export class ClientEngine extends Engine {
   debugValues: {[key: string]: number | string} = {};
   isDead: boolean = false;
-
-  keys: PlayerInputKeys = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-    shoot: false,
-  };
-  lastXY?: {x: number; y: number};
+  keys: PlayerInputKeys = {up: false, down: false, left: false, right: false, shoot: false};
+  lastXY?: TwoVectorModel;
+  latency: number = 0;
   leaderboardScores: LeaderboardEntryRanked[] = [];
   myScore?: LeaderboardEntryRanked;
+  pingIndex = 0;
+  pings: {[pingIndex: number]: number} = {};
   spectatorMode: boolean = false;
 
   private connected = false;
@@ -65,7 +62,7 @@ export class ClientEngine extends Engine {
   }
 
   assignActor(entity: Entity): void {
-    entity.actor = new ActorEntityTypes[entity.type](entity as any);
+    entity.actor = new ActorEntityTypes[entity.type](this, entity as any);
   }
 
   checkDrift(checkType: 'onServerSync' | 'onEveryStep') {
@@ -101,7 +98,6 @@ export class ClientEngine extends Engine {
     const t = +new Date();
     const p = 1000 / 60;
     let dt = 0;
-
     // reset step time if we passed a threshold
     if (this.doReset || t > this.lastStepTime + TIME_RESET_THRESHOLD) {
       this.doReset = false;
@@ -141,6 +137,7 @@ export class ClientEngine extends Engine {
       },
       onDisconnect: () => {
         this.options.onDisconnect(this);
+        this.scheduler?.stop();
         this.connected = false;
       },
       onMessage: (messages) => {
@@ -153,12 +150,9 @@ export class ClientEngine extends Engine {
 
   died() {
     if (!this.isDead) {
-      // todo dead
-      /*
       this.isDead = true;
-      this.lastXY = {x: this.liveEntity?.x ?? 0, y: this.liveEntity?.y ?? 0};
-      this.liveEntity = undefined;
-*/
+      this.lastXY = this.game.clientPlayer?.position;
+      this.game.clientPlayerId = undefined;
       this.options.onDied(this);
     }
   }
@@ -174,6 +168,16 @@ export class ClientEngine extends Engine {
       delay: STEP_DELAY_MSEC,
     });
     this.scheduler!.start();
+
+    const pingInterval = setInterval(() => {
+      if (!this.connected) {
+        clearInterval(pingInterval);
+        return;
+      }
+      this.pingIndex++;
+      this.pings[this.pingIndex] = +new Date();
+      this.socket.sendMessage({type: 'ping', ping: this.pingIndex});
+    }, GameConstants.pingInterval);
   }
 
   joinGame() {
@@ -186,6 +190,7 @@ export class ClientEngine extends Engine {
   sendMessageToServer(message: ClientToServerMessage) {
     this.socket.sendMessage(message);
   }
+
   setDebug(key: string, value: number | string) {
     this.debugValues[key] = value;
   }
@@ -207,7 +212,6 @@ export class ClientEngine extends Engine {
       this.game.step(false, dt, true);
       return;
     }
-
     this.handleKeys();
 
     this.processMessages();
@@ -283,12 +287,12 @@ export class ClientEngine extends Engine {
           }
           break;
         case 'pong':
-          /*   if (!(message.ping in this.pings)) {
+          if (!(message.ping in this.pings)) {
             throw new Error('Unmatched ping.');
           }
           const time = this.pings[message.ping];
           this.latency = +new Date() - time - GameConstants.serverTickRate;
-          delete this.pings[message.ping];*/
+          delete this.pings[message.ping];
           break;
         case 'worldState':
           this.totalPlayers = message.totalPlayers;

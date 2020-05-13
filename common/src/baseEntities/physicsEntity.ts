@@ -20,7 +20,10 @@ type BoundingBox = {
 };
 export abstract class PhysicsEntity extends Entity {
   angle!: number;
+  bendingAngleDelta?: number;
   bendingIncrements = 0;
+  bendingPositionDelta?: TwoVector;
+  bendingVelocityDelta?: TwoVector;
   boundingBoxes: BoundingBox[] = [];
   friction!: TwoVector;
   height: number = 0;
@@ -29,9 +32,6 @@ export abstract class PhysicsEntity extends Entity {
   savedCopy?: PhysicsEntityModel;
   velocity!: TwoVector;
   width: number = 0;
-  private bendingAngleDelta?: number;
-  private bendingPositionDelta?: TwoVector;
-  private bendingVelocityDelta?: TwoVector;
 
   constructor(game: Game, messageModel: ImpliedDefaultPhysics<PhysicsEntityModel>) {
     super(game, messageModel);
@@ -58,14 +58,6 @@ export abstract class PhysicsEntity extends Entity {
     };
   } {
     return {};
-  }
-
-  accelerate(acceleration: number, angle: number) {
-    const rad = angle * (Math.PI / 180);
-    const dv = new TwoVector(Math.cos(rad), Math.sin(rad));
-    dv.multiplyScalar(acceleration);
-    this.velocity.add(dv);
-    return this;
   }
 
   applyIncrementalBending(stepDesc: {dt?: number}) {
@@ -106,12 +98,13 @@ export abstract class PhysicsEntity extends Entity {
     this.bendingPositionDelta = TwoVector.getBendingDelta(original.position, this.position, positionBending);
     this.bendingVelocityDelta = TwoVector.getBendingDelta(original.velocity, this.velocity, velocityBending);
     this.bendingAngleDelta =
-      MathUtils.interpolateDeltaWithWrapping(original.angle, this.angle, angleBending.percent, 0, 360) / increments;
+      MathUtils.interpolateDeltaWithWrapping(original.angle % 255, this.angle % 255, angleBending.percent, 0, 360) /
+      increments;
 
     // revert to original
     this.position.copy(original.position);
     this.velocity.copy(original.velocity);
-    this.angle = original.angle;
+    this.angle = original.angle % 255;
 
     // keep parameters
     this.bendingIncrements = increments;

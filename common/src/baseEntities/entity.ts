@@ -29,6 +29,7 @@ export abstract class Entity {
   postTick() {}
 
   reconcileFromServer(messageModel: EntityModel) {
+    this.actor?.reconcileFromServer(messageModel);
     this.entityId = messageModel.entityId;
   }
 

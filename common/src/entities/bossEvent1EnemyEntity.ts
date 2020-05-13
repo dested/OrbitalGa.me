@@ -41,23 +41,6 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements WeaponEntity
   causedKill(otherEntity: Entity): void {}
 
   collide(otherEntity: Entity, collisionResult: Result): boolean {
-    /* if (isPlayerWeapon(otherEntity)) {
-      otherEntity.hurt(
-        otherEntity.damage,
-        this,
-        collisionResult.overlap * collisionResult.overlap_x,
-        collisionResult.overlap * collisionResult.overlap_y
-      );
-      this.hurt(
-        otherEntity.damage,
-        otherEntity,
-        -collisionResult.overlap * collisionResult.overlap_x,
-        -collisionResult.overlap * collisionResult.overlap_y
-      );
-
-      return true;
-    }
-*/
     return false;
   }
   createPolygon() {
@@ -68,34 +51,9 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements WeaponEntity
     this.aliveTick++;
   }
 
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    /*
-    if (this.markToDestroy) {
-      return;
-    }
-    this.health -= damage;
-    this.momentumX += x;
-    this.momentumY += y;
+  hurt(damage: number, otherEntity: Entity, x: number, y: number) {}
 
-    const explosionEntity = new ExplosionEntity(this.game, nextId(), this.explosionIntensity, this.entityId);
-    explosionEntity.start(otherEntity.x - this.x, otherEntity.y - this.y);
-    this.game.addObjectToWorld(explosionEntity);
-    if (this.health <= 0) {
-      const drop = new DropEntity(this.game, nextId(), DropEntity.randomDrop('big'));
-      drop.start(this.x, this.y);
-      this.game.addObjectToWorld(drop);
-      this.game.explode(this, 'medium');
-    }
-*/
-  }
-
-  inView(
-    viewX: number,
-    viewY: number,
-    viewWidth: number,
-    viewHeight: number,
-    playerId: number
-  ): boolean {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     return (
       this.position.x + this.xOffset > viewX &&
       this.position.x + this.xOffset < viewX + viewWidth &&

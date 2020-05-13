@@ -1,14 +1,16 @@
-import {Entity} from './entity';
+import {Entity, EntityModel} from './entity';
+import {ClientEngine} from '../../../client/src/game/clientEngine';
 
 export abstract class ClientActor<TEntity extends Entity> {
   clientDestroyedTick?: number = undefined;
   abstract zIndex: DrawZIndex;
-  constructor(public entity: TEntity) {}
+  constructor(public clientEngine: ClientEngine, public entity: TEntity) {}
   destroyClient(): void {
-    this.clientDestroyedTick = this.entity.game.stepCount;
+    if (this.clientDestroyedTick === undefined) this.clientDestroyedTick = 5;
   }
 
   abstract draw(context: CanvasRenderingContext2D): void;
+  reconcileFromServer(messageModel: EntityModel): void {}
   staticDraw(context: CanvasRenderingContext2D): void {}
   tick(duration: number): void {}
 }

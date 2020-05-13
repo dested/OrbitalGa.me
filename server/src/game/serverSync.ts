@@ -4,6 +4,7 @@ import {Utils} from '@common/utils/utils';
 import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
 import {ServerStatCreateInput} from '@prisma/client';
 import {prisma} from '../utils/db';
+import {getConfigParseResult} from 'ts-loader/dist/config';
 
 export class ServerSync implements IServerSync {
   leaderboard: {[sessionId: string]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};
@@ -16,52 +17,59 @@ export class ServerSync implements IServerSync {
   }
 
   async setStat(serverStat: Omit<ServerStatCreateInput, 'server'>) {
-    this.serverStats.push(serverStat);
-    const messages = [
-      `#${serverStat.tickIndex}`,
-      `Con: ${serverStat.connections}`,
-      `Spc ${serverStat.spectators}`,
-      `Usrs: ${serverStat.users}`,
-      `Ents: ${serverStat.entities}`,
-      `Msg:${serverStat.messages}`,
-      `Duration: ${serverStat.duration}ms`,
-      `-> ${Utils.formatBytes(serverStat.totalBytesSent)}`,
-      `<- ${Utils.formatBytes(serverStat.totalBytesReceived)}`,
-      `Wdt: ${serverStat.boardWidth}`,
-      `Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(serverStat.memHeapTotal)}`,
-      `${serverStat.entityGroupCount}`,
-    ];
-    console.clear();
-    console.log(messages.join(','));
+    if (serverStat.duration > GameConstants.serverTickRate * 2) {
+      console.log('--------------', 'long duration: ', serverStat.duration);
+    }
+    if (serverStat.tickIndex % 20 === 0) {
+      this.serverStats.push(serverStat);
+      const messages = [
+        `#${serverStat.tickIndex}`,
+        `Con: ${serverStat.connections}`,
+        `Spc ${serverStat.spectators}`,
+        `Usrs: ${serverStat.users}`,
+        `Ents: ${serverStat.entities}`,
+        `Msg:${serverStat.messages}`,
+        `Duration: ${serverStat.duration}ms`,
+        `-> ${Utils.formatBytes(serverStat.totalBytesSent)}`,
+        `<- ${Utils.formatBytes(serverStat.totalBytesReceived)}`,
+        `Wdt: ${serverStat.boardWidth}`,
+        `Mem:${Utils.formatBytes(serverStat.memHeapUsed)}/${Utils.formatBytes(serverStat.memHeapTotal)}`,
+        `${serverStat.entityGroupCount}`,
+      ];
+      // console.log(messages.join(','));
 
-    if (this.serverStats.length > 10_000 / GameConstants.serverTickRate) {
-      // console.log('pushing updates', this.serverStats.length);
-      const statsToPush = [...this.serverStats];
-      this.serverStats.length = 0;
-      const awaiter = async () => {
-        await prisma.server.update({
-          where: {id: this.serverId!},
-          data: {
-            live: true,
-            updatedAt: new Date(),
-          },
-        });
-        await Promise.all(
-          statsToPush.map((s) =>
-            prisma.serverStat.create({
-              data: {
-                server: {
-                  connect: {
-                    id: this.serverId!,
+      if (this.serverStats.length > 60) {
+        console.log('pushing updates ' + this.serverStats.length);
+        console.time('pushing updates');
+        const statsToPush = [...this.serverStats];
+        this.serverStats.length = 0;
+        const awaiter = async () => {
+          await prisma.server.update({
+            where: {id: this.serverId!},
+            data: {
+              live: true,
+              updatedAt: new Date(),
+            },
+          });
+          await Promise.all(
+            statsToPush.map((s) =>
+              prisma.serverStat.create({
+                data: {
+                  server: {
+                    connect: {
+                      id: this.serverId!,
+                    },
                   },
+                  ...s,
                 },
-                ...s,
-              },
-            })
-          )
-        );
-      };
-      awaiter().then(() => {});
+              })
+            )
+          );
+        };
+        awaiter().then(() => {
+          console.timeEnd('pushing updates');
+        });
+      }
     }
   }
 

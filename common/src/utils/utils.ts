@@ -9,11 +9,11 @@ export class Utils {
   static bitsToInt(...bools: boolean[]) {
     return parseInt('1' + bools.map((a) => (a ? '1' : '0')).join(''), 2);
   }
-  static byteDegToRad(deg: number) {
-    return deg * (360 / 255) * 0.0174533;
-  }
   static byteDegToDeg(deg: number) {
     return deg * (360 / 255);
+  }
+  static byteDegToRad(deg: number) {
+    return deg * (360 / 255) * 0.0174533;
   }
 
   static checksum(a: Uint8Array): number {

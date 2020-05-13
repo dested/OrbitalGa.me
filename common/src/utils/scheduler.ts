@@ -17,6 +17,7 @@ export class Scheduler {
   private nextExecTime = 0;
   private options: SchedulerOptions;
   private requestedDelay = 0;
+  private stopped: boolean = false;
 
   constructor(options: Partial<SchedulerOptions>) {
     this.options = {period: SIXTY_PER_SEC, delay: SIXTY_PER_SEC / 3, tick: () => {}, ...options};
@@ -38,6 +39,7 @@ export class Scheduler {
   }
 
   nextTick = () => {
+    if (this.stopped) return;
     const stepStartTime = new Date().getTime();
     if (stepStartTime > this.nextExecTime + this.options.period * LOOP_SLOW_THRESH) {
       this.delayCounter++;
@@ -53,6 +55,7 @@ export class Scheduler {
   // this is known to happen during the first 100ms of a touch event
   // on android chrome.  Double-check the game loop using requestAnimationFrame
   nextTickChecker = () => {
+    if (this.stopped) return;
     const currentTime = new Date().getTime();
     if (currentTime > this.nextExecTime) {
       this.delayCounter++;
@@ -71,5 +74,9 @@ export class Scheduler {
     if (typeof window === 'object' && typeof window.requestAnimationFrame === 'function')
       window.requestAnimationFrame(this.nextTickChecker);
     return this;
+  }
+
+  stop() {
+    this.stopped = true;
   }
 }

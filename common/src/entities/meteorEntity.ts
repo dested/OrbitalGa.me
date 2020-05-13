@@ -163,7 +163,7 @@ export class MeteorEntity extends PhysicsEntity {
     }
     this.health -= damage;
     this.hit = true;
-    // todo bounce
+    this.velocity.add({x:x*5, y:y*5});
     if (this.health <= 0) {
       if (!this.game.isClient) {
         if (Utils.random(50)) {

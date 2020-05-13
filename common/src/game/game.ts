@@ -19,13 +19,13 @@ export abstract class Game {
   collisionEngine: Collisions;
   readonly collisionResult: Result;
   entities = new ArrayHash<Entity>('entityId');
-
   entityClusterer: EntityClusterer;
+  // todo leaderboard, remember we want to emit leaderbaord stuff back to engine
   gameLeaderboard: any = null;
   highestServerStep?: number;
   stepCount: number = 0;
   totalPlayers: number = 0;
-  protected engine!: Engine;
+  engine!: Engine;
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();
@@ -136,6 +136,8 @@ export abstract class Game {
 
 export abstract class Engine {
   abstract assignActor(entity: Entity): void;
+  abstract killPlayer(player: Entity): void;
+  abstract setDebug(key: string, value: number | string): void;
 }
 
 export class OrbitalGame extends Game {
@@ -176,23 +178,12 @@ export class OrbitalGame extends Game {
     return curObj;
   }
 
-  killPlayer(player: PlayerEntity): void {
-    // todo leaderboard this.gameLeaderboard!.removePlayer(player.entityId);
-    for (const user of this.entities.array) {
-      if (user === player) {
-        // todo deadxy
-        // user.deadXY = {x: player.realX, y: player.realY};
-        break;
-      }
-    }
-  }
-
   postTick(tickIndex: number, duration: number): void {
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.getIndex(i);
       if (entity.markToDestroy) {
         if (entity instanceof PlayerEntity) {
-          this.killPlayer(entity);
+          this.engine.killPlayer(entity);
         }
         this.entities.remove(entity);
       } else {

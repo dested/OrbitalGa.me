@@ -51,21 +51,17 @@ export class LivePlayerActor extends PlayerActor {
     }
   }
 
-  /*
-  todo
   reconcileFromServer(messageModel: LivePlayerModel | PlayerModel) {
     assertType<LivePlayerModel>(messageModel);
-    const wasHit = this.hit;
-    super.reconcileFromServerLive(messageModel);
-
-    if (this.hit !== wasHit) {
+    if (this.entity.hit) {
       this.hitTimer = 5;
     }
-
-    if (this.dead) {
-      this.clientGame.died();
+    if (this.entity.dead) {
+      this.clientEngine.died();
     }
-  }*/
+  }
+
+
 
   staticDraw(context: CanvasRenderingContext2D) {
     const totalCount = this.entity.game.totalPlayers;

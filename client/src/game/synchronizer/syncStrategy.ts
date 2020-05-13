@@ -30,24 +30,16 @@ export abstract class SyncStrategy {
 
   abstract applySync(sync: Sync): 'SYNC_APPLIED' | null;
 
-  // collect a sync and its events
-  // maintain a "lastSync" member which describes the last sync we received from
-  // the server.  the lastSync object contains:
-  //  - syncObjects: all events in the sync indexed by the id of the object involved
-  //  - syncSteps: all events in the sync indexed by the step on which they occurred
-  //  - objCount
-  //  - eventCount
-  //  - stepCount
   collectSync(e: Sync) {
     // TODO: there is a problem below in the case where the client is 10 steps behind the server,
     // and the syncs that arrive are always in the future and never get processed.  To address this
     // we may need to store more than one sync.
 
     // ignore syncs which are older than the latest
-    if (this.lastSync && this.lastSync.stepCount && this.lastSync.stepCount > e.stepCount) return;
+    if ((this.lastSync?.stepCount ?? 0) > e.stepCount) {
+      return;
+    }
 
-    // before we overwrite the last sync, check if it was a required sync
-    // syncs that create or delete objects are saved because they must be applied.
     if (this.lastSync) {
       this.syncs.push(this.lastSync);
     }

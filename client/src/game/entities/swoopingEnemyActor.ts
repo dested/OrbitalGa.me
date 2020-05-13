@@ -64,16 +64,13 @@ export class SwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
       3
     );
   }
-  /*
-todo
+
   reconcileFromServer(messageModel: SwoopingEnemyModel) {
-    const wasHit = this.hit;
     super.reconcileFromServer(messageModel);
-    if (this.hit !== wasHit) {
+    if (this.entity.hit) {
       this.hitTimer = 5;
     }
   }
-*/
 
   tick() {}
 

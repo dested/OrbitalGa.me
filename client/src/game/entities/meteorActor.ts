@@ -41,16 +41,12 @@ export class MeteorActor extends ClientActor<MeteorEntity> {
     context.restore();
   }
 
-  /*
-todo
   reconcileFromServer(messageModel: MeteorModel) {
-    const wasHit = this.hit;
     super.reconcileFromServer(messageModel);
-    if (this.hit !== wasHit) {
+    if (this.entity.hit) {
       this.hitTimer = 5;
     }
   }
-*/
 
   tick() {}
 

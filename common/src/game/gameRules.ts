@@ -1,8 +1,8 @@
 export const GameRules = {
   playerShield: {
-    small: {maxHealth: 5, depletedRegenTimeout: 60*5, regenRate: 60},
-    medium: {maxHealth: 10, depletedRegenTimeout: 60*5, regenRate: 60},
-    big: {maxHealth: 15, depletedRegenTimeout: 60*5, regenRate: 60},
+    small: {maxHealth: 5, depletedRegenTimeout: 60 * 5, regenRate: 60},
+    medium: {maxHealth: 10, depletedRegenTimeout: 60 * 5, regenRate: 60},
+    big: {maxHealth: 15, depletedRegenTimeout: 60 * 5, regenRate: 60},
   },
   player: {
     base: {
@@ -10,7 +10,7 @@ export const GameRules = {
       maxReverseSpeed: 100,
       maxForwardSpeed: 150,
       momentumDeceleration: 0.7,
-      speedRamp: 20,
+      speedRamp: 100,
       startingHealth: 20,
     },
   },
@@ -49,7 +49,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     damage: 5,
     explosionIntensity: 2,
     alternateSide: false,
-    resetShootTimer: 5,
+    resetShootTimer: 50,
     spray: 0,
   },
   laser1: {
@@ -71,7 +71,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     damage: 1,
     explosionIntensity: 1,
     alternateSide: false,
-    resetShootTimer: 3,
+    resetShootTimer: 30,
     spray: 10,
   },
   laser2: {
@@ -82,7 +82,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     damage: 2,
     explosionIntensity: 1,
     alternateSide: true,
-    resetShootTimer: 1,
+    resetShootTimer: 10,
     spray: 0,
   },
   torpedo: {
@@ -93,7 +93,7 @@ export const WeaponConfigs: {[key in PlayerWeapon]: WeaponConfig} = {
     damage: 8,
     explosionIntensity: 3,
     alternateSide: false,
-    resetShootTimer: 7,
+    resetShootTimer: 70,
     spray: 0,
   },
 };
