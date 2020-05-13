@@ -8,7 +8,6 @@ import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {GameData} from '../../game/gameData';
 import {unreachable} from '@common/utils/unreachable';
 import {Leaderboard} from '../../components/leaderboard';
-import {STOCError} from '@common/models/serverToClientMessages';
 import {useApolloClient} from 'react-apollo-hooks';
 import {
   LoginAnonymousDocument,

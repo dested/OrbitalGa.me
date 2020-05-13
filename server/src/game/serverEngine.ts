@@ -3,7 +3,6 @@ import {GameConstants, GameDebug} from '@common/game/gameConstants';
 import {Engine, Game} from '@common/game/game';
 import {Utils} from '@common/utils/utils';
 import {ServerPlayerEntity} from './entities/serverPlayerEntity';
-import {SpectatorEntity} from '@common/entities/spectatorEntity';
 import {EntityModels, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {PlayerEntity} from '@common/entities/playerEntity';
 import {ArrayHash} from '@common/utils/arrayHash';

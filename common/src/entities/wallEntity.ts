@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
-import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
+import {OrbitalGame} from '../game/game';
+import {Entity} from '../baseEntities/entity';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {
   ImpliedDefaultPhysics,

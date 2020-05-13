@@ -1,10 +1,10 @@
-import {LivePlayerModel, PlayerBadges, PlayerEntity, PlayerInput, PlayerModel} from '@common/entities/playerEntity';
+import {PlayerBadges, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 import {GameRules} from '@common/game/gameRules';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {CanvasUtils} from '../../utils/canvasUtils';
 import {unreachable} from '@common/utils/unreachable';
-import {GameConstants, GameDebug} from '@common/game/gameConstants';
+import {GameDebug} from '@common/game/gameConstants';
 
 export class PlayerActor extends ClientActor<PlayerEntity> {
   static _greenPlayer?: HTMLCanvasElement;

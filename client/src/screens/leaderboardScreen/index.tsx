@@ -1,10 +1,9 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback} from 'react';
 import './index.css';
 import {observer} from 'mobx-react';
 import {useStores} from '../../store/stores';
-import {JoinButton, LeaderboardButton, LoginBox, Logo, NameBox, Status, Wrapper} from './index.styles';
+import {JoinButton, LoginBox, Logo, Wrapper} from './index.styles';
 import {GoFullScreen} from '../../components/goFullScreen';
-import {GameData} from '../../game/gameData';
 import {useLeaderboardQuery} from '../../schema/generated/graphql';
 import {useApolloClient} from 'react-apollo-hooks';
 

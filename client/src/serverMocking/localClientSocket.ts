@@ -8,7 +8,6 @@ import {
   ClientToServerSchemaAdderSizeFunction,
 } from '@common/models/clientToServerMessages';
 import {ServerToClientMessage, ServerToClientSchemaReaderFunction} from '@common/models/serverToClientMessages';
-import {Jwt} from '../utils/jwt';
 import {QueuedThrottle} from '../socket/queuedThrottle';
 import {IClientSocket} from '../socket/IClientSocket';
 

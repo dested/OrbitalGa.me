@@ -1,7 +1,7 @@
 import {unreachable} from '@common/utils/unreachable';
 import {GameConstants} from '@common/game/gameConstants';
-import {Engine, Game, OrbitalGame} from '@common/game/game';
-import {EntityModels, STOCWorldState} from '@common/models/serverToClientMessages';
+import {Engine, Game} from '@common/game/game';
+import {STOCWorldState} from '@common/models/serverToClientMessages';
 import {LeaderboardEntryRanked} from '@common/game/gameLeaderboard';
 import {STOCError, ServerToClientMessage} from '@common/models/serverToClientMessages';
 import {ClientToServerMessage, CTOSPlayerInput} from '@common/models/clientToServerMessages';
@@ -198,9 +198,11 @@ export class ClientEngine extends Engine {
   setKey<Key extends keyof PlayerInputKeys>(input: Key, value: PlayerInputKeys[Key]) {
     this.keys[input] = value;
   }
+
   setOptions(options: ClientGameOptions) {
     this.options = options;
   }
+
   spectateGame() {
     this.lastXY = undefined;
     this.sendMessageToServer({type: 'spectate'});

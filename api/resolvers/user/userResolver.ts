@@ -1,4 +1,4 @@
-import {Arg, Ctx, Int, Mutation, Query, Resolver} from 'type-graphql';
+import {Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql';
 import {GameModel, LoginResponse, SpectateResponse} from './models';
 import * as bcrypt from 'bcryptjs';
 import {Utils} from '@common/utils/utils';

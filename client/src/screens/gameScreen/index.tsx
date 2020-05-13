@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './index.css';
 import {observer} from 'mobx-react';
-import {GameConstants} from '@common/game/gameConstants';
 import {useStores} from '../../store/stores';
 import {Utils} from '@common/utils/utils';
 import {JoyStick} from '../../components/joystick';
@@ -11,7 +10,6 @@ import {GameData} from '../../game/gameData';
 import {Weapons} from '../../components/weapons';
 import {JoinButton, LoginBox, Logo, Wrapper} from '../loginScreen/index.styles';
 import {Leaderboard} from '../../components/leaderboard';
-import {STOCError} from '@common/models/serverToClientMessages';
 
 const leftJoystickOptions = {
   mode: 'static',

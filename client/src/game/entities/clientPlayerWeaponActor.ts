@@ -1,13 +1,9 @@
-import {PlayerWeaponEntity, PlayerWeaponModel} from '@common/entities/playerWeaponEntity';
+import {PlayerWeaponEntity} from '@common/entities/playerWeaponEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 import {OrbitalAssets} from '../../utils/assetManager';
-import {PlayerActor} from './playerActor';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
-import {GameConstants} from '@common/game/gameConstants';
-import {WeaponConfigs} from '@common/game/gameRules';
-import {OrbitalGame} from '@common/game/game';
 import {PlayerEntity} from '@common/entities/playerEntity';
 
 export class ClientPlayerWeaponActor extends ClientActor<PlayerWeaponEntity> {

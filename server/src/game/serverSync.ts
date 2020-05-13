@@ -4,7 +4,6 @@ import {Utils} from '@common/utils/utils';
 import {LeaderboardEntry, LeaderboardEntryUserDetails} from '@common/game/gameLeaderboard';
 import {ServerStatCreateInput} from '@prisma/client';
 import {prisma} from '../utils/db';
-import {getConfigParseResult} from 'ts-loader/dist/config';
 
 export class ServerSync implements IServerSync {
   leaderboard: {[sessionId: string]: LeaderboardEntry & LeaderboardEntryUserDetails} = {};

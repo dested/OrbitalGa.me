@@ -4,7 +4,6 @@ import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {GameRules} from '@common/game/gameRules';
 import {CanvasUtils} from '../../utils/canvasUtils';
-import {OrbitalGame} from '@common/game/game';
 
 export class SwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
   static _whiteEnemy?: HTMLCanvasElement;

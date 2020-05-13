@@ -1,8 +1,8 @@
 import {ServerSocket} from './utils/serverSocket';
 import {ServerSync} from './game/serverSync';
-import {SecureConfig, Config} from '../../api/server-common';
+import {SecureConfig} from '../../api/server-common';
 import {ServerUtils} from './utils/serverUtils';
-import {Game, OrbitalGame} from '@common/game/game';
+import {OrbitalGame} from '@common/game/game';
 import {OrbitalServerEngine} from './game/orbitalServerEngine';
 
 async function main() {

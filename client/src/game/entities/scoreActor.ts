@@ -1,6 +1,6 @@
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
-import {ScoreEntity, ScoreModel} from '@common/entities/scoreEntity';
+import {ScoreEntity} from '@common/entities/scoreEntity';
 
 export class ScoreActor extends ClientActor<ScoreEntity> {
   clientDestroyedTick?: number = undefined;

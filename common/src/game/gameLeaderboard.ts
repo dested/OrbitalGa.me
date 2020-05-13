@@ -1,4 +1,4 @@
-import {assertType, Utils} from '../utils/utils';
+import {Utils} from '../utils/utils';
 import {IServerSync} from '../../../server/src/game/IServerSync';
 import {uuid} from '../utils/uuid';
 

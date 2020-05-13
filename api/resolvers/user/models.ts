@@ -1,4 +1,4 @@
-import {Field, Int, ObjectType, createUnionType} from 'type-graphql';
+import {Field, Int, ObjectType} from 'type-graphql';
 import {response} from '../../gqlUtils/response';
 
 @ObjectType()

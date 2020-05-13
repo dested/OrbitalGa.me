@@ -9,7 +9,7 @@ import {SwoopingEnemyEntity} from '@common/entities/swoopingEnemyEntity';
 import {MeteorEntity} from '@common/entities/meteorEntity';
 import {Utils} from '@common/utils/utils';
 import {ServerEngine} from './serverEngine';
-import {Game, OrbitalGame} from '@common/game/game';
+import {OrbitalGame} from '@common/game/game';
 import {IServerSync} from './IServerSync';
 import {IServerSocket} from '@common/socket/models';
 import {TwoVector} from '@common/utils/twoVector';

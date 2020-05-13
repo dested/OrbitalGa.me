@@ -1,7 +1,6 @@
-import {EnemyShotEntity, EnemyShotModel} from '@common/entities/enemyShotEntity';
+import {EnemyShotEntity} from '@common/entities/enemyShotEntity';
 import {DrawZIndex} from '@common/baseEntities/clientActor';
 import {OrbitalAssets} from '../../utils/assetManager';
-import {OrbitalGame} from '@common/game/game';
 import {ClientActor} from '@common/baseEntities/clientActor';
 
 export class EnemyShotActor extends ClientActor<EnemyShotEntity> {

@@ -1,11 +1,9 @@
-import {ExplosionEntity, ExplosionModel} from '@common/entities/explosionEntity';
+import {ExplosionEntity} from '@common/entities/explosionEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
-import {ShakeGame} from '../../utils/shakeUtils';
 import {Entity} from '@common/baseEntities/entity';
 import {Utils} from '@common/utils/utils';
 import {OrbitalAssets} from '../../utils/assetManager';
-import {OrbitalGame} from '@common/game/game';
 
 export class ExplosionActor extends ClientActor<ExplosionEntity> {
   clientDestroyedTick?: number = undefined;

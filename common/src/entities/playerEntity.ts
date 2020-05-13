@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
-import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
+import {OrbitalGame} from '../game/game';
+import {Entity} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {PlayerWeaponEntity} from './playerWeaponEntity';
 import {nextId} from '../utils/uuid';
@@ -11,7 +11,6 @@ import {Utils} from '../utils/utils';
 import {isEnemyWeapon, WeaponEntity} from './weaponEntity';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
-import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
 import {SDArray, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {

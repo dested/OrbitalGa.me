@@ -13,12 +13,9 @@ export class BossEvent1Actor extends ClientActor<BossEvent1Entity> {
     return this.entity.position.y;
   }
 
-  destroyClient(): void {
-  }
+  destroyClient(): void {}
 
-  draw(context: CanvasRenderingContext2D): void {
-  }
+  draw(context: CanvasRenderingContext2D): void {}
 
-  tick() {
-  }
+  tick() {}
 }

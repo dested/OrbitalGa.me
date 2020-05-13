@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
-import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
+import {OrbitalGame} from '../game/game';
+import {Entity} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {nextId} from '../utils/uuid';
@@ -163,7 +163,7 @@ export class MeteorEntity extends PhysicsEntity {
     }
     this.health -= damage;
     this.hit = true;
-    this.velocity.add({x:x*5, y:y*5});
+    this.velocity.add({x: x * 5, y: y * 5});
     if (this.health <= 0) {
       if (!this.game.isClient) {
         if (Utils.random(50)) {

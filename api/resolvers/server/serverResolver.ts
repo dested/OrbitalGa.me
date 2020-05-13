@@ -1,4 +1,4 @@
-import {Arg, Ctx, Int, Mutation, Query, Resolver} from 'type-graphql';
+import {Arg, Query, Resolver} from 'type-graphql';
 import {ServersResponse, ServerStatsResponse} from './models';
 import {ServerStatsInput} from './serverInputs';
 import {prisma} from '../../server-common';

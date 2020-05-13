@@ -1,6 +1,6 @@
 import {Result} from 'collisions';
-import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
+import {OrbitalGame} from '../game/game';
+import {Entity} from '../baseEntities/entity';
 import {nextId} from '../utils/uuid';
 import {isPlayerWeapon} from './weaponEntity';
 import {DropEntity} from './dropEntity';
@@ -224,13 +224,7 @@ export class BossEvent1Entity extends PhysicsEntity {
     }
   }
 
-  inView(
-    viewX: number,
-    viewY: number,
-    viewWidth: number,
-    viewHeight: number,
-    playerId: number
-  ): boolean {
+  inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     return true;
   }
 

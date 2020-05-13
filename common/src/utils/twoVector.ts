@@ -1,7 +1,4 @@
-import {SDArray, SDSimpleObject, SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
-import {PhysicsEntityModelSchema} from '../baseEntities/physicsEntity';
-import {PlayerInputKeyBitmask} from '../models/schemaEnums';
-import {PlayerBadges, PlayerBadgesModelSchema, PlayerModel} from '../entities/playerEntity';
+import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 
 export class TwoVector {
   constructor(public x: number, public y: number) {
@@ -29,9 +26,6 @@ export class TwoVector {
    */
   clone() {
     return new TwoVector(this.x, this.y);
-  }
-  model(): TwoVectorModel {
-    return {x: this.x, y: this.y};
   }
 
   /**
@@ -68,6 +62,9 @@ export class TwoVector {
     this.y += (target.y - this.y) * p;
 
     return this;
+  }
+  model(): TwoVectorModel {
+    return {x: this.x, y: this.y};
   }
 
   multiply(other: TwoVector) {

@@ -1,5 +1,4 @@
-import {PlayerInput, PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
-import {ImpliedEntityType} from '@common/models/serverToClientMessages';
+import {PlayerEntity, PlayerModel} from '@common/entities/playerEntity';
 import {OrbitalGame} from '@common/game/game';
 import {ImpliedDefaultPhysics} from '@common/baseEntities/physicsEntity';
 

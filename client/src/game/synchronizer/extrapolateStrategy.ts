@@ -4,14 +4,11 @@ import {assertType, Utils} from '@common/utils/utils';
 import {Entity} from '@common/baseEntities/entity';
 import {PhysicsEntity, PhysicsEntityModel} from '@common/baseEntities/physicsEntity';
 import {CTOSPlayerInput} from '@common/models/clientToServerMessages';
-import {Game} from '@common/game/game';
-import {ShadowableEntity, ShadowEntityModel} from '@common/baseEntities/shadowableEntity';
 import {EntityUtils} from '@common/utils/entityUtils';
 
 const defaults = {
   syncsBufferLength: 5,
   maxReEnactSteps: 60, // maximum number of steps to re-enact
-  RTTEstimate: 2, // estimate the RTT as two steps (for updateRate=6, that's 200ms)
   extrapolate: 2, // player performs method "X" which means extrapolate to match server time. that 100 + (0..100)
   localObjBending: 0.1, // amount of bending towards position of sync object
   remoteObjBending: 0.6, // amount of bending towards position of sync object

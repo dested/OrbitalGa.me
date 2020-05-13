@@ -1,4 +1,3 @@
-import {Entity} from '../baseEntities/entity';
 import {PhysicsEntity} from '../baseEntities/physicsEntity';
 
 type MomentumPoint = {x: number; y: number};

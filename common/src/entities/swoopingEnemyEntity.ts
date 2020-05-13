@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
 import {Utils} from '../utils/utils';
-import {Game, OrbitalGame} from '../game/game';
-import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
+import {OrbitalGame} from '../game/game';
+import {Entity} from '../baseEntities/entity';
 import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {GameRules} from '../game/gameRules';

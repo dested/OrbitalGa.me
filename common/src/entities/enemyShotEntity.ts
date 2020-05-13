@@ -1,7 +1,7 @@
 import {Result} from 'collisions';
-import {Game, OrbitalGame} from '../game/game';
+import {OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
-import {Entity, EntityModel, EntityModelSchema} from '../baseEntities/entity';
+import {Entity} from '../baseEntities/entity';
 import {GameRules} from '../game/gameRules';
 import {WeaponEntity} from './weaponEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';

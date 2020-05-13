@@ -1,8 +1,7 @@
-import {DropEntity, DropModel} from '@common/entities/dropEntity';
+import {DropEntity} from '@common/entities/dropEntity';
 import {OrbitalAssets} from '../../utils/assetManager';
 import {unreachable} from '@common/utils/unreachable';
 import {CanvasUtils} from '../../utils/canvasUtils';
-import {OrbitalGame} from '@common/game/game';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
 export class DropActor extends ClientActor<DropEntity> {

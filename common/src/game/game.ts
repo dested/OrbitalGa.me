@@ -1,5 +1,5 @@
 import {Collisions, Result} from 'collisions';
-import {Entity, EntityModel} from '../baseEntities/entity';
+import {Entity} from '../baseEntities/entity';
 import {ArrayHash} from '../utils/arrayHash';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
@@ -18,6 +18,7 @@ export abstract class Game {
   clientPlayerId?: number;
   collisionEngine: Collisions;
   readonly collisionResult: Result;
+  engine!: Engine;
   entities = new ArrayHash<Entity>('entityId');
   entityClusterer: EntityClusterer;
   // todo leaderboard, remember we want to emit leaderbaord stuff back to engine
@@ -25,7 +26,6 @@ export abstract class Game {
   highestServerStep?: number;
   stepCount: number = 0;
   totalPlayers: number = 0;
-  engine!: Engine;
   constructor(public isClient: boolean) {
     this.collisionEngine = new Collisions();
     this.collisionResult = this.collisionEngine.createResult();

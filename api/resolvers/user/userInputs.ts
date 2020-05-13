@@ -1,4 +1,4 @@
-import {Field, Float, InputType, Int} from 'type-graphql';
+import {Field, InputType} from 'type-graphql';
 
 @InputType()
 export class LoginInput {

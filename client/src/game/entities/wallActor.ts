@@ -1,6 +1,5 @@
-import {WallEntity, WallModel} from '@common/entities/wallEntity';
+import {WallEntity} from '@common/entities/wallEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
-import {OrbitalGame} from '@common/game/game';
 
 export class WallActor extends ClientActor<WallEntity> {
   clientDestroyedTick?: number = undefined;

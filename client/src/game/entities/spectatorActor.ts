@@ -1,6 +1,6 @@
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
 
-import {SpectatorEntity, SpectatorModel} from '@common/entities/spectatorEntity';
+import {SpectatorEntity} from '@common/entities/spectatorEntity';
 
 export class SpectatorActor extends ClientActor<SpectatorEntity> {
   clientDestroyedTick?: number = undefined;

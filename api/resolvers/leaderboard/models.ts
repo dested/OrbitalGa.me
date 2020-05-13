@@ -1,5 +1,4 @@
-import {Field, Int, ObjectType, createUnionType} from 'type-graphql';
-import {response} from '../../gqlUtils/response';
+import {Field, Int, ObjectType} from 'type-graphql';
 
 @ObjectType()
 export class LeaderboardResponse {
