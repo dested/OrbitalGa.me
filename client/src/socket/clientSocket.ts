@@ -69,6 +69,11 @@ export class ClientSocket implements IClientSocket {
   }
 
   sendMessage(message: ClientToServerMessage) {
+/*
+    if (!this.isConnected()) {
+      debugger;
+    }
+*/
     if (GameConstants.binaryTransport) {
       this.socketSend(
         SchemaDefiner.startAddSchemaBuffer(

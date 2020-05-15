@@ -6,13 +6,6 @@ export class SpectatorActor extends ClientActor<SpectatorEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 
-  get drawX() {
-    return this.entity.position.x;
-  }
-  get drawY() {
-    return this.entity.position.y;
-  }
-
   draw(context: CanvasRenderingContext2D): void {}
   tick() {}
 }

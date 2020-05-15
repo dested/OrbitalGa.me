@@ -50,7 +50,7 @@ export class ServerSync implements IServerSync {
               updatedAt: new Date(),
             },
           });
-          await Promise.all(
+/*          await Promise.all(
             statsToPush.map((s) =>
               prisma.serverStat.create({
                 data: {
@@ -63,7 +63,7 @@ export class ServerSync implements IServerSync {
                 },
               })
             )
-          );
+          )*/;
         };
         awaiter().then(() => {
           console.timeEnd('pushing updates');

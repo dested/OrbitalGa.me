@@ -47,7 +47,7 @@ export abstract class SyncStrategy {
   }
 
   // sync to step, by applying bending, and applying the latest sync
-  syncStep(stepDesc: {dt?: number}) {
+  syncStep(stepDesc: {dt: number}) {
     // apply incremental bending
     for (const entity of this.gameEngine.entities.array) {
       if (entity instanceof PhysicsEntity) {

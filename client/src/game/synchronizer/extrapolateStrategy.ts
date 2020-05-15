@@ -22,7 +22,8 @@ export class ExtrapolateStrategy extends SyncStrategy {
     onEveryStep: {MAX_LEAD: 7, MAX_LAG: 4}, // max step lead/lag allowed at every step
     clientReset: 40, // if we are behind this many steps, just reset the step counter
   };
-  private recentInputs: {[stepNumber: number]: CTOSPlayerInput};
+
+  private readonly recentInputs: {[stepNumber: number]: CTOSPlayerInput};
   constructor(clientEngine: ClientEngine, options?: typeof defaults) {
     super(clientEngine);
     this.options = {...defaults, ...options};
@@ -169,7 +170,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
           ? `ΔPos=${entity.bendingPositionDelta} ΔVel=${entity.bendingVelocityDelta} ΔAngle=${entity.bendingAngleDelta} increments=${entity.bendingIncrements}`
           : 'no bending';
 
-        /*console.info(`object[${entity.entityId}] ${bendingString}`);*/
+        // console.info(`object[${entity.entityId}] ${bendingString}`);
       }
     }
 

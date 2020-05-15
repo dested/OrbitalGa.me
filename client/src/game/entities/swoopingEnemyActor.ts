@@ -12,14 +12,6 @@ export class SwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
   hitTimer = 0;
   zIndex = DrawZIndex.Player;
 
-  get drawX() {
-    return this.entity.position.x;
-  }
-
-  get drawY() {
-    return this.entity.position.y;
-  }
-
   get ship() {
     switch (this.entity.enemyColor) {
       case 'black':
@@ -36,7 +28,7 @@ export class SwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
   draw(context: CanvasRenderingContext2D): void {
     const ship = this.ship;
     context.save();
-    context.translate(this.drawX, this.drawY);
+    context.translate(this.entity.position.x, this.entity.position.y);
     context.drawImage(ship.image, -ship.size.width / 2, -ship.size.height / 2);
 
     if (this.hitTimer > 0) {
@@ -54,11 +46,16 @@ export class SwoopingEnemyActor extends ClientActor<SwoopingEnemyEntity> {
   drawHealth(context: CanvasRenderingContext2D) {
     const ship = this.ship;
     context.fillStyle = 'rgba(255,255,255,0.4)';
-    context.fillRect(this.drawX - ship.size.width / 2, this.drawY - ship.size.height / 2 - 8, ship.size.width, 5);
+    context.fillRect(
+      this.entity.position.x - ship.size.width / 2,
+      this.entity.position.y - ship.size.height / 2 - 8,
+      ship.size.width,
+      5
+    );
     context.fillStyle = 'rgba(254,0,0,0.4)';
     context.fillRect(
-      this.drawX - ship.size.width / 2 + 1,
-      this.drawY - ship.size.height / 2 + 1 - 8,
+      this.entity.position.x - ship.size.width / 2 + 1,
+      this.entity.position.y - ship.size.height / 2 + 1 - 8,
       (ship.size.width - 2) * (this.entity.health / GameRules.enemies.swoopingEnemy.startingHealth),
       3
     );

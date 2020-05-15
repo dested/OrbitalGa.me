@@ -129,6 +129,10 @@ export class TwoVector {
 
     return this;
   }
+
+  toString() {
+    return `[${this.x.toFixed(3)},${this.y.toFixed(3)}]`;
+  }
   static fromModel(model: TwoVectorModel): TwoVector {
     return new TwoVector(model.x, model.y);
   }

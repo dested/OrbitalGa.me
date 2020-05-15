@@ -104,8 +104,8 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
       this.hurt(
         otherEntity.damage,
         otherEntity,
-        -collisionResult.overlap * collisionResult.overlap_x,
-        -collisionResult.overlap * collisionResult.overlap_y
+        (-collisionResult.overlap * collisionResult.overlap_x) / 10,
+        (-collisionResult.overlap * collisionResult.overlap_y) / 10
       );
 
       return true;

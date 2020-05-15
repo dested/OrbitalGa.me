@@ -104,6 +104,7 @@ export class ClientEngine extends Engine {
   }
 
   clientStep = () => {
+    if (!this.socket.isConnected()) return;
     const t = +new Date();
     const p = 1000 / 60;
     let dt = 0;
@@ -176,7 +177,7 @@ export class ClientEngine extends Engine {
       }
       this.pingIndex++;
       this.pings[this.pingIndex] = +new Date();
-      this.socket.sendMessage({type: 'ping', ping: this.pingIndex});
+      if (this.socket.isConnected()) this.socket.sendMessage({type: 'ping', ping: this.pingIndex});
     }, GameConstants.pingInterval);
   }
 

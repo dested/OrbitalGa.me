@@ -13,6 +13,10 @@ import {
 } from '../../client/src/schema/generated/graphql';
 import {ClientSocket} from '../../client/src/socket/clientSocket';
 import {makeJwt} from '../../client/src/utils/jwt';
+console.log = () => {};
+console.warn = () => {};
+console.debug = () => {};
+console.trace = () => {};
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData: {

@@ -1,12 +1,12 @@
 const screenSize = {width: 1950, height: 900};
 
 export class GameDebug {
-  static autoSignIn = true;
+  static autoSignIn = false;
   static client = true;
   static clientServerView = false;
   static collisions = false;
   static dontFilterEntities = false;
-  static isLocal = true;
+  static isLocal = false;
   static meteorCluster = false;
   static noBackground = false;
   static noEnemies = false;

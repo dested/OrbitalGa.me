@@ -101,14 +101,14 @@ export class MeteorEntity extends PhysicsEntity {
       otherEntity.hurt(
         1,
         this,
-        collisionResult.overlap * collisionResult.overlap_x * 2,
-        collisionResult.overlap * collisionResult.overlap_y * 2
+        collisionResult.overlap * collisionResult.overlap_x * 4,
+        collisionResult.overlap * collisionResult.overlap_y * 4
       );
       this.hurt(
         otherEntity.damage,
         otherEntity,
-        -collisionResult.overlap * collisionResult.overlap_x,
-        -collisionResult.overlap * collisionResult.overlap_y
+        -collisionResult.overlap * collisionResult.overlap_x * 10,
+        -collisionResult.overlap * collisionResult.overlap_y * 10
       );
       return true;
     }
@@ -165,8 +165,8 @@ export class MeteorEntity extends PhysicsEntity {
     this.health -= damage;
     this.hit = true;
     this.velocity.add({x: x * 5, y: y * 5});
-    if (this.health <= 0) {
-      if (!this.game.isClient) {
+    if (!this.game.isClient) {
+      if (this.health <= 0) {
         if (Utils.random(50)) {
           const drop = new DropEntity(this.game, {
             entityId: nextId(),

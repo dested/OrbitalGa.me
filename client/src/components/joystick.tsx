@@ -31,10 +31,7 @@ export class JoyStick extends Component<Props> {
   }
 
   componentDidMount() {
-    // delete window.PointerEvent;
-    // delete (window as any).isMSPointer;
     this.manager = (nipplejs.create({...this.props.options, zone: this.joyRef.current!}) as unknown) as JoystickManager;
-    this.joyRef.current!.style.touchAction = 'initial';
     this.props.managerListener(this.manager);
   }
 

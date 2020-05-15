@@ -60,7 +60,7 @@ export abstract class PhysicsEntity extends Entity {
     return {};
   }
 
-  applyIncrementalBending(stepDesc: {dt?: number}) {
+  applyIncrementalBending(stepDesc: {dt: number}) {
     if (
       this.bendingIncrements === 0 ||
       !this.bendingPositionDelta ||
@@ -69,9 +69,7 @@ export abstract class PhysicsEntity extends Entity {
     )
       return;
 
-    let timeFactor = 1;
-    if (stepDesc && stepDesc.dt) timeFactor = stepDesc.dt / (1000 / 60);
-
+    const timeFactor = stepDesc.dt / (1000 / 60);
     const posDelta = this.bendingPositionDelta.clone().multiplyScalar(timeFactor);
     const velDelta = this.bendingVelocityDelta.clone().multiplyScalar(timeFactor);
     this.position.add(posDelta);
@@ -84,13 +82,13 @@ export abstract class PhysicsEntity extends Entity {
   bendToCurrent(original: PhysicsEntityModel, percent: number, isLocal: boolean, increments: number) {
     const bending = {increments, percent};
     // if the object has defined a bending multiples for this object, use them
-    let positionBending = Object.assign({}, bending, this.bending.position);
-    let velocityBending = Object.assign({}, bending, this.bending.velocity);
-    let angleBending = Object.assign({}, bending, this.bending.angle);
+    let positionBending = {...bending, ...this.bending.position};
+    let velocityBending = {...bending, ...this.bending.velocity};
+    let angleBending = {...bending, ...this.bending.angle};
 
     if (isLocal) {
       positionBending = {...positionBending, ...this.bending.positionLocal};
-      velocityBending = {...positionBending, ...this.bending.velocityLocal};
+      velocityBending = {...velocityBending, ...this.bending.velocityLocal};
       angleBending = {...positionBending, ...this.bending.angleLocal};
     }
 
@@ -98,7 +96,7 @@ export abstract class PhysicsEntity extends Entity {
     this.bendingPositionDelta = TwoVector.getBendingDelta(original.position, this.position, positionBending);
     this.bendingVelocityDelta = TwoVector.getBendingDelta(original.velocity, this.velocity, velocityBending);
     this.bendingAngleDelta =
-      MathUtils.interpolateDeltaWithWrapping(original.angle % 255, this.angle % 255, angleBending.percent, 0, 360) /
+      MathUtils.interpolateDeltaWithWrapping(original.angle % 255, this.angle % 255, angleBending.percent, 0, 255) /
       increments;
 
     // revert to original
