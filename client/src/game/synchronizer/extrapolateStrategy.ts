@@ -38,7 +38,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     }
     const game = this.gameEngine;
 
-    console.debug('extrapolate applying sync');
+    // console.debug('extrapolate applying sync');
 
     //
     //    scan all the objects in the sync
@@ -57,6 +57,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     const entityMap = Utils.toDictionary(sync.entities, (a) => a.entityId);
     for (let i = this.gameEngine.entities.length - 1; i >= 0; i--) {
       const entity = this.gameEngine.entities.getIndex(i);
+      if (EntityUtils.isShadow(entity)) continue;
       assertType<Entity>(entity);
       if (entity.actor?.clientDestroyedTick !== undefined) {
         entity.actor.clientDestroyedTick--;
@@ -75,13 +76,14 @@ export class ExtrapolateStrategy extends SyncStrategy {
       const foundEntityShadow =
         'inputId' in messageModel &&
         this.gameEngine.entities.array.find(
-          (entity) => EntityUtils.isShadowEntity(entity) && entity.inputId === messageModel.inputId
+          (entity) => EntityUtils.isShadow(entity) && entity.inputId === messageModel.inputId
         );
 
-      if (foundEntityShadow) {
+      if (foundEntityShadow && EntityUtils.isShadow(foundEntityShadow)) {
         // case 1: this object has a local shadow object on the client
-        console.debug(`object ${messageModel.entityId} replacing local shadow ${foundEntityShadow.entityId}`);
-
+        console.debug(
+          `object ${messageModel.entityId} replacing local shadow ${foundEntityShadow.entityId} ${foundEntityShadow.inputId}`
+        );
         if (!this.gameEngine.entities.lookup(messageModel.entityId)) {
           const newObj = this.addNewObject(messageModel);
           if (newObj instanceof PhysicsEntity) {
@@ -94,14 +96,38 @@ export class ExtrapolateStrategy extends SyncStrategy {
         if (!foundEntity) {
           foundEntity = this.addNewObject(messageModel);
         } else {
-          console.info(`object before syncTo: ${JSON.stringify(foundEntity.serialize())}`);
+          /*console.info(`object before syncTo: ${JSON.stringify(foundEntity.serialize())}`);*/
           if (foundEntity instanceof PhysicsEntity) {
             foundEntity.saveState();
           }
           foundEntity.reconcileFromServer(messageModel);
+          /*
           console.info(
             `object after syncTo: ${JSON.stringify(foundEntity.serialize())} synced to step[${sync.stepCount}]`
           );
+*/
+        }
+      }
+    }
+
+    const shadows = this.gameEngine.entities.array.filter((a) => EntityUtils.isShadow(a));
+
+    if (shadows.length > 0) {
+      /*
+      console.log(
+        'a',
+        sync.entities.filter((a) => 'inputId' in a).map((a) => (a as any).inputId)
+      );
+      console.log(
+        'b',
+        shadows.map((a) => EntityUtils.isShadowEntity(a) && (a as any).inputId + ' ' + a.tickCreated)
+      );*/
+      for (const shadow of shadows) {
+        if (EntityUtils.isShadowEntity(shadow)) {
+          if (shadow.tickCreated + 60 < this.gameEngine.stepCount) {
+            this.gameEngine.entities.remove(shadow);
+            console.log('Removed bad shadow');
+          }
         }
       }
     }
@@ -109,7 +135,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     //
     // reenact the steps that we want to extrapolate forwards
     //
-    console.debug(`extrapolate re-enacting steps from [${serverStep}] to [${game.stepCount}]`);
+    // console.debug(`extrapolate re-enacting steps from [${serverStep}] to [${game.stepCount}]`);
     if (serverStep < game.stepCount - this.options.maxReEnactSteps) {
       serverStep = game.stepCount - this.options.maxReEnactSteps;
       console.info(`too many steps to re-enact.  Starting from [${serverStep}] to [${game.stepCount}]`);
@@ -133,7 +159,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
     //
     for (const entity of this.gameEngine.entities.array) {
       // shadow objects are not bent
-      if (EntityUtils.isShadowEntity(entity)) continue;
+      if (EntityUtils.isShadow(entity)) continue;
       if (entity instanceof PhysicsEntity) {
         const isLocal = entity.owningPlayerId === this.gameEngine.clientPlayerId; // eslint-disable-line eqeqeq
         const bending = isLocal ? this.options.localObjBending : this.options.remoteObjBending;
@@ -143,7 +169,7 @@ export class ExtrapolateStrategy extends SyncStrategy {
           ? `ΔPos=${entity.bendingPositionDelta} ΔVel=${entity.bendingVelocityDelta} ΔAngle=${entity.bendingAngleDelta} increments=${entity.bendingIncrements}`
           : 'no bending';
 
-        console.info(() => `object[${entity.entityId}] ${bendingString}`);
+        /*console.info(`object[${entity.entityId}] ${bendingString}`);*/
       }
     }
 

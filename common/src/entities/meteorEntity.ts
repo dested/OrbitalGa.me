@@ -92,6 +92,7 @@ export class MeteorEntity extends PhysicsEntity {
         this.health = 1;
         break;
     }
+    this.health *= 10;
     this.createPolygon();
   }
 

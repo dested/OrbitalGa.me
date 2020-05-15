@@ -1,12 +1,11 @@
 import {PlayerWeaponEntity} from '@common/entities/playerWeaponEntity';
 import {ClientActor, DrawZIndex} from '@common/baseEntities/clientActor';
-
 import {OrbitalAssets} from '../../utils/assetManager';
 import {unreachable} from '@common/utils/unreachable';
 import {Utils} from '@common/utils/utils';
 import {PlayerEntity} from '@common/entities/playerEntity';
 
-export class ClientPlayerWeaponActor extends ClientActor<PlayerWeaponEntity> {
+export class PlayerWeaponActor extends ClientActor<PlayerWeaponEntity> {
   clientDestroyedTick?: number = undefined;
   zIndex = DrawZIndex.Ordinance;
 

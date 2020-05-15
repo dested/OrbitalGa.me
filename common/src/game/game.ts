@@ -46,8 +46,9 @@ export abstract class Game {
   }
 
   addObjectToWorld(entity: Entity, instantiatedFromSync: boolean = false) {
-    if (this.isClient && !instantiatedFromSync) {
+    if (this.isClient && !instantiatedFromSync && EntityUtils.isShadowEntity(entity)) {
       entity.entityId += 1000000;
+      entity.tickCreated = this.stepCount;
     }
     this.engine.assignActor(entity);
     this.entities.push(entity);
@@ -73,7 +74,7 @@ export abstract class Game {
     dt = dt ?? 1;
     for (const entity of this.entities.array) {
       // skip physics for shadow objects during re-enactment
-      if (isReenact && EntityUtils.isShadowEntity(entity)) {
+      if (isReenact && EntityUtils.isShadow(entity)) {
         continue;
       }
       if (entity instanceof PhysicsEntity) {
@@ -136,6 +137,7 @@ export abstract class Game {
 
 export abstract class Engine {
   abstract assignActor(entity: Entity): void;
+  abstract clientDied(): void;
   abstract killPlayer(player: Entity): void;
   abstract setDebug(key: string, value: number | string): void;
 }

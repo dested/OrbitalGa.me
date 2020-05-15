@@ -94,6 +94,15 @@ export class ClientEngine extends Engine {
     delete this.debugValues[key];
   }
 
+  clientDied() {
+    if (!this.isDead) {
+      this.isDead = true;
+      this.lastXY = this.game.clientPlayer?.position;
+      this.game.clientPlayerId = undefined;
+      this.options.onDied(this);
+    }
+  }
+
   clientStep = () => {
     const t = +new Date();
     const p = 1000 / 60;
@@ -146,15 +155,6 @@ export class ClientEngine extends Engine {
     });
 
     this.init();
-  }
-
-  died() {
-    if (!this.isDead) {
-      this.isDead = true;
-      this.lastXY = this.game.clientPlayer?.position;
-      this.game.clientPlayerId = undefined;
-      this.options.onDied(this);
-    }
   }
 
   disconnect() {
@@ -231,14 +231,18 @@ export class ClientEngine extends Engine {
   };
 
   private handleKeys() {
-    if (this.keys.up || this.keys.right || this.keys.left || this.keys.down || this.keys.shoot) {
+    const keys = {...this.keys};
+    if (keys.up || keys.right || keys.left || keys.down || keys.shoot) {
+      if (!this.game.clientPlayer?.canShoot) {
+        keys.shoot = false;
+      }
       const inputEvent: CTOSPlayerInput = {
         type: 'playerInput',
         messageIndex: this.messageIndex,
         step: this.game.stepCount,
         weapon: 'unset', // todo weapon
-        keys: this.keys,
-        movement: this.keys.up || this.keys.right || this.keys.left || this.keys.down,
+        keys,
+        movement: keys.up || keys.right || keys.left || keys.down,
       };
       this.synchronizer.clientInputSave(inputEvent);
       this.game.processInput(inputEvent, this.game.clientPlayerId!);
@@ -260,6 +264,8 @@ export class ClientEngine extends Engine {
           this.isDead = false;
           this.lastXY = undefined;
           this.spectatorMode = false;
+          this.game.highestServerStep = message.stepCount;
+          this.game.stepCount = message.stepCount;
           this.game.clientPlayerId = message.playerEntityId;
           this.options.onReady(this);
           break;

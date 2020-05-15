@@ -56,7 +56,7 @@ export class LivePlayerActor extends PlayerActor {
       this.hitTimer = 5;
     }
     if (this.entity.dead) {
-      this.clientEngine.died();
+      this.clientEngine.clientDied();
     }
   }
 

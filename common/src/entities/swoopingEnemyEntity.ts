@@ -35,8 +35,6 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
   health: number = GameRules.enemies.swoopingEnemy.startingHealth;
   hit = false;
   isWeapon = true as const;
-  momentumX = 0;
-  momentumY = 0;
   ownerPlayerEntityId: number;
   swoopDirection: 'left' | 'right' = Utils.flipCoin('left', 'right');
   type = 'swoopingEnemy' as const;
@@ -47,12 +45,12 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
       {
         phase: 'swoop' as const,
         type: 'linear',
-        duration: 20,
+        duration: 60,
         variability: 2,
         points: [
           {
             x: -2,
-            y: 10,
+            y: 5,
           },
         ],
       },
@@ -70,12 +68,12 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
       {
         phase: 'exit' as const,
         type: 'linear',
-        duration: 20 * 10,
+        duration: 20 * 50,
         variability: 0,
         points: [
           {
-            x: this.swoopDirection === 'left' ? -150 : +150,
-            y: -200,
+            x: this.swoopDirection === 'left' ? -10 : +10,
+            y: -15,
           },
         ],
       },
@@ -118,6 +116,7 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
 
   gameTick(duration: number): void {
     if (
+      !this.game.isClient &&
       this.aliveTick % (4 * 6) === 0 &&
       (this.path.getCurrentPhase() === 'bounce' || this.path.getCurrentPhase() === 'swoop')
     ) {
@@ -146,37 +145,38 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
     }
 
     this.hit = true;
-    this.health -= damage;
-    this.momentumX += x;
-    this.momentumY += y;
-    otherEntity.causedDamage(otherEntity.damage, this);
-    if (this.health <= 0) {
-      this.health = 0;
-      otherEntity.causedKill(this);
-      const drop = new DropEntity(this.game, {
-        entityId: nextId(),
-        position: {x: this.position.x, y: this.position.y},
-        drop: DropEntity.randomDrop('big'),
-      });
-      this.game.addObjectToWorld(drop);
-      this.game.explode(this, 'medium');
-      this.game.addObjectToWorld(
-        new ScoreEntity(this.game, {
+    this.bounce(x, y);
+    if (!this.game.isClient) {
+      this.health -= damage;
+      otherEntity.causedDamage(otherEntity.damage, this);
+      if (this.health <= 0) {
+        this.health = 0;
+        otherEntity.causedKill(this);
+        const drop = new DropEntity(this.game, {
           entityId: nextId(),
           position: {x: this.position.x, y: this.position.y},
-          onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
-          score: LeaderboardEntryWeight.enemiesKilled,
-        })
-      );
-    } else {
-      this.game.addObjectToWorld(
-        new ScoreEntity(this.game, {
-          entityId: nextId(),
-          position: {x: this.position.x, y: this.position.y},
-          onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
-          score: LeaderboardEntryWeight.damageGiven,
-        })
-      );
+          drop: DropEntity.randomDrop('big'),
+        });
+        this.game.addObjectToWorld(drop);
+        this.game.explode(this, 'medium');
+        this.game.addObjectToWorld(
+          new ScoreEntity(this.game, {
+            entityId: nextId(),
+            position: {x: this.position.x, y: this.position.y},
+            onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
+            score: LeaderboardEntryWeight.enemiesKilled,
+          })
+        );
+      } else {
+        this.game.addObjectToWorld(
+          new ScoreEntity(this.game, {
+            entityId: nextId(),
+            position: {x: this.position.x, y: this.position.y},
+            onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
+            score: LeaderboardEntryWeight.damageGiven,
+          })
+        );
+      }
     }
   }
 

@@ -3,7 +3,7 @@ import {EntityType, EntityModels} from '@common/models/serverToClientMessages';
 import {ExplosionActor} from './explosionActor';
 import {PlayerShieldActor} from './playerShieldActor';
 import {SwoopingEnemyActor} from './swoopingEnemyActor';
-import {ClientPlayerWeaponActor} from './clientPlayerWeaponActor';
+import {PlayerWeaponActor} from './playerWeaponActor';
 import {WallActor} from './wallActor';
 import {PlayerActor} from './playerActor';
 import {EnemyShotActor} from './enemyShotActor';
@@ -24,7 +24,7 @@ export const ActorEntityTypes: {
   player: PlayerActor,
   livePlayer: LivePlayerActor,
   enemyShot: EnemyShotActor,
-  playerWeapon: ClientPlayerWeaponActor,
+  playerWeapon: PlayerWeaponActor,
   explosion: ExplosionActor,
   swoopingEnemy: SwoopingEnemyActor,
   wall: WallActor,

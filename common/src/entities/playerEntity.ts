@@ -73,6 +73,10 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
     this.createPolygon();
   }
 
+  get canShoot() {
+    return this.shootTimer <= 0;
+  }
+
   get playersToLeft() {
     if (this.staticPlayersToLeft !== undefined) return this.staticPlayersToLeft;
     return this.game.entities.filter(
@@ -154,9 +158,9 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
       this.selectedWeapon = input.weapon;
     }
     if (input.keys.shoot) {
-      if (this.shootTimer <= 0) {
+      const config = WeaponConfigs[this.selectedWeapon];
+      if (this.canShoot) {
         const availableWeapon = this.availableWeapons.find((w) => w.weapon === this.selectedWeapon);
-        const config = WeaponConfigs[this.selectedWeapon];
         if (availableWeapon) {
           let canFire = false;
           switch (config.ammoType) {
@@ -302,28 +306,35 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
 
   gameTick(duration: number): void {
     this.shootTimer = Math.max(this.shootTimer - 1, 0);
-    this.updatedPositionFromMomentum();
+    if (this.position.y < GameConstants.screenSize.height * 0.1) {
+      this.position.y = GameConstants.screenSize.height * 0.1;
+      this.velocity.set(this.velocity.x, 0);
+    }
+    if (this.position.y > GameConstants.screenSize.height * 1.1) {
+      this.position.y = GameConstants.screenSize.height * 1.1;
+      this.velocity.set(this.velocity.x, 0);
+    }
   }
 
   hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
     this.bounce(x, y);
     if (!this.game.isClient) {
+      const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
       this.game.gameLeaderboard?.increaseEntry(this.entityId, 'damageTaken', damage);
-    }
-    if (shield && !shield.depleted) {
-      const damageLeft = shield.hurt(damage, otherEntity, x, y);
-      if (damageLeft === 0) {
-        return;
-      } else {
-        damage = damageLeft;
+      if (shield && !shield.depleted) {
+        const damageLeft = shield.hurt(damage, otherEntity, x, y);
+        if (damageLeft === 0) {
+          return;
+        } else {
+          damage = damageLeft;
+        }
       }
-    }
 
-    this.health -= damage;
-    this.hit = true;
-    if (this.health <= 0) {
-      this.die();
+      this.health -= damage;
+      this.hit = true;
+      if (this.health <= 0) {
+        this.die();
+      }
     }
   }
 
@@ -362,7 +373,6 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
       this.playerInputKeys = messageModel.playerInputKeys;
     } else {
       this.dead = messageModel.dead;
-      this.shootTimer = messageModel.shootTimer;
       this.availableWeapons = messageModel.availableWeapons;
       this.selectedWeapon = messageModel.selectedWeapon;
       this.playersToLeft = messageModel.playersToLeft;
@@ -385,7 +395,6 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
   serializeLive(): LivePlayerModel {
     return {
       ...this.serialize(),
-      shootTimer: this.shootTimer,
       playersToLeft: this.playersToLeft,
       playersToRight: this.playersToRight,
       dead: this.dead,
@@ -397,24 +406,6 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
 
   setShieldEntity(shieldEntityId: number) {
     this.shieldEntityId = shieldEntityId;
-  }
-
-  updatedPositionFromMomentum() {
-    if (this.position.y < GameConstants.screenSize.height * 0.1) {
-      this.position.y = GameConstants.screenSize.height * 0.1;
-      this.velocity.set(this.velocity.x, 0);
-    }
-    if (this.position.y > GameConstants.screenSize.height * 1.1) {
-      this.position.y = GameConstants.screenSize.height * 1.1;
-      this.velocity.set(this.velocity.x, 0);
-    }
-  }
-
-  protected bounce(momentumX: number, momentumY: number) {
-    this.velocity.add({
-      x: momentumX * 5,
-      y: momentumY * 5,
-    });
   }
 
   static randomEnemyColor() {
@@ -441,7 +432,6 @@ export type LivePlayerModel = PhysicsEntityModel & {
   playersToLeft: number;
   playersToRight: number;
   selectedWeapon: PlayerWeapon;
-  shootTimer: number;
   type: 'livePlayer';
 };
 
@@ -464,7 +454,6 @@ export const LivePlayerModelSchema: SDTypeElement<LivePlayerModel> = {
     red: 4,
   },
   hit: 'boolean',
-  shootTimer: 'uint8',
   availableWeapons: {
     flag: 'array-uint8',
     elements: {ammo: 'uint16', weapon: PlayerWeaponEnumSchema},

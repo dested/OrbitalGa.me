@@ -18,13 +18,13 @@ import {PhysicsEntity} from '@common/baseEntities/physicsEntity';
 
 export class OrbitalServerEngine extends ServerEngine {
   game: OrbitalGame;
-
   constructor(serverSocket: IServerSocket, serverSync: IServerSync, game: OrbitalGame) {
     super(serverSocket, serverSync, game);
     this.game = game;
   }
 
   assignActor(entity: Entity): void {}
+  clientDied() {}
 
   gameTick(tickIndex: number, duration: number): void {
     this.processGameRules(tickIndex);
@@ -75,6 +75,7 @@ export class OrbitalServerEngine extends ServerEngine {
 
     this.sendMessageToClient(connectionId, {
       type: 'joined',
+      stepCount: this.game.stepCount,
       serverVersion: GameConstants.serverVersion,
       playerEntityId: playerEntity.entityId,
     });

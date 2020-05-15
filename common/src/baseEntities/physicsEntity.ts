@@ -117,6 +117,13 @@ export abstract class PhysicsEntity extends Entity {
     this.savedCopy = undefined;
   }
 
+  bounce(momentumX: number, momentumY: number) {
+    this.velocity.add({
+      x: momentumX * 50,
+      y: momentumY * 50,
+    });
+  }
+
   checkCollisions() {
     if (this.boundingBoxes.length === 0) {
       return;

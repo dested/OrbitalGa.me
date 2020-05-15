@@ -5,13 +5,10 @@ import {ClientActor} from './clientActor';
 
 export abstract class Entity {
   actor?: ClientActor<this>;
-
   entityId: number;
   markToDestroy: boolean = false;
   owningPlayerId?: number;
-
   abstract type: EntityModels['type'];
-
   constructor(public game: Game, messageModel: EntityModel) {
     this.entityId = messageModel.entityId;
   }

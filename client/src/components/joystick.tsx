@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import nipplejs from '../nipplejs/index';
+import nipplejs from 'nipplejs';
 import {JoystickManager, JoystickManagerOptions} from 'nipplejs';
 
 type Props = {

@@ -46,7 +46,12 @@ export type EntityModels = EntityType[keyof EntityType]['model'];
 
 export type ImpliedEntityType<T> = Omit<T, 'type'>;
 
-type STOCJoined = {playerEntityId: number; serverVersion: number; type: 'joined'};
+type STOCJoined = {
+  playerEntityId: number;
+  serverVersion: number;
+  stepCount: number;
+  type: 'joined';
+};
 type STOCSpectating = {serverVersion: number; type: 'spectating'};
 type STOCPong = {ping: number; type: 'pong'};
 export type STOCError =
@@ -75,6 +80,7 @@ const STOCErrorSchema: SDTypeLookup<ServerToClientMessage, 'error'> = {
   reason: {flag: 'enum', nameInUse: 1, '500': 2, spectatorCapacity: 3, userCapacity: 4},
 };
 const STOCJoinedSchema: SDTypeLookup<ServerToClientMessage, 'joined'> = {
+  stepCount: 'uint32',
   serverVersion: 'uint8',
   playerEntityId: 'int32',
 };

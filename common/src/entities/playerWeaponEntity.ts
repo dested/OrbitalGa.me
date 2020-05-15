@@ -25,6 +25,7 @@ export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, S
   ownerEntityId: number;
   ownerPlayerEntityId: number;
   sprayAngle: number;
+  tickCreated: number = 0;
   type = 'playerWeapon' as const;
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
@@ -71,7 +72,10 @@ export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, S
       this.velocity.add({x: 0, y: -config.speed * (duration / 1000)});
     } else {
       if (this.sprayAngle > 0) {
-        /* todo angular momentum   
+        /* todo angular momentum
+                missile.velocity.x += Math.cos(missile.angle * (Math.PI / 180)) * 10;
+        missile.velocity.y += Math.sin(missile.angle * (Math.PI / 180)) * 10;
+
      this.x -= Math.cos(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);
         this.y -= Math.sin(Utils.degToRad(this.sprayAngle)) * config.speed * (duration / 1000);*/
       }
