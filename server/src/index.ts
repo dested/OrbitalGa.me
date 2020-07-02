@@ -5,6 +5,7 @@ import {ServerUtils} from './utils/serverUtils';
 import {OrbitalGame} from '@common/game/game';
 import {OrbitalServerEngine} from './game/orbitalServerEngine';
 
+
 async function main() {
   console.log('Getting config');
   await SecureConfig.setup();

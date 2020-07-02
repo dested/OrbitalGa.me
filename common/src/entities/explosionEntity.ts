@@ -73,5 +73,8 @@ export type ExplosionModel = PhysicsEntityModel & {
 export const ExplosionModelSchema: SDTypeElement<ExplosionModel> = {
   ...PhysicsEntityModelSchema,
   intensity: 'uint8',
-  ownerEntityId: 'int32Optional',
+  ownerEntityId: {
+    flag: 'optional',
+    element: 'uint32',
+  },
 };

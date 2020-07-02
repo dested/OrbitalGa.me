@@ -127,17 +127,13 @@ return (${code})
         return `buff.addBoolean(${fieldName});\n`;
       case 'string':
         return `buff.addString(${fieldName});\n`;
-      case 'int32Optional':
-        return `buff.addInt32Optional(${fieldName});\n`;
-      case 'int8Optional':
-        return `buff.addInt8Optional(${fieldName});\n`;
       default:
         assertType<ABFlags>(schema);
         switch (schema.flag) {
           case 'enum': {
             return `({ 
 ${Utils.safeKeysExclude(schema, 'flag')
-  .map((key) => `${key}:()=>buff.addUint8(${schema[key]}),`)
+  .map((key) => `['${key}']:()=>buff.addUint8(${schema[key]}),`)
   .join('\n')}
 })[${fieldName}]();`;
           }
@@ -150,7 +146,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
           }
 
           case 'array-uint8': {
-            const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+            const noPeriodsFieldName = fieldName.replace(/\["/g, '_').replace(/"]/g, '');
             return `
            buff.addUint8(${fieldName}.length);
     for (const ${noPeriodsFieldName}Element of ${fieldName}) {
@@ -158,7 +154,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
     }`;
           }
           case 'array-uint16': {
-            const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+            const noPeriodsFieldName = fieldName.replace(/\["/g, '_').replace(/"]/g, '');
             return `
            buff.addUint16(${fieldName}.length);
     for (const ${noPeriodsFieldName}Element of ${fieldName}) {
@@ -169,7 +165,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             let map = '{\n';
             let index = 0;
             for (const key of Object.keys(schema.elements)) {
-              map += `${key}:()=>{
+              map += `['${key}']:()=>{
               buff.addUint8(${index});
               ${SchemaDefiner.buildAdderFunction(schema.elements[key], fieldName, addMap)}
               },`;
@@ -178,14 +174,21 @@ ${Utils.safeKeysExclude(schema, 'flag')
             map += '}\n';
             return `(${map})[${fieldName}.type]();`;
           }
+          case 'optional': {
+            return `buff.addBoolean(${fieldName}!==undefined);
+            if(${fieldName}!==undefined){
+            ${SchemaDefiner.buildAdderFunction(schema.element, fieldName, addMap)}
+            }`;
+          }
           case undefined:
+            assertType<{flag: undefined} & {[key: string]: any}>(schema);
             let result = '';
             for (const key of Object.keys(schema)) {
               if (key === 'type' || key === 'entityType') {
                 continue;
               }
               const currentSchemaElement = schema[key];
-              result += this.buildAdderFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '\n';
+              result += this.buildAdderFunction(currentSchemaElement, `${fieldName}["${key}"]`, addMap) + '\n';
             }
             return result;
         }
@@ -218,10 +221,6 @@ ${Utils.safeKeysExclude(schema, 'flag')
         return `1+`;
       case 'string':
         return `2+${fieldName}.length*2+`;
-      case 'int32Optional':
-        return `4+`;
-      case 'int8Optional':
-        return `1+`;
       default:
         assertType<ABFlags>(schema);
         switch (schema.flag) {
@@ -231,8 +230,11 @@ ${Utils.safeKeysExclude(schema, 'flag')
           case 'bitmask': {
             return `1+`;
           }
+          case 'optional': {
+            return `1+${SchemaDefiner.buildAdderSizeFunction(schema.element, fieldName, addMap)}`;
+          }
           case 'array-uint8': {
-            const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+            const noPeriodsFieldName = fieldName.replace(/\["/g, '_').replace(/"]/g, '');
             return `1+sum(${fieldName}.map(${noPeriodsFieldName + 'Element'}=>(${SchemaDefiner.buildAdderSizeFunction(
               schema.elements,
               noPeriodsFieldName + 'Element',
@@ -240,7 +242,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             )}0)))+`;
           }
           case 'array-uint16': {
-            const noPeriodsFieldName = fieldName.replace(/\./g, '_');
+            const noPeriodsFieldName = fieldName.replace(/\["/g, '_').replace(/"]/g, '');
             return `2+sum(${fieldName}.map(${noPeriodsFieldName + 'Element'}=>(${SchemaDefiner.buildAdderSizeFunction(
               schema.elements,
               noPeriodsFieldName + 'Element',
@@ -258,13 +260,14 @@ ${Utils.safeKeysExclude(schema, 'flag')
             return `(${map})[${fieldName}.type]()+`;
           }
           case undefined:
+            assertType<{flag: undefined} & {[key: string]: any}>(schema);
             let result = '';
             for (const key of Object.keys(schema)) {
               if (key === 'type' || key === 'entityType') {
                 continue;
               }
               const currentSchemaElement = schema[key];
-              result += this.buildAdderSizeFunction(currentSchemaElement, `${fieldName}.${key}`, addMap) + '';
+              result += this.buildAdderSizeFunction(currentSchemaElement, `${fieldName}["${key}"]`, addMap) + '';
             }
             return result + '0+';
         }
@@ -294,21 +297,17 @@ ${Utils.safeKeysExclude(schema, 'flag')
         return 'reader.readBoolean()';
       case 'string':
         return 'reader.readString()';
-      case 'int32Optional':
-        return 'reader.readInt32Optional()';
-      case 'int8Optional':
-        return 'reader.readInt8Optional()';
       default:
         assertType<ABFlags>(schema);
         switch (schema.flag) {
           case 'enum': {
             return `lookupEnum(reader.readUint8(),{${Utils.safeKeysExclude(schema, 'flag')
-              .map((key) => `${schema[key]}:'${key}'`)
+              .map((key) => `['${schema[key]}']:'${key}'`)
               .join(',')}})`;
           }
           case 'bitmask': {
             return `bitmask(reader.readBits(), {${Utils.safeKeysExclude(schema, 'flag')
-              .map((key) => `${schema[key]}:'${key}'`)
+              .map((key) => `['${schema[key]}']:'${key}'`)
               .join(',')}})`;
           }
 
@@ -317,6 +316,11 @@ ${Utils.safeKeysExclude(schema, 'flag')
           }
           case 'array-uint16': {
             return `range(reader.readUint16(),()=>(${SchemaDefiner.buildReaderFunction(schema.elements, addMap)}))`;
+          }
+          case 'optional': {
+            return `reader.readBoolean()?
+              ${SchemaDefiner.buildReaderFunction(schema.element, addMap)}
+            :undefined`;
           }
           case 'type-lookup': {
             let map = '{\n';
@@ -332,6 +336,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
             return `lookup(reader.readUint8(),${newMapId})\n`;
           }
           case undefined: {
+            assertType<{flag: undefined} & {[key: string]: any}>(schema);
             let str = '{';
             if (injectField) {
               str += `${injectField},\n`;
@@ -341,7 +346,7 @@ ${Utils.safeKeysExclude(schema, 'flag')
                 continue;
               }
               const currentSchemaElement = schema[key];
-              str += `${key} : ${this.buildReaderFunction(currentSchemaElement, addMap)},\n`;
+              str += `['${key}'] : ${this.buildReaderFunction(currentSchemaElement, addMap)},\n`;
             }
             str += '}';
             return str;

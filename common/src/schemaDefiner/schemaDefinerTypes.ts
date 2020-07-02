@@ -16,39 +16,52 @@ export type SDTypeLookup<TItem extends {type: string}, TKey extends TItem['type'
 export type SDTypeElement<TItem extends {type: string}> = SDSimpleObject<Omit<TItem, 'type'>>;
 
 export type SDSimpleObject<TItem> = {
-  [keyT in keyof Required<TItem>]: SDElement<Required<TItem>, keyT>;
-};
+  [keyT in OptionalPropertyOf<TItem>]: {element: SDElement<Required<TItem>, keyT>; flag: 'optional'};
+} &
+  {
+    [keyT in RequiredPropertyOf<TItem>]: SDElement<Required<TItem>, keyT>;
+  };
 
-export type SDElement<T, TKey extends keyof T> = T[TKey] extends string
-  ? 'string' | SDEnum<T[TKey]>
-  : T[TKey] extends number
-  ?
-      | 'uint8'
-      | 'uint16'
-      | 'uint32'
-      | 'int8'
-      | 'int16'
-      | 'int32'
-      | 'float32'
-      | 'float64'
-      | 'int8Optional'
-      | 'int32Optional'
-  : T[TKey] extends boolean
+type OptionalPropertyOf<T> = Exclude<
+  {
+    [K in keyof T]: T extends Record<K, T[K]> ? never : K;
+  }[keyof T],
+  undefined
+>;
+type RequiredPropertyOf<T> = Exclude<
+  {
+    [K in keyof T]: T extends Record<K, T[K]> ? K : never;
+  }[keyof T],
+  undefined
+>;
+
+type Simple<T> = T extends string
+  ? 'string' | SDEnum<T>
+  : T extends number
+  ? 'uint8' | 'uint16' | 'uint32' | 'int8' | 'int16' | 'int32' | 'float32' | 'float64'
+  : T extends boolean
   ? 'boolean'
+  : never;
+
+export type SDElement<T, TKey extends keyof T> = T[TKey] extends string | boolean | number
+  ? Simple<T[TKey]>
   : T[TKey] extends Array<any>
-  ? T[TKey][number] extends {type: string}
-    ? SDArray<SDTypeLookupElements<T[TKey][number]>>
+  ? T[TKey][number] extends string | boolean | number
+    ? SDArray<Simple<T[TKey][number]>>
+    : T[TKey][number] extends {type: string}
+    ? SDArray<SDTypeLookupElements<T[TKey][number]>> | SDArray<SDSimpleObject<T[TKey][number]>>
     : SDArray<SDSimpleObject<T[TKey][number]>>
   : T[TKey] extends {[key in keyof T[TKey]]: boolean}
   ? SDBitmask<T[TKey]>
   : T[TKey] extends {type: string}
-  ? SDTypeLookupElements<T[TKey]>
+  ? SDTypeLookupElements<T[TKey]> | SDSimpleObject<T[TKey]>
   : T[TKey] extends {}
   ? SDSimpleObject<T[TKey]>
   : never;
 
 export type ABFlags =
   | {flag: 'enum'}
+  | {element: any; flag: 'optional'}
   | {flag: 'bitmask'}
   | {elements: any; flag: 'array-uint16'}
   | {elements: any; flag: 'array-uint8'}

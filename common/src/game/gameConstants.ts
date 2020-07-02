@@ -6,7 +6,7 @@ export class GameDebug {
   static clientServerView = false;
   static collisions = false;
   static dontFilterEntities = false;
-  static isLocal = false;
+  static isLocal = true;
   static meteorCluster = false;
   static noBackground = false;
   static noEnemies = false;
