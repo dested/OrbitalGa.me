@@ -15,7 +15,7 @@
     "apollo-boost": "^0.4.7",
     "collisions": "^2.0.13",
     "graphql": "^14.6.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "websocket": "^1.0.31"
   },
   "devDependencies": {
