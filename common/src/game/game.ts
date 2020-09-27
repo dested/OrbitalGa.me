@@ -4,7 +4,7 @@ import {ArrayHash} from '../utils/arrayHash';
 import {ExplosionEntity} from '../entities/explosionEntity';
 import {EntityClusterer} from '../../../server/src/game/entityClusterer';
 import {PlayerEntity} from '../entities/playerEntity';
-import {PhysicsEntity} from '../baseEntities/physicsEntity';
+import {CollisionPair, PhysicsEntity} from '../baseEntities/physicsEntity';
 import {SpectatorEntity} from '../entities/spectatorEntity';
 import {CTOSPlayerInput} from '../models/clientToServerMessages';
 import {TwoVector} from '../utils/twoVector';
@@ -12,6 +12,7 @@ import {EntityModels} from '../models/serverToClientMessages';
 import {nextId} from '../utils/uuid';
 import {EntityUtils} from '../utils/entityUtils';
 import {EntityTypes} from '../entities/entityTypes';
+import {MathUtils} from '../utils/mathUtils';
 const dx = new TwoVector(0, 0);
 
 export abstract class Game {
@@ -125,12 +126,20 @@ export abstract class Game {
 
   protected checkCollisions() {
     this.collisionEngine.update();
-
+    const collisionPairs: CollisionPair = {};
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const entity = this.entities.getIndex(i);
       if (entity instanceof PhysicsEntity) {
-        entity.checkCollisions();
+        entity.checkCollisions(collisionPairs);
       }
+    }
+    for (const collisionKey in collisionPairs) {
+      const {entity1, entity2, collisionResult} = collisionPairs[collisionKey];
+
+      entity1.collide(entity2, collisionResult);
+      entity2.collide(entity1, collisionResult);
+
+      MathUtils.resolveCollision(entity1, entity2);
     }
   }
 }

@@ -4,7 +4,7 @@ import {Entity} from '../baseEntities/entity';
 import {GameConstants} from '../game/gameConstants';
 import {Utils} from '../utils/utils';
 import {nextId} from '../utils/uuid';
-import {isPlayerWeapon} from './weaponEntity';
+import {isPlayerWeapon, WeaponEntity} from './weaponEntity';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {EntityModelSchemaType} from '../models/serverToClientMessages';
@@ -17,7 +17,11 @@ import {
 
 export type Size = 'big' | 'med' | 'small' | 'tiny';
 
-export class MeteorEntity extends PhysicsEntity {
+export class MeteorEntity extends PhysicsEntity implements WeaponEntity {
+  damage = 1;
+  explosionIntensity = 1;
+  isWeapon: true = true;
+  weaponSide = 'neutral' as const;
   health: number;
   hit = false;
   meteorColor!: 'brown' | 'grey';
@@ -92,28 +96,31 @@ export class MeteorEntity extends PhysicsEntity {
         this.health = 1;
         break;
     }
-    this.health *= 10;
+    switch (messageModel.size) {
+      case 'big':
+        this.mass = 4;
+        break;
+      case 'med':
+        this.mass = 3;
+        break;
+      case 'small':
+        this.mass = 2;
+        break;
+      case 'tiny':
+        this.mass = 1;
+        break;
+    }
     this.createPolygon();
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
     if (isPlayerWeapon(otherEntity)) {
-      otherEntity.hurt(
-        1,
-        this,
-        collisionResult.overlap * collisionResult.overlap_x * 4,
-        collisionResult.overlap * collisionResult.overlap_y * 4
-      );
-      this.hurt(
-        otherEntity.damage,
-        otherEntity,
-        -collisionResult.overlap * collisionResult.overlap_x * 10,
-        -collisionResult.overlap * collisionResult.overlap_y * 10
-      );
-      return true;
+      this.hurt(otherEntity.damage);
     }
-    return false;
   }
+
+  causedDamage(damage: number, otherEntity: Entity): void {}
+  causedKill(otherEntity: Entity): void {}
 
   gameTick(duration: number) {
     this.angle += this.rotateSpeed;
@@ -154,17 +161,13 @@ export class MeteorEntity extends PhysicsEntity {
 
   updatePolygon() {
     super.updatePolygon();
-    if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.angle);
+    // if (this.boundingBoxes[0].polygon) this.boundingBoxes[0].polygon.angle = Utils.byteDegToRad(this.angle);
   }
 
-  private hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+  hurt(damage: number) {
     if (this.markToDestroy) return;
-    if (!isPlayerWeapon(otherEntity)) {
-      return;
-    }
     this.health -= damage;
     this.hit = true;
-    this.velocity.add({x: x * 5, y: y * 5});
     if (!this.game.isClient) {
       if (this.health <= 0) {
         if (Utils.random(50)) {
@@ -174,8 +177,8 @@ export class MeteorEntity extends PhysicsEntity {
             drop: DropEntity.randomDrop(this.size),
           });
           this.game.addObjectToWorld(drop);
-          this.game.explode(this, 'small');
         }
+        this.game.explode(this, 'small');
       }
     }
   }

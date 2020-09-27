@@ -13,7 +13,7 @@ import {
   PhysicsEntityModelSchema,
 } from '../baseEntities/physicsEntity';
 import {ShadowableEntity, ShadowEntityModel, ShadowEntityModelSchema} from '../baseEntities/shadowableEntity';
-import {WeaponEntity} from './weaponEntity';
+import {isEnemyWeapon, isNeutralWeapon, isPlayerWeapon, WeaponEntity} from './weaponEntity';
 
 export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, ShadowableEntity {
   aliveDuration = 3000;
@@ -29,6 +29,7 @@ export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, S
   type = 'playerWeapon' as const;
   weaponSide = 'player' as const;
   weaponType: PlayerWeapon;
+  mass = 0;
 
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<PlayerWeaponModel>>) {
     super(game, messageModel);
@@ -58,12 +59,12 @@ export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, S
     this.game.gameLeaderboard?.increaseEntry(this.ownerEntityId, 'enemiesKilled', 1);
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof WallEntity) {
-      this.destroy();
-      return true;
-    }
-    return false;
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
+    this.destroy();
+  }
+
+  shouldIgnoreCollision(otherEntity: PhysicsEntity): boolean {
+    return otherEntity.type === 'player' || otherEntity.type === 'playerShield';
   }
 
   gameTick(duration: number) {
@@ -86,7 +87,7 @@ export class PlayerWeaponEntity extends PhysicsEntity implements WeaponEntity, S
     }
   }
 
-  hurt(damage: number, otherEntity: Entity, overlapX: number, overlap: number): void {
+  hurt(damage: number): void {
     this.destroy();
   }
 

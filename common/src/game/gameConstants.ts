@@ -12,6 +12,7 @@ export class GameDebug {
   static noEnemies = false;
   static noTimeout = false;
   static throttleClient = false;
+  static renderServer = false;
 }
 
 export class GameConstants {

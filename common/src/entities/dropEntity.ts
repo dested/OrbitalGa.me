@@ -32,6 +32,7 @@ export class DropEntity extends PhysicsEntity {
   boundingBoxes = [{width: 50, height: 50}];
   drop: DropType;
   type = 'drop' as const;
+  mass = 0;
 
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<DropModel>>) {
     super(game, messageModel);
@@ -40,14 +41,13 @@ export class DropEntity extends PhysicsEntity {
     this.velocity.set(0, 50);
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
     if (otherEntity instanceof PlayerEntity) {
       if (!this.game.isClient) {
         otherEntity.addDrop(this.drop);
       }
       this.destroy();
     }
-    return false;
   }
 
   gameTick(duration: number) {

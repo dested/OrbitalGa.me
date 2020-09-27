@@ -23,9 +23,7 @@ export class ExplosionEntity extends PhysicsEntity {
     this.ownerEntityId = messageModel.ownerEntityId;
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    return false;
-  }
+  collide(otherEntity: PhysicsEntity, collisionResult: Result) {}
 
   gameTick(duration: number) {
     this.aliveDuration -= 1;

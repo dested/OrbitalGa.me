@@ -24,9 +24,7 @@ export class ScoreEntity extends PhysicsEntity {
     this.velocity.set(0, -80);
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    return false;
-  }
+  collide(otherEntity: PhysicsEntity, collisionResult: Result) {}
   gameTick(): void {
     this.aliveTick++;
     if (this.aliveTick > 60 * 1) {

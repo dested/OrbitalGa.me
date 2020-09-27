@@ -6,7 +6,7 @@ import {nextId} from '../utils/uuid';
 import {EnemyShotEntity} from './enemyShotEntity';
 import {GameRules} from '../game/gameRules';
 import {MomentumRunner} from '../utils/momentumRunner';
-import {isPlayerWeapon, WeaponEntity} from './weaponEntity';
+import {isEnemyWeapon, isNeutralWeapon, isPlayerWeapon, WeaponEntity} from './weaponEntity';
 import {DropEntity} from './dropEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
@@ -18,6 +18,8 @@ import {
   PhysicsEntityModel,
   PhysicsEntityModelSchema,
 } from '../baseEntities/physicsEntity';
+import {PlayerEntity} from './playerEntity';
+import {PlayerWeaponEntity} from './playerWeaponEntity';
 
 export type EnemyColor = 'black' | 'blue' | 'green' | 'red';
 
@@ -93,25 +95,35 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (isPlayerWeapon(otherEntity)) {
-      otherEntity.hurt(
-        otherEntity.damage,
-        this,
-        collisionResult.overlap * collisionResult.overlap_x,
-        collisionResult.overlap * collisionResult.overlap_y
-      );
-      this.hurt(
-        otherEntity.damage,
-        otherEntity,
-        (-collisionResult.overlap * collisionResult.overlap_x) / 10,
-        (-collisionResult.overlap * collisionResult.overlap_y) / 10
-      );
-
-      return true;
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
+    if (isPlayerWeapon(otherEntity) || isNeutralWeapon(otherEntity)) {
+      this.hurt(otherEntity.damage);
+      if (otherEntity instanceof PlayerEntity || otherEntity instanceof PlayerWeaponEntity) {
+        if (!this.game.isClient) {
+          otherEntity.causedDamage(otherEntity.damage, this);
+          if (this.health <= 0) {
+            otherEntity.causedKill(this);
+            this.game.addObjectToWorld(
+              new ScoreEntity(this.game, {
+                entityId: nextId(),
+                position: {x: this.position.x, y: this.position.y},
+                onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
+                score: LeaderboardEntryWeight.enemiesKilled,
+              })
+            );
+          } else {
+            this.game.addObjectToWorld(
+              new ScoreEntity(this.game, {
+                entityId: nextId(),
+                position: {x: this.position.x, y: this.position.y},
+                onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
+                score: LeaderboardEntryWeight.damageGiven,
+              })
+            );
+          }
+        }
+      }
     }
-
-    return false;
   }
 
   gameTick(duration: number): void {
@@ -135,23 +147,17 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
     this.aliveTick++;
   }
 
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+  hurt(damage: number) {
     if (this.markToDestroy) {
       return;
     }
 
-    if (!isPlayerWeapon(otherEntity)) {
-      return;
-    }
-
     this.hit = true;
-    this.bounce(x, y);
+
     if (!this.game.isClient) {
       this.health -= damage;
-      otherEntity.causedDamage(otherEntity.damage, this);
       if (this.health <= 0) {
         this.health = 0;
-        otherEntity.causedKill(this);
         const drop = new DropEntity(this.game, {
           entityId: nextId(),
           position: {x: this.position.x, y: this.position.y},
@@ -159,23 +165,6 @@ export class SwoopingEnemyEntity extends PhysicsEntity implements WeaponEntity {
         });
         this.game.addObjectToWorld(drop);
         this.game.explode(this, 'medium');
-        this.game.addObjectToWorld(
-          new ScoreEntity(this.game, {
-            entityId: nextId(),
-            position: {x: this.position.x, y: this.position.y},
-            onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
-            score: LeaderboardEntryWeight.enemiesKilled,
-          })
-        );
-      } else {
-        this.game.addObjectToWorld(
-          new ScoreEntity(this.game, {
-            entityId: nextId(),
-            position: {x: this.position.x, y: this.position.y},
-            onlyVisibleToPlayerEntityId: otherEntity.ownerPlayerEntityId,
-            score: LeaderboardEntryWeight.damageGiven,
-          })
-        );
       }
     }
   }

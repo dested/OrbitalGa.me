@@ -11,7 +11,7 @@ export const GameRules = {
       maxForwardSpeed: 150,
       momentumDeceleration: 0.7,
       speedRamp: 100,
-      startingHealth: 20,
+      startingHealth: 2000,
     },
   },
   enemyShots: {

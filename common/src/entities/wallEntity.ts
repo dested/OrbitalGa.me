@@ -12,6 +12,7 @@ import {ImpliedEntityType} from '../models/serverToClientMessages';
 
 export class WallEntity extends PhysicsEntity {
   type = 'wall' as const;
+  mass = Number.MAX_SAFE_INTEGER;
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<WallModel>>) {
     super(game, messageModel);
     this.width = messageModel.width;
@@ -23,8 +24,12 @@ export class WallEntity extends PhysicsEntity {
     this.createPolygon();
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    return false;
+  collide(otherEntity: PhysicsEntity, collisionResult: Result) {
+    otherEntity.position.add({
+      x: -collisionResult.overlap * collisionResult.overlap_x,
+      y: -collisionResult.overlap * collisionResult.overlap_y,
+    });
+    otherEntity.velocity.set(0, 0);
   }
 
   gameTick(): void {}

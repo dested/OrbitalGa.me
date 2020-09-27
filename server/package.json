@@ -61,6 +61,6 @@
     "typescript": "^3.8.3",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
-    "copy-webpack-plugin": "^5.1.1y"
+    "copy-webpack-plugin": "^5.1.1"
   }
 }

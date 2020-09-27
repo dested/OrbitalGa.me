@@ -17,9 +17,7 @@ export class SpectatorEntity extends PhysicsEntity {
     this.createPolygon();
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    return false;
-  }
+  collide(otherEntity: PhysicsEntity, collisionResult: Result) {}
 
   gameTick(duration: number): void {}
 

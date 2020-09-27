@@ -5,8 +5,11 @@ import spaceMissiles_004 from '../assets/Missiles/spaceMissiles_004.png';
 import laserBlue02 from '../assets/Lasers/laserBlue02.png';
 import laserBlue03 from '../assets/Lasers/laserBlue03.png';
 import laserBlue03Spray from '../assets/Lasers/laserBlue03Spray.png';
-import {PlayerWeapon} from '@common/game/gameRules';
-import {boxSize} from './weapons.styles';
+import {PlayerWeapon, WeaponConfigs} from '@common/game/gameRules';
+import {boxSize, SelectWeaponBox} from './weapons.styles';
+import {Utils} from '@common/utils/utils';
+import {PlayerEntity} from '@common/entities/playerEntity';
+import {LivePlayerActor} from '../game/entities/livePlayerActor';
 
 const images: {[key in PlayerWeapon]: string} = {
   laser1Spray10: laserBlue03Spray,
@@ -50,7 +53,7 @@ export const Weapons = (props: {tick: number}) => {
         if (!liveEntityId) {
           return;
         }
-        // client?.clientEngine.setKey('weapon', weapon);//todo weapon
+        // client?.clientEngine.setKey('weapon', weapon); //todo weapon
       };
     },
     [liveEntityId]
@@ -59,9 +62,12 @@ export const Weapons = (props: {tick: number}) => {
   if (!liveEntityId) {
     return <></>;
   }
+  const liveEntity = client?.clientEngine.game.entities.lookup(liveEntityId)! as PlayerEntity;
+  if (!liveEntity) {
+    return <></>;
+  }
   return (
     <div style={styles.wrapper}>
-      {/*
       {liveEntity.availableWeapons.map((weapon) => (
         <div key={weapon.weapon} style={styles.weaponBody}>
           <span style={styles.ammo}>
@@ -74,14 +80,13 @@ export const Weapons = (props: {tick: number}) => {
           <SelectWeaponBox
             onClick={selectWeapon(weapon.weapon)}
             key={weapon.weapon}
-            liveEntity={liveEntity}
+            liveEntity={liveEntity.actor! as LivePlayerActor}
             weapon={weapon}
           >
             <img src={images[weapon.weapon]} style={styles.image} />
           </SelectWeaponBox>
         </div>
       ))}
-*/}
     </div>
   );
 };

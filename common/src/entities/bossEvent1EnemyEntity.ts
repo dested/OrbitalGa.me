@@ -40,9 +40,7 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements WeaponEntity
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    return false;
-  }
+  collide(otherEntity: PhysicsEntity, collisionResult: Result) {}
   createPolygon() {
     super.createPolygon(this.position.x + this.xOffset, this.position.y + this.yOffset);
   }
@@ -51,7 +49,7 @@ export class BossEvent1EnemyEntity extends PhysicsEntity implements WeaponEntity
     this.aliveTick++;
   }
 
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {}
+  hurt(damage: number) {}
 
   inView(viewX: number, viewY: number, viewWidth: number, viewHeight: number, playerId: number): boolean {
     return (

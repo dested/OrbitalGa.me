@@ -4,7 +4,7 @@ import {SDSimpleObject} from '../schemaDefiner/schemaDefinerTypes';
 import {Entity, EntityModel, EntityModelSchema} from './entity';
 import {TwoVector, TwoVectorModel, TwoVectorSchema} from '../utils/twoVector';
 import {MathUtils} from '../utils/mathUtils';
-import {Utils} from '../utils/utils';
+import {assertType, Utils} from '../utils/utils';
 
 type PartialOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type ImpliedDefaultPhysics<T extends PhysicsEntityModel> = PartialOptional<
@@ -20,6 +20,7 @@ type BoundingBox = {
 };
 export abstract class PhysicsEntity extends Entity {
   angle!: number;
+  mass: number = 1;
   bendingAngleDelta?: number;
   bendingIncrements = 0;
   bendingPositionDelta?: TwoVector;
@@ -115,14 +116,7 @@ export abstract class PhysicsEntity extends Entity {
     this.savedCopy = undefined;
   }
 
-  bounce(momentumX: number, momentumY: number) {
-    this.velocity.add({
-      x: momentumX * 50,
-      y: momentumY * 50,
-    });
-  }
-
-  checkCollisions() {
+  checkCollisions(collisionPairs: CollisionPair) {
     if (this.boundingBoxes.length === 0) {
       return;
     }
@@ -134,22 +128,32 @@ export abstract class PhysicsEntity extends Entity {
       }
       const potentials = polygon.potentials();
       for (const body of potentials) {
+        assertType<PhysicsEntity>(body.entity);
+
+        if (collisionPairs[body.entity.entityId + '-' + this.entityId]) {
+          continue;
+        }
         if (polygon.collides(body, this.game.collisionResult)) {
-          const collided = this.collide(body.entity, this.game.collisionResult);
-          if (collided) {
-            return true;
+          if (this.shouldIgnoreCollision(body.entity) || body.entity.shouldIgnoreCollision(this)) {
+            continue;
           }
+          collisionPairs[this.entityId + '-' + body.entity.entityId] = {
+            entity1: this,
+            entity2: body.entity,
+            collisionResult: {...this.game.collisionResult},
+          };
         }
       }
     }
+  }
 
+  abstract collide(otherEntity: PhysicsEntity, collisionResult: Result): void;
+
+  shouldIgnoreCollision(otherEntity: PhysicsEntity): boolean {
     return false;
   }
 
-  abstract collide(otherEntity: Entity, collisionResult: Result): boolean;
-
   createPolygon(x = this.position.x, y = this.position.y): void {
-    // todo physics this needs to call update polygon and anything that really uses realx needs to update accordingly
     if (this.width !== 0 && this.height !== 0) {
       for (const boundingBox of this.boundingBoxes) {
         const polygon = new Polygon(
@@ -234,6 +238,10 @@ export abstract class PhysicsEntity extends Entity {
     }
   }
 }
+
+export type CollisionPair = {
+  [pairKey: string]: {entity1: PhysicsEntity; entity2: PhysicsEntity; collisionResult: Result};
+};
 
 export type PhysicsEntityModel = EntityModel & {
   angle: number;

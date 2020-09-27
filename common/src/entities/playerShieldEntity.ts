@@ -37,9 +37,7 @@ export class PlayerShieldEntity extends PhysicsEntity {
     return GameRules.playerShield[this.shieldStrength];
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    return false;
-  }
+  collide(otherEntity: PhysicsEntity, collisionResult: Result) {}
 
   gameTick(duration: number) {
     if (this.game.isClient) return;
@@ -64,7 +62,7 @@ export class PlayerShieldEntity extends PhysicsEntity {
     }
   }
 
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+  hurt(damage: number) {
     let damageLeft = 0;
     if (damage > this.health) {
       damageLeft = damage - this.health;

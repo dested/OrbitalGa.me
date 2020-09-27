@@ -11,6 +11,14 @@ import {LeaderboardScreen} from './screens/leaderboardScreen';
 
 const styles = {
   canvas: {width: '100vw', height: '100vh', position: 'absolute', zIndex: -99},
+  serverCanvas: {
+    width: '100vw',
+    height: '100vh',
+    position: 'absolute',
+    zIndex: -99,
+    opacity: 0.9,
+    filter: 'grayscale(100%)',
+  },
 } as const;
 
 export const App = observer(() => {
@@ -40,6 +48,12 @@ export const App = observer(() => {
         width={GameConstants.screenSize.width}
         height={GameConstants.screenSize.height}
         style={styles.canvas}
+      />
+      <canvas
+        id={'serverGame'}
+        width={GameConstants.screenSize.width}
+        height={GameConstants.screenSize.height}
+        style={styles.serverCanvas}
       />
       {screen()}
     </>

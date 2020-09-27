@@ -3,7 +3,7 @@ import {OrbitalGame} from '../game/game';
 import {WallEntity} from './wallEntity';
 import {Entity} from '../baseEntities/entity';
 import {GameRules} from '../game/gameRules';
-import {WeaponEntity} from './weaponEntity';
+import {isNeutralWeapon, isPlayerWeapon, WeaponEntity} from './weaponEntity';
 import {ImpliedEntityType} from '../models/serverToClientMessages';
 import {SDTypeElement} from '../schemaDefiner/schemaDefinerTypes';
 import {
@@ -23,6 +23,7 @@ export class EnemyShotEntity extends PhysicsEntity implements WeaponEntity {
   ownerPlayerEntityId: number;
   type = 'enemyShot' as const;
   weaponSide = 'enemy' as const;
+  mass = 1;
 
   constructor(public game: OrbitalGame, messageModel: ImpliedEntityType<ImpliedDefaultPhysics<EnemyShotModel>>) {
     super(game, messageModel);
@@ -35,12 +36,12 @@ export class EnemyShotEntity extends PhysicsEntity implements WeaponEntity {
   causedDamage(damage: number, otherEntity: Entity): void {}
   causedKill(otherEntity: Entity): void {}
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof WallEntity) {
-      this.destroy();
-      return true;
-    }
-    return false;
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
+    this.destroy();
+  }
+
+  shouldIgnoreCollision(otherEntity: PhysicsEntity): boolean {
+    return otherEntity.type === 'swoopingEnemy';
   }
 
   gameTick(duration: number) {
@@ -49,7 +50,7 @@ export class EnemyShotEntity extends PhysicsEntity implements WeaponEntity {
       this.destroy();
     }
   }
-  hurt(damage: number, otherEntity: Entity, overlapX: number, overlap: number): void {
+  hurt(damage: number): void {
     this.destroy();
   }
 

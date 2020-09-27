@@ -118,12 +118,12 @@ export class OrbitalServerEngine extends ServerEngine {
         for (let i = groupings[0].x0; i < groupings[groupings.length - 1].x1; i += 100) {
           const meteor = new MeteorEntity(this.game, {
             entityId: nextId(),
-            position: {x: i, y: GameConstants.screenSize.height * 0.55},
+            position: {x: i, y: GameConstants.screenSize.height * 0.2},
             meteorColor: 'brown',
             size: 'big',
             meteorType: '4',
             hit: false,
-            velocity: {x: 0, y: 100},
+            velocity: {x: 0, y: 200},
             rotateSpeed: 0.5,
           });
           this.game.addObjectToWorld(meteor);

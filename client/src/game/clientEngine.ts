@@ -179,6 +179,9 @@ export class ClientEngine extends Engine {
       this.pings[this.pingIndex] = +new Date();
       if (this.socket.isConnected()) this.socket.sendMessage({type: 'ping', ping: this.pingIndex});
     }, GameConstants.pingInterval);
+    setInterval(() => {
+      this.options?.onUIUpdate(this);
+    }, 500);
   }
 
   joinGame() {

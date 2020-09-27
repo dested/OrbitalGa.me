@@ -180,38 +180,21 @@ export class BossEvent1Entity extends PhysicsEntity {
     }
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
     if (isPlayerWeapon(otherEntity)) {
-      otherEntity.hurt(
-        otherEntity.damage,
-        this,
-        collisionResult.overlap * collisionResult.overlap_x,
-        collisionResult.overlap * collisionResult.overlap_y
-      );
-      this.hurt(
-        otherEntity.damage,
-        otherEntity,
-        -collisionResult.overlap * collisionResult.overlap_x,
-        -collisionResult.overlap * collisionResult.overlap_y
-      );
-
-      return true;
+      this.hurt(otherEntity.damage);
     }
-
-    return false;
   }
 
   gameTick(duration: number): void {
     this.aliveTick++;
   }
 
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
+  hurt(damage: number) {
     if (this.markToDestroy) {
       return;
     }
     this.health -= damage;
-    this.momentumX += x;
-    this.momentumY += y;
 
     if (this.health <= 0) {
       const drop = new DropEntity(this.game, {

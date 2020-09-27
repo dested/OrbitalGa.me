@@ -8,7 +8,7 @@ import {WallEntity} from './wallEntity';
 import {PlayerShieldEntity} from './playerShieldEntity';
 import {GameRules, PlayerWeapon, WeaponConfigs} from '../game/gameRules';
 import {Utils} from '../utils/utils';
-import {isEnemyWeapon, WeaponEntity} from './weaponEntity';
+import {isEnemyWeapon, WeaponEntity, isWeapon, isNeutralWeapon} from './weaponEntity';
 import {unreachable} from '../utils/unreachable';
 import {DropType} from './dropEntity';
 import {PlayerInputKeyBitmask, PlayerWeaponEnumSchema} from '../models/schemaEnums';
@@ -255,46 +255,10 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
     this.game.gameLeaderboard?.increaseEntry(this.entityId, 'enemiesKilled', 1);
   }
 
-  collide(otherEntity: Entity, collisionResult: Result): boolean {
-    if (otherEntity instanceof WallEntity) {
-      this.position.add({
-        x: -collisionResult.overlap * collisionResult.overlap_x,
-        y: -collisionResult.overlap * collisionResult.overlap_y,
-      });
-      this.velocity.set(0, 0);
-      this.updatePolygon();
-      return true;
+  collide(otherEntity: PhysicsEntity, collisionResult: Result): void {
+    if (isEnemyWeapon(otherEntity) || isNeutralWeapon(otherEntity)) {
+      this.hurt(otherEntity.damage);
     }
-    if (otherEntity instanceof PlayerEntity) {
-      this.velocity.add({
-        x: -collisionResult.overlap * collisionResult.overlap_x,
-        y: -collisionResult.overlap * collisionResult.overlap_y,
-      });
-      otherEntity.velocity.add({
-        x: collisionResult.overlap * collisionResult.overlap_x,
-        y: collisionResult.overlap * collisionResult.overlap_y,
-      });
-      this.updatePolygon();
-      return true;
-    }
-
-    if (isEnemyWeapon(otherEntity)) {
-      otherEntity.hurt(
-        otherEntity.damage,
-        this,
-        collisionResult.overlap * collisionResult.overlap_x,
-        collisionResult.overlap * collisionResult.overlap_y
-      );
-      this.hurt(
-        otherEntity.damage,
-        otherEntity,
-        -collisionResult.overlap * collisionResult.overlap_x,
-        -collisionResult.overlap * collisionResult.overlap_y
-      );
-
-      return true;
-    }
-    return false;
   }
 
   die() {
@@ -316,13 +280,12 @@ export class PlayerEntity extends PhysicsEntity implements WeaponEntity {
     }
   }
 
-  hurt(damage: number, otherEntity: Entity, x: number, y: number) {
-    this.bounce(x, y);
+  hurt(damage: number) {
     if (!this.game.isClient) {
       const shield = this.game.entities.lookup<PlayerShieldEntity>(this.shieldEntityId!);
       this.game.gameLeaderboard?.increaseEntry(this.entityId, 'damageTaken', damage);
       if (shield && !shield.depleted) {
-        const damageLeft = shield.hurt(damage, otherEntity, x, y);
+        const damageLeft = shield.hurt(damage);
         if (damageLeft === 0) {
           return;
         } else {
