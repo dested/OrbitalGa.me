@@ -24,7 +24,7 @@
     "@prisma/client": "^2.0.0-beta.3",
     "apollo-server-lambda": "^2.12.0",
     "aws-sdk": "^2.632.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "graphql": "^14.6.0",
